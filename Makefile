@@ -4,7 +4,7 @@ CPPFLAGS = -g -O0 -Wall -fpermissive
 LDFLAGS = -I/usr/local/include
 LFLAGS = -L/usr/local/lib
 LIBS = -lboost_thread -lboost_filesystem -lboost_program_options -lboost_system -lboost_date_time
-OBJS = Group.o Utilities.o Cell.o Point.o Grid.o Value.o User.o Pair.o SPOs.o GPOs.o BasicGSQueries.o SPFP.o
+OBJS = Group.o Utilities.o Cell.o Point.o Grid.o Value.o User.o Pair.o SPOs.o GPOs.o BasicGSQueries.o ArrayOperations.o CalculateProbability.o Entropy.o RenyiEntropy.o WeightedEntropy.o SPFP.o
 
 $(PROG) : $(OBJS)
 	$(CC) $(LDFLAGS) -o $(PROG) $(OBJS) $(LFLAGS) $(LIBS)
@@ -47,6 +47,23 @@ Pair.o : SPOs/MemoryMapWeighted/Pair.cpp  headersMemory.h
 BasicGSQueries.o : basicGSQueries/BasicGSQueries.cpp headers.h
 	$(CC) $(CPPFLAGS) -c basicGSQueries/BasicGSQueries.cpp
 	$(CC) -MM basicGSQueries/BasicGSQueries.cpp > BasicGSQueries.d
+ArrayOperations.o : pTools/ArrayOperations.c pTools/ArrayOperations.h
+	$(CC) $(cFLAGS) -c pTools/ArrayOperations.c
+	$(CC) -MM pTools/ArrayOperations.c  > ArrayOperations.d
+CalculateProbability.o : pTools/CalculateProbability.c pTools/CalculateProbability.h
+	$(CC) $(cFLAGS) -c pTools/CalculateProbability.c
+	$(CC) -MM pTools/CalculateProbability.c  > CalculateProbability.d
+Entropy.o : pTools/Entropy.c pTools/Entropy.h
+	$(CC) $(cFLAGS) -c pTools/Entropy.c
+	$(CC) -MM pTools/Entropy.c  > Entropy.d
+RenyiEntropy.o : pTools/RenyiEntropy.c pTools/RenyiEntropy.h
+	$(CC) $(cFLAGS) -c pTools/RenyiEntropy.c
+	$(CC) -MM pTools/RenyiEntropy.c  > RenyiEntropy.d
+WeightedEntropy.o : pTools/WeightedEntropy.c pTools/WeightedEntropy.h
+	$(CC) $(cFLAGS) -c pTools/WeightedEntropy.c
+	$(CC) -MM pTools/WeightedEntropy.c  > WeightedEntropy.d
+
+
 
 .PHONY : clean
 clean:
