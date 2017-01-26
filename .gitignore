@@ -1,0 +1,6 @@
+*.o
+*.d
+SPFP
+*.hpp
+data_GSR_Austin/*
+data
