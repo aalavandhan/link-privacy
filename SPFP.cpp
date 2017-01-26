@@ -199,6 +199,7 @@ void testpTools(){
    *    suseconds_t    tv_usec     microseconds
    * }
    */
+  return;
 
   gettimeofday(&start, NULL);
   for (i = 0; i < 1000; i++)
