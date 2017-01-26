@@ -136,7 +136,7 @@ WeightedJointProbState calculateWeightedJointProbability(uint *firstVector, uint
   firstNumStates = maxState(firstVector,vectorLength);
   secondNumStates = maxState(secondVector,vectorLength);
   jointNumStates = firstNumStates * secondNumStates;
-  
+
   firstStateCounts = (int *) checkedCalloc(firstNumStates,sizeof(int));
   secondStateCounts = (int *) checkedCalloc(secondNumStates,sizeof(int));
   jointStateCounts = (int *) checkedCalloc(jointNumStates,sizeof(int));
@@ -235,6 +235,7 @@ WeightedJointProbState discAndCalcWeightedJointProbability(double *firstVector, 
 }/*discAndCalcWeightedJointProbability(double *,double *,double *,int)*/
 
 ProbabilityState calculateProbability(uint* dataVector, int vectorLength) {
+
   int numStates;
   int *stateCounts;
   double *stateProbs;
@@ -243,7 +244,7 @@ ProbabilityState calculateProbability(uint* dataVector, int vectorLength) {
   double length = vectorLength;
 
   numStates = maxState(dataVector,vectorLength);
-  
+  printf("Calculating probability : numStates = %d", numStates);
   stateCounts = (int *) checkedCalloc(numStates,sizeof(int));
   stateProbs = (double *) checkedCalloc(numStates,sizeof(double));
   
@@ -251,11 +252,14 @@ ProbabilityState calculateProbability(uint* dataVector, int vectorLength) {
   for (i = 0; i < vectorLength; i++) {
     stateCounts[dataVector[i]] += 1;
   }
-  
+  printf("Printing stateCounts\n");
+  printIntVector(stateCounts,numStates);
   for (i = 0; i < numStates; i++) {
     stateProbs[i] = stateCounts[i] / length;
   }
-  
+  printf("Printing stateProbs\n");
+  printDoubleVector(stateProbs,numStates);
+
   FREE_FUNC(stateCounts);
   stateCounts = NULL;
   
