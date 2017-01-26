@@ -99,6 +99,9 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
   unsigned int tp = 0, pos = 0, nFriendships=spos->edges;
   double precision, recall;
 
+  boost::posix_time::ptime time;
+  boost::posix_time::time_duration td;
+
   unordered_set< pair<int,int>, PairHasher > seen_pairs;
 
   set<int>* seenLocations = new set<int>();
@@ -108,21 +111,24 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
     y   = l->second->getY();
     lid = l->second->getID();
     uid = l->second->getUID();
+    time = l->second->getTime();
 
     vector<res_point*>* checkins = gpos->getRange(x, y, radius_geo_dist);
     for(auto c = checkins->begin(); c != checkins->end(); c++){
+      td = time - (*c)->time;
+
       bool areFriends = spos->areFriends(uid, (*c)->uid),
          notRecoreded = seen_pairs.find(make_pair(uid, (*c)->uid)) == seen_pairs.end(),
          unseenLocation = (seenLocations->find((*c)->id) == seenLocations->end()),
-         validLocation = isOptimistic || unseenLocation;
+         validCoOccurrence = (isOptimistic || unseenLocation) && td.total_seconds() <= 86400;
 
-      if(  areFriends && notRecoreded &&  validLocation ){
+      if(  areFriends && notRecoreded &&  validCoOccurrence ){
         seen_pairs.insert(make_pair(uid, (*c)->uid));
         seenLocations->insert( (*c)->id );
         tp++;
       }
 
-      if(validLocation){
+      if(validCoOccurrence){
         pos++;
       }
 
