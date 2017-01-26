@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <map>
+#include <cmath>
 
 #include <cstdlib>
 #include <stdio.h>
