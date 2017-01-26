@@ -28,6 +28,8 @@ public:
     double estimateNearestDistance(double x, double y, int k);
     void deleteEmptyCells();
 
+    Cell* makeCell(double x, double y);
+
     int num_failed=0;
 };
 

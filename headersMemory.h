@@ -81,8 +81,8 @@
 
 // dataset scalability
 extern double DATASET_SIZE;
-#define X 1000 // table[X][Y]
-#define Y 1000
+#define X 15000 // table[X][Y]
+#define Y 15000
 extern double MIN_X;
 extern double MIN_Y;
 extern double MAX_X;

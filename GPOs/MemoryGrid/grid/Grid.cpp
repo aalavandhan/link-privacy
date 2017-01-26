@@ -6,16 +6,21 @@ Grid::Grid (){
     cout << "MIN_X = " << MIN_X << " MAX_X = " << MAX_X << " DELTA_X = " << DELTA_X << endl;
     cout << "MIN_Y = " << MIN_Y << " MAX_Y = " << MAX_Y << " DELTA_Y = " << DELTA_Y << endl;
 
-    for (int i=0; i<X; i++){
-        for (int j=0; j<Y; j++){
-            Cell* c = new Cell;
-            c->setDimensions(MIN_X+(i*DELTA_X), MIN_Y+(j*DELTA_Y), MIN_X+((i+1)*DELTA_X), MIN_Y+((j+1)*DELTA_Y));
-            //            cout << MIN_X+(i*DELTA_X) << " , " <<  MIN_Y+(j*DELTA_Y) << " , " <<  MIN_X+((i+1)*DELTA_X) << " , " <<  MIN_Y+((j+1)*DELTA_Y) << endl;
-            c->setType(CELL);
-            c->setIndex(i, j);
-            table[i][j] = c;
-        }
-    }
+    // memset(table, 0, sizeof table);
+
+    // for (int i=0; i<X; i++){
+    //     for (int j=0; j<Y; j++){
+    //         // Cell* c = new Cell;
+    //         // c->setDimensions(MIN_X+(i*DELTA_X), MIN_Y+(j*DELTA_Y), MIN_X+((i+1)*DELTA_X), MIN_Y+((j+1)*DELTA_Y));
+    //         // //            cout << MIN_X+(i*DELTA_X) << " , " <<  MIN_Y+(j*DELTA_Y) << " , " <<  MIN_X+((i+1)*DELTA_X) << " , " <<  MIN_Y+((j+1)*DELTA_Y) << endl;
+    //         // c->setType(CELL);
+    //         // c->setIndex(i, j);
+    //         // table[i][j] = c;
+    //         table[i][j] = NULL;
+    //     }
+    // }
+
+    cout << "GRID SETUP " << endl;
 
 }
 
@@ -33,10 +38,9 @@ void Grid::deleteEmptyCells(){
   int emptyCount=0;
   for(int i=0; i<X;i++){
     for(int j=0; j<Y;j++){
-      if(table[i][j]->getCheckinCount() == 0){
+      if(table[i][j] != NULL && table[i][j]->getCheckinCount() == 0){
         emptyCount++;
-        if(table[i][j] != NULL)
-            delete table[i][j];
+        delete table[i][j];
       }
     }
   }
@@ -65,9 +69,33 @@ Cell* Grid::getCell(int i, int j){
 
 }
 
+Cell* Grid::makeCell(double x, double y){
+    int q_x = (int)((x - MIN_X)/DELTA_X);
+    int q_y = (int)((y - MIN_Y)/DELTA_Y);
+
+    if(q_x >=0 && q_x < X && q_y >=0 && q_y < Y){
+        if (table[q_x][q_y] != NULL){
+            return table[q_x][q_y];
+        }
+
+        Cell* c = new Cell;
+        c->setDimensions(MIN_X+(q_x*DELTA_X), MIN_Y+(q_y*DELTA_Y), MIN_X+((q_x+1)*DELTA_X), MIN_Y+((q_y+1)*DELTA_Y));
+        //            cout << MIN_X+(q_x*DELTA_X) << " , " <<  MIN_Y+(q_y*DELTA_Y) << " , " <<  MIN_X+((q_x+1)*DELTA_X) << " , " <<  MIN_Y+((q_y+1)*DELTA_Y) << endl;
+        c->setType(CELL);
+        c->setIndex(q_x, q_y);
+        table[q_x][q_y] = c;
+
+        return c;
+    }
+    else{
+        return NULL;
+    }
+}
+
 
 bool Grid::addCheckIn(Point* user){
-    Cell * c = getCell(user->getX(), user->getY());
+    Cell * c = makeCell(user->getX(),user->getY());
+
     if(c != NULL){
         c->newCheckIn(user);
         int id = user->getID();

@@ -9,7 +9,7 @@ GPOs::GPOs (char* gridFileName){
   totalCPUTime = totalTime = 0.0;
   grid = new Grid;
 	loadLocations(gridFileName);
-  grid->deleteEmptyCells();
+  // grid->deleteEmptyCells();
   objects = 0;
   computedNN = returnedNN = finalNextNN = 0;
   nextNNList = new vector<res_point*>();
