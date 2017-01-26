@@ -8,6 +8,7 @@ Utilities::Utilities(){
 
 Utilities::~Utilities(){}
 
+//change
 
 //for Diversity between topk results
 double Utilities::getDistanceBetween(int friendsO[], int friendsK[], int friendsSizeO, int friendsSizeK, string f){
