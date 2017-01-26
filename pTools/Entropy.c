@@ -25,11 +25,13 @@ double entropy(ProbabilityState state) {
     int i;
 
     /*H(X) = - \sum p(x) \log p(x)*/
+    printf("Printing entropy values:");
     for (i = 0; i < state.numStates; i++) {
         tempValue = state.probabilityVector[i];
 
         if (tempValue > 0) {
             entropy -= tempValue * log(tempValue);
+            printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
         }
     }
 
@@ -48,9 +50,10 @@ double discAndCalcEntropy(double* dataVector, int vectorLength) {
 }/*discAndCalcEntropy(double* ,int)*/
 
 double calcEntropy(uint* dataVector, int vectorLength) {
+    printf("Calculating entropy: \n");
     ProbabilityState state = calculateProbability(dataVector, vectorLength);
     double h = entropy(state);
-
+    printf("Entropy Sum = %f",h);
     freeProbabilityState(state);
     
     return h;
