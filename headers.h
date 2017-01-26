@@ -53,7 +53,6 @@
 
 using namespace std;
 
-
 //VLDB dataset
 //#define MAXGROUPSIZE 12652
 //#define MAXSC 420                  // maximum number of friends plus one
@@ -110,7 +109,14 @@ extern int MAXT;
 #include "utilities/res_point.h"
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"
+#include "utilities/PairHasher.h"
 
+#include "pTools/MIToolbox.h"
+#include "pTools/ArrayOperations.h"
+#include "pTools/CalculateProbability.h"
+#include "pTools/Entropy.h"
+#include "pTools/RenyiEntropy.h"
+#include "pTools/WeightedEntropy.h"
 
 #include "GPOs/IGPOs.h"
 #include "SPOs/ISPOs.h"

@@ -28,27 +28,6 @@ int MAXT = 0;
 #endif
 
 
-// Pair hasher
-template <class T>
-inline void hash_combine(std::size_t & seed, const T & v)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-
-//hashes a pair into an unordered set
-struct PairHasher
-{
-    size_t operator()(const pair<int, int> & v) const
-    {
-      size_t seed = 0;
-      ::hash_combine(seed, v.first);
-      ::hash_combine(seed, v.second);
-      return seed;
-    }
-};
-
-
 void count_cooccrrences(SPOs *spos, GPOs *gpos){
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   // Counting co-occurrences
@@ -150,6 +129,90 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
+void testpTools(){
+
+  int i;
+  double length, entropyTarget;
+  double firstEntropy, secondEntropy, thirdEntropy, targetEntropy;
+  // double firstMItarget, secondMItarget, thirdMItarget, targetMItarget;
+  int *testFirstVector, *testSecondVector, *testThirdVector, *testMergedVector;
+  struct timeval start,end;
+
+  int *firstVector = (int *) calloc(4,sizeof(int));
+  int *secondVector = (int *) calloc(4,sizeof(int));
+  int *thirdVector = (int *) calloc(4,sizeof(int));
+  int *targetVector = (int *) calloc(4,sizeof(int));
+  
+  firstVector[0] = 0;
+  firstVector[1] = 0;
+  firstVector[2] = 1;
+  firstVector[3] = 1;
+  
+  secondVector[0] = 0;
+  secondVector[1] = 1;
+  secondVector[2] = 0;
+  secondVector[3] = 1;
+  
+  thirdVector[0] = 0;
+  thirdVector[1] = 1;
+  thirdVector[2] = 1;
+  thirdVector[3] = 1;
+  
+  targetVector[0] = 0;
+  targetVector[1] = 1;
+  targetVector[2] = 1;
+  targetVector[3] = 0;
+  
+  firstEntropy = calcEntropy(firstVector,4);
+  secondEntropy = calcEntropy(secondVector,4);
+  thirdEntropy = calcEntropy(thirdVector,4);
+  targetEntropy = calcEntropy(targetVector,4);
+  
+  printf("Entropies - first: %f, second: %f, third: %f, target %f\n",firstEntropy,secondEntropy,thirdEntropy,targetEntropy);
+    
+  // firstMItarget = calcMutualInformation(firstVector,targetVector,4);
+  // secondMItarget = calcMutualInformation(secondVector,targetVector,4);
+  // thirdMItarget = calcMutualInformation(thirdVector,targetVector,4);
+  // targetMItarget = calcMutualInformation(targetVector,targetVector,4);
+  
+  // printf("MIs - first: %f, second: %f, third: %f, target %f\n",firstMItarget,secondMItarget,thirdMItarget,targetMItarget);
+  
+  testFirstVector = (int *) calloc(10000,sizeof(int));
+  testSecondVector = (int *) calloc(10000,sizeof(int));
+  testThirdVector = (int *) calloc(10000,sizeof(int));
+  testMergedVector = (int *) calloc(10000,sizeof(int));
+  
+  for (i = 0; i < 10000; i++)
+  {
+    testFirstVector[i] = i % 2;
+    testSecondVector[i] = i % 4;
+    testThirdVector[i] = i % 3;
+  }
+  /* struct timeval
+   * {
+   *    time_t         tv_sec      seconds
+   *    suseconds_t    tv_usec     microseconds
+   * }
+   */
+
+  gettimeofday(&start, NULL);
+  for (i = 0; i < 1000; i++)
+  {
+    // miTarget = calcMutualInformation(testFirstVector,testSecondVector,10000);
+    entropyTarget = calcEntropy(testFirstVector,10000);
+    // cmiTarget = calcConditionalMutualInformation(testFirstVector,testSecondVector,testThirdVector,10000);
+    mergeArrays(testFirstVector,testSecondVector,testMergedVector,10000);
+  }
+  gettimeofday(&end, NULL);
+  printf("H(X) = %f\n",entropyTarget);
+  
+  length = end.tv_sec - start.tv_sec;
+  length = length + (end.tv_usec - start.tv_usec) / 1000000.0;
+  
+  printf("Time taken for a thousand I(X;Y), H(X), I(X;Y|Z), merge(X,Y) is %lf seconds\n",length);
+
+}
+
 
 int main(int argc, char *argv[]){
   cout.precision(15);
@@ -162,6 +225,9 @@ int main(int argc, char *argv[]){
   r2 = atof(argv[4]);
   tp = atof(argv[5]);
   bool isOptimistic = (tp == 0);
+
+  testpTools();
+  exit(-1);
 
   // Loading social network and checkins
   SPOs* spos = new SPOs();
