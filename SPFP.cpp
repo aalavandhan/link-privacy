@@ -120,7 +120,8 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
       bool areFriends = spos->areFriends(uid, (*c)->uid),
          notRecoreded = seen_pairs.find(make_pair(uid, (*c)->uid)) == seen_pairs.end(),
          unseenLocation = (seenLocations->find((*c)->id) == seenLocations->end()),
-         validCoOccurrence = (isOptimistic || unseenLocation) && abs(td.total_seconds()) <= 86400;
+         isDifferent = lid != (*c)->id && uid != (*c)->uid,
+         validCoOccurrence = isDifferent && (isOptimistic || unseenLocation) && abs(td.total_seconds()) <= 86400;
 
       if(  areFriends && notRecoreded &&  validCoOccurrence ){
         seen_pairs.insert(make_pair(uid, (*c)->uid));
