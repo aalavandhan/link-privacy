@@ -33,8 +33,8 @@ public:
     map<int , vector< Point* >*> locationHistory;
     map<int , vector< Point* >*> location_to_user;
 
-    // map<int, map<int, vector<int, int>>> cooccurrence_matrix;
     unordered_map<int, double> location_to_H;
+    map<int, map<int, vector<int, int>*>*> cooccurrence_matrix;
 
     virtual void getLocation(int id, double* result);
     virtual res_point* getNextNN(double x, double y, int incrStep);
