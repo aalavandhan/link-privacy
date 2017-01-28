@@ -35,7 +35,8 @@ extern "C" {
 *******************************************************************************/
 double discAndCalcEntropy(double *dataVector, int vectorLength);
 double calcEntropy(uint *dataVector, int vectorLength);
-
+double calcEntropyFromCoV(uint* dataVector, int vectorLength);
+double calcEntropyFromLocationVector(uint* dataVector, int vectorLength);
 /*******************************************************************************
 ** calculateJointEntropy returns the entropy in log base LOG_BASE of the joint 
 ** variable of firstVector and secondVector H(X,Y)

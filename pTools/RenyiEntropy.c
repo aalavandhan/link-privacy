@@ -19,7 +19,7 @@
 #include "../pTools/MIToolbox.h"
 #include "../pTools/ArrayOperations.h"
 #include "../pTools/CalculateProbability.h"
-#include "../pTools/Entropy.h"
+#include "../pTools/RenyiEntropy.h"
 
 double renyiEntropy(ProbabilityState state, double alpha) {
   double entropy = 0.0;
@@ -27,17 +27,22 @@ double renyiEntropy(ProbabilityState state, double alpha) {
   int i;
   
   /*H_\alpha(X) = 1/(1-alpha) * \log(\sum_x p(x)^alpha)*/
+  printf("Printing entropy values:\n");
   for (i = 0; i < state.numStates; i++) {
     tempValue = state.probabilityVector[i];
     if (tempValue > 0) {
       entropy += pow(tempValue,alpha);
+      printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
     }
   }
   
+  printf("Sum of Pij ^ q = %f",entropy);
   entropy = log(entropy);
+  printf(" after log = %f",entropy);
   entropy /= log(LOG_BASE);
+  printf(" after base conversion = %f",entropy);
   entropy /= (1.0-alpha);
-  
+  printf(" divided by q-1 = %f\n",entropy);
   return entropy;
 }
 
@@ -49,6 +54,35 @@ double calcRenyiEntropy(double alpha, uint *dataVector, int vectorLength) {
   
   return h;
 }/*calcRenyiEntropy(double,uint*,int)*/
+
+double calcRenyiEntropyFromCoV(double alpha, uint *dataVector, int vectorLength) {
+    printf("Calculating Renyi entropy from Co-occurrence vector for alpha (q) =  %f\n",alpha);
+
+    double *stateProbs;
+    double stateLength = vectorLength;
+    ProbabilityState state;
+    printf("Calculating probability :\n");
+    stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
+
+    int sumOfCo = sumState(dataVector, vectorLength);
+    int i;
+    for (i = 0; i < vectorLength; i++) {
+       stateProbs[i] = dataVector[i]/(double)sumOfCo;
+    }
+
+    printf("Printing stateProbs\n");
+    printDoubleVector(stateProbs,stateLength);
+
+    state.probabilityVector = stateProbs;
+    state.numStates = stateLength;
+
+    double h = renyiEntropy(state,alpha);
+    printf("Entropy Sum = %f\n",h);
+    freeProbabilityState(state);
+    
+    return h;
+}
+
 
 double discAndCalcRenyiEntropy(double alpha, double *dataVector, int vectorLength) {
   ProbabilityState state = discAndCalcProbability(dataVector,vectorLength);

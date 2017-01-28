@@ -34,6 +34,7 @@ extern "C" {
 *******************************************************************************/
 double calcRenyiEntropy(double alpha, uint *dataVector, int vectorLength);
 double discAndCalcRenyiEntropy(double alpha, double *dataVector, int vectorLength);
+double calcRenyiEntropyFromCoV(double alpha, uint *dataVector, int vectorLength);
 
 /*******************************************************************************
 ** calculateJointRenyiEntropy returns the Renyi entropy in log base LOG_BASE of the 

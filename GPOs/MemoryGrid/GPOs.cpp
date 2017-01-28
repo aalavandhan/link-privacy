@@ -303,6 +303,36 @@ bool GPOs::loadLocations(const char* fileName){
   cout << " -------------------------------------- " << endl;
   return true;
 }
+/*  iterate through each location
+**      put each users frequency in a datavector
+**      call entropy function on the datavector to obtain the entropy
+**      insert entropy into hashmap
+*/      
+
+//TODO: VERIFY FOR CORRECTNESS ACCORDING TO FORMAT OF DATA STRUCTURE
+unordered_map<int, double>* GPOs::calculateLocationEntropy(map<int , set<int>*> location_History){
+
+  for(auto it = location_History.begin(); it != location_History.end();it++){
+    
+    int location_id = it->first;
+    set<int>* users_at_location = it->second;
+
+    //populating freqVector array with frequencies of users at this location
+    uint *freqVector = (uint *) calloc(users_at_location->size(),sizeof(uint));
+    int i =0;
+    for(auto u_it = users_at_location->begin(); u_it!=users_at_location->end(); u_it++){
+      freqVector[i] = *u_it;
+      i++;
+    }
+
+    //converts the frequencies to probabilities before computing the total shannon entropy
+    double entropy = calcEntropyFromLocationVector(freqVector , users_at_location->size());
+    location_to_H.insert(make_pair(location_id, entropy));
+  }
+  return &location_to_H;
+}
+
+
 
 // Radius in meters
 // SEED HAS BEEN SET

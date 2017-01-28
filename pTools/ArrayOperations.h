@@ -52,6 +52,9 @@ double **generateDoubleIndices(double *featureMatrix, uint noOfSamples, uint noO
 *******************************************************************************/
 int maxState(uint* vector, int vectorLength);
 
+int sumState(uint* vector, int vectorLength);
+
+
 /*******************************************************************************
 ** numberOfUniqueValues finds the number of unique values in an array by 
 ** repeatedly iterating through the array and checking if a value has been 

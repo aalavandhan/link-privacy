@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 #include "../pTools/MIToolbox.h"
+#include "../pTools/ArrayOperations.h"
 #include "../pTools/CalculateProbability.h"
 #include "../pTools/Entropy.h"
 
@@ -25,7 +26,7 @@ double entropy(ProbabilityState state) {
     int i;
 
     /*H(X) = - \sum p(x) \log p(x)*/
-    printf("Printing entropy values:");
+    printf("Printing entropy values:\n");
     for (i = 0; i < state.numStates; i++) {
         tempValue = state.probabilityVector[i];
 
@@ -53,11 +54,70 @@ double calcEntropy(uint* dataVector, int vectorLength) {
     printf("Calculating entropy: \n");
     ProbabilityState state = calculateProbability(dataVector, vectorLength);
     double h = entropy(state);
-    printf("Entropy Sum = %f",h);
+    printf("Entropy Sum = %f\n",h);
     freeProbabilityState(state);
     
     return h;
 }/*calcEntropy(uint* ,int)*/
+
+double calcEntropyFromCoV(uint* dataVector, int vectorLength) {
+    printf("Calculating entropy from Co-occurrence vector: \n");
+
+    double *stateProbs;
+    double stateLength = vectorLength;
+    ProbabilityState state;
+    printf("Calculating probability : \n");
+    stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
+
+    int sumOfCo = sumState(dataVector, vectorLength);
+    int i;
+    for (i = 0; i < vectorLength; i++) {
+       stateProbs[i] = dataVector[i]/(double)sumOfCo;
+    }
+
+    printf("Printing stateProbs\n");
+    printDoubleVector(stateProbs,stateLength);
+
+    state.probabilityVector = stateProbs;
+    state.numStates = stateLength;
+
+    double h = entropy(state);
+    printf("Entropy Sum = %f\n",h);
+    freeProbabilityState(state);
+    
+    return h;
+}/*calcEntropy(uint* ,int)*/
+
+double calcEntropyFromLocationVector(uint* dataVector, int vectorLength) {
+    printf("Calculating entropy from Co-occurrence vector: \n");
+
+    double *stateProbs;
+    double stateLength = vectorLength;
+    ProbabilityState state;
+    printf("Calculating probability : \n");
+    stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
+
+    int sumOfCo = sumState(dataVector, vectorLength);
+    int i;
+    for (i = 0; i < vectorLength; i++) {
+       stateProbs[i] = dataVector[i]/(double)sumOfCo;
+    }
+
+    printf("Printing stateProbs\n");
+    printDoubleVector(stateProbs,stateLength);
+
+    state.probabilityVector = stateProbs;
+    state.numStates = stateLength;
+
+    double h = entropy(state);
+    printf("Entropy Sum = %f\n",h);
+    freeProbabilityState(state);
+    
+    return h;
+}/*calcEntropy(uint* ,int)*/
+
+
+
 
 double jointEntropy(JointProbabilityState state) {
     double jointEntropy = 0.0;

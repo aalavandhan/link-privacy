@@ -22,9 +22,11 @@
 #include <string.h>
 
 #define BASE_TWO 2.0
+#define BASE_TEN 10.0
+
 #define BASE_E M_E
 #define C_IMPLEMENTATION
-#define LOG_BASE BASE_TWO
+#define LOG_BASE BASE_E
 
 typedef unsigned int uint;
 

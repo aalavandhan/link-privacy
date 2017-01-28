@@ -234,6 +234,7 @@ WeightedJointProbState discAndCalcWeightedJointProbability(double *firstVector, 
   return state;
 }/*discAndCalcWeightedJointProbability(double *,double *,double *,int)*/
 
+
 ProbabilityState calculateProbability(uint* dataVector, int vectorLength) {
 
   int numStates;
@@ -244,7 +245,7 @@ ProbabilityState calculateProbability(uint* dataVector, int vectorLength) {
   double length = vectorLength;
 
   numStates = maxState(dataVector,vectorLength);
-  printf("Calculating probability : numStates = %d", numStates);
+  printf("Calculating probability : numStates = %d\n", numStates);
   stateCounts = (int *) checkedCalloc(numStates,sizeof(int));
   stateProbs = (double *) checkedCalloc(numStates,sizeof(double));
   

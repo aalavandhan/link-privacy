@@ -98,6 +98,15 @@ int maxState(uint *vector, int vectorLength) {
     return max + 1;
 }
 
+int sumState(uint *vector, int vectorLength) {
+    int i, sum;
+    sum = 0;
+    for (i = 0; i < vectorLength; i++) {
+        sum += vector[i];
+    }
+    return sum;
+}
+
 int numberOfUniqueValues(double *featureVector, int vectorLength) {
     int uniqueValues = 0;
     double *valuesArray = (double *) checkedCalloc(vectorLength,sizeof(double));

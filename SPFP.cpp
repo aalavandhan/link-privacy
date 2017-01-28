@@ -136,17 +136,17 @@ void count_cooccurences(SPOs *spos, GPOs* gpos, double radius, double timeRange,
 
 void testpTools(){
 
-  int i;
-  double length, entropyTarget;
+  // int i;
+  // double length, entropyTarget;
   double firstEntropy, secondEntropy, thirdEntropy, targetEntropy;
   // double firstMItarget, secondMItarget, thirdMItarget, targetMItarget;
-  int *testFirstVector, *testSecondVector, *testThirdVector, *testMergedVector;
-  struct timeval start,end;
+  // int *testFirstVector, *testSecondVector, *testThirdVector, *testMergedVector;
+  // struct timeval start,end;
 
-  int *firstVector = (int *) calloc(4,sizeof(int));
-  int *secondVector = (int *) calloc(4,sizeof(int));
-  int *thirdVector = (int *) calloc(4,sizeof(int));
-  int *targetVector = (int *) calloc(4,sizeof(int));
+  uint *firstVector = (uint *) calloc(4,sizeof(uint));
+  uint *secondVector = (uint *) calloc(4,sizeof(uint));
+  uint *thirdVector = (uint *) calloc(4,sizeof(uint));
+  uint *targetVector = (uint *) calloc(4,sizeof(uint));
   
   firstVector[0] = 0;
   firstVector[1] = 0;
@@ -172,9 +172,55 @@ void testpTools(){
   secondEntropy = calcEntropy(secondVector,4);
   thirdEntropy = calcEntropy(thirdVector,4);
   targetEntropy = calcEntropy(targetVector,4);
+  // targetEntropy = calcRenyiEntropy(0.1,targetVector,4 );
   
   printf("Entropies - first: %f, second: %f, third: %f, target %f\n",firstEntropy,secondEntropy,thirdEntropy,targetEntropy);
     
+  //verifying section 3.4 EBM
+
+  cout<<" -----------------------Entropy Example ------------------------"<<endl;
+  cout<<" ------------------------Section  3.4---------------------------"<<endl;
+  uint *CabOcc = (uint *) calloc(5,sizeof(uint));
+  uint *CcdOccur = (uint *) calloc(5,sizeof(uint));
+
+  CabOcc[0] = 10;
+  CabOcc[1] = 1;
+  CabOcc[2] = 0;
+  CabOcc[3] = 0;
+  CabOcc[4] = 9;
+  
+  CcdOccur[0] = 2;
+  CcdOccur[1] = 3;
+  CcdOccur[2] = 2;
+  CcdOccur[3] = 2;
+  CcdOccur[4] = 3;
+
+  cout<<" C_ab is : 10 , 1, 0, 0, 9"<<endl;
+  cout<<" C_cd is : 2 , 3, 2, 2, 3"<<endl;
+  
+  cout<<" ------------------Testing Shannon Entropy------------------------"<<endl;
+  double CabEntropy, CcdEntropy, CabDiversity, CcdDiversity;
+
+  CabEntropy = calcEntropyFromCoV(CabOcc,5);
+  CcdEntropy = calcEntropyFromCoV(CcdOccur,5);
+  CabDiversity = exp(CabEntropy);
+  CcdDiversity = exp(CcdEntropy);
+
+
+  cout<<"CabEntropy = "<<CabEntropy<<" CcdEntropy = "<<CcdEntropy <<" CabEntropy/CcdEntropy = " << CabEntropy/CcdEntropy <<endl;
+  cout<<"CabDiversity = "<<CabDiversity<<" CabDiversity = "<<CcdDiversity<<" CabDiversity/CcdDiversity = " << CabDiversity/CcdDiversity <<endl;
+
+  cout<<" ------------------Testing Renyi Entropy------------------------"<<endl;
+  double CabRenEntropy, CcdRenEntropy, CabRenDiversity, CcdRenDiversity;
+
+  CabRenEntropy = calcRenyiEntropyFromCoV(0.5,CabOcc,5);
+  CcdRenEntropy = calcRenyiEntropyFromCoV(0.5,CcdOccur,5);
+  CabRenDiversity = exp(CabRenEntropy);
+  CcdRenDiversity = exp(CcdRenEntropy);
+
+  cout<<"CabRenEntropy = "<<CabRenEntropy<<" CcdRenEntropy = "<<CcdRenEntropy<< " CabRenEntropy/CcdRenEntropy = " << CabRenEntropy/CcdRenEntropy<<endl;
+  cout<<"CabRenDiversity = "<<CabRenDiversity<<" CcdRenDiversity = "<<CcdRenDiversity<<" CabRenDiversity/CcdRenDiversity = "<< CabRenDiversity/CcdRenDiversity << endl;
+
   // firstMItarget = calcMutualInformation(firstVector,targetVector,4);
   // secondMItarget = calcMutualInformation(secondVector,targetVector,4);
   // thirdMItarget = calcMutualInformation(thirdVector,targetVector,4);
@@ -182,40 +228,40 @@ void testpTools(){
   
   // printf("MIs - first: %f, second: %f, third: %f, target %f\n",firstMItarget,secondMItarget,thirdMItarget,targetMItarget);
   
-  testFirstVector = (int *) calloc(10000,sizeof(int));
-  testSecondVector = (int *) calloc(10000,sizeof(int));
-  testThirdVector = (int *) calloc(10000,sizeof(int));
-  testMergedVector = (int *) calloc(10000,sizeof(int));
+  // testFirstVector = (int *) calloc(10000,sizeof(int));
+  // testSecondVector = (int *) calloc(10000,sizeof(int));
+  // testThirdVector = (int *) calloc(10000,sizeof(int));
+  // testMergedVector = (int *) calloc(10000,sizeof(int));
   
-  for (i = 0; i < 10000; i++)
-  {
-    testFirstVector[i] = i % 2;
-    testSecondVector[i] = i % 4;
-    testThirdVector[i] = i % 3;
-  }
+  // for (i = 0; i < 10000; i++)
+  // {
+  //   testFirstVector[i] = i % 2;
+  //   testSecondVector[i] = i % 4;
+  //   testThirdVector[i] = i % 3;
+  // }
   /* struct timeval
    * {
    *    time_t         tv_sec      seconds
    *    suseconds_t    tv_usec     microseconds
    * }
    */
-  return;
+  // return;
 
-  gettimeofday(&start, NULL);
-  for (i = 0; i < 1000; i++)
-  {
-    // miTarget = calcMutualInformation(testFirstVector,testSecondVector,10000);
-    entropyTarget = calcEntropy(testFirstVector,10000);
-    // cmiTarget = calcConditionalMutualInformation(testFirstVector,testSecondVector,testThirdVector,10000);
-    mergeArrays(testFirstVector,testSecondVector,testMergedVector,10000);
-  }
-  gettimeofday(&end, NULL);
-  printf("H(X) = %f\n",entropyTarget);
+  // gettimeofday(&start, NULL);
+  // for (i = 0; i < 1000; i++)
+  // {
+  //   // miTarget = calcMutualInformation(testFirstVector,testSecondVector,10000);
+  //   entropyTarget = calcEntropy(testFirstVector,10000);
+  //   // cmiTarget = calcConditionalMutualInformation(testFirstVector,testSecondVector,testThirdVector,10000);
+  //   mergeArrays(testFirstVector,testSecondVector,testMergedVector,10000);
+  // }
+  // gettimeofday(&end, NULL);
+  // printf("H(X) = %f\n",entropyTarget);
   
-  length = end.tv_sec - start.tv_sec;
-  length = length + (end.tv_usec - start.tv_usec) / 1000000.0;
+  // length = end.tv_sec - start.tv_sec;
+  // length = length + (end.tv_usec - start.tv_usec) / 1000000.0;
   
-  printf("Time taken for a thousand I(X;Y), H(X), I(X;Y|Z), merge(X,Y) is %lf seconds\n",length);
+  // printf("Time taken for a thousand I(X;Y), H(X), I(X;Y|Z), merge(X,Y) is %lf seconds\n",length);
 
 }
 

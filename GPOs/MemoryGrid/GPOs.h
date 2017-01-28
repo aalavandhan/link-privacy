@@ -34,6 +34,7 @@ public:
     map<int , vector< Point* >*> location_to_user;
 
     // map<int, map<int, vector<int, int>>> cooccurrence_matrix;
+    unordered_map<int, double> location_to_H;
 
     virtual void getLocation(int id, double* result);
     virtual res_point* getNextNN(double x, double y, int incrStep);
@@ -43,6 +44,7 @@ public:
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
     virtual double estimateNearestDistance(double x, double y, int k);
     virtual void clearNextNN();
+    virtual unordered_map<int, double>* calculateLocationEntropy(map<int , set<int>*> location_History);
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);
