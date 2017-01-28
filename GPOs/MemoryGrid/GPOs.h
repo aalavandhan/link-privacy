@@ -22,7 +22,7 @@ private:
     int pureNNexec;
 
 
-    void generateLocationFrequencyCache();
+    void generateFrequencyCache();
 
 
 public:
@@ -37,6 +37,9 @@ public:
     map<int , vector< Point* >*> location_to_user;
 
     map<int, unordered_map<int, int>*> users_locations_frequency_map;
+    map<int, unordered_map<int, int>*> locations_users_frequency_map;
+
+    unordered_set< pair<int,int>, PairHasher > cooccured_user_pairs;
 
     unordered_map<int, double> location_to_H;
     map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
