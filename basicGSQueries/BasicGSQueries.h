@@ -15,6 +15,6 @@ public:
 
     map<int, vector<my_pair>*> cacluateSocialStrength();
     void verifySocialStrength(double tresh);
-    map<int, map<int, double>*> buildMatrices(double q);
+    void buildMatrices(double q);
 };
 

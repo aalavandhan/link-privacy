@@ -22,6 +22,8 @@ private:
     int pureNNexec;
 
 
+    void generateLocationFrequencyCache();
+
 
 public:
     Grid *grid;
@@ -31,8 +33,10 @@ public:
     vector<int> ids;
     map<int, Point*> locations;
     //user id to checkins
-    map<int , vector< Point* >*> locationHistory;
+    map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
+
+    map<int, unordered_map<int, int>*> users_locations_frequency_map;
 
     unordered_map<int, double> location_to_H;
     map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
@@ -46,10 +50,11 @@ public:
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
     virtual double estimateNearestDistance(double x, double y, int k);
     virtual void clearNextNN();
-    unordered_map<int, double>* calculateLocationEntropy(map<int , set<int>*> location_History);
-
-    virtual unordered_map<int, double>* getLocationHistory();
+    virtual unordered_map<int, double>* getLocationEntropy();
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
+
+    unordered_map<int, double>* calculateLocationEntropy();
+
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);

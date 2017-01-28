@@ -45,25 +45,28 @@ void SimpleQueries::verifySocialStrength(double tresh){
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-map<int, map<int, double>*> SimpleQueries::buildMatrices(double q){
-  unordered_map<int, double>* location_to_H =  gpos->getLocationHistory();
+void SimpleQueries::buildMatrices(double q){
+  unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
   map<int, map<int, vector<pair<int, int> >* >*>* cooccurrence_matrix = gpos->getCooccurrenceMatrix();
 
 
   for(auto c_it = cooccurrence_matrix->begin(); c_it != cooccurrence_matrix->end(); c_it++){
     int user_1 = c_it->first;
-    auto user_location_history_list = c_it->second;
+    auto users_location_frequency_map = c_it->second;
 
-    for(auto ulh_it = user_location_history_list->begin(); ulh_it != user_location_history_list->end(); ulh_it++){
+
+
+    for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
       int user_2 = ulh_it->first;
       vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
 
       uint *cooccVector = (uint *) calloc(cooccurrence_counts_vector->size(), sizeof(uint));
-      int i =0;
+      int i=0;
       double weighted_frequency=0;
 
       for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
         int location_id = u_it->first;
+
         double location_entropy;
 
         auto it_ltH = location_to_H->find(location_id);
@@ -112,9 +115,10 @@ map<int, map<int, double>*> SimpleQueries::buildMatrices(double q){
         map<int, double>* wtlist = wt_it->second;
         wtlist->insert(make_pair(user_2, weighted_frequency));
       }
+
+
     }
   }
-
 }
 
 

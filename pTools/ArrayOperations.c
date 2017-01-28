@@ -4,7 +4,7 @@
  **
  ** Contains functions to floor arrays, and to merge arrays into a joint
  ** state.
- ** 
+ **
  ** Author: Adam Pocock
  ** Created 17/2/2010
  ** Updated - 22/02/2014 - Added checking on calloc.
@@ -25,7 +25,7 @@ void* checkedCalloc(size_t vectorLength, size_t sizeOfType) {
         /* This call returns control to Matlab, with the associated error message */
         mexErrMsgTxt("Failed to allocate memory\n");
 #elif defined(C_IMPLEMENTATION)
-        fprintf(stderr, "Error: %s\nAttempted to allocate %lu length of size %lu\n", strerror(errno), vectorLength, sizeOfType);
+        //fprintf(stderr, "Error: %s\nAttempted to allocate %lu length of size %lu\n", strerror(errno), vectorLength, sizeOfType);
         exit(EXIT_FAILURE);
 #endif
     }
@@ -52,14 +52,14 @@ void printDoubleVector(double *vector, int vectorLength) {
 void printIntVector(int *vector, int vectorLength) {
     int i;
     for (i = 0; i < vectorLength; i++) {
-        printf("Value at i=%d, is %d\n",i,vector[i]);
+        //printf("Value at i=%d, is %d\n",i,vector[i]);
     }/*for number of items in vector*/
 }/*printIntVector(int*,int)*/
 
 void printUintVector(uint *vector, int vectorLength) {
     int i;
     for (i = 0; i < vectorLength; i++) {
-        printf("Value at i=%d, is %d\n",i,vector[i]);
+        //printf("Value at i=%d, is %d\n",i,vector[i]);
     }/*for number of items in vector*/
 }/*printUintVector(int*,int)*/
 
@@ -67,7 +67,7 @@ uint **generateIntIndices(uint *featureMatrix, uint noOfSamples, uint noOfFeatur
     int j;
 
     uint **feature2D = (uint **) checkedCalloc(noOfFeatures,sizeof(uint *));
-    
+
     for (j = 0; j < noOfFeatures; j++) {
         feature2D[j] = featureMatrix + j*noOfSamples;
     }
@@ -79,7 +79,7 @@ double **generateDoubleIndices(double *featureMatrix, uint noOfSamples, uint noO
     int j;
 
     double **feature2D = (double **) checkedCalloc(noOfFeatures,sizeof(double *));
-    
+
     for (j = 0; j < noOfFeatures; j++) {
         feature2D[j] = featureMatrix + j*noOfSamples;
     }
@@ -138,7 +138,7 @@ int numberOfUniqueValues(double *featureVector, int vectorLength) {
     return uniqueValues;
 }/*numberOfUniqueValues(double*,int)*/
 
-/******************************************************************************* 
+/*******************************************************************************
  ** normaliseArray takes an input vector and writes an output vector
  ** which is a normalised version of the input, and returns the number of states
  ** A normalised array has min value = 0, max value = number of states
@@ -214,7 +214,7 @@ int mergeArrays(uint *firstVector, uint *secondVector, uint *outputVector, int v
 
 /*******************************************************************************
  ** discAndMergeArrays takes in two arrays, discretises them and writes the joint
- ** state of those arrays to the output vector, returning the number of joint 
+ ** state of those arrays to the output vector, returning the number of joint
  ** states.
  **
  ** the length of the vectors must be the same and equal to vectorLength

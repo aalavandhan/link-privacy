@@ -2,10 +2,10 @@
  ** Entropy.c
  ** Part of the mutual information toolbox
  **
- ** Contains functions to calculate the entropy of a single variable H(X), 
+ ** Contains functions to calculate the entropy of a single variable H(X),
  ** the joint entropy of two variables H(X,Y), and the conditional entropy
  ** H(X|Y)
- ** 
+ **
  ** Author: Adam Pocock
  ** Created 19/2/2010
  **
@@ -26,13 +26,13 @@ double entropy(ProbabilityState state) {
     int i;
 
     /*H(X) = - \sum p(x) \log p(x)*/
-    printf("Printing entropy values:\n");
+    // printf("Printing entropy values:\n");
     for (i = 0; i < state.numStates; i++) {
         tempValue = state.probabilityVector[i];
 
         if (tempValue > 0) {
             entropy -= tempValue * log(tempValue);
-            printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
+            // printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
         }
     }
 
@@ -51,22 +51,22 @@ double discAndCalcEntropy(double* dataVector, int vectorLength) {
 }/*discAndCalcEntropy(double* ,int)*/
 
 double calcEntropy(uint* dataVector, int vectorLength) {
-    printf("Calculating entropy: \n");
+    // printf("Calculating entropy: \n");
     ProbabilityState state = calculateProbability(dataVector, vectorLength);
     double h = entropy(state);
-    printf("Entropy Sum = %f\n",h);
+    // printf("Entropy Sum = %f\n",h);
     freeProbabilityState(state);
-    
+
     return h;
 }/*calcEntropy(uint* ,int)*/
 
 double calcEntropyFromCoV(uint* dataVector, int vectorLength) {
-    printf("Calculating entropy from Co-occurrence vector: \n");
+    // printf("Calculating entropy from Co-occurrence vector: \n");
 
     double *stateProbs;
     double stateLength = vectorLength;
     ProbabilityState state;
-    printf("Calculating probability : \n");
+    // printf("Calculating probability : \n");
     stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
 
     int sumOfCo = sumState(dataVector, vectorLength);
@@ -75,26 +75,26 @@ double calcEntropyFromCoV(uint* dataVector, int vectorLength) {
        stateProbs[i] = dataVector[i]/(double)sumOfCo;
     }
 
-    printf("Printing stateProbs\n");
-    printDoubleVector(stateProbs,stateLength);
+    // printf("Printing stateProbs\n");
+    // printDoubleVector(stateProbs,stateLength);
 
     state.probabilityVector = stateProbs;
     state.numStates = stateLength;
 
     double h = entropy(state);
-    printf("Entropy Sum = %f\n",h);
+    // printf("Entropy Sum = %f\n",h);
     freeProbabilityState(state);
-    
+
     return h;
 }/*calcEntropy(uint* ,int)*/
 
 double calcEntropyFromLocationVector(uint* dataVector, int vectorLength) {
-    printf("Calculating entropy from Co-occurrence vector: \n");
+    // printf("Calculating entropy from location vector: \n");
 
     double *stateProbs;
     double stateLength = vectorLength;
     ProbabilityState state;
-    printf("Calculating probability : \n");
+    // printf("Calculating probability for size of vector: %d\n", stateLength);
     stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
 
     int sumOfCo = sumState(dataVector, vectorLength);
@@ -103,16 +103,16 @@ double calcEntropyFromLocationVector(uint* dataVector, int vectorLength) {
        stateProbs[i] = dataVector[i]/(double)sumOfCo;
     }
 
-    printf("Printing stateProbs\n");
-    printDoubleVector(stateProbs,stateLength);
+    // printf("Printing stateProbs\n");
+    // printDoubleVector(stateProbs,stateLength);
 
     state.probabilityVector = stateProbs;
     state.numStates = stateLength;
 
     double h = entropy(state);
-    printf("Entropy Sum = %f\n",h);
+    // printf("Entropy Sum = %f\n",h);
     freeProbabilityState(state);
-    
+
     return h;
 }/*calcEntropy(uint* ,int)*/
 
@@ -123,7 +123,7 @@ double jointEntropy(JointProbabilityState state) {
     double jointEntropy = 0.0;
     double tempValue = 0.0;
     int i;
-    
+
     /*H(XY) = - \sum_x \sum_y p(xy) \log p(xy)*/
     for (i = 0; i < state.numJointStates; i++) {
         tempValue = state.jointProbabilityVector[i];
