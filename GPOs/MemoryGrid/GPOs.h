@@ -30,12 +30,14 @@ public:
     ~GPOs();
     vector<int> ids;
     map<int, Point*> locations;
+    //user id to checkins
     map<int , vector< Point* >*> locationHistory;
     map<int , vector< Point* >*> location_to_user;
 
     unordered_map<int, double> location_to_H;
     map<int, map<int, vector<int, int>*>*> cooccurrence_matrix;
 
+    void createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km);
     virtual void getLocation(int id, double* result);
     virtual res_point* getNextNN(double x, double y, int incrStep);
     virtual vector<res_point*>* getkNN(double x, double y, int k);

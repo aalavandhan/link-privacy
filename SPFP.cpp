@@ -220,49 +220,6 @@ void testpTools(){
 
   cout<<"CabRenEntropy = "<<CabRenEntropy<<" CcdRenEntropy = "<<CcdRenEntropy<< " CabRenEntropy/CcdRenEntropy = " << CabRenEntropy/CcdRenEntropy<<endl;
   cout<<"CabRenDiversity = "<<CabRenDiversity<<" CcdRenDiversity = "<<CcdRenDiversity<<" CabRenDiversity/CcdRenDiversity = "<< CabRenDiversity/CcdRenDiversity << endl;
-
-  // firstMItarget = calcMutualInformation(firstVector,targetVector,4);
-  // secondMItarget = calcMutualInformation(secondVector,targetVector,4);
-  // thirdMItarget = calcMutualInformation(thirdVector,targetVector,4);
-  // targetMItarget = calcMutualInformation(targetVector,targetVector,4);
-  
-  // printf("MIs - first: %f, second: %f, third: %f, target %f\n",firstMItarget,secondMItarget,thirdMItarget,targetMItarget);
-  
-  // testFirstVector = (int *) calloc(10000,sizeof(int));
-  // testSecondVector = (int *) calloc(10000,sizeof(int));
-  // testThirdVector = (int *) calloc(10000,sizeof(int));
-  // testMergedVector = (int *) calloc(10000,sizeof(int));
-  
-  // for (i = 0; i < 10000; i++)
-  // {
-  //   testFirstVector[i] = i % 2;
-  //   testSecondVector[i] = i % 4;
-  //   testThirdVector[i] = i % 3;
-  // }
-  /* struct timeval
-   * {
-   *    time_t         tv_sec      seconds
-   *    suseconds_t    tv_usec     microseconds
-   * }
-   */
-  // return;
-
-  // gettimeofday(&start, NULL);
-  // for (i = 0; i < 1000; i++)
-  // {
-  //   // miTarget = calcMutualInformation(testFirstVector,testSecondVector,10000);
-  //   entropyTarget = calcEntropy(testFirstVector,10000);
-  //   // cmiTarget = calcConditionalMutualInformation(testFirstVector,testSecondVector,testThirdVector,10000);
-  //   mergeArrays(testFirstVector,testSecondVector,testMergedVector,10000);
-  // }
-  // gettimeofday(&end, NULL);
-  // printf("H(X) = %f\n",entropyTarget);
-  
-  // length = end.tv_sec - start.tv_sec;
-  // length = length + (end.tv_usec - start.tv_usec) / 1000000.0;
-  
-  // printf("Time taken for a thousand I(X;Y), H(X), I(X;Y|Z), merge(X,Y) is %lf seconds\n",length);
-
 }
 
 

@@ -166,8 +166,7 @@ double Utilities::computeJaccard(int arr1[], int arr2[], int m, int n){
 /* Function prints union of arr1[] and arr2[]
    m is the number of elements in arr1[]
    n is the number of elements in arr2[] */
-int Utilities::countUnion(int arr1[], int arr2[], int m, int n)
-{
+int Utilities::countUnion(int arr1[], int arr2[], int m, int n){
   int count = 0;
   int i = 0, j = 0;
   while (i < m && j < n)
