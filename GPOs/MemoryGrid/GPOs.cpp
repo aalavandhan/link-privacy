@@ -274,13 +274,21 @@ bool GPOs::loadLocations(const char* fileName){
 **      put each users frequency in a datavector
 **      call entropy function on the datavector to obtain the entropy
 **      insert entropy into hashmap
-*/      
+*/
+
+unordered_map<int, double>* GPOs::getLocationHistory(){
+  return &location_to_H;
+}
+
+map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getCooccurrenceMatrix(){
+  return &cooccurrence_matrix;
+}
 
 //TODO: VERIFY FOR CORRECTNESS ACCORDING TO FORMAT OF DATA STRUCTURE
 unordered_map<int, double>* GPOs::calculateLocationEntropy(map<int , set<int>*> location_History){
 
   for(auto it = location_History.begin(); it != location_History.end();it++){
-    
+
     int location_id = it->first;
     set<int>* users_at_location = it->second;
 
@@ -438,9 +446,8 @@ void GPOs::verifyRange(double radius){
   cout << "Mean points in range : " << " " << meanGroupSize << endl;
 }
 
-void GPOs::countU2UCoOccurrences(){
-  cout << "----- Loading Cooccurrence Matrix --- " << endl;
 
+void GPOs::countU2UCoOccurrences(){
   for(auto u1=locationHistory.begin(); u1!=locationHistory.end(); u1++){
     map<int, int> u1Locations;
     auto u1Checkins = u1->second;
@@ -452,8 +459,6 @@ void GPOs::countU2UCoOccurrences(){
       auto found = u1Locations.find((*l)->getID());
       found->second = found->second + 1;
     }
-
-
 
     for(auto u2=locationHistory.begin(); u2!=locationHistory.end(); u2++){
       if(u1->first != u2->first){
@@ -469,24 +474,44 @@ void GPOs::countU2UCoOccurrences(){
           found->second = found->second + 1;
         }
 
+        int u1Id = u1->first, u2Id = u2->first;
+        if(u1Id > u2Id){
+          int temp = u2Id;
+          u2Id = u1Id;
+          u1Id = temp;
+        }
+
+        // map<int, map<int, vector<pair<int, int> >* >*>*
+
+        vector<pair<int, int> >* locList = new vector<pair<int, int>>();
+        map<int, vector<pair<int, int>>*>* uPair = new map<int, vector<pair<int, int>>*>();
+
+        auto u1_coocc = cooccurrence_matrix.find(u1Id);
+        if(u1_coocc == cooccurrence_matrix.end()){
+          uPair->insert(make_pair(u2Id, locList));
+          cooccurrence_matrix.insert(make_pair(u1Id, uPair));
+        } else {
+          uPair = u1_coocc->second;
+        }
+
+        auto u2_coocc = uPair->find(u2Id);
+        if(u2_coocc == uPair->end()){
+          uPair->insert(make_pair(u2Id, locList));
+        } else {
+          locList = u2_coocc->second;
+        }
 
         for(auto l = u1Locations.begin(); l != u1Locations.end(); l++){
-          if(u2Locations.find(l->first) == u2Locations.end()){
-            // common->insert(make_pair(
-            //   l->first,
-            //   min(u2Locations.find(l->first)->second, l->second)
-            // ));
-            // cout << u1->first << " " << u2->first << " " << l->first << " " << min(u2Locations.find(l->first)->second, l->second) << endl;
-
-            // insert into cocccurrence matrix
+          auto u2Match = u2Locations.find(l->first);
+          if( u2Match != u2Locations.end()){
+            int coocc_count = min(u2Match->second, l->second);
+            locList->push_back(make_pair(l->first, coocc_count));
           }
         }
 
       }
     }
   }
-
-  cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 }
 
 

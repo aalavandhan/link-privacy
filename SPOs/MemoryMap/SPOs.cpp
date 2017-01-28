@@ -373,3 +373,7 @@ int SPOs::getUserDegree(int id){
 
 	return degree;
 }
+
+int SPOs::getNumberOfFriends(){
+    return edges;
+}

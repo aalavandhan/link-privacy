@@ -33,6 +33,7 @@ public:
 	virtual unordered_set<int>* getFriends(int id);
     virtual bool areFriends(int user1, int user2);
 	virtual int getUserDegree(int id);
+    virtual int getNumberOfFriends();
 	virtual multiset<my_pair, pair_comparator_descending>* getDegreeSet();
 
 	void printTriangles( int id, vector<int> friendList);

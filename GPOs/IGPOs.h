@@ -9,6 +9,8 @@ public:
     virtual void clearNextNN() = 0;
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius) = 0;
     virtual double estimateNearestDistance(double x, double y, int k) = 0;
-    virtual unordered_map<int, double>* calculateLocationEntropy(map<int , set<int>*> location_History) = 0;
+    virtual unordered_map<int, double>* getLocationHistory() =0;
+    virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix()=0;
+
 };
 

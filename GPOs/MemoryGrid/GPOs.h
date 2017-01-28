@@ -35,7 +35,7 @@ public:
     map<int , vector< Point* >*> location_to_user;
 
     unordered_map<int, double> location_to_H;
-    map<int, map<int, vector<int, int>*>*> cooccurrence_matrix;
+    map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
 
     void createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km);
     virtual void getLocation(int id, double* result);
@@ -46,7 +46,10 @@ public:
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
     virtual double estimateNearestDistance(double x, double y, int k);
     virtual void clearNextNN();
-    virtual unordered_map<int, double>* calculateLocationEntropy(map<int , set<int>*> location_History);
+    unordered_map<int, double>* calculateLocationEntropy(map<int , set<int>*> location_History);
+
+    virtual unordered_map<int, double>* getLocationHistory();
+    virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);
