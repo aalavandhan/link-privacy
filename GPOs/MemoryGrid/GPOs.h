@@ -19,7 +19,9 @@ private:
     bool flagNextNN;
     int objects;
     Utilities util;
-	int pureNNexec;
+    int pureNNexec;
+
+
 
 public:
     Grid *grid;
@@ -27,10 +29,11 @@ public:
     GPOs();
     ~GPOs();
     vector<int> ids;
-	map<int, Point*> locations;
+    map<int, Point*> locations;
     map<int , vector< Point* >*> locationHistory;
+    map<int , vector< Point* >*> location_to_user;
 
-    map<int , set<int>*> location_to_user;
+    // map<int, map<int, vector<int, int>>> cooccurrence_matrix;
 
     virtual void getLocation(int id, double* result);
     virtual res_point* getNextNN(double x, double y, int incrStep);
@@ -63,4 +66,5 @@ public:
     void groupByRange(GPOs* gpos, double radius);
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void verifyRange(double radius);
+    void countU2UCoOccurrences();
 };

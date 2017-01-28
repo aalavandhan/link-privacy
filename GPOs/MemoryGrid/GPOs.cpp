@@ -166,7 +166,6 @@ vector<res_point*>* GPOs::getRange(double x, double y, double radius){
     return res;
 }
 
-
 set<res_point*, res_point_ascending_id>* GPOs::getSetRange(double x, double y, double radius){
     clock_t startC, endC;
     struct timeval start, end;
@@ -185,8 +184,6 @@ set<res_point*, res_point_ascending_id>* GPOs::getSetRange(double x, double y, d
     //    cout << "Num of users (GPOs) in radius = "<<radius<<" are =" << res->size() << endl;
     return res;
 }
-
-
 
 
 vector<res_point*>* GPOs::getRangeSortedId(double x, double y, double radius){
@@ -253,12 +250,12 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
   auto lu_it = location_to_user.find(lid);
 
   if( lu_it == location_to_user.end() ){
-    set<int>* users = new set<int>();
-    users->insert(uid);
-    location_to_user.insert( make_pair(lid, users) );
+    vector<Point* >* pts = new vector<Point*>();
+    pts->push_back(l);
+    location_to_user.insert( make_pair(lid, pts) );
   } else {
-    set<int>* users = lu_it->second;
-    users->insert(uid);
+    vector<Point* >* pts = lu_it->second;
+    pts->push_back(l);
   }
 
   grid->addCheckIn(l);
@@ -356,6 +353,54 @@ void GPOs::verifyRange(double radius){
   cout << "Sum of points in range : " << places << endl;
   meanGroupSize = places / locations.size();
   cout << "Mean points in range : " << " " << meanGroupSize << endl;
+}
+
+void GPOs::countU2UCoOccurrences(){
+  // cout << "----- Loading Cooccurrence Matrix --- " << endl;
+
+  // map<int, int> u1Locations, u2Locations;
+
+  // for(auto u1=locationHistory.begin(); u1!=locationHistory.end(); u1++){
+  //   for(auto u2=locationHistory.begin(); u2!=locationHistory.end(); u2++){
+  //     if(u1->first != u2->first){
+  //       auto u1Checkins = u1->second;
+  //       auto u2Checkins = u2->second;
+
+  //       for(auto l = u1Checkins->begin(); l != u1Checkins->end(); l++){
+  //         if(u1Locations.find((*l)->getID()) == u1Locations.end())
+  //           u1Locations.insert(make_pair((*l)->getID(), 0));
+
+  //         auto found = u1Locations.find((*l)->getID());
+  //         found->second = found->second + 1;
+  //       }
+
+  //       for(auto l = u2Checkins->begin(); l != u2Checkins->end(); l++){
+  //         if(u2Locations.find((*l)->getID()) == u2Locations.end())
+  //           u2Locations.insert(make_pair((*l)->getID(), 0));
+
+  //         auto found = u2Locations.find((*l)->getID());
+  //         found->second = found->second + 1;
+  //       }
+
+
+  //       map<int, int>* common = new map<int, int>();
+  //       // FIX THIS based on time
+  //       for(auto l = u1Locations.begin(); l != u1Locations.end(); l++){
+  //         if(u2Locations.find(l->first) == u2Locations.end()){
+  //           common->insert(make_pair(
+  //             l->first,
+  //             min(u2Locations.find(l->first)->second, l->second)
+  //           ));
+  //           cout << u1->first << " " << u2->first << " " << l->first << " " << min(u2Locations.find(l->first)->second, l->second) << endl;
+  //         }
+  //       }
+  //       coocc_matrix[u1->first][u2->first] = common;
+
+  //     }
+  //   }
+  // }
+
+  // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 }
 
 

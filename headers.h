@@ -17,7 +17,6 @@
 #include <string>
 #include <string.h>
 #include <sstream>
-#include <cmath>
 #include <fstream>
 #include <unistd.h>
 #include <list>
@@ -72,6 +71,10 @@ using namespace std;
 extern int MAXSC;                // maximum number of friends plus one
 extern double MAXDIST;          // maximum distance between to points
 extern int MAXT;
+extern double ALPHA;
+extern double BETA;
+extern double GAMMA;
+
 //scallability
 
 // d maxS maxT

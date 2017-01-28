@@ -25,6 +25,9 @@ double DELTA_Y = 0;
 int MAXSC = 0;                // maximum number of friends plus one
 double MAXDIST = 0;          // maximum distance between to points
 int MAXT = 0;
+double ALPHA = 0;
+double GAMMA = 0;
+double BETA = 0;
 #endif
 
 
@@ -48,49 +51,35 @@ struct PairHasher
     }
 };
 
+void check_cooccurrence(SPOs *spos, int u1id, int u2id, int l1id, int l2id, bool validTimeRange,
+  set<int>* seenLocations,
+  unordered_set< pair<int,int>, PairHasher >* seen_pairs,
+  unordered_set< pair<int,int>, PairHasher >* seen_coocc,
+  bool isOptimistic){
 
-void count_cooccrrences(SPOs *spos, GPOs *gpos){
-  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  // Counting co-occurrences
+  bool areFriends = spos->areFriends(u1id, u2id);
 
-  // for l in locations
-    // for (u1,u2) checkied into l:
-    // if are friends of [u1/u2]
+  bool notRecorededFriendship = seen_pairs->find(make_pair(u1id, u2id)) == seen_pairs->end();
 
-  int tp = 0, p = 0, nFriendships=spos->edges;
-  double precision, recall;
-  float users_per_location=0;
+  bool notRecorededCoOcc = seen_coocc->find(make_pair(u1id, u2id)) == seen_coocc->end();
 
-  unordered_set< pair<int,int>, PairHasher > seen_pairs;
+  bool unseenLocation = (seenLocations->find(u2id) == seenLocations->end());
 
-  for(auto loc = gpos->location_to_user.begin(); loc != gpos->location_to_user.end(); loc++){
-    users_per_location += loc->second->size();
-    for(auto it_u1 = loc->second->begin(); it_u1 != loc->second->end(); it_u1++){
-      for(auto it_u2 = it_u1; it_u2 != loc->second->end(); it_u2++){
-        if(  spos->areFriends(*it_u1, *it_u2) && seen_pairs.find(make_pair(*it_u1, *it_u2)) == seen_pairs.end() ){
-          seen_pairs.insert(make_pair(*it_u1,*it_u2));
-          tp++;
-        }
-        p++;
-      }
+  bool isDifferent = l1id != l2id && u1id != u2id;
+
+  bool validCoOccurrence = isDifferent && notRecorededCoOcc && (isOptimistic || unseenLocation) && validTimeRange;
+
+  if( validCoOccurrence ){
+    if(  areFriends && notRecorededFriendship ){
+      seen_pairs->insert(make_pair(u1id, u2id));
+      seenLocations->insert( l2id );
     }
-  }
 
-  users_per_location /= gpos->location_to_user.size();
-  cout << "Number of locations : " << gpos->location_to_user.size() << endl;
-  cout << "Number of users : " << gpos->locationHistory.size() << endl;
-  cout << "Mean of users at location : " << users_per_location << endl;
-  cout << "Number of (unidirectional) friendships that can be inferred from co-occurrences " << tp << endl;
-  cout << "Number of co-occurrences " << p << endl;
-  cout << "Number of friendships " << nFriendships << endl;
-  precision = tp / (double) p;
-  recall    = tp / (double) nFriendships;
-  cout << "Precision : " << precision << endl;
-  cout << "Recall : " << recall << endl;
-  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    seen_coocc->insert(make_pair(u1id, u2id));
+  }
 }
 
-void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOptimistic){
+void count_cooccurences(SPOs *spos, GPOs* gpos, double radius, double timeRange, bool isOptimistic){
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,
          x=0, y=0;
@@ -102,9 +91,10 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
   boost::posix_time::ptime time;
   boost::posix_time::time_duration td;
 
-  unordered_set< pair<int,int>, PairHasher > seen_pairs;
+  unordered_set< pair<int,int>, PairHasher > seen_pairs, seen_coocc;
 
   set<int>* seenLocations = new set<int>();
+  bool validTimeRange;
 
   for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
     x   = l->second->getX();
@@ -113,29 +103,32 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
     uid = l->second->getUID();
     time = l->second->getTime();
 
-    vector<res_point*>* checkins = gpos->getRange(x, y, radius_geo_dist);
-    for(auto c = checkins->begin(); c != checkins->end(); c++){
-      td = time - (*c)->time;
 
-      bool areFriends = spos->areFriends(uid, (*c)->uid),
-         notRecoreded = seen_pairs.find(make_pair(uid, (*c)->uid)) == seen_pairs.end(),
-         unseenLocation = (seenLocations->find((*c)->id) == seenLocations->end()),
-         isDifferent = lid != (*c)->id && uid != (*c)->uid,
-         validCoOccurrence = isDifferent && (isOptimistic || unseenLocation) && abs(td.total_seconds()) <= 86400;
-
-      if(  areFriends && notRecoreded &&  validCoOccurrence ){
-        seen_pairs.insert(make_pair(uid, (*c)->uid));
-        seenLocations->insert( (*c)->id );
-        tp++;
+    // Skipping range search if radius is 0
+    if(radius == 0){
+      auto points =  gpos->location_to_user.find(lid)->second;
+      for(auto u = points->begin(); u != points->end(); u++){
+        td = time - (*u)->getTime();
+        validTimeRange = (abs(td.total_seconds()) <= timeRange);
+        // cout << uid << " " << (*u)->getUID() << " " << lid << " " << (*u)->getID() << " " << validTimeRange << endl;
+        check_cooccurrence(spos, uid, (*u)->getUID(), lid, -1,
+          validTimeRange,
+          seenLocations, &seen_pairs, &seen_coocc,
+          isOptimistic);
       }
-
-      if(validCoOccurrence){
-        pos++;
+    } else {
+      vector<res_point*>* checkins = gpos->getRange(x, y, radius_geo_dist);
+      for(auto c = checkins->begin(); c != checkins->end(); c++){
+        td = time - (*c)->time;
+        validTimeRange = (abs(td.total_seconds()) <= timeRange);
+        check_cooccurrence(spos, uid, (*c)->uid, lid, (*c)->id,
+          validTimeRange,
+          seenLocations, &seen_pairs, &seen_coocc,
+          isOptimistic);
+        delete (*c);
       }
-
-      delete (*c);
+      delete checkins;
     }
-    delete checkins;
 
     count++;
 
@@ -146,12 +139,17 @@ void countPurturbedCoOccurences(SPOs *spos, GPOs* gpos, double radius, bool isOp
   cout << "Number of locations : " << gpos->location_to_user.size() << endl;
   cout << "Number of users : " << gpos->locationHistory.size() << endl;
 
+  tp  = seen_pairs.size();
+  pos = seen_coocc.size();
+
   cout << "Number of friendships that can be inferred from co-occurrences " << tp << endl;
   cout << "Number of co-occurrences " << pos << endl;
   cout << "Number of friendships " << nFriendships << endl;
 
+
   precision = tp / (double) pos;
   recall    = tp / (double) nFriendships;
+
   cout << "Precision : " << precision << endl;
   cout << "Recall : " << recall << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -164,11 +162,14 @@ int main(int argc, char *argv[]){
   DELTA_X = ((MAX_X - MIN_X)/ (X-1));
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
 
-  double r1, r2, tp;
+  double r1, r2, tp, tR;
   r1 = atof(argv[3]);
   r2 = atof(argv[4]);
-  tp = atof(argv[5]);
+  tR = atof(argv[5]);
+  tp = atof(argv[6]);
   bool isOptimistic = (tp == 0);
+  ALPHA = 0.480;
+  BETA = 0.520;
 
   // Loading social network and checkins
   SPOs* spos = new SPOs();
@@ -177,13 +178,33 @@ int main(int argc, char *argv[]){
   GPOs* gpos = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
 
+  gpos->countU2UCoOccurrences();
 
-  if(tp == -1){
-    count_cooccrrences(spos, gpos);
-  } else {
-    GPOs* purturbedGPOs = new GPOs();
-    purturbedGPOs->loadPurturbedLocations(gpos, r1);
-    cout << "------------- Noise added -------------------" << endl;
-    countPurturbedCoOccurences(spos, purturbedGPOs, r2, isOptimistic);
-  }
+  // int coocc_count = 0, tot;
+
+  // for(int i=0; i<USER_COUNT; i++){
+  //   for(int j=0; j<USER_COUNT; j++){
+  //     auto c_list = gpos->coocc_matrix[i][j];
+  //     if(c_list != NULL && i != j){
+  //       tot=0;
+  //       for(auto l=c_list->begin(); l != c_list->end(); l++ ){
+  //         tot += l->second;
+  //       }
+  //       if(tot > 1){
+  //         coocc_count++;
+  //       }
+  //     }
+  //   }
+  // }
+
+  // cout << "Number of user pairs " << coocc_count << endl;
+
+  // if(r1 == 0){
+  //   count_cooccurences(spos, gpos, r2, tR, isOptimistic);
+  // } else {
+  //   GPOs* purturbedGPOs = new GPOs();
+  //   purturbedGPOs->loadPurturbedLocations(gpos, r1);
+  //   cout << "------------- Noise added -------------------" << endl;
+  //   count_cooccurences(spos, purturbedGPOs, r2, tR, isOptimistic);
+  // }
 }

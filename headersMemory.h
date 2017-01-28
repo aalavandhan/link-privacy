@@ -88,7 +88,6 @@ extern double MIN_Y;
 extern double MAX_X;
 extern double MAX_Y;
 
-
 //#define DATASET_SIZE 10000
 
 /// @brief The usual PI/180 constant
