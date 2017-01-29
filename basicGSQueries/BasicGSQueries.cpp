@@ -34,8 +34,8 @@ void SimpleQueries::verifySocialStrength(double tresh){
         }
         postitive++;
         total_score += ss_it->getScore();
-        myfile << ss_it->getScore() << endl;
       }
+      myfile << ss_it->getScore() << endl;
     }
   }
 
