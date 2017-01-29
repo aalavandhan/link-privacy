@@ -281,21 +281,21 @@ int main(int argc, char *argv[]){
   query->verifySocialStrength(0.5);
   cout << "--------------------------------------------";
 
-  cout << "----- Computing accuracy for threshold --- " << 0.6 <<endl;
-  query->verifySocialStrength(0.6);
-  cout << "--------------------------------------------";
+  // cout << "----- Computing accuracy for threshold --- " << 0.6 <<endl;
+  // query->verifySocialStrength(0.6);
+  // cout << "--------------------------------------------";
 
-  cout << "----- Computing accuracy for threshold --- " << 0.7 <<endl;
-  query->verifySocialStrength(0.7);
-  cout << "--------------------------------------------";
+  // cout << "----- Computing accuracy for threshold --- " << 0.7 <<endl;
+  // query->verifySocialStrength(0.7);
+  // cout << "--------------------------------------------";
 
-  cout << "----- Computing accuracy for threshold --- " << 0.8 <<endl;
-  query->verifySocialStrength(0.8);
-  cout << "--------------------------------------------";
+  // cout << "----- Computing accuracy for threshold --- " << 0.8 <<endl;
+  // query->verifySocialStrength(0.8);
+  // cout << "--------------------------------------------";
 
-  cout << "----- Computing accuracy for threshold --- " << 0.9 <<endl;
-  query->verifySocialStrength(0.9);
-  cout << "--------------------------------------------";
+  // cout << "----- Computing accuracy for threshold --- " << 0.9 <<endl;
+  // query->verifySocialStrength(0.9);
+  // cout << "--------------------------------------------";
 
 
   // if(r1 == 0){

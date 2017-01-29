@@ -18,6 +18,9 @@ void SimpleQueries::verifySocialStrength(double tresh){
 
   int postitive=0, true_positive=0, gt = spos->getNumberOfFriends(), total_score=0;
 
+  ofstream myfile;
+  myfile.open("social_strengths.csv");
+
   for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
     int user_1 = s_it->first;
     auto user_ss_list = s_it->second;
@@ -31,9 +34,12 @@ void SimpleQueries::verifySocialStrength(double tresh){
         }
         postitive++;
         total_score += ss_it->getScore();
+        myfile << ss_it->getScore() << endl;
       }
     }
   }
+
+  myfile.close();
 
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Number of correct friendships inferred " << true_positive << endl;
