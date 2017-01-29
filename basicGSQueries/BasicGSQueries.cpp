@@ -16,7 +16,7 @@ SimpleQueries::~SimpleQueries(){}
 
 void SimpleQueries::verifySocialStrength(double tresh){
 
-  int postitive=0, true_positive=0, gt = spos->getNumberOfFriends();
+  int postitive=0, true_positive=0, gt = spos->getNumberOfFriends(), total_score=0;
 
   for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
     int user_1 = s_it->first;
@@ -30,6 +30,7 @@ void SimpleQueries::verifySocialStrength(double tresh){
           true_positive++;
         }
         postitive++;
+        total_score += ss_it->getScore();
       }
     }
   }
@@ -40,8 +41,10 @@ void SimpleQueries::verifySocialStrength(double tresh){
   cout << "Number of friendships " << gt << endl;
   double precision = true_positive / (double) postitive;
   double recall    = true_positive / (double) gt;
+  double mean_score    = total_score / (double) gt;
   cout << "Precision : " << precision << endl;
   cout << "Recall : " << recall << endl;
+  cout << "Mean Score : " << mean_score << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
