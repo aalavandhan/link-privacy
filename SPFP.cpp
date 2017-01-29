@@ -242,11 +242,19 @@ int main(int argc, char *argv[]){
   // exit(-1);
 
   // Loading social network and checkins
+  cout << "------------- Loading SocialGraph ---------------" << endl;
   SPOs* spos = new SPOs();
   spos->load(argv[1]);
 
+  cout << "------------- Loading checkins ---------------" << endl;
   GPOs* gpos = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
+
+  //testing grid snapping
+  GPOs* gridSnappiedGPOs = new GPOs();
+  gridSnappiedGPOs->createNewGPOsbyGridSnapping(gpos,1); //second var is the x distance of a cell is km
+  cout << "------------- Noise added -------------------" << endl;
+
 
   cout << "----- Loading Cooccurrence Matrix --- " << endl;
   gpos->countU2UCoOccurrences();
