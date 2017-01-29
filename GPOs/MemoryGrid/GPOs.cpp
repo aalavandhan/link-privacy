@@ -103,12 +103,8 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
     if(computedNN <= returnedNN && flagNextNN){
         NextNNExecutions++;
         computedNN+=incrStep;
-//        cout<<"returneNN="<<returnedNN<<endl;
-//        cout << "next-" << computedNN << endl;
         vector<res_point*>* kNN = grid->getkNN(x, y, computedNN);
         int size = kNN->size();
-//        cout << "size = " << size << endl;
-
         for(int i = returnedNN; i < size; i++){
             nextNNList->push_back(util.copy((*kNN)[i]));
         }
@@ -120,8 +116,6 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
         delete kNN;
 
         int newNNsize = nextNNList->size();
-//        cout << "newNNsize = " << newNNsize << endl;
-//        cout << "computted NN = "<<computedNN<<endl;
         if(computedNN > newNNsize){ // no more!
             //cout<<"here"<<endl;
             flagNextNN = false;
@@ -425,9 +419,37 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
   double min_x = MIN_X + 0.00001; double min_y = MIN_Y + 0.00001;
 
 
+  // Changes the dimensions of the virtual grid to be a square
+  // Note: may cause some checkins to fail in the direction in which the grid is extended.
+  // this happens because the points may get assisgned to grid corners in the virtual grid
+  // that are outside the boundary of the actual grid. (tested on gowalla and found no failed checkins)
+  if(MAX_X - MIN_X > MAX_Y - MIN_Y){  //adjust in y direction by moving the boundaries equally in the north and the south
+    double seperation = (MAX_X - MIN_X) - (MAX_Y - MIN_Y);
+    seperation = seperation/2;
+    min_y =  MIN_Y - seperation;
+    max_y =  MAX_Y + seperation;
+
+  }else if(MAX_X - MIN_X < MAX_Y - MIN_Y){  //vice versa
+    double seperation = (MAX_Y - MIN_Y) - (MAX_X - MIN_X);
+    seperation = seperation/2;
+    min_x =  MIN_X - seperation;
+    max_x =  MAX_X + seperation;
+  }
+  //-----------------------------------------------------
+
+
+  cout<<"Adjusted MIN_X: "<<min_x<<" MAX_X: "<<max_x<<endl;
+  cout<<"Adjusted MIN_Y: "<<min_y<<" MAX_Y: "<<max_y<<endl;
+
   int grid_size = ceil( (max_x - min_x) / grid_distance_on_x_axis_in_geodist ) + 1;
   double delta_on_x = ((max_x - min_x)/ (grid_size));
   double delta_on_y = ((max_y - min_y)/ (grid_size));
+
+  cout<<"Grid Size from input cell size: "<< grid_size<<" X "<<grid_size<<endl;
+  cout<<"Adjusted DELTA_X: "<<delta_on_x<<" DELTA_Y : "<<delta_on_y<<endl;
+  cout<<"Adjusted (in meters) DELTA_X: "<<delta_on_x*1000*EARTH_CIRCUMFERENCE/360<<" DELTA_Y : "<<delta_on_y*1000*EARTH_CIRCUMFERENCE/360<<endl;
+  
+  // int asd = 100;
 
   //for each checkin do:
   //  find which cell it belongs to
@@ -435,9 +457,20 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
   //  load this point to this corner
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
+
+      // asd--;
+      // if(asd==0){
+      //   exit(-1);
+      // }
+
       Point* p = *loc;
       int q_x = (int)((p->getX() - min_x)/delta_on_x);
       int q_y = (int)((p->getY() - min_y)/delta_on_y);
+
+
+      // cout<<"Point cell: "<<q_x<<" , " <<q_y<<endl;
+      // p->printDetails();
+
       if(q_x >=0 && q_x < grid_size && q_y >=0 && q_y < grid_size){
         double min_dist = 999;
         double closest_x;
@@ -446,6 +479,8 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
         for(int i = 0;i < 2;i++){
           for(int j = 0;j < 2;j++){
             double distance = util.computeMinimumDistance(p->getX(),p->getY(),min_x+((q_x+i)*delta_on_x), min_y+((q_y+j)*delta_on_y));
+            // cout<<"Corner : "<<i*2+j<<" Coordinate: ("<<min_x+((q_x+i)*delta_on_x)<<" , "<<min_y+((q_y+j)*delta_on_y)<<")"<<endl;
+            // cout<<"Distance: "<<distance*1000*EARTH_CIRCUMFERENCE/360<<" meters"<<endl;
             if(distance < min_dist){
               min_dist = distance;
               closest_x = min_x+((q_x+i)*delta_on_x);
@@ -456,10 +491,13 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
           }
         }
         int location_id = ((closest_corner_i + q_x)*grid_size)+( closest_corner_j + q_y);
+        // cout<<"Computed Location id: "<<location_id<<endl;
+        // cout<<" ---------------------------------"<<endl;
+        // cout<<" Point goes to location: ("<<closest_x<<" , "<<closest_y<<")"<<endl;
         loadPoint(closest_x, closest_y, location_id, u->first, p->getTime());
       }
       else{
-        cout<<"cell out of bounds...check grid size"<<endl;
+        // cout<<"cell out of bounds...check grid size"<<endl;
       }
     }
   }

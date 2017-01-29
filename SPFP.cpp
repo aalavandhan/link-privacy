@@ -242,33 +242,41 @@ int main(int argc, char *argv[]){
   // exit(-1);
 
   // Loading social network and checkins
+  cout << "------------- Loading SocialGraph ---------------" << endl;
   SPOs* spos = new SPOs();
   spos->load(argv[1]);
 
+  cout << "------------- Loading checkins ---------------" << endl;
   GPOs* gpos = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
 
-  cout << "----- Loading Cooccurrence Matrix --- " << endl;
-  gpos->countU2UCoOccurrences();
-  cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
+  //testing grid snapping
+  GPOs* gridSnappiedGPOs = new GPOs();
+  gridSnappiedGPOs->createNewGPOsbyGridSnapping(gpos,1); //second var is the x distance of a cell is km
+  cout << "------------- Noise added -------------------" << endl;
 
 
-  cout << "----- Calculating Location Entropy --- " << endl;
-  gpos->calculateLocationEntropy();
-  cout << "----- Completed Calculating Location Entropy --- " << endl;
+  // cout << "----- Loading Cooccurrence Matrix --- " << endl;
+  // gpos->countU2UCoOccurrences();
+  // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 
 
-  SimpleQueries* query = new SimpleQueries(gpos, spos);
+  // cout << "----- Calculating Location Entropy --- " << endl;
+  // gpos->calculateLocationEntropy();
+  // cout << "----- Completed Calculating Location Entropy --- " << endl;
 
-  cout << "----- Precomputing matrices --- " << endl;
-  query->buildMatrices(0.5);
-  cout << "----- Completed Precomputing matrices --- " << endl;
 
-  cout << "----- Calculating Social Strength --- " << endl;
-  query->cacluateSocialStrength();
-  cout << "----- Completed calculating Social Strength --- " << endl;
+  // SimpleQueries* query = new SimpleQueries(gpos, spos);
 
-  query->verifySocialStrength(0.5);
+  // cout << "----- Precomputing matrices --- " << endl;
+  // query->buildMatrices(0.5);
+  // cout << "----- Completed Precomputing matrices --- " << endl;
+
+  // cout << "----- Calculating Social Strength --- " << endl;
+  // query->cacluateSocialStrength();
+  // cout << "----- Completed calculating Social Strength --- " << endl;
+
+  // query->verifySocialStrength(0.5);
 
 
   // if(r1 == 0){
