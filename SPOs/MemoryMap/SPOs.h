@@ -13,9 +13,11 @@ private:
 //    Value* hashTable2[DATASET_SIZE];
     int areFriendsExecutions, getFriendsExecutions;
     Utilities util;
+    GPOs *gpos;
 
 public:
     SPOs();
+    SPOs(GPOs *gpos);
     ~SPOs() {}
 	//map<int, int>* degreeMap;
 	multiset<my_pair, pair_comparator_descending>* degreeSet;

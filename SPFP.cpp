@@ -9,15 +9,15 @@
 #ifndef GLOBALS
 #define GLOBALS
 
-double MIN_X = -124.848974;
-double MAX_X = -66.885444;
-double MIN_Y = 24.396308;
-double MAX_Y = 49.384358;
-
 // double MIN_X = -124.848974;
 // double MAX_X = -66.885444;
-// double MIN_Y = 10.396308;
-// double MAX_Y = 65.384358;
+// double MIN_Y = 24.396308;
+// double MAX_Y = 49.384358;
+
+double MIN_X = -180;
+double MAX_X = 180;
+double MIN_Y = -90;
+double MAX_Y = 90;
 
 double DATASET_SIZE = 0;
 double DELTA_X = 0;
@@ -242,14 +242,25 @@ int main(int argc, char *argv[]){
   // testpTools();
   // exit(-1);
 
-  // Loading social network and checkins
-  cout << "------------- Loading SocialGraph ---------------" << endl;
-  SPOs* spos = new SPOs();
-  spos->load(argv[1]);
+  // cout << "------------- Loading checkins ---------------" << endl;
+  // GPOs* gpos = new GPOs(argv[2]);
+  // cout << "------------- Loading complete ---------------" << endl;
+
+  // testing grid snapping
 
   cout << "------------- Loading checkins ---------------" << endl;
-  GPOs* gpos = new GPOs(argv[2]);
+  GPOs* g = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
+
+  GPOs* gpos = new GPOs();
+  // gpos->createNewGPOsbyGridSnapping(g, r1); //second var is the x distance of a cell is km
+  // cout << "Number of locations loaded " << gpos->locations.size() << endl;
+  // cout << "------------- Noise added -------------------" << endl;
+
+  GPOs* purturbedGPOs = new GPOs();
+  purturbedGPOs->loadPurturbedLocations(g, r1);
+  gpos->groupLocationsByRange(purturbedGPOs, r2, isOptimistic);
+  cout << "------------- Noise added -------------------" << endl;
 
 
   cout << "----- Loading Cooccurrence Matrix --- " << endl;
@@ -260,6 +271,11 @@ int main(int argc, char *argv[]){
   cout << "----- Calculating Location Entropy --- " << endl;
   gpos->calculateLocationEntropy();
   cout << "----- Completed Calculating Location Entropy --- " << endl;
+
+  // Loading social network and checkins
+  cout << "------------- Loading SocialGraph ---------------" << endl;
+  SPOs* spos = new SPOs(gpos);
+  spos->load(argv[1]);
 
 
   SimpleQueries* query = new SimpleQueries(gpos, spos);
@@ -273,20 +289,13 @@ int main(int argc, char *argv[]){
   cout << "----- Completed calculating Social Strength --- " << endl;
 
 
-  double thresholds[8] = {0.1, 0.5, 1, 2, 5, 10, 25, 100};
+  // double thresholds[9] = {0.5,1,2,3,4,5,7,10,25};
 
-  for(int i=0; i<8; i++){
-    cout << "----- Computing accuracy for threshold --- " << thresholds[i] <<endl;
-    query->verifySocialStrength(thresholds[i]);
+  for(double i = 0.8; i < 2.2; i = i + 0.1){
+    cout << "----- Computing accuracy for threshold --- " << i <<endl;
+    query->verifySocialStrength(i);
     cout << "--------------------------------------------";
   }
-
-
-  //testing grid snapping
-  // GPOs* gridSnappiedGPOs = new GPOs();
-  // gridSnappiedGPOs->createNewGPOsbyGridSnapping(gpos, r1); //second var is the x distance of a cell is km
-  // cout << "------------- Noise added -------------------" << endl;
-  // count_cooccurences(spos, gridSnappiedGPOs, 0, tR, isOptimistic);
 
   // if(r1 == 0){
   //   count_cooccurences(spos, gpos, r2, tR, isOptimistic);

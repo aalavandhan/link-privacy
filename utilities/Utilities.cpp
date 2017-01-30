@@ -224,7 +224,7 @@ int Utilities::countIntersection(int arr1[], int arr2[], int m, int n)
 }
 
 
-int Utilities::countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>* arr2, uint time_block)
+int Utilities::countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>* arr2, uint time_block, bool debug)
 {
   int count=0;
   int m = arr1->size();
@@ -232,17 +232,42 @@ int Utilities::countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>
   int i = 0, j = 0;
   while (i < m && j < n)
   {
-    if (arr1->at(i) - arr2->at(j) >= time_block)
-      i++;
-    else if (arr2->at(j) - arr1->at(i) >= time_block)
-      j++;
-    else /* if arr1[i] == arr2[j] */
-    {
-    ++count;
+
+
+
+    // if ((arr1->at(i) - arr2->at(j)) >= time_block)
+    //   i++;
+    // else if ((arr2->at(j) - arr1->at(i)) >= time_block)
+    //   j++;
+    // else /* if arr1[i] == arr2[j] */
+    // {
+    //   abs(arr1->at(i) - arr2->at(j)) <= time_block
+
+    //   ++count;
+    //   ++j;
+    //   i++;
+    // }
+
+
+    int diff = (arr1->at(i) - arr2->at(j));
+
+    if(debug)
+        cout<<"diff: "<<  diff <<" ";
+
+    if(abs(diff) <= time_block) {
+      ++count;
       ++j;
       i++;
     }
+    else if(arr1->at(i) > arr2->at(j)){
+        j++;
+    } else {
+        i++;
+    }
   }
+
+  if(debug)
+    cout<<endl;
 
   return count;
 }

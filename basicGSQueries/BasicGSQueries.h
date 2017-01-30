@@ -16,5 +16,6 @@ public:
     map<int, vector<my_pair>*> cacluateSocialStrength();
     void verifySocialStrength(double tresh);
     void buildMatrices(double q);
+    int countCooccurredFriends();
 };
 

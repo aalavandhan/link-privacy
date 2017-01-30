@@ -11,6 +11,6 @@ public:
     virtual double estimateNearestDistance(double x, double y, int k) = 0;
     virtual unordered_map<int, double>* getLocationEntropy() =0;
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix()=0;
-
+    virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs()=0;
 };
 

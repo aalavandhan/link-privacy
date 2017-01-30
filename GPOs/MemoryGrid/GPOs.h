@@ -22,9 +22,6 @@ private:
     int pureNNexec;
 
 
-    void generateFrequencyCache();
-
-
 public:
     Grid *grid;
     GPOs(char* gridFileName);
@@ -40,6 +37,8 @@ public:
     map<int, map<int, vector<uint>* >*> locations_users_frequency_map;
 
     unordered_set< pair<int,int>, PairHasher > cooccured_user_pairs;
+    unordered_set< pair<int,int>, PairHasher > significantly_cooccured_user_pairs;
+    unordered_set< pair<int,int>, PairHasher > insignificantly_cooccured_user_pairs;
 
     unordered_map<int, double> location_to_H;
     map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
@@ -55,8 +54,12 @@ public:
     virtual void clearNextNN();
     virtual unordered_map<int, double>* getLocationEntropy();
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
+    virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs();
 
     unordered_map<int, double>* calculateLocationEntropy();
+
+
+    void generateFrequencyCache();
 
 
     // nextNN without the incremental approach of NN
@@ -78,7 +81,7 @@ public:
     void updateCheckin(Point* p);
 
     void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time);
-    void groupByRange(GPOs* gpos, double radius);
+    void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void verifyRange(double radius);
     void countU2UCoOccurrences(uint time_block);

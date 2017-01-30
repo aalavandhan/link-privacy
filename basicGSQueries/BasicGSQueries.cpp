@@ -14,12 +14,20 @@ SimpleQueries::~SimpleQueries(){}
 
 // map<int, map<int, vector<pair<int, int>>*>*> cooccurrence_matrix;
 
+int SimpleQueries::countCooccurredFriends(){
+  int friends = 0;
+  auto cooccured_user_pairs = gpos->getCoOccurredUserPairs();
+  for(auto p=cooccured_user_pairs->begin(); p!=cooccured_user_pairs->end(); p++){
+    int u1=p->first, u2=p->second;
+    if(spos->areFriends(u1, u2))
+      friends++;
+  }
+  return friends;
+}
+
 void SimpleQueries::verifySocialStrength(double tresh){
 
-  int postitive=0, true_positive=0, gt = spos->getNumberOfFriends(), total_score=0;
-
-  ofstream myfile;
-  myfile.open("social_strengths.csv");
+  int postitive=0, true_positive=0, gt = countCooccurredFriends(), total_score=0, nFriends=spos->getNumberOfFriends();
 
   for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
     int user_1 = s_it->first;
@@ -35,19 +43,17 @@ void SimpleQueries::verifySocialStrength(double tresh){
         postitive++;
         total_score += ss_it->getScore();
       }
-      myfile << ss_it->getScore() << endl;
     }
   }
-
-  myfile.close();
 
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Number of correct friendships inferred " << true_positive << endl;
   cout << "Number of  friendships inferred " << postitive << endl;
-  cout << "Number of friendships " << gt << endl;
+  // cout << "Number of friendships with more than one cooccrrences " << gt << endl;
+  cout << "Number of friendships " << nFriends << endl;
   double precision = true_positive / (double) postitive;
-  double recall    = true_positive / (double) gt;
-  double mean_score    = total_score / (double) gt;
+  double recall    = true_positive / (double) nFriends;
+  double mean_score    = total_score / (double) postitive;
   cout << "Precision : " << precision << endl;
   cout << "Recall : " << recall << endl;
   cout << "Mean Score : " << mean_score << endl;
@@ -144,7 +150,8 @@ map<int, vector<my_pair>*> SimpleQueries::cacluateSocialStrength(){
             double diversity_value = list_it->second;
             auto f_it = user_wfreq_list->find(user_2);
             double weighted_frequency_value = f_it->second;
-            double social_strength_value = (ALPHA * diversity_value) + (BETA * weighted_frequency_value) + GAMMA;
+            double social_strength_value = (ALPHA * diversity_value) + (BETA * weighted_frequency_value);
+
 
             //swap values of user_1 and user_2 to ensure user1 is less than user2
             if(user_1 > user_2){
