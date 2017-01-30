@@ -551,6 +551,8 @@ void GPOs::verifyRange(double radius){
 
 void GPOs::countU2UCoOccurrences(uint time_block){
 
+  int total_cooccurrences=0;
+
   for(auto l_it=locations_users_frequency_map.begin(); l_it != locations_users_frequency_map.end(); l_it++){
     int location_id = l_it->first;
     map<int, vector<uint>* > *user_checkin_times = l_it->second;
@@ -571,35 +573,40 @@ void GPOs::countU2UCoOccurrences(uint time_block){
         int intersection_count = util.countIntersectionWithinTimeBlock(u1_timestamps,u2_timestamps,time_block);
 
         if(intersection_count > 0){
-        auto coV_it = cooccurrence_matrix.find(u1Id);
+          auto coV_it = cooccurrence_matrix.find(u1Id);
 
-        if(coV_it != cooccurrence_matrix.end()){ //u1 exist in matrix
-          map<int, vector<pair<int, int> >*>* inner_map = coV_it->second;
-          //fnd user 2 and update the location list with location_id -> intersection count
-          auto flist_it = inner_map->find(u2Id);
-          if(flist_it!=inner_map->end()){  //u2 exist in matrix
-            vector<pair<int,int> >* location_freqeuncy_list = flist_it->second;
-            location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
-          }else{  //u2 does not exist in matrix
+          if(cooccured_user_pairs.find(make_pair(u1Id, u2Id)) == cooccured_user_pairs.end())
+           cooccured_user_pairs.insert(make_pair( u1Id, u2Id ));
+
+          total_cooccurrences += intersection_count;
+
+          if(coV_it != cooccurrence_matrix.end()){ //u1 exist in matrix
+            map<int, vector<pair<int, int> >*>* inner_map = coV_it->second;
+            //fnd user 2 and update the location list with location_id -> intersection count
+            auto flist_it = inner_map->find(u2Id);
+            if(flist_it!=inner_map->end()){  //u2 exist in matrix
+              vector<pair<int,int> >* location_freqeuncy_list = flist_it->second;
+              location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
+            }else{  //u2 does not exist in matrix
+              vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
+              location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
+              inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
+            }
+          }else{  //u1 does not exist in matrix
+            map<int, vector<pair<int, int> >* >* inner_map = new map<int, vector<pair<int, int> >* >();
             vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
             location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
             inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
+            cooccurrence_matrix.insert(make_pair(u1Id,inner_map));
           }
-        }else{  //u1 does not exist in matrix
-          map<int, vector<pair<int, int> >* >* inner_map = new map<int, vector<pair<int, int> >* >();
-          vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
-          location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
-          inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
-          cooccurrence_matrix.insert(make_pair(u1Id,inner_map));
         }
-      }
-
       }
     }
 
   }
 
-  // cout << "------ Generated Valid User Paris ---------  " << cooccured_user_pairs.size() << endl;
+  cout << "------ Total Cooccrrences ---------  " << total_cooccurrences << endl;
+  cout << "------ User pairs who've co-occurred ---------  " << cooccured_user_pairs.size() << endl;
 
   // int count=0;
 
