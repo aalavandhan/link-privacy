@@ -36,4 +36,6 @@ public:
 	int countUnion(int arr1[], int arr2[], int m, int n);
 	double computeJaccard(int arr1[], int arr2[], int m, int n);
 	double computeSetIntersection( unordered_set<int>* _f1, unordered_set<int>* _f2 );
+
+    int countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>* arr2, uint time_block);
 };

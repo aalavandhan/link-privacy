@@ -224,6 +224,31 @@ int Utilities::countIntersection(int arr1[], int arr2[], int m, int n)
 }
 
 
+int Utilities::countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>* arr2, uint time_block)
+{
+  int count=0;
+  int m = arr1->size();
+  int n = arr2->size();
+  int i = 0, j = 0;
+  while (i < m && j < n)
+  {
+    if (arr1->at(i) - arr2->at(j) >= time_block)
+      i++;
+    else if (arr2->at(j) - arr1->at(i) >= time_block)
+      j++;
+    else /* if arr1[i] == arr2[j] */
+    {
+    ++count;
+      ++j;
+      i++;
+    }
+  }
+
+  return count;
+}
+
+
+
 //time in microseconds
 double Utilities::print_time(struct timeval &start, struct timeval &end){
     double usec;

@@ -229,12 +229,13 @@ int main(int argc, char *argv[]){
   DELTA_X = ((MAX_X - MIN_X)/ (X-1));
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
 
-  double r1, r2, tp, tR;
-  r1 = atof(argv[3]);
-  r2 = atof(argv[4]);
-  tR = atof(argv[5]);
-  tp = atof(argv[6]);
-  bool isOptimistic = (tp == 0);
+  double r1, r2, tp, time_range_in_seconds;
+  r1                    = atof(argv[3]);
+  r2                    = atof(argv[4]);
+  time_range_in_seconds = atof(argv[5]);
+  tp                    = atof(argv[6]);
+  bool isOptimistic     = (tp == 0);
+
   ALPHA = 0.480;
   BETA = 0.520;
 
@@ -251,52 +252,41 @@ int main(int argc, char *argv[]){
   cout << "------------- Loading complete ---------------" << endl;
 
 
-  // cout << "----- Loading Cooccurrence Matrix --- " << endl;
-  // gpos->countU2UCoOccurrences();
-  // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
+  cout << "----- Loading Cooccurrence Matrix --- " << endl;
+  gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 
 
-  // cout << "----- Calculating Location Entropy --- " << endl;
-  // gpos->calculateLocationEntropy();
-  // cout << "----- Completed Calculating Location Entropy --- " << endl;
+  cout << "----- Calculating Location Entropy --- " << endl;
+  gpos->calculateLocationEntropy();
+  cout << "----- Completed Calculating Location Entropy --- " << endl;
 
 
-  // SimpleQueries* query = new SimpleQueries(gpos, spos);
+  SimpleQueries* query = new SimpleQueries(gpos, spos);
 
-  // cout << "----- Precomputing matrices --- " << endl;
-  // query->buildMatrices(0.5);
-  // cout << "----- Completed Precomputing matrices --- " << endl;
+  cout << "----- Precomputing matrices --- " << endl;
+  query->buildMatrices(0.1);
+  cout << "----- Completed Precomputing matrices --- " << endl;
 
-  // cout << "----- Calculating Social Strength --- " << endl;
-  // query->cacluateSocialStrength();
-  // cout << "----- Completed calculating Social Strength --- " << endl;
+  cout << "----- Calculating Social Strength --- " << endl;
+  query->cacluateSocialStrength();
+  cout << "----- Completed calculating Social Strength --- " << endl;
 
 
-  // cout << "----- Computing accuracy for threshold --- " << 0.5 <<endl;
-  // query->verifySocialStrength(0.5);
-  // cout << "--------------------------------------------";
+  double thresholds[8] = {0.1, 0.5, 1, 2, 5, 10, 25, 100};
 
-  // cout << "----- Computing accuracy for threshold --- " << 0.6 <<endl;
-  // query->verifySocialStrength(0.6);
-  // cout << "--------------------------------------------";
+  for(int i=0; i<8; i++){
+    cout << "----- Computing accuracy for threshold --- " << thresholds[i] <<endl;
+    query->verifySocialStrength(thresholds[i]);
+    cout << "--------------------------------------------";
+  }
 
-  // cout << "----- Computing accuracy for threshold --- " << 0.7 <<endl;
-  // query->verifySocialStrength(0.7);
-  // cout << "--------------------------------------------";
-
-  // cout << "----- Computing accuracy for threshold --- " << 0.8 <<endl;
-  // query->verifySocialStrength(0.8);
-  // cout << "--------------------------------------------";
-
-  // cout << "----- Computing accuracy for threshold --- " << 0.9 <<endl;
-  // query->verifySocialStrength(0.9);
-  // cout << "--------------------------------------------";
 
   //testing grid snapping
-  GPOs* gridSnappiedGPOs = new GPOs();
-  gridSnappiedGPOs->createNewGPOsbyGridSnapping(gpos, r1); //second var is the x distance of a cell is km
-  cout << "------------- Noise added -------------------" << endl;
-  count_cooccurences(spos, gridSnappiedGPOs, 0, tR, isOptimistic);
+  // GPOs* gridSnappiedGPOs = new GPOs();
+  // gridSnappiedGPOs->createNewGPOsbyGridSnapping(gpos, r1); //second var is the x distance of a cell is km
+  // cout << "------------- Noise added -------------------" << endl;
+  // count_cooccurences(spos, gridSnappiedGPOs, 0, tR, isOptimistic);
 
   // if(r1 == 0){
   //   count_cooccurences(spos, gpos, r2, tR, isOptimistic);

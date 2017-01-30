@@ -63,8 +63,6 @@ void SimpleQueries::buildMatrices(double q){
     int user_1 = c_it->first;
     auto users_location_frequency_map = c_it->second;
 
-
-
     for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
       int user_2 = ulh_it->first;
       vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
