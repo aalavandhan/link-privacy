@@ -390,7 +390,7 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
 
 
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
-  double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
+double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int lid, uid, count=0;
   set<int>* seenLocations = new set<int>();
   boost::posix_time::ptime time;
@@ -415,6 +415,10 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
       delete (*c);
     }
     delete checkins;
+
+    count++;
+    if(count % 100000==0)
+      cout << count << " " << endl;
   }
   generateFrequencyCache();
 }

@@ -9,15 +9,15 @@
 #ifndef GLOBALS
 #define GLOBALS
 
-// double MIN_X = -124.848974;
-// double MAX_X = -66.885444;
-// double MIN_Y = 24.396308;
-// double MAX_Y = 49.384358;
+double MIN_X = -124.848974;
+double MAX_X = -66.885444;
+double MIN_Y = 24.396308;
+double MAX_Y = 49.384358;
 
-double MIN_X = -180;
-double MAX_X = 180;
-double MIN_Y = -90;
-double MAX_Y = 90;
+// double MIN_X = -180;
+// double MAX_X = 180;
+// double MIN_Y = -90;
+// double MAX_Y = 90;
 
 double DATASET_SIZE = 0;
 double DELTA_X = 0;
@@ -259,8 +259,9 @@ int main(int argc, char *argv[]){
 
   GPOs* purturbedGPOs = new GPOs();
   purturbedGPOs->loadPurturbedLocations(g, r1);
+  cout << "------------- Locations perturbed -------------------" << endl;
   gpos->groupLocationsByRange(purturbedGPOs, r2, isOptimistic);
-  cout << "------------- Noise added -------------------" << endl;
+  cout << "------------- Locations Grouped -------------------" << endl;
 
 
   cout << "----- Loading Cooccurrence Matrix --- " << endl;
