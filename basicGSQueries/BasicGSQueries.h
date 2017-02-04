@@ -17,5 +17,7 @@ public:
     void verifySocialStrength(double tresh);
     void buildMatrices(double q);
     int countCooccurredFriends();
+    map< int, bool >* getUsersOfInterest(double tresh);
+    void checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius);
 };
 

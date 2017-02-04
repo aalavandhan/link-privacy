@@ -1,7 +1,6 @@
 class IGPOs
 {
 public:
-    virtual void getLocation(int id, double* result) = 0;
     virtual vector<res_point*>* getkNN(double x, double y, int k) = 0;
     virtual vector<res_point*>* getRange(double x, double y, double radius) = 0;
     virtual set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius) = 0;
@@ -12,5 +11,6 @@ public:
     virtual unordered_map<int, double>* getLocationEntropy() =0;
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix()=0;
     virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs()=0;
+    virtual vector<int>* getUsersInRange(double x, double y, double radius)=0;
 };
 

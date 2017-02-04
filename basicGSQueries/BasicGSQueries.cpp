@@ -11,7 +11,6 @@ SimpleQueries::~SimpleQueries(){}
 // map<int, vector<my_pair>*> social_strength_matrix;
 // map<int, map<int, double>*> diversity_matrix;
 // map<int, map<int, double>*> weighted_frequency_matrix;
-
 // map<int, map<int, vector<pair<int, int>>*>*> cooccurrence_matrix;
 
 int SimpleQueries::countCooccurredFriends(){
@@ -23,6 +22,75 @@ int SimpleQueries::countCooccurredFriends(){
       friends++;
   }
   return friends;
+}
+
+void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius){
+  ifstream fin(fileName);
+  double x,y, precision, recall, avg_precision=0, avg_recall=0;
+  int count=-1;
+
+  if (!fin) {
+    std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
+  }
+
+  vector<int> *u1_set, *u2_set;
+
+  while (fin){
+    fin >> y >> x;
+    u1_set = base_gpos->getUsersInRange(x, y, radius);
+    u2_set = gpos->getUsersInRange(x, y, radius);
+
+    // cout << x << "\t" << y <<"\t" << u1_set->size() << "\t" <<  u2_set->size() << endl;
+
+    std::vector<int> v_intersection;
+
+    std::set_intersection(u1_set->begin(), u1_set->end(),
+                          u2_set->begin(), u2_set->end(),
+                          std::back_inserter(v_intersection));
+
+    if(u2_set->size() != 0){
+      precision = (double) v_intersection.size() / (double) u2_set->size();
+
+      if(v_intersection.size() != 0)
+        recall    = (double) v_intersection.size() / (double) u1_set->size();
+      else
+        recall    = 0;
+
+      avg_precision += precision;
+      avg_recall    += recall;
+
+      count++;
+    }
+  }
+
+  avg_precision /= count;
+  avg_recall    /= count;
+
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Utility [ RANGE QUERY ]" << endl;
+  cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
+  cout << "Precision :" << avg_precision << endl;
+  cout << "Recall    :" << avg_recall    << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
+map< int, bool >* SimpleQueries::getUsersOfInterest(double tresh){
+  map< int, bool >* users_of_interest = new map< int, bool >();
+
+  for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
+    int user_1 = s_it->first;
+    auto user_ss_list = s_it->second;
+
+    for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
+      if(ss_it->getScore() >= tresh){
+        if(users_of_interest->find(user_1) == users_of_interest->end())
+          users_of_interest->insert(make_pair(user_1, true));
+      }
+    }
+  }
+
+  return users_of_interest;
 }
 
 void SimpleQueries::verifySocialStrength(double tresh){
@@ -128,8 +196,6 @@ void SimpleQueries::buildMatrices(double q){
         map<int, double>* wtlist = wt_it->second;
         wtlist->insert(make_pair(user_2, weighted_frequency));
       }
-
-
     }
   }
 }

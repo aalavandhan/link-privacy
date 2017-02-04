@@ -235,6 +235,7 @@ int main(int argc, char *argv[]){
   time_range_in_seconds = atof(argv[5]);
   tp                    = atof(argv[6]);
   bool isOptimistic     = (tp == 0);
+  auto locations_of_interest_file = argv[7];
 
   ALPHA = 0.480;
   BETA = 0.520;
@@ -252,15 +253,15 @@ int main(int argc, char *argv[]){
   GPOs* g = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
 
-  GPOs* gpos = new GPOs();
+  // GPOs* gpos = new GPOs();
   // gpos->createNewGPOsbyGridSnapping(g, r1); //second var is the x distance of a cell is km
   // cout << "Number of locations loaded " << gpos->locations.size() << endl;
   // cout << "------------- Noise added -------------------" << endl;
 
-  GPOs* purturbedGPOs = new GPOs();
-  purturbedGPOs->loadPurturbedLocations(g, r1);
+  GPOs* gpos = new GPOs();
+  gpos->loadPurturbedLocations(g, r1);
   cout << "------------- Locations perturbed -------------------" << endl;
-  gpos->groupLocationsByRange(purturbedGPOs, r2, isOptimistic);
+  gpos->groupLocationsByRange(gpos, r2, isOptimistic);
   cout << "------------- Locations Grouped -------------------" << endl;
 
 
@@ -278,25 +279,60 @@ int main(int argc, char *argv[]){
   SPOs* spos = new SPOs(gpos);
   spos->load(argv[1]);
 
-
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
-  cout << "----- Precomputing matrices --- " << endl;
-  query->buildMatrices(0.1);
-  cout << "----- Completed Precomputing matrices --- " << endl;
+  cout << "------------- Evaluating range utility ---------------" << endl;
+  query->checkUtilityRange(locations_of_interest_file, g, 25);
 
-  cout << "----- Calculating Social Strength --- " << endl;
-  query->cacluateSocialStrength();
-  cout << "----- Completed calculating Social Strength --- " << endl;
+  query->checkUtilityRange(locations_of_interest_file, g, 50);
+
+  query->checkUtilityRange(locations_of_interest_file, g, 100);
+
+  query->checkUtilityRange(locations_of_interest_file, g, 200);
+
+  query->checkUtilityRange(locations_of_interest_file, g, 400);
+
+  // query->checkUtilityRange(locations_of_interest_file, g, 1000);
+
+  // query->checkUtilityRange(locations_of_interest_file, g, 2500);
+
+  // query->checkUtilityRange(locations_of_interest_file, g, 5000);
+
+
+  // cout << "----- Precomputing matrices --- " << endl;
+  // query->buildMatrices(0.1);
+  // cout << "----- Completed Precomputing matrices --- " << endl;
+
+  // cout << "----- Calculating Social Strength --- " << endl;
+  // query->cacluateSocialStrength();
+  // cout << "----- Completed calculating Social Strength --- " << endl;
 
 
   // double thresholds[9] = {0.5,1,2,3,4,5,7,10,25};
+  // for(double i = 0.8; i < 2.2; i = i + 0.1){
+  //   cout << "----- Computing accuracy for threshold --- " << i <<endl;
+  //   query->verifySocialStrength(i);
+  //   cout << "--------------------------------------------";
+  // }
 
-  for(double i = 0.8; i < 2.2; i = i + 0.1){
-    cout << "----- Computing accuracy for threshold --- " << i <<endl;
-    query->verifySocialStrength(i);
-    cout << "--------------------------------------------";
-  }
+  // cout << "----- Computing accuracy for threshold --- " << 2.1 <<endl;
+  // map< int, bool >* users_of_interest = query->getUsersOfInterest(2.1);
+  // cout << "--------------------------------------------";
+
+  // map<int, Point*> locations;
+  // ofstream output_file;
+  // output_file.open("locations-of-interest.csv");
+
+  // for (auto u = users_of_interest->begin(); u != users_of_interest->end(); u++){
+  //   auto pts = gpos->getLocations(u->first);
+  //   for(auto p=pts->begin(); p!=pts->end(); p++){
+  //     double x=(*p)->getX(), y=(*p)->getY();
+  //     locations.insert( make_pair((*p)->getID(), *p) );
+  //     output_file << x << "," << y <<endl;
+  //   }
+  // }
+  // cout << "------- Locations of interest : " << locations.size() << endl;
+  // output_file.close();
 
   // if(r1 == 0){
   //   count_cooccurences(spos, gpos, r2, tR, isOptimistic);

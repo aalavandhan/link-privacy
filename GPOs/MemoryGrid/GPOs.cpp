@@ -79,28 +79,9 @@ void GPOs::generateFrequencyCache(){
   }
 }
 
-void GPOs::getLocation(int id, double* result){
-    clock_t startC, endC;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-    startC = clock();
-    LocationExecutions++;
-
-    it = locations.find(id);
-
-    if(it!=locations.end()){
-        result[0]= (*it).second->getX();
-        result[1]= (*it).second->getY();
-    }
-    else{
-        result[0] = -1000;
-    }
-
-    endC = clock();
-    totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
-    gettimeofday(&end, NULL);
-    totalTime += util.print_time(start, end);
-
+vector< Point* >* GPOs::getLocations(int user_id){
+  auto l = user_to_location.find(user_id);
+  return l->second;
 }
 
 res_point* GPOs::getNextNN(double x, double y, int incrStep){
@@ -388,6 +369,24 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
 };
 
 
+vector<int>* GPOs::getUsersInRange(double x, double y, double radius){
+  vector<int> *users = new vector<int>();
+
+  double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+  vector<res_point*>* checkins = getRange(x, y, radius_geo_dist);
+
+  for(auto c = checkins->begin(); c != checkins->end(); c++){
+    users->push_back( (*c)->uid );
+    delete (*c);
+  }
+  delete checkins;
+
+  // Sorting user list
+  sort(users->begin(), users->end());
+  users->erase( unique( users->begin(), users->end() ), users->end() );
+
+  return users;
+}
 
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
 double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
@@ -474,18 +473,18 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
   // Note: may cause some checkins to fail in the direction in which the grid is extended.
   // this happens because the points may get assisgned to grid corners in the virtual grid
   // that are outside the boundary of the actual grid. (tested on gowalla and found no failed checkins)
-  if(MAX_X - MIN_X > MAX_Y - MIN_Y){  //adjust in y direction by moving the boundaries equally in the north and the south
-    double seperation = (MAX_X - MIN_X) - (MAX_Y - MIN_Y);
-    seperation = seperation/2;
-    min_y =  MIN_Y - seperation;
-    max_y =  MAX_Y + seperation;
+  // if(MAX_X - MIN_X > MAX_Y - MIN_Y){  //adjust in y direction by moving the boundaries equally in the north and the south
+  //   double seperation = (MAX_X - MIN_X) - (MAX_Y - MIN_Y);
+  //   seperation = seperation/2;
+  //   min_y =  MIN_Y - seperation;
+  //   max_y =  MAX_Y + seperation;
 
-  }else if(MAX_X - MIN_X < MAX_Y - MIN_Y){  //vice versa
-    double seperation = (MAX_Y - MIN_Y) - (MAX_X - MIN_X);
-    seperation = seperation/2;
-    min_x =  MIN_X - seperation;
-    max_x =  MAX_X + seperation;
-  }
+  // }else if(MAX_X - MIN_X < MAX_Y - MIN_Y){  //vice versa
+  //   double seperation = (MAX_Y - MIN_Y) - (MAX_X - MIN_X);
+  //   seperation = seperation/2;
+  //   min_x =  MIN_X - seperation;
+  //   max_x =  MAX_X + seperation;
+  // }
   //-----------------------------------------------------
 
 
