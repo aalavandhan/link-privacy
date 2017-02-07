@@ -426,13 +426,15 @@ double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
 // SEED HAS BEEN SET
 void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   boost::mt19937 rng;
-  boost::normal_distribution<> nd(0.0, radius);
+  boost::normal_distribution<> nd(0.0, radius/2);
 
   boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
 
   double lat=0,lon=0, dLat=0, dLon=0, nLat=0, nLon=0, noise_distance=0;
 
   int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
+
+  map <int,int> noise_histogram;
 
   unsigned int lid = 0;
 
@@ -451,12 +453,33 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 
       loadPoint(nLon, nLat, lid, u->first, (*loc)->getTime());
       lid++;
+
+      int bin = (int) floor(noise_distance);
+      auto it = noise_histogram.find(bin);
+      if(it != noise_histogram.end()){
+        it->second = it->second + 1;
+      }
+      else{
+        noise_histogram.insert(make_pair(bin,1));
+      }
     }
   }
 
+  // int inRange=0, total=0;
+  // double percentage;
+  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  // cout << "Noise distribution  : " << endl;
+  // for(auto b_it = noise_histogram.begin(); b_it != noise_histogram.end(); b_it++){
+  //   cout << "Bin : " << b_it->first << "\t Count : " << b_it->second << endl;
+  //   if(abs(b_it->first) <= radius ){
+  //     inRange+=b_it->second;
+  //   }
+  //   total+=b_it->second;
+  // }
+  // percentage = (double) inRange / (double) total;
+  // cout << "In Range : " << percentage << endl;
+  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
-
-
 
 //input:  grid cell distance in x direction (say, 100m grid). This value is independent of grid size in headers.h.
 //output: all checkins are snapped to the nearest cell corner.
