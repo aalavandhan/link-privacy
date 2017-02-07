@@ -80,9 +80,12 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 // Given a set of locations of interest and a range  this utility counts the pairs of users with
 // katz score greater than the defined treshold
 void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh){
+  cout << "Computing user proximity list for base gpos : " << endl;
   // Before adding noise
   vector< unordered_set< pair<int,int>, PairHasher >* >* base_proximity_list = SimpleQueries(base_gpos, spos).computeProximityUserList(fileName, radius, tresh);
   // With noise
+
+  cout << "Computing user proximity list for other gpos : " << endl;
   vector< unordered_set< pair<int,int>, PairHasher >* >* cmp_proximity_list  = computeProximityUserList(fileName, radius, tresh);
 
   double precision, recall, avg_precision=0, avg_recall=0;
@@ -120,6 +123,8 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
+
+// Threshold defines
 vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computeProximityUserList(const char* fileName, double radius, double tresh){
   ifstream fin(fileName);
 
@@ -130,14 +135,23 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
   }
 
   vector<int> *u_set;
+  int lno=-1;
 
   vector< unordered_set< pair<int,int>, PairHasher >* >* proximate_users_list = new vector< unordered_set< pair<int,int>, PairHasher >* >();
 
   while (fin){
     fin >> y >> x;
+    lno++;
+
+    cout << "Processing location number: " << lno << endl;
+
     u_set = gpos->getUsersInRange(x, y, radius);
 
+    multiset<ranked_pair, ranked_pair_comparator_descending>* proximate_users_set = new multiset<ranked_pair, ranked_pair_comparator_descending>();
     unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
+
+    cout << "number of users around this location : " << u_set->size() << endl;
+    cout << "computing proximate_users_set  for location" << endl;
 
     for(auto u1_it=u_set->begin(); u1_it != u_set->end(); u1_it++){
       auto u2_it=u1_it;
@@ -150,12 +164,34 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
           u2id = u1id;
           u1id = temp;
         }
-        // KATZ score between u1 and u2 > tresh
-        if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end())
+
+        double KatzScore = spos->getKatzScore(u1id, u2id);
+        // cout << u1id << " " << u2id << " " << KatzScore << endl;
+        if(KatzScore>= tresh && proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end()){
           proximate_users->insert(make_pair(u1id, u2id));
+          proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
+        }
       }
     }
-    proximate_users_list->push_back(proximate_users);
+
+    unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
+
+    cout << "keeping top " << tresh <<" user_paris " << endl;
+    int count=0;
+    for(auto rk_it=proximate_users_set->begin(); rk_it != proximate_users_set->end(); rk_it++){
+      int u1id = rk_it->getId1();
+      int u2id = rk_it->getId2();
+      if(u1id > u2id){
+        int temp = u2id;
+        u2id = u1id;
+        u1id = temp;
+      }
+      ranked_proximate_users->insert(make_pair(u1id, u2id));
+      count++;
+      if(count > tresh)
+        break;
+    }
+    proximate_users_list->push_back(ranked_proximate_users);
   }
 
   return proximate_users_list;

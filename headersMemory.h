@@ -162,4 +162,6 @@ extern double DELTA_Y ;
 #include "SPOs/MemoryMapWeighted/User.h"
 #include "SPOs/MemoryMapWeighted/Graph.h"
 
+#include "pTools/KatzScore.h"
+
 #endif

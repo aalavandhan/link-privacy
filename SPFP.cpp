@@ -281,22 +281,23 @@ int main(int argc, char *argv[]){
 
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
-  cout << "------------- Evaluating range utility ---------------" << endl;
-  query->checkUtilityRange(locations_of_interest_file, g, 25);
+  // cout << "------------- Evaluating range utility ---------------" << endl;
+  // query->checkUtilityRange(locations_of_interest_file, g, 25);
 
-  query->checkUtilityRange(locations_of_interest_file, g, 50);
+  // query->checkUtilityRange(locations_of_interest_file, g, 50);
 
-  query->checkUtilityRange(locations_of_interest_file, g, 100);
+  // query->checkUtilityRange(locations_of_interest_file, g, 100);
 
-  query->checkUtilityRange(locations_of_interest_file, g, 200);
+  // query->checkUtilityRange(locations_of_interest_file, g, 200);
 
-  query->checkUtilityRange(locations_of_interest_file, g, 400);
+  // query->checkUtilityRange(locations_of_interest_file, g, 400);
 
-  // query->checkUtilityRange(locations_of_interest_file, g, 1000);
 
-  // query->checkUtilityRange(locations_of_interest_file, g, 2500);
+  cout << "------------- Evaluating range proximity ---------------" << endl;
+  query->checkUtilityProximity(locations_of_interest_file, g, 500, 50);
+  // query->checkUtilityProximity(locations_of_interest_file, g, 500, 100);
+  // query->checkUtilityProximity(locations_of_interest_file, g, 500, 200);
 
-  // query->checkUtilityRange(locations_of_interest_file, g, 5000);
 
 
   // cout << "----- Precomputing matrices --- " << endl;

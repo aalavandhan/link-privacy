@@ -31,6 +31,9 @@ multiset<my_pair, pair_comparator_descending>* SPOs::getDegreeSet(){
     return degreeSet;
 }
 
+double SPOs::getKatzScore(int source, int target){
+    return KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
+}
 
 /*
 loads the social graph into a map/hashtable containing

@@ -5,4 +5,5 @@ public:
     virtual bool areFriends(int user1, int user2) = 0;
 	  virtual int getUserDegree(int id ) =0;
     virtual int getNumberOfFriends( ) =0;
+    virtual double getKatzScore(int source, int target) = 0;
 };

@@ -59,13 +59,12 @@ Entropy.o : pTools/Entropy.c pTools/Entropy.h
 RenyiEntropy.o : pTools/RenyiEntropy.c pTools/RenyiEntropy.h
 	$(CC) $(cFLAGS) -c pTools/RenyiEntropy.c
 	$(CC) -MM pTools/RenyiEntropy.c  > RenyiEntropy.d
-KatzScore.o : pTools/KatzScore.cpp headers.h
-	$(CC) $(cFLAGS) -c pTools/KatzScore.cpp
-	$(CC) -MM pTools/KatzScore.cpp  > KatzScore.d
 WeightedEntropy.o : pTools/WeightedEntropy.c pTools/WeightedEntropy.h
 	$(CC) $(cFLAGS) -c pTools/WeightedEntropy.c
 	$(CC) -MM pTools/WeightedEntropy.c  > WeightedEntropy.d
-
+KatzScore.o : pTools/KatzScore.cpp pTools/KatzScore.h
+	$(CC) $(CPPFLAGS) -c pTools/KatzScore.cpp
+	$(CC) -MM pTools/KatzScore.cpp  > KatzScore.d
 
 
 .PHONY : clean

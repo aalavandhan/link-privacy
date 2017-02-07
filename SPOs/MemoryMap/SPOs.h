@@ -46,6 +46,7 @@ public:
     double getTotalCPUTime();
     double getTotalTime();
 
+    virtual double getKatzScore(int source, int target);
 
     int edges=0;
 

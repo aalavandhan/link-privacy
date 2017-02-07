@@ -111,9 +111,13 @@ extern double GAMMA;
 #define BOUNDARY_ERROR 0.00000000000001
 
 
+#define KATZ_ATTENUATION 0.1
+#define KATZ_PATH_LENGTH 3
+
 #include "utilities/res_point.h"
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"
+#include "utilities/ranked_pair.h"
 #include "utilities/PairHasher.h"
 
 #include "pTools/MIToolbox.h"

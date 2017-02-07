@@ -1,3 +1,5 @@
+#include "../pTools/KatzScore.h"
+
 #include <stdio.h>
 #include <vector>
 #include <algorithm>
@@ -9,6 +11,11 @@
 #include <map>
 
 using namespace std;
+
+KatzScore::KatzScore(){
+}
+KatzScore::~KatzScore(){
+}
 
 inline void print_path(vector<int>path)
 {
@@ -50,7 +57,7 @@ int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, unordere
             auto it = pathLen_to_freq->find(path.size());
             if(it!=pathLen_to_freq->end()){
                 it->second = it->second + 1;
-            }else{      
+            }else{
                 pathLen_to_freq->insert(make_pair(path.size(),1));
             }
             // cout<<"The Required path is:: ";
@@ -80,7 +87,7 @@ int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, unordere
     return 1;
 }
 
-double calculateKatzScore(int source ,int target, unordered_map<int, unordered_set<int>*>* social_graph_map, double katz_epsilon, int katz_path_limit)
+double KatzScore::calculateKatzScore(int source ,int target, unordered_map<int, unordered_set<int>*>* social_graph_map, double katz_epsilon, int katz_path_limit)
 {
     map <int, int > pathLen_to_freq;
     findpaths(source, target, & pathLen_to_freq, social_graph_map, katz_path_limit);
