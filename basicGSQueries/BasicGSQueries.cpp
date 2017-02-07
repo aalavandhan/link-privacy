@@ -83,10 +83,12 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
   cout << "Computing user proximity list for base gpos : " << endl;
   // Before adding noise
   vector< unordered_set< pair<int,int>, PairHasher >* >* base_proximity_list = SimpleQueries(base_gpos, spos).computeProximityUserList(fileName, radius, tresh);
-  // With noise
+  cout << "Computed user proximity list for base gpos : " << base_proximity_list->size() << endl;
 
+  // With noise
   cout << "Computing user proximity list for other gpos : " << endl;
   vector< unordered_set< pair<int,int>, PairHasher >* >* cmp_proximity_list  = computeProximityUserList(fileName, radius, tresh);
+  cout << "Computed user proximity list for other gpos : " << cmp_proximity_list->size() << endl;
 
   double precision, recall, avg_precision=0, avg_recall=0;
   int count=base_proximity_list->size();
@@ -107,6 +109,8 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
 
     precision = (double) tp / (double) positive;
     recall    = (double) tp / (double) gt;
+
+    cout << "Location : " << i << "\tPrecision : " << precision <<"\tRecall : "<< recall << endl;
 
     avg_precision += precision;
     avg_recall    += recall;
