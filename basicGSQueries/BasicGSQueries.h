@@ -19,5 +19,8 @@ public:
     int countCooccurredFriends();
     map< int, bool >* getUsersOfInterest(double tresh);
     void checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius);
+    void checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh);
+    vector< unordered_set< pair<int,int>, PairHasher >* >* computeProximityUserList(const char* fileName, double radius, double tresh);
+
 };
 

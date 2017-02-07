@@ -12,7 +12,6 @@ SimpleQueries::~SimpleQueries(){}
 // map<int, map<int, double>*> diversity_matrix;
 // map<int, map<int, double>*> weighted_frequency_matrix;
 // map<int, map<int, vector<pair<int, int>>*>*> cooccurrence_matrix;
-
 int SimpleQueries::countCooccurredFriends(){
   int friends = 0;
   auto cooccured_user_pairs = gpos->getCoOccurredUserPairs();
@@ -24,6 +23,9 @@ int SimpleQueries::countCooccurredFriends(){
   return friends;
 }
 
+
+// Given a set of locations of interest and a range; this utility compares the usersInRange from each location
+// between base_gpos and this->gpos
 void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius){
   ifstream fin(fileName);
   double x,y, precision, recall, avg_precision=0, avg_recall=0;
@@ -73,6 +75,90 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
   cout << "Precision :" << avg_precision << endl;
   cout << "Recall    :" << avg_recall    << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
+// Given a set of locations of interest and a range  this utility counts the pairs of users with
+// katz score greater than the defined treshold
+void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh){
+  // Before adding noise
+  vector< unordered_set< pair<int,int>, PairHasher >* >* base_proximity_list = SimpleQueries(base_gpos, spos).computeProximityUserList(fileName, radius, tresh);
+  // With noise
+  vector< unordered_set< pair<int,int>, PairHasher >* >* cmp_proximity_list  = computeProximityUserList(fileName, radius, tresh);
+
+  double precision, recall, avg_precision=0, avg_recall=0;
+  int count=base_proximity_list->size();
+
+  for(int i=0; i<count; i++){
+    unordered_set< pair<int,int>, PairHasher >* base_proximate_users = base_proximity_list->at(i);
+    unordered_set< pair<int,int>, PairHasher >* cmp_proximate_users  = cmp_proximity_list->at(i);
+
+    int positive = cmp_proximate_users->size(), tp=0, gt=base_proximate_users->size();
+
+    for(auto pair=base_proximate_users->begin(); pair != base_proximate_users->end(); base_proximate_users++){
+      int u1=pair->first;
+      int u2=pair->second;
+
+      if(cmp_proximate_users->find(make_pair(u1, u2)) != cmp_proximate_users->end())
+        tp++;
+    }
+
+    precision = (double) tp / (double) positive;
+    recall    = (double) tp / (double) gt;
+
+    avg_precision += precision;
+    avg_recall    += recall;
+  }
+
+  avg_precision /= count;
+  avg_recall    /= count;
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Utility [ Proximity QUERY ]" << endl;
+  cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
+  cout << "Precision :" << avg_precision << endl;
+  cout << "Recall    :" << avg_recall    << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
+vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computeProximityUserList(const char* fileName, double radius, double tresh){
+  ifstream fin(fileName);
+
+  double x,y;
+
+  if (!fin) {
+    std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
+  }
+
+  vector<int> *u_set;
+
+  vector< unordered_set< pair<int,int>, PairHasher >* >* proximate_users_list = new vector< unordered_set< pair<int,int>, PairHasher >* >();
+
+  while (fin){
+    fin >> y >> x;
+    u_set = gpos->getUsersInRange(x, y, radius);
+
+    unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
+
+    for(auto u1_it=u_set->begin(); u1_it != u_set->end(); u1_it++){
+      auto u2_it=u1_it;
+      u2_it++;
+      for(; u2_it != u_set->end(); u2_it++){
+        int u1id = (*u1_it);
+        int u2id = (*u2_it);
+        if(u1id > u2id){
+          int temp = u2id;
+          u2id = u1id;
+          u1id = temp;
+        }
+        // KATZ score between u1 and u2 > tresh
+        if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end())
+          proximate_users->insert(make_pair(u1id, u2id));
+      }
+    }
+    proximate_users_list->push_back(proximate_users);
+  }
+
+  return proximate_users_list;
 }
 
 map< int, bool >* SimpleQueries::getUsersOfInterest(double tresh){
