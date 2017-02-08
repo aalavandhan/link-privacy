@@ -155,7 +155,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
     cout << "number of users around this location : " << u_set->size() << endl;
-    cout << "computing proximate_users_set  for location" << endl;
+    cout << "computing proximate_users_set for location" << endl;
 
     for(auto u1_it=u_set->begin(); u1_it != u_set->end(); u1_it++){
       auto u2_it=u1_it;
@@ -180,9 +180,8 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
 
     unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
-    cout << "keeping top " << tresh <<" user_paris " << endl;
-    int count=0;
-    for(auto rk_it=proximate_users_set->begin(); rk_it != proximate_users_set->end(); rk_it++){
+    auto rk_it=proximate_users_set->begin();
+    for(int count=0; count <= tresh; count++, rk_it++){
       int u1id = rk_it->getId1();
       int u2id = rk_it->getId2();
       if(u1id > u2id){
@@ -191,10 +190,9 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
         u1id = temp;
       }
       ranked_proximate_users->insert(make_pair(u1id, u2id));
-      count++;
-      if(count > tresh)
-        break;
     }
+
+    cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
     proximate_users_list->push_back(ranked_proximate_users);
   }
 
