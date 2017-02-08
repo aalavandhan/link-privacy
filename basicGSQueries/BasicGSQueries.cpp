@@ -171,7 +171,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
 
         double KatzScore = spos->getKatzScore(u1id, u2id);
         // cout << u1id << " " << u2id << " " << KatzScore << endl;
-        if(KatzScore>= tresh && proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end()){
+        if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end()){
           proximate_users->insert(make_pair(u1id, u2id));
           proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
         }
