@@ -153,43 +153,43 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
 
     multiset<ranked_pair, ranked_pair_comparator_descending>* proximate_users_set = new multiset<ranked_pair, ranked_pair_comparator_descending>();
     unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
+    unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
     cout << "number of users around this location : " << u_set->size() << endl;
-    cout << "computing proximate_users_set for location" << endl;
 
-    for(auto u1_it=u_set->begin(); u1_it != u_set->end(); u1_it++){
-      auto u2_it=u1_it;
-      u2_it++;
-      for(; u2_it != u_set->end(); u2_it++){
-        int u1id = (*u1_it);
-        int u2id = (*u2_it);
+    if(u_set->size() > 1){
+      for(auto u1_it=u_set->begin(); u1_it != u_set->end(); u1_it++){
+        auto u2_it=u1_it;
+        u2_it++;
+        for(; u2_it != u_set->end(); u2_it++){
+          int u1id = (*u1_it);
+          int u2id = (*u2_it);
+          if(u1id > u2id){
+            int temp = u2id;
+            u2id = u1id;
+            u1id = temp;
+          }
+
+          double KatzScore = spos->getKatzScore(u1id, u2id);
+          // cout << u1id << " " << u2id << " " << KatzScore << endl;
+          if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end()){
+            proximate_users->insert(make_pair(u1id, u2id));
+            proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
+          }
+        }
+      }
+
+      auto rk_it=proximate_users_set->begin();
+      for(int count=0; count < tresh; count++, rk_it++){
+        int u1id = rk_it->getId1();
+        int u2id = rk_it->getId2();
         if(u1id > u2id){
           int temp = u2id;
           u2id = u1id;
           u1id = temp;
         }
-
-        double KatzScore = spos->getKatzScore(u1id, u2id);
-        // cout << u1id << " " << u2id << " " << KatzScore << endl;
-        if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end()){
-          proximate_users->insert(make_pair(u1id, u2id));
-          proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
-        }
+        ranked_proximate_users->insert(make_pair(u1id, u2id));
       }
-    }
-
-    unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
-
-    auto rk_it=proximate_users_set->begin();
-    for(int count=0; count <= tresh; count++, rk_it++){
-      int u1id = rk_it->getId1();
-      int u2id = rk_it->getId2();
-      if(u1id > u2id){
-        int temp = u2id;
-        u2id = u1id;
-        u1id = temp;
-      }
-      ranked_proximate_users->insert(make_pair(u1id, u2id));
     }
 
     cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
