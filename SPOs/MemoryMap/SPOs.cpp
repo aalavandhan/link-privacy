@@ -3,12 +3,14 @@
 SPOs::SPOs() {
     areFriendsExecutions = getFriendsExecutions = 0;
     totalCPUTime = totalTime = 0.0;
+    isGposSet=false;
 }
 
 SPOs::SPOs(GPOs * _gpos) {
     areFriendsExecutions = getFriendsExecutions = 0;
     totalCPUTime = totalTime = 0.0;
     gpos = _gpos;
+    isGposSet=true;
 }
 
 double SPOs::getTotalCPUTime(){
@@ -94,14 +96,15 @@ int SPOs::load(const char* file){
         int* list = (int*) malloc(sizeof(int)*size);
         totalFriends+=sizeof(int)*size;
         for(int i = 0; i<size; i++){
-            int friend_id ;
-            fin >> friend_id;
+          int friend_id ;
+          fin >> friend_id;
 
-            if(gpos->significantly_cooccured_user_pairs.find(make_pair(id, friend_id)) != gpos->significantly_cooccured_user_pairs.end()){
-    			friend_set->insert(friend_id);
-                list[i] = friend_id;
-                edges = edges + 1;
-            }
+          if(!isGposSet || gpos->significantly_cooccured_user_pairs.find(make_pair(id, friend_id)) != gpos->significantly_cooccured_user_pairs.end()){
+  			    friend_set->insert(friend_id);
+            list[i] = friend_id;
+            edges = edges + 1;
+          }
+
         }
         entry->setList(list, size);
 

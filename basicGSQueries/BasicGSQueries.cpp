@@ -23,6 +23,41 @@ int SimpleQueries::countCooccurredFriends(){
   return friends;
 }
 
+void SimpleQueries::checkUtilityStats(const char* fileName, double radius){
+  ifstream fin(fileName);
+  double x,y, avg_users;
+  int total_users=0, locations_with_users=0;
+  int count=0;
+
+  if (!fin) {
+    std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
+  }
+
+  vector<int> *u_set;
+
+  while (fin){
+    fin >> y >> x;
+    u_set = gpos->getUsersInRange(x, y, radius);
+
+    if(u_set->size() > 0)
+      locations_with_users++;
+
+    total_users += u_set->size();
+    count++;
+  }
+
+  avg_users = (double) total_users / (double) count;
+
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
+  cout << "Locations with users :" << locations_with_users << endl;
+  cout << "Locations without users :" << count - locations_with_users << endl;
+  cout << "Mean users around a location :" << avg_users << endl;
+  cout << "Total users across all locations :" << total_users << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
 // between base_gpos and this->gpos

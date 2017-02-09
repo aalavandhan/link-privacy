@@ -14,6 +14,7 @@ private:
     int areFriendsExecutions, getFriendsExecutions;
     Utilities util;
     GPOs *gpos;
+    bool isGposSet;
 
 public:
     SPOs();

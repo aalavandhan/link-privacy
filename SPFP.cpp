@@ -243,41 +243,45 @@ int main(int argc, char *argv[]){
   // testpTools();
   // exit(-1);
 
-  // cout << "------------- Loading checkins ---------------" << endl;
-  // GPOs* gpos = new GPOs(argv[2]);
-  // cout << "------------- Loading complete ---------------" << endl;
+  cout << "------------- Loading checkins ---------------" << endl;
+  GPOs* gpos = new GPOs(argv[2]);
+  cout << "------------- Loading complete ---------------" << endl;
 
   // testing grid snapping
 
-  cout << "------------- Loading checkins ---------------" << endl;
-  GPOs* g = new GPOs(argv[2]);
-  cout << "------------- Loading complete ---------------" << endl;
+  // cout << "------------- Loading checkins ---------------" << endl;
+  // GPOs* g = new GPOs(argv[2]);
+  // cout << "------------- Loading complete ---------------" << endl;
 
   // GPOs* gpos = new GPOs();
   // gpos->createNewGPOsbyGridSnapping(g, r1); //second var is the x distance of a cell is km
   // cout << "Number of locations loaded " << gpos->locations.size() << endl;
   // cout << "------------- Noise added -------------------" << endl;
 
-  GPOs* gpos = new GPOs();
-  gpos->loadPurturbedLocations(g, r1);
-  cout << "------------- Locations perturbed -------------------" << endl;
-  gpos->groupLocationsByRange(gpos, r2, isOptimistic);
-  cout << "------------- Locations Grouped -------------------" << endl;
+  // GPOs* gpos = new GPOs();
+  // gpos->loadPurturbedLocations(g, r1);
+  // cout << "------------- Locations perturbed -------------------" << endl;
+  // gpos->groupLocationsByRange(gpos, r2, isOptimistic);
+  // cout << "------------- Locations Grouped -------------------" << endl;
 
 
-  cout << "----- Loading Cooccurrence Matrix --- " << endl;
-  gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
-  cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
+  // cout << "----- Loading Cooccurrence Matrix --- " << endl;
+  // gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 
 
-  cout << "----- Calculating Location Entropy --- " << endl;
-  gpos->calculateLocationEntropy();
-  cout << "----- Completed Calculating Location Entropy --- " << endl;
+  // cout << "----- Calculating Location Entropy --- " << endl;
+  // gpos->calculateLocationEntropy();
+  // cout << "----- Completed Calculating Location Entropy --- " << endl;
 
   // Loading social network and checkins
   cout << "------------- Loading SocialGraph ---------------" << endl;
-  SPOs* spos = new SPOs(gpos);
+  SPOs* spos = new SPOs();
   spos->load(argv[1]);
+
+  // cout << "------------- Loading SocialGraph ---------------" << endl;
+  // SPOs* spos = new SPOs(gpos);
+  // spos->load(argv[1]);
 
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
@@ -293,10 +297,20 @@ int main(int argc, char *argv[]){
   // query->checkUtilityRange(locations_of_interest_file, g, 400);
 
 
-  cout << "------------- Evaluating range proximity ---------------" << endl;
-  query->checkUtilityProximity(locations_of_interest_file, g, 500, 50);
+  // cout << "------------- Evaluating range proximity ---------------" << endl;
+  // query->checkUtilityProximity(locations_of_interest_file, g, 100, 50);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 100);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 200);
+
+  cout << "------------- Evaluating query locations ---------------" << endl;
+  query->checkUtilityStats(locations_of_interest_file, 10);
+  query->checkUtilityStats(locations_of_interest_file, 25);
+  query->checkUtilityStats(locations_of_interest_file, 50);
+  query->checkUtilityStats(locations_of_interest_file, 100);
+  query->checkUtilityStats(locations_of_interest_file, 200);
+  query->checkUtilityStats(locations_of_interest_file, 400);
+  query->checkUtilityStats(locations_of_interest_file, 800);
+  query->checkUtilityStats(locations_of_interest_file, 1600);
 
 
 
