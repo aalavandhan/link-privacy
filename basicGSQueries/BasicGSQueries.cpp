@@ -282,13 +282,15 @@ void SimpleQueries::verifySocialStrength(double tresh){
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Number of correct friendships inferred " << true_positive << endl;
   cout << "Number of  friendships inferred " << postitive << endl;
-  // cout << "Number of friendships with more than one cooccrrences " << gt << endl;
+  cout << "Number of friendships with more than one cooccrrences " << gt << endl;
   cout << "Number of friendships " << nFriends << endl;
   double precision = true_positive / (double) postitive;
-  double recall    = true_positive / (double) nFriends;
+  double recall    = true_positive / (double) RECALL_BOUND;
   double mean_score    = total_score / (double) postitive;
+  double f1 = 2 * precision * recall / ( precision + recall );
   cout << "Precision : " << precision << endl;
   cout << "Recall : " << recall << endl;
+  cout << "F1 Score  :" << f1   << endl;
   cout << "Mean Score : " << mean_score << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }

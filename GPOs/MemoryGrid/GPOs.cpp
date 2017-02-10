@@ -283,6 +283,7 @@ bool GPOs::loadLocations(const char* fileName){
   cout << "------- LOADED GPOS from FILE --------- " << endl;
   cout << "Done! Number of checkins: " <<  count << endl;
   cout << "Number of failed checkins: " <<  grid->num_failed << endl;
+  cout << "Number of locations: " <<  locations.size() << endl;
   cout << " -------------------------------------- " << endl;
   return true;
 }
@@ -482,7 +483,8 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 }
 
 void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius){
-  int lid = 0;
+  // TODO: Pick a random id
+  int lid = 9999999;
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
     int user_id = u_it->first;
     vector< Point* > *user_checkins = u_it->second;
@@ -497,17 +499,20 @@ void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), p->getTime());
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, user_id, p->getTime());
         lid++;
       }
     } else {
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime());
-        lid++;
+        loadPoint(p->getX(), p->getY(), p->getID(), user_id, p->getTime());
       }
     }
   }
+
+  cout << "------- Purturbed checkins bsed on node locality --------- " << endl;
+  cout << "Done! Number of locations: " <<  locations.size() << endl;
+  cout << " -------------------------------------- " << endl;
 }
 
 //input:  grid cell distance in x direction (say, 100m grid). This value is independent of grid size in headers.h.

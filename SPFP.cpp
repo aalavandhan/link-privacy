@@ -261,41 +261,56 @@ int main(int argc, char *argv[]){
   GPOs* g = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
 
+
   // testing grid snapping
   // GPOs* gpos = new GPOs();
   // gpos->createNewGPOsbyGridSnapping(g, r1); //second var is the x distance of a cell is km
   // cout << "Number of locations loaded " << gpos->locations.size() << endl;
   // cout << "------------- Noise added -------------------" << endl;
 
+
+  // test Gaussian noise with grouping
+  GPOs* gg = new GPOs();
+  GPOs* gpos = new GPOs();
+  gg->loadPurturbedLocations(g, r1);
+  cout << "------------- Locations perturbed -------------------" << endl;
+  gpos->groupLocationsByRange(gg, r2, isOptimistic);
+  cout << "------------- Locations Grouped -------------------" << endl;
+
+  // test Gaussian for high node locality  noise with grouping
+  // cout << "------------- Load computed node locality ---------------" << endl;
+  // SPOs* tmp_spos = new SPOs();
+  // map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
   // GPOs* gg = new GPOs();
+  // gg->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1);
+  // cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
   // GPOs* gpos = new GPOs();
-  // gg->loadPurturbedLocations(g, r1);
-  // cout << "------------- Locations perturbed -------------------" << endl;
   // gpos->groupLocationsByRange(gg, r2, isOptimistic);
   // cout << "------------- Locations Grouped -------------------" << endl;
 
 
+  // test gaussian noise without grouping
   // GPOs* gpos = new GPOs();
   // gpos->loadPurturbedLocations(g, r1);
   // cout << "------------- Locations perturbed -------------------" << endl;
 
-  // cout << "----- Loading Cooccurrence Matrix --- " << endl;
-  // gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
-  // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
+  cout << "----- Loading Cooccurrence Matrix --- " << endl;
+  gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 
 
-  // cout << "----- Calculating Location Entropy --- " << endl;
-  // gpos->calculateLocationEntropy();
-  // cout << "----- Completed Calculating Location Entropy --- " << endl;
+  cout << "----- Calculating Location Entropy --- " << endl;
+  gpos->calculateLocationEntropy();
+  cout << "----- Completed Calculating Location Entropy --- " << endl;
 
   // Loading social network and checkins
-  cout << "------------- Loading SocialGraph ---------------" << endl;
-  SPOs* spos = new SPOs();
-  spos->load(argv[1]);
-
   // cout << "------------- Loading SocialGraph ---------------" << endl;
-  // SPOs* spos = new SPOs(gpos);
+  // SPOs* spos = new SPOs();
   // spos->load(argv[1]);
+
+  cout << "------------- Loading SocialGraph ---------------" << endl;
+  SPOs* spos = new SPOs(gpos);
+  spos->load(argv[1]);
 
   // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
   // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
@@ -304,23 +319,15 @@ int main(int argc, char *argv[]){
   // spos->computeNodeLocality(gpos);
   // spos->writeNodeLocalityToFile();
 
-  cout << "------------- Load computed node locality ---------------" << endl;
-  map< int, double >* node_locality = spos->loadNodeLocalityFromFile();
-
-  GPOs* gpos = new GPOs();
-  gpos->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1);
-  cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
-
-
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
-  cout << "------------- Evaluating range utility ---------------" << endl;
-  query->checkUtilityRange(locations_of_interest_file, g, 10);
-  query->checkUtilityRange(locations_of_interest_file, g, 25);
-  query->checkUtilityRange(locations_of_interest_file, g, 50);
-  query->checkUtilityRange(locations_of_interest_file, g, 100);
-  query->checkUtilityRange(locations_of_interest_file, g, 200);
-  query->checkUtilityRange(locations_of_interest_file, g, 400);
+  // cout << "------------- Evaluating range utility ---------------" << endl;
+  // query->checkUtilityRange(locations_of_interest_file, g, 10);
+  // query->checkUtilityRange(locations_of_interest_file, g, 25);
+  // query->checkUtilityRange(locations_of_interest_file, g, 50);
+  // query->checkUtilityRange(locations_of_interest_file, g, 100);
+  // query->checkUtilityRange(locations_of_interest_file, g, 200);
+  // query->checkUtilityRange(locations_of_interest_file, g, 400);
 
 
   // cout << "------------- Evaluating range proximity ---------------" << endl;
@@ -340,13 +347,13 @@ int main(int argc, char *argv[]){
 
 
 
-  // cout << "----- Precomputing matrices --- " << endl;
-  // query->buildMatrices(0.1);
-  // cout << "----- Completed Precomputing matrices --- " << endl;
+  cout << "----- Precomputing matrices --- " << endl;
+  query->buildMatrices(0.1);
+  cout << "----- Completed Precomputing matrices --- " << endl;
 
-  // cout << "----- Calculating Social Strength --- " << endl;
-  // query->cacluateSocialStrength();
-  // cout << "----- Completed calculating Social Strength --- " << endl;
+  cout << "----- Calculating Social Strength --- " << endl;
+  query->cacluateSocialStrength();
+  cout << "----- Completed calculating Social Strength --- " << endl;
 
 
   // double thresholds[9] = {0.5,1,2,3,4,5,7,10,25};
@@ -356,9 +363,9 @@ int main(int argc, char *argv[]){
   //   cout << "--------------------------------------------";
   // }
 
-  // cout << "----- Computing accuracy for threshold --- " << 2.1 <<endl;
-  // map< int, bool >* users_of_interest = query->getUsersOfInterest(2.1);
-  // cout << "--------------------------------------------";
+  cout << "----- Computing accuracy for threshold --- 1.6 " <<endl;
+  query->verifySocialStrength(1.6);
+  cout << "--------------------------------------------";
 
   // map<int, Point*> locations;
   // ofstream output_file;

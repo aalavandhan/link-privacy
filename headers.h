@@ -116,6 +116,11 @@ extern double GAMMA;
 
 #define NODE_LOCALITY_BETA 384
 
+
+// Number of friendships in gowalla dataset with more than one
+// occccurrences
+#define RECALL_BOUND 10505
+
 #include "utilities/res_point.h"
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"
