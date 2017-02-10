@@ -1,11 +1,49 @@
 #include "../headersMemory.h"
 
+template<class T>
+struct distribution
+{ // general case, assuming T is of integral type
+  typedef boost::uniform_int<> type;
+};
+
+template<>
+struct distribution<float>
+{ // float case
+  typedef boost::uniform_real<> type;
+};
+
+template<>
+struct distribution<double>
+{ // double case
+  typedef boost::uniform_real<> type;
+};
+template <typename N> N getRandom(N min, N max, N sd)
+{
+  typedef typename distribution<N>::type distro_type;
+  boost::mt19937 seed( (int) sd );
+  distro_type dist(min,max);
+  boost::variate_generator<boost::mt19937&, distro_type > random(seed, dist);
+  return random();
+};
+
 Utilities::Utilities(){
 
   srand((unsigned)time(NULL));
 }
 
 Utilities::~Utilities(){}
+
+double Utilities::distanceBetween(double lat1, double lon1, double lat2, double lon2){
+  double lat1r, lon1r, lat2r, lon2r, u, v;
+  lat1r = DEG_TO_RAD * lat1;
+  lon1r = DEG_TO_RAD * lon1;
+  lat2r = DEG_TO_RAD * lat2;
+  lon2r = DEG_TO_RAD * lon2;
+  u = sin((lat2r - lat1r)/2);
+  v = sin((lon2r - lon1r)/2);
+  return 2.0 * EARTH_RADIUS_IN_KILOMETERS * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+
 
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
   boost::mt19937 rng;
@@ -15,19 +53,19 @@ pair<double,double> Utilities::addGaussianNoise(double x, double y, double radiu
   boost::normal_distribution<> nd(0.0, radius/2);
   boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
 
-  double lat=0,lon=0, dLat=0, dLon=0, nLat=0, nLon=0, noise_distance=0;
+  double lat=0,lon=0, nLat=0, nLon=0, noise_distance=0;
   int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
 
-  noise_distance = var_norormal();
+  noise_distance = abs(var_norormal());
+  int direction = getRandom<int>(0,360, seed);
 
   lon = x;
   lat = y;
 
-  dLat = noise_distance / R;
-  dLon = noise_distance / (R * cos(PI * lat / 180));
+  nLat = lat  + (noise_distance / R) * (1/DEG_TO_RAD);
+  nLon = lon  + (noise_distance / R) * (1/DEG_TO_RAD) / cos(lat * DEG_TO_RAD);
 
-  nLat = lat + dLat * ( 1 / DEG_TO_RAD );
-  nLon = lon + dLon * ( 1 / DEG_TO_RAD );
+  // cout << distanceBetween(nLat, nLon, y, x) * 1000 << " " << abs(noise_distance)  << " " << direction <<endl;
 
   return make_pair(nLon, nLat);
 }

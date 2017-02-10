@@ -426,43 +426,25 @@ double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
 // Radius in meters Adding gaussian noise
 // SEED HAS BEEN SET
 void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
-  boost::mt19937 rng;
-  boost::normal_distribution<> nd(0.0, radius/2);
-
-  boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
-
-  double lat=0,lon=0, dLat=0, dLon=0, nLat=0, nLon=0, noise_distance=0;
-
-  int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
-
-  map <int,int> noise_histogram;
-
+  // map <int,int> noise_histogram;
   unsigned int lid = 0;
+  Utilities* util = new Utilities();
 
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
-      noise_distance = var_norormal();
-
-      lon = (*loc)->getX();
-      lat = (*loc)->getY();
-
-      dLat = noise_distance / R;
-      dLon = noise_distance / (R * cos(PI * lat / 180));
-
-      nLat = lat + dLat * ( 1 / DEG_TO_RAD );
-      nLon = lon + dLon * ( 1 / DEG_TO_RAD );
-
-      loadPoint(nLon, nLat, lid, u->first, (*loc)->getTime());
+      Point *p = (*loc);
+      pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
+      loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime());
       lid++;
 
-      int bin = (int) floor(noise_distance);
-      auto it = noise_histogram.find(bin);
-      if(it != noise_histogram.end()){
-        it->second = it->second + 1;
-      }
-      else{
-        noise_histogram.insert(make_pair(bin,1));
-      }
+      // int bin = (int) floor(noise_distance);
+      // auto it = noise_histogram.find(bin);
+      // if(it != noise_histogram.end()){
+      //   it->second = it->second + 1;
+      // }
+      // else{
+      //   noise_histogram.insert(make_pair(bin,1));
+      // }
     }
   }
 
