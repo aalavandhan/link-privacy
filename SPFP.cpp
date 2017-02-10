@@ -290,13 +290,9 @@ int main(int argc, char *argv[]){
 
   // cout << "------------- Evaluating range utility ---------------" << endl;
   // query->checkUtilityRange(locations_of_interest_file, g, 25);
-
   // query->checkUtilityRange(locations_of_interest_file, g, 50);
-
   // query->checkUtilityRange(locations_of_interest_file, g, 100);
-
   // query->checkUtilityRange(locations_of_interest_file, g, 200);
-
   // query->checkUtilityRange(locations_of_interest_file, g, 400);
 
 

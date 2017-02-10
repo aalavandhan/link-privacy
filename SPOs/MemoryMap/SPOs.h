@@ -53,5 +53,5 @@ public:
 
     double computeDistanceBetweenFriends(vector< Point* >* source_checkins, vector< Point* >* friend_checkins);
     double computeMeanDistanceBetweenAllFriends(GPOs* gpos);
-
+    vector<double>* computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends);
 };

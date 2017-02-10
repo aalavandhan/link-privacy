@@ -411,38 +411,64 @@ double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, ve
   return closestDistance;
 }
 
+vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends){
+  vector<double>* distances = new vector<double>();
+
+  vector< Point* >* source_checkins;
+
+  auto source_checkins_it = gpos->user_to_location.find(source);
+
+  // Ensuring check-ins are present
+  if(source_checkins_it != gpos->user_to_location.end())
+    source_checkins = source_checkins_it->second;
+  else
+    source_checkins = new vector< Point* >();
+
+  for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
+    int fid = (*f_it);
+
+    auto friend_checkins_it = gpos->user_to_location.find(fid);
+    vector< Point* >* friend_checkins;
+
+    // Ensuring check-ins are present
+    if(friend_checkins_it != gpos->user_to_location.end())
+      friend_checkins = friend_checkins_it->second;
+    else
+      friend_checkins = new vector< Point* >();
+
+    double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
+
+    distances->push_back(distance);
+  }
+
+  return distances;
+}
+
 
 double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
-  double sum_distance=0;
+  double sum_distance=0, inf=std::numeric_limits<double>::infinity();
   int count=0;
 
-  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+
+  for(auto u_it = socialgraph_map->begin(); u_it != socialgraph_map->end(); u_it++){
     int source = u_it->first;
-    vector< Point* >* source_checkins = u_it->second;
-    unordered_set<int>* friends = getFriends(source);
+    unordered_set<int>* friends = u_it->second;
 
-    if(source_checkins == NULL || source_checkins->size() == 0)
-      continue;
+    vector<double>* distances = computeDistancesBetweenUserFriends(gpos, source, friends);
 
-    for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
-      int fid = (*f_it);
-
-      auto friend_checkins_it = gpos->user_to_location.find(fid);
-      vector< Point* >* friend_checkins = friend_checkins_it->second;
-
-      if(friend_checkins == NULL || friend_checkins->size() == 0)
-        continue;
-
-      double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
-      sum_distance += distance;
-
-      // cout << source << " " << source_checkins->size() << " " << fid << " " << friend_checkins->size() << " " << distance << " " << count << endl;
-
-      if(count%1000 == 0)
-        cout << "Processed Edges : " << count << "\tSum distance : " << sum_distance << endl;
-
-      count++;
+    for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
+      double dist = (*d_it);
+      if(dist != inf){
+        sum_distance += dist;
+        count++;
+      }
     }
+
+    cout << "Processed Edges : " << count << "\tSum distance : " << sum_distance << endl;
+
+    // Freeing memory
+    distances->clear();
+    delete distances;
   }
 
   double mean_distance = sum_distance / count;
