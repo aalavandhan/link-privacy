@@ -392,3 +392,100 @@ int SPOs::getUserDegree(int id){
 int SPOs::getNumberOfFriends(){
     return edges;
 }
+
+double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, vector< Point* >* friend_checkins){
+
+  double closestDistance = std::numeric_limits<double>::infinity();
+
+  for(auto s_it=source_checkins->begin(); s_it != source_checkins->end(); s_it++){
+    Point * source_checkin = (*s_it);
+    for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
+      Point * friend_checkin = (*f_it);
+      double distSq = gpos->distanceBetween(source_checkin, friend_checkin);
+      if(distSq < closestDistance){
+        closestDistance = distSq;
+      }
+    }
+  }
+
+  return closestDistance;
+}
+
+
+double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
+  double sum_distance=0;
+  int count=0;
+
+  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+    int source = u_it->first;
+    vector< Point* >* source_checkins = u_it->second;
+    unordered_set<int>* friends = getFriends(source);
+
+    if(source_checkins->size() == 0)
+      continue;
+
+    for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
+      int fid = (*f_it);
+
+      auto friend_checkins_it = gpos->user_to_location.find(fid);
+      vector< Point* >* friend_checkins = friend_checkins_it->second;
+
+      if(friend_checkins->size() == 0)
+        continue;
+
+      double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
+      sum_distance += distance;
+
+      // cout << source << " " << source_checkins->size() << " " << fid << " " << friend_checkins->size() << " " << distance << " " << count << endl;
+
+      if(count%1000 == 0)
+        cout << "Processed Edges : " << count << "\tSum distance : " << sum_distance << endl;
+
+      count++;
+    }
+  }
+
+  double mean_distance = sum_distance / count;
+  return mean_distance;
+}
+
+
+// Distance matters: Geo-social metrics for online social networks
+// double SPOs::computeNodeLocality(GPOs* gpos, int source){
+//   int *friends;
+//   unsigned int numOfFriends;
+
+//   auto source_checkins_it = gpos->user_to_location->find(source);
+//   vector< Point* >* source_checkins = source_checkins_it->second;
+
+//   getFriends(source, &friends, &numOfFriends);
+
+//   double locality_sum=0, node_locality;
+
+//   for(auto f = friends->begin(); f != friends->end(); f++){
+//     int fid = (*f);
+//     auto friend_checkins_it = gpos->user_to_location->find(fid);
+//     vector< Point* >* friend_checkins = friend_checkins_it->second;
+
+//     double closestDistanceSq = std::numeric_limits<double>::infinity();
+
+//     for(auto s_it=source_checkins->begin(); s_it != source_checkins->end(); s_it++){
+//       Point * source_checkin = (*s_it);
+//       for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
+//         Point * friend_checkin = (*f_it);
+//         double distSq = gpos->distanceBetween(source_checkin, friend_checkin);
+//         if(distSq < closestDistanceSq){
+//           closestDistanceSq = distSq;
+//         }
+//       }
+//     }
+//     delete (*f);
+
+//     locality_sum += exp( -sqrt(closestDistanceSq) / NODE_LOCALITY_BETA );
+//   }
+//   delete friends;
+
+//   node_locality = (1/numOfFriends) * locality_sum;
+
+//   return node_locality;
+// }

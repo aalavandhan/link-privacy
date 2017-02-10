@@ -227,6 +227,10 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
       }
     }
 
+    // Delete
+    // proximate_users_set
+    // proximate_users
+
     cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
     proximate_users_list->push_back(ranked_proximate_users);
   }

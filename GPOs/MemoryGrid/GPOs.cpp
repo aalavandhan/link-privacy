@@ -797,3 +797,14 @@ void GPOs::clearNextNN(){
 double GPOs::estimateNearestDistance(double x, double y, int k){
     return grid->estimateNearestDistance(x,y,k);
 }
+
+double GPOs::distanceBetween(Point *a, Point *b){
+  double lat1r, lon1r, lat2r, lon2r, u, v;
+  lat1r = DEG_TO_RAD * a->getY();
+  lon1r = DEG_TO_RAD * a->getX();
+  lat2r = DEG_TO_RAD * b->getY();
+  lon2r = DEG_TO_RAD * b->getX();
+  u = sin((lat2r - lat1r)/2);
+  v = sin((lon2r - lon1r)/2);
+  return 2.0 * EARTH_RADIUS_IN_KILOMETERS * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}

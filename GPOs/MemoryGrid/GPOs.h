@@ -86,4 +86,5 @@ public:
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void verifyRange(double radius);
     void countU2UCoOccurrences(uint time_block);
+    double distanceBetween(Point *a, Point *b);
 };

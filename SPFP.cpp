@@ -283,7 +283,10 @@ int main(int argc, char *argv[]){
   // SPOs* spos = new SPOs(gpos);
   // spos->load(argv[1]);
 
-  SimpleQueries* query = new SimpleQueries(gpos, spos);
+  cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
+  cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
+
+  // SimpleQueries* query = new SimpleQueries(gpos, spos);
 
   // cout << "------------- Evaluating range utility ---------------" << endl;
   // query->checkUtilityRange(locations_of_interest_file, g, 25);
@@ -302,15 +305,15 @@ int main(int argc, char *argv[]){
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 100);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 200);
 
-  cout << "------------- Evaluating query locations ---------------" << endl;
-  query->checkUtilityStats(locations_of_interest_file, 10);
-  query->checkUtilityStats(locations_of_interest_file, 25);
-  query->checkUtilityStats(locations_of_interest_file, 50);
-  query->checkUtilityStats(locations_of_interest_file, 100);
-  query->checkUtilityStats(locations_of_interest_file, 200);
-  query->checkUtilityStats(locations_of_interest_file, 400);
-  query->checkUtilityStats(locations_of_interest_file, 800);
-  query->checkUtilityStats(locations_of_interest_file, 1600);
+  // cout << "------------- Evaluating query locations ---------------" << endl;
+  // query->checkUtilityStats(locations_of_interest_file, 10);
+  // query->checkUtilityStats(locations_of_interest_file, 25);
+  // query->checkUtilityStats(locations_of_interest_file, 50);
+  // query->checkUtilityStats(locations_of_interest_file, 100);
+  // query->checkUtilityStats(locations_of_interest_file, 200);
+  // query->checkUtilityStats(locations_of_interest_file, 400);
+  // query->checkUtilityStats(locations_of_interest_file, 800);
+  // query->checkUtilityStats(locations_of_interest_file, 1600);
 
 
 
