@@ -103,12 +103,14 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
   avg_precision /= count;
   avg_recall    /= count;
 
+  double f1 = 2 * avg_precision * avg_recall / ( avg_precision + avg_recall );
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
   cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
   cout << "Precision :" << avg_precision << endl;
   cout << "Recall    :" << avg_recall    << endl;
+  cout << "F1 Score  :" << f1            << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
