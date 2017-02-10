@@ -421,7 +421,7 @@ double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
     vector< Point* >* source_checkins = u_it->second;
     unordered_set<int>* friends = getFriends(source);
 
-    if(source_checkins->size() == 0)
+    if(source_checkins == NULL || source_checkins->size() == 0)
       continue;
 
     for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
@@ -430,7 +430,7 @@ double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
       auto friend_checkins_it = gpos->user_to_location.find(fid);
       vector< Point* >* friend_checkins = friend_checkins_it->second;
 
-      if(friend_checkins->size() == 0)
+      if(friend_checkins == NULL || friend_checkins->size() == 0)
         continue;
 
       double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
