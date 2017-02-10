@@ -484,7 +484,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 
 void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius){
   // TODO: Pick a random id
-  int lid = 9999999;
+  int lid = LOCATION_NOISE_BOUND;
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
     int user_id = u_it->first;
     vector< Point* > *user_checkins = u_it->second;
@@ -510,8 +510,9 @@ void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double
     }
   }
 
-  cout << "------- Purturbed checkins bsed on node locality --------- " << endl;
+  cout << "------- Perturbed checkins based on node locality --------- " << endl;
   cout << "Done! Number of locations: " <<  locations.size() << endl;
+  cout << "Number of locations with added noise: " <<  lid - LOCATION_NOISE_BOUND << endl;
   cout << " -------------------------------------- " << endl;
 }
 

@@ -270,12 +270,12 @@ int main(int argc, char *argv[]){
 
 
   // test Gaussian noise with grouping
-  GPOs* gg = new GPOs();
-  GPOs* gpos = new GPOs();
-  gg->loadPurturbedLocations(g, r1);
-  cout << "------------- Locations perturbed -------------------" << endl;
-  gpos->groupLocationsByRange(gg, r2, isOptimistic);
-  cout << "------------- Locations Grouped -------------------" << endl;
+  // GPOs* gg = new GPOs();
+  // GPOs* gpos = new GPOs();
+  // gg->loadPurturbedLocations(g, r1);
+  // cout << "------------- Locations perturbed -------------------" << endl;
+  // gpos->groupLocationsByRange(gg, r2, isOptimistic);
+  // cout << "------------- Locations Grouped -------------------" << endl;
 
   // test Gaussian for high node locality  noise with grouping
   // cout << "------------- Load computed node locality ---------------" << endl;
@@ -287,6 +287,15 @@ int main(int argc, char *argv[]){
   // GPOs* gpos = new GPOs();
   // gpos->groupLocationsByRange(gg, r2, isOptimistic);
   // cout << "------------- Locations Grouped -------------------" << endl;
+
+  // test Gaussian for high node locality  noise without grouping
+  cout << "------------- Load computed node locality ---------------" << endl;
+  SPOs* tmp_spos = new SPOs();
+  map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
+  GPOs* gpos = new GPOs();
+  gpos->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1);
+  gpos->generateFrequencyCache();
+  cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
 
 
   // test gaussian noise without grouping

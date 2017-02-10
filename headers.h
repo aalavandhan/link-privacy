@@ -121,6 +121,8 @@ extern double GAMMA;
 // occccurrences
 #define RECALL_BOUND 10505
 
+#define LOCATION_NOISE_BOUND 9999999
+
 #include "utilities/res_point.h"
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"
