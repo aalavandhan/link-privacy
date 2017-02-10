@@ -267,12 +267,22 @@ int main(int argc, char *argv[]){
   // cout << "Number of locations loaded " << gpos->locations.size() << endl;
   // cout << "------------- Noise added -------------------" << endl;
 
-  GPOs* gg = new GPOs();
+  // GPOs* gg = new GPOs();
+  // GPOs* gpos = new GPOs();
+  // gg->loadPurturbedLocations(g, r1);
+  // cout << "------------- Locations perturbed -------------------" << endl;
+  // gpos->groupLocationsByRange(gg, r2, isOptimistic);
+  // cout << "------------- Locations Grouped -------------------" << endl;
+
+
   GPOs* gpos = new GPOs();
-  gg->loadPurturbedLocations(g, r1);
+  gpos->loadPurturbedLocations(g, r1);
   cout << "------------- Locations perturbed -------------------" << endl;
-  gpos->groupLocationsByRange(gg, r2, isOptimistic);
-  cout << "------------- Locations Grouped -------------------" << endl;
+
+
+  // GPOs* gpos = new GPOs();
+  // gpos->loadPurturbedLocationsBasedOnNodeLocality(g, r1);
+  // cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
 
 
   // cout << "----- Loading Cooccurrence Matrix --- " << endl;

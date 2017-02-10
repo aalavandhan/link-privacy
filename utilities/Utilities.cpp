@@ -1,4 +1,4 @@
-#include "../headers.h"
+#include "../headersMemory.h"
 
 Utilities::Utilities(){
 
@@ -8,8 +8,29 @@ Utilities::Utilities(){
 
 Utilities::~Utilities(){}
 
-//change
+pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
+  boost::mt19937 rng;
+  boost::normal_distribution<> nd(0.0, radius/2);
+  boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
 
+  double lat=0,lon=0, dLat=0, dLon=0, nLat=0, nLon=0, noise_distance=0;
+  int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
+
+  noise_distance = var_norormal();
+
+  lon = x;
+  lat = y;
+
+  dLat = noise_distance / R;
+  dLon = noise_distance / (R * cos(PI * lat / 180));
+
+  nLat = lat + dLat * ( 1 / DEG_TO_RAD );
+  nLon = lon + dLon * ( 1 / DEG_TO_RAD );
+
+  return make_pair(nLon, nLat);
+}
+
+//change
 //for Diversity between topk results
 double Utilities::getDistanceBetween(int friendsO[], int friendsK[], int friendsSizeO, int friendsSizeK, string f){
 

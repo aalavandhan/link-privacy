@@ -422,7 +422,7 @@ double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   generateFrequencyCache();
 }
 
-// Radius in meters
+// Radius in meters Adding gaussian noise
 // SEED HAS BEEN SET
 void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   boost::mt19937 rng;
@@ -479,6 +479,35 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   // percentage = (double) inRange / (double) total;
   // cout << "In Range : " << percentage << endl;
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
+void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double> node_locality, double radius){
+  int lid = 0;
+  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+    int user_id = u_it->first;
+    vector< Point* > *user_checkins = u_it->second;
+
+    auto nl_it = node_locality.find(user_id);
+    double locality = nl_it->second;
+
+    Utilities* util = new Utilities();
+
+    // Add noise
+    if(locality > 0.75){
+      for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
+        Point *p = (*loc_it);
+        pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), p->getTime());
+        lid++;
+      }
+    } else {
+      for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
+        Point *p = (*loc_it);
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime());
+        lid++;
+      }
+    }
+  }
 }
 
 //input:  grid cell distance in x direction (say, 100m grid). This value is independent of grid size in headers.h.
