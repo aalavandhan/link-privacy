@@ -252,26 +252,27 @@ int main(int argc, char *argv[]){
   // testpTools();
   // exit(-1);
 
+  // cout << "------------- Loading checkins ---------------" << endl;
+  // GPOs* gpos = new GPOs(argv[2]);
+  // cout << "------------- Loading complete ---------------" << endl;
+
+
   cout << "------------- Loading checkins ---------------" << endl;
-  GPOs* gpos = new GPOs(argv[2]);
+  GPOs* g = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
 
   // testing grid snapping
-
-  // cout << "------------- Loading checkins ---------------" << endl;
-  // GPOs* g = new GPOs(argv[2]);
-  // cout << "------------- Loading complete ---------------" << endl;
-
   // GPOs* gpos = new GPOs();
   // gpos->createNewGPOsbyGridSnapping(g, r1); //second var is the x distance of a cell is km
   // cout << "Number of locations loaded " << gpos->locations.size() << endl;
   // cout << "------------- Noise added -------------------" << endl;
 
-  // GPOs* gpos = new GPOs();
-  // gpos->loadPurturbedLocations(g, r1);
-  // cout << "------------- Locations perturbed -------------------" << endl;
-  // gpos->groupLocationsByRange(gpos, r2, isOptimistic);
-  // cout << "------------- Locations Grouped -------------------" << endl;
+  GPOs* gg = new GPOs();
+  GPOs* gpos = new GPOs();
+  gg->loadPurturbedLocations(g, r1);
+  cout << "------------- Locations perturbed -------------------" << endl;
+  gpos->groupLocationsByRange(gg, r2, isOptimistic);
+  cout << "------------- Locations Grouped -------------------" << endl;
 
 
   // cout << "----- Loading Cooccurrence Matrix --- " << endl;
@@ -295,20 +296,21 @@ int main(int argc, char *argv[]){
   // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
   // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
 
-  cout << "------------- Computing node locality of all users ---------------" << endl;
-  spos->computeNodeLocality(gpos);
-  spos->writeNodeLocalityToFile();
+  // cout << "------------- Computing node locality of all users ---------------" << endl;
+  // spos->computeNodeLocality(gpos);
+  // spos->writeNodeLocalityToFile();
 
+  // cout << "------------- Load computed node locality ---------------" << endl;
+  // spos->loadNodeLocalityFromFile();
 
+  SimpleQueries* query = new SimpleQueries(gpos, spos);
 
-  // SimpleQueries* query = new SimpleQueries(gpos, spos);
-
-  // cout << "------------- Evaluating range utility ---------------" << endl;
-  // query->checkUtilityRange(locations_of_interest_file, g, 25);
-  // query->checkUtilityRange(locations_of_interest_file, g, 50);
-  // query->checkUtilityRange(locations_of_interest_file, g, 100);
-  // query->checkUtilityRange(locations_of_interest_file, g, 200);
-  // query->checkUtilityRange(locations_of_interest_file, g, 400);
+  cout << "------------- Evaluating range utility ---------------" << endl;
+  query->checkUtilityRange(locations_of_interest_file, g, 25);
+  query->checkUtilityRange(locations_of_interest_file, g, 50);
+  query->checkUtilityRange(locations_of_interest_file, g, 100);
+  query->checkUtilityRange(locations_of_interest_file, g, 200);
+  query->checkUtilityRange(locations_of_interest_file, g, 400);
 
 
   // cout << "------------- Evaluating range proximity ---------------" << endl;

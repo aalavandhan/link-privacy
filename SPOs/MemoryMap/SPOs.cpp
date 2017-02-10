@@ -533,8 +533,25 @@ void SPOs::writeNodeLocalityToFile(){
   for (auto u_it = node_locality->begin(); u_it != node_locality->end(); u_it++){
     double uid = u_it->first;
     double locality = u_it->second;
-    output_file << uid << "," << locality <<endl;
+    output_file << uid << "\t" << locality <<endl;
   }
   cout << "------- Wrote node locality to files " << node_locality->size() << endl;
   output_file.close();
+}
+
+
+map< int, double >* SPOs::loadNodeLocalityFromFile(){
+  node_locality  = new map< int, double >();
+  ifstream fin("node-locality.csv");
+  if (!fin){
+    cout << "Cannot open node locality file node_locality.csv" << endl;
+  }
+  double user_id, locality;
+
+  while(fin){
+    fin >> user_id >> locality;
+    node_locality->insert(make_pair(user_id, locality));
+  }
+
+  return node_locality;
 }

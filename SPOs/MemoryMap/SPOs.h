@@ -57,6 +57,6 @@ public:
     vector<double>* computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends);
     double computeNodeLocality(GPOs* gpos, int source);
     map< int, double >* computeNodeLocality(GPOs* gpos);
-
+    map< int, double >* loadNodeLocalityFromFile();
     void writeNodeLocalityToFile();
 };
