@@ -292,8 +292,8 @@ int main(int argc, char *argv[]){
   // SPOs* spos = new SPOs(gpos);
   // spos->load(argv[1]);
 
-  cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
-  cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
+  // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
+  // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
 
   cout << "------------- Computing node locality of all users ---------------" << endl;
   spos->computeNodeLocality(gpos);

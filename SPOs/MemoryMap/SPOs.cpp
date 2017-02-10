@@ -496,7 +496,10 @@ double SPOs::computeNodeLocality(GPOs* gpos, int source){
     locality_sum += exp( -dist / NODE_LOCALITY_BETA );
   }
 
-  node_locality = 1/distances->size() * locality_sum;
+  if(distances->size() != 0)
+    node_locality = 1/distances->size() * locality_sum;
+  else
+    node_locality = 0;
 
   return node_locality;
 }
