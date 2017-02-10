@@ -446,8 +446,8 @@ vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source,
 
 
 double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
-  double sum_distance=0, inf=std::numeric_limits<double>::infinity();
-  int count=0;
+  double inf=std::numeric_limits<double>::infinity();
+  unsigned int count=0, sum_distance=0, f_counter=0;
 
 
   for(auto u_it = socialgraph_map->begin(); u_it != socialgraph_map->end(); u_it++){
@@ -459,19 +459,22 @@ double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
     for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
       double dist = (*d_it);
       if(dist != inf){
-        sum_distance += dist;
+        sum_distance += (unsigned int) dist;
         count++;
       }
     }
 
-    cout << "Processed Edges : " << count << "\tSum distance : " << sum_distance << endl;
+    if(f_counter%1000 == 0)
+      cout << "Processed Edges : " << count << "\tSum distance : " << sum_distance << endl;
 
     // Freeing memory
     distances->clear();
     delete distances;
+
+    f_counter++;
   }
 
-  double mean_distance = sum_distance / count;
+  double mean_distance = (double) sum_distance / (double) count;
   return mean_distance;
 }
 
