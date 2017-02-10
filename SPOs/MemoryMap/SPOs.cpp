@@ -412,6 +412,7 @@ double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, ve
 }
 
 vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends){
+  double inf=std::numeric_limits<double>::infinity();
   vector<double>* distances = new vector<double>();
 
   vector< Point* >* source_checkins;
@@ -438,7 +439,10 @@ vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source,
 
     double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
 
-    distances->push_back(distance);
+
+    // Handling users without any checkins
+    if(distance != inf)
+      distances->push_back(distance);
   }
 
   return distances;
@@ -446,7 +450,6 @@ vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source,
 
 
 double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
-  double inf=std::numeric_limits<double>::infinity();
   unsigned int count=0, sum_distance=0, f_counter=0;
 
 
@@ -458,10 +461,8 @@ double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
 
     for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
       double dist = (*d_it);
-      if(dist != inf){
-        sum_distance += (unsigned int) dist;
-        count++;
-      }
+      sum_distance += (unsigned int) dist;
+      count++;
     }
 
     if(f_counter%1000 == 0)
@@ -480,41 +481,57 @@ double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
 
 
 // Distance matters: Geo-social metrics for online social networks
-// double SPOs::computeNodeLocality(GPOs* gpos, int source){
-//   int *friends;
-//   unsigned int numOfFriends;
+double SPOs::computeNodeLocality(GPOs* gpos, int source){
+  auto f_it = socialgraph_map->find(source);
 
-//   auto source_checkins_it = gpos->user_to_location->find(source);
-//   vector< Point* >* source_checkins = source_checkins_it->second;
+  unordered_set<int>* friends = f_it->second;
 
-//   getFriends(source, &friends, &numOfFriends);
+  double locality_sum=0, node_locality=0;
 
-//   double locality_sum=0, node_locality;
+  vector<double>* distances = computeDistancesBetweenUserFriends(gpos, source, friends);
 
-//   for(auto f = friends->begin(); f != friends->end(); f++){
-//     int fid = (*f);
-//     auto friend_checkins_it = gpos->user_to_location->find(fid);
-//     vector< Point* >* friend_checkins = friend_checkins_it->second;
+  for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
+    double dist = (*d_it);
 
-//     double closestDistanceSq = std::numeric_limits<double>::infinity();
+    locality_sum += exp( -dist / NODE_LOCALITY_BETA );
+  }
 
-//     for(auto s_it=source_checkins->begin(); s_it != source_checkins->end(); s_it++){
-//       Point * source_checkin = (*s_it);
-//       for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
-//         Point * friend_checkin = (*f_it);
-//         double distSq = gpos->distanceBetween(source_checkin, friend_checkin);
-//         if(distSq < closestDistanceSq){
-//           closestDistanceSq = distSq;
-//         }
-//       }
-//     }
-//     delete (*f);
+  node_locality = 1/distances->size() * locality_sum;
 
-//     locality_sum += exp( -sqrt(closestDistanceSq) / NODE_LOCALITY_BETA );
-//   }
-//   delete friends;
+  return node_locality;
+}
 
-//   node_locality = (1/numOfFriends) * locality_sum;
+map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
+  node_locality  = new map< int, double >();
 
-//   return node_locality;
-// }
+  int count=0;
+
+  cout << "Computing node locality" << endl;
+
+  for(auto u_it = socialgraph_map->begin(); u_it != socialgraph_map->end(); u_it++){
+    int source = u_it->first;
+    double locality = computeNodeLocality(gpos, source);
+    node_locality->insert(make_pair(source, locality));
+
+    if(count%1000 == 0)
+      cout << "User Count : " << count << endl;
+
+    count++;
+  }
+
+  cout << "Completed node locality" << endl;
+
+  return node_locality;
+}
+
+void SPOs::writeNodeLocalityToFile(){
+  ofstream output_file;
+  output_file.open("node-locality.csv");
+  for (auto u_it = node_locality->begin(); u_it != node_locality->end(); u_it++){
+    double uid = u_it->first;
+    double locality = u_it->second;
+    output_file << uid << "," << locality <<endl;
+  }
+  cout << "------- Wrote node locality to files " << node_locality->size() << endl;
+  output_file.close();
+}

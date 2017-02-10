@@ -222,6 +222,14 @@ void testpTools(){
   cout<<"CabRenDiversity = "<<CabRenDiversity<<" CcdRenDiversity = "<<CcdRenDiversity<<" CabRenDiversity/CcdRenDiversity = "<< CabRenDiversity/CcdRenDiversity << endl;
 }
 
+void testDistance(){
+  GPOs *g = new GPOs();
+
+  Point p1 = Point(-77.037852, 38.898556, 1);
+  Point p2 = Point(-77.043934, 38.897147, 2);
+  cout << "Distance between (-77.037852, 38.898556) and (-77.043934, 38.897147) is " << g->distanceBetween(&p1, &p2) << "km" << endl;
+}
+
 
 int main(int argc, char *argv[]){
   cout.precision(15);
@@ -240,6 +248,7 @@ int main(int argc, char *argv[]){
   ALPHA = 0.480;
   BETA = 0.520;
 
+  // testDistance();
   // testpTools();
   // exit(-1);
 
@@ -285,6 +294,12 @@ int main(int argc, char *argv[]){
 
   cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
   cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
+
+  cout << "------------- Computing node locality of all users ---------------" << endl;
+  spos->computeNodeLocality(gpos);
+  spos->writeNodeLocalityToFile();
+
+
 
   // SimpleQueries* query = new SimpleQueries(gpos, spos);
 

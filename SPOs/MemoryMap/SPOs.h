@@ -15,6 +15,7 @@ private:
     Utilities util;
     GPOs *gpos;
     bool isGposSet;
+    map< int, double >* node_locality;
 
 public:
     SPOs();
@@ -54,4 +55,8 @@ public:
     double computeDistanceBetweenFriends(vector< Point* >* source_checkins, vector< Point* >* friend_checkins);
     double computeMeanDistanceBetweenAllFriends(GPOs* gpos);
     vector<double>* computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends);
+    double computeNodeLocality(GPOs* gpos, int source);
+    map< int, double >* computeNodeLocality(GPOs* gpos);
+
+    void writeNodeLocalityToFile();
 };
