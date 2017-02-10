@@ -2,14 +2,16 @@
 
 Utilities::Utilities(){
 
-    srand((unsigned)time(NULL));
-
+  srand((unsigned)time(NULL));
 }
 
 Utilities::~Utilities(){}
 
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
   boost::mt19937 rng;
+  static unsigned int seed = rand() % 10000;
+  rng.seed(++seed);
+
   boost::normal_distribution<> nd(0.0, radius/2);
   boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
 
