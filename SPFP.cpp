@@ -275,15 +275,9 @@ int main(int argc, char *argv[]){
   // cout << "------------- Locations Grouped -------------------" << endl;
 
 
-  GPOs* gpos = new GPOs();
-  gpos->loadPurturbedLocations(g, r1);
-  cout << "------------- Locations perturbed -------------------" << endl;
-
-
   // GPOs* gpos = new GPOs();
-  // gpos->loadPurturbedLocationsBasedOnNodeLocality(g, r1);
-  // cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
-
+  // gpos->loadPurturbedLocations(g, r1);
+  // cout << "------------- Locations perturbed -------------------" << endl;
 
   // cout << "----- Loading Cooccurrence Matrix --- " << endl;
   // gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
@@ -310,12 +304,18 @@ int main(int argc, char *argv[]){
   // spos->computeNodeLocality(gpos);
   // spos->writeNodeLocalityToFile();
 
-  // cout << "------------- Load computed node locality ---------------" << endl;
-  // spos->loadNodeLocalityFromFile();
+  cout << "------------- Load computed node locality ---------------" << endl;
+  map< int, double >* node_locality = spos->loadNodeLocalityFromFile();
+
+  GPOs* gpos = new GPOs();
+  gpos->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1);
+  cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
+
 
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
   cout << "------------- Evaluating range utility ---------------" << endl;
+  query->checkUtilityRange(locations_of_interest_file, g, 10);
   query->checkUtilityRange(locations_of_interest_file, g, 25);
   query->checkUtilityRange(locations_of_interest_file, g, 50);
   query->checkUtilityRange(locations_of_interest_file, g, 100);

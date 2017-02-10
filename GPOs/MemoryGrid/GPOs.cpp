@@ -481,13 +481,13 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double> node_locality, double radius){
+void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius){
   int lid = 0;
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
     int user_id = u_it->first;
     vector< Point* > *user_checkins = u_it->second;
 
-    auto nl_it = node_locality.find(user_id);
+    auto nl_it = node_locality->find(user_id);
     double locality = nl_it->second;
 
     Utilities* util = new Utilities();
