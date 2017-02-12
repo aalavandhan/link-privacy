@@ -296,9 +296,9 @@ int main(int argc, char *argv[]){
 
 
   // test gaussian noise without grouping
-  GPOs* gpos = new GPOs();
-  gpos->loadPurturbedLocations(g, r1);
-  cout << "------------- Locations perturbed -------------------" << endl;
+  // GPOs* gpos = new GPOs();
+  // gpos->loadPurturbedLocations(g, r1);
+  // cout << "------------- Locations perturbed -------------------" << endl;
 
   // cout << "----- Loading Cooccurrence Matrix --- " << endl;
   // gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
@@ -313,6 +313,8 @@ int main(int argc, char *argv[]){
   cout << "------------- Loading SocialGraph ---------------" << endl;
   SPOs* spos = new SPOs();
   spos->load(argv[1]);
+
+  spos->precomputeKatzScore();
 
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs(g);
@@ -329,7 +331,7 @@ int main(int argc, char *argv[]){
   // spos->computeNodeLocality(gpos);
   // spos->writeNodeLocalityToFile();
 
-  SimpleQueries* query = new SimpleQueries(gpos, spos);
+  // SimpleQueries* query = new SimpleQueries(gpos, spos);
 
   // cout << "------------- Evaluating range utility ---------------" << endl;
   // query->checkUtilityRange(locations_of_interest_file, g, 10);
@@ -341,7 +343,7 @@ int main(int argc, char *argv[]){
 
 
   // cout << "------------- Evaluating range proximity ---------------" << endl;
-  query->checkUtilityProximity(locations_of_interest_file, g, 100, 50);
+  // query->checkUtilityProximity(locations_of_interest_file, g, 100, 50);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 100);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 200);
 

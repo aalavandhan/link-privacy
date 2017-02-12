@@ -55,6 +55,25 @@ double SPOs::getKatzScore(int source, int target){
   return score;
 }
 
+double SPOs::precomputeKatzScore(){
+  ofstream output_file;
+  output_file.open("katz-score.csv");
+
+  for(auto u1_it = socialgraph_map->begin(); u1_it != socialgraph_map->end(); u1_it++){
+    for(auto u2_it = socialgraph_map->begin(); u2_it != socialgraph_map->end(); u2_it++){
+      int source = u1_it->first;
+      int target = u2_it->first;
+
+      if(u1_it != u2_it){
+        double score = getKatzScore(source, target);
+        output_file << source << " " << target << " " << score <<endl;
+      }
+    }
+  }
+  cout << "------- Wrote katz scores to file " << node_locality->size() << endl;
+  output_file.close();
+}
+
 /*
 loads the social graph into a map/hashtable containing
 (id, value) pair. The "value" data structure stores the
