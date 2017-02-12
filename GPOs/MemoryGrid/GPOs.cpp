@@ -512,7 +512,7 @@ void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radiu
     }
   }
 
-  cout << "------- Perturbed checkins based on node locality --------- " << endl;
+  cout << "------- Perturbed checkins based on location entropy --------- " << endl;
   cout << "Done! Number of locations: " <<  locations.size() << endl;
   cout << "Number of locations with added noise: " <<  lid - LOCATION_NOISE_BOUND << endl;
   cout << " -------------------------------------- " << endl;

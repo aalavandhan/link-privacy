@@ -117,7 +117,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 // Given a set of locations of interest and a range  this utility counts the pairs of users with
 // katz score greater than the defined treshold
 void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh){
-  cout << "Computing user proximity list for base gpos : " << endl;
+  cout << "Computing user proximity list for base gpos " << endl;
   // Before adding noise
   vector< unordered_set< pair<int,int>, PairHasher >* >* base_proximity_list = SimpleQueries(base_gpos, spos).computeProximityUserList(fileName, radius, tresh);
   cout << "Computed user proximity list for base gpos : " << base_proximity_list->size() << endl;
@@ -207,17 +207,20 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
             u1id = temp;
           }
 
+          // cout << u1id << " " << u2id << " ";
           double KatzScore = spos->getKatzScore(u1id, u2id);
-          // cout << u1id << " " << u2id << " " << KatzScore << endl;
-          if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end()){
+          // cout << KatzScore << endl;
+          if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end() && KatzScore > 0){
             proximate_users->insert(make_pair(u1id, u2id));
             proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
           }
         }
       }
 
+      cout << "computed ranked pair : " << proximate_users->size() << " " << proximate_users_set->size() << endl;
+
       auto rk_it=proximate_users_set->begin();
-      for(int count=0; count < tresh; count++, rk_it++){
+      for(int count=0; count < tresh && rk_it != proximate_users_set->end(); count++, rk_it++){
         int u1id = rk_it->getId1();
         int u2id = rk_it->getId2();
         if(u1id > u2id){
@@ -227,6 +230,8 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
         }
         ranked_proximate_users->insert(make_pair(u1id, u2id));
       }
+
+      cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
     }
 
     // Delete

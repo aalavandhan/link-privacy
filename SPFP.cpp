@@ -259,7 +259,7 @@ int main(int argc, char *argv[]){
 
   cout << "------------- Loading checkins ---------------" << endl;
   GPOs* g = new GPOs(argv[2]);
-  g->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // g->countU2UCoOccurrences((uint) time_range_in_seconds);
   cout << "------------- Loading complete ---------------" << endl;
 
 
@@ -271,12 +271,12 @@ int main(int argc, char *argv[]){
 
 
   // test Gaussian noise with grouping
-  GPOs* gg = new GPOs();
-  GPOs* gpos = new GPOs();
-  gg->loadPurturbedLocations(g, r1);
-  cout << "------------- Locations perturbed -------------------" << endl;
-  gpos->groupLocationsByRange(gg, r2, isOptimistic);
-  cout << "------------- Locations Grouped -------------------" << endl;
+  // GPOs* gg = new GPOs();
+  // GPOs* gpos = new GPOs();
+  // gg->loadPurturbedLocations(g, r1);
+  // cout << "------------- Locations perturbed -------------------" << endl;
+  // gpos->groupLocationsByRange(gg, r2, isOptimistic);
+  // cout << "------------- Locations Grouped -------------------" << endl;
 
   // test Gaussian for high node locality  noise without grouping
   // cout << "------------- Load computed node locality ---------------" << endl;
@@ -296,27 +296,27 @@ int main(int argc, char *argv[]){
 
 
   // test gaussian noise without grouping
-  // GPOs* gpos = new GPOs();
-  // gpos->loadPurturbedLocations(g, r1);
-  // cout << "------------- Locations perturbed -------------------" << endl;
+  GPOs* gpos = new GPOs();
+  gpos->loadPurturbedLocations(g, r1);
+  cout << "------------- Locations perturbed -------------------" << endl;
 
-  cout << "----- Loading Cooccurrence Matrix --- " << endl;
-  gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
-  cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
+  // cout << "----- Loading Cooccurrence Matrix --- " << endl;
+  // gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 
 
-  cout << "----- Calculating Location Entropy --- " << endl;
-  gpos->calculateLocationEntropy();
-  cout << "----- Completed Calculating Location Entropy --- " << endl;
+  // cout << "----- Calculating Location Entropy --- " << endl;
+  // gpos->calculateLocationEntropy();
+  // cout << "----- Completed Calculating Location Entropy --- " << endl;
 
   // Loading social network and checkins
-  // cout << "------------- Loading SocialGraph ---------------" << endl;
-  // SPOs* spos = new SPOs();
-  // spos->load(argv[1]);
-
   cout << "------------- Loading SocialGraph ---------------" << endl;
-  SPOs* spos = new SPOs(g);
+  SPOs* spos = new SPOs();
   spos->load(argv[1]);
+
+  // cout << "------------- Loading SocialGraph ---------------" << endl;
+  // SPOs* spos = new SPOs(g);
+  // spos->load(argv[1]);
 
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs(gpos);
@@ -341,7 +341,7 @@ int main(int argc, char *argv[]){
 
 
   // cout << "------------- Evaluating range proximity ---------------" << endl;
-  // query->checkUtilityProximity(locations_of_interest_file, g, 100, 50);
+  query->checkUtilityProximity(locations_of_interest_file, g, 100, 50);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 100);
   // query->checkUtilityProximity(locations_of_interest_file, g, 500, 200);
 
@@ -357,13 +357,13 @@ int main(int argc, char *argv[]){
 
 
 
-  cout << "----- Precomputing matrices --- " << endl;
-  query->buildMatrices(0.1);
-  cout << "----- Completed Precomputing matrices --- " << endl;
+  // cout << "----- Precomputing matrices --- " << endl;
+  // query->buildMatrices(0.1);
+  // cout << "----- Completed Precomputing matrices --- " << endl;
 
-  cout << "----- Calculating Social Strength --- " << endl;
-  query->cacluateSocialStrength();
-  cout << "----- Completed calculating Social Strength --- " << endl;
+  // cout << "----- Calculating Social Strength --- " << endl;
+  // query->cacluateSocialStrength();
+  // cout << "----- Completed calculating Social Strength --- " << endl;
 
 
   // double thresholds[9] = {0.5,1,2,3,4,5,7,10,25};
@@ -373,9 +373,9 @@ int main(int argc, char *argv[]){
   //   cout << "--------------------------------------------";
   // }
 
-  cout << "----- Computing accuracy for threshold --- 1.6 " <<endl;
-  query->verifySocialStrength(1.6);
-  cout << "--------------------------------------------";
+  // cout << "----- Computing accuracy for threshold --- 1.6 " <<endl;
+  // query->verifySocialStrength(1.6);
+  // cout << "--------------------------------------------";
 
   // map<int, Point*> locations;
   // ofstream output_file;
