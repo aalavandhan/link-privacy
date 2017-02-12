@@ -17,6 +17,8 @@ private:
     bool isGposSet;
     map< int, double >* node_locality;
 
+    map<std::pair<int,int>, double> katzCache = map<std::pair<int,int>, double>();
+
 public:
     SPOs();
     SPOs(GPOs *gpos);

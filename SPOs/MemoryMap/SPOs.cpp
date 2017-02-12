@@ -33,8 +33,26 @@ multiset<my_pair, pair_comparator_descending>* SPOs::getDegreeSet(){
     return degreeSet;
 }
 
+
+// Memorizing Katz computation
 double SPOs::getKatzScore(int source, int target){
-    return KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
+  if(source > target){
+    int temp = target;
+    target = source;
+    source = temp;
+  }
+
+  auto katz_it = katzCache.find(std::make_pair(source,target));
+  double score;
+
+  if(katz_it != katzCache.end()){
+    score = katz_it->second;
+  } else{
+    score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
+    katzCache[ std::make_pair(source,target) ] = score;
+  }
+
+  return score;
 }
 
 /*
