@@ -332,6 +332,28 @@ unordered_map<int, double>* GPOs::calculateLocationEntropy(){
     double entropy = calcEntropyFromLocationVector(freqVector , location_counts.size());
     location_to_H.insert(make_pair(location_id, entropy));
   }
+
+  // map <int,int> entropy_histogram;
+
+  // for(auto l_it=location_to_H.begin(); l_it != location_to_H.end(); l_it++){
+  //   double entropy = l_it->second;
+  //   int bin = (int) floor(entropy * 10);
+  //   auto it = entropy_histogram.find(bin);
+  //   if(it != entropy_histogram.end()){
+  //     it->second = it->second + 1;
+  //   }
+  //   else{
+  //     entropy_histogram.insert(make_pair(bin,1));
+  //   }
+  // }
+
+  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  // cout << "Entropy distribution  : " << endl;
+  // for(auto b_it = entropy_histogram.begin(); b_it != entropy_histogram.end(); b_it++){
+  //   cout << "Bin : " << b_it->first << "\t Count : " << b_it->second << endl;
+  // }
+  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
   return &location_to_H;
 }
 
@@ -464,7 +486,39 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius){
+void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit){
+  int lid = LOCATION_NOISE_BOUND;
+  for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
+    int location = l_it->first;
+    vector< Point* > *checkins = l_it->second;
+
+    auto h_it = gpos->location_to_H.find(location);
+    double entropy = h_it->second;
+
+    Utilities* util = new Utilities();
+
+    if(entropy > limit){
+      for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+        Point *p = (*loc_it);
+        pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime());
+        lid++;
+      }
+    } else {
+      for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+        Point *p = (*loc_it);
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime());
+      }
+    }
+  }
+
+  cout << "------- Perturbed checkins based on node locality --------- " << endl;
+  cout << "Done! Number of locations: " <<  locations.size() << endl;
+  cout << "Number of locations with added noise: " <<  lid - LOCATION_NOISE_BOUND << endl;
+  cout << " -------------------------------------- " << endl;
+}
+
+void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit){
   // TODO: Pick a random id
   int lid = LOCATION_NOISE_BOUND;
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
@@ -477,17 +531,17 @@ void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double
     Utilities* util = new Utilities();
 
     // Add noise
-    if(locality > 0.75){
+    if(locality > limit){
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, user_id, p->getTime());
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime());
         lid++;
       }
     } else {
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), user_id, p->getTime());
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime());
       }
     }
   }

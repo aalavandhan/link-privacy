@@ -88,5 +88,6 @@ public:
     void countU2UCoOccurrences(uint time_block);
     double distanceBetween(Point *a, Point *b);
 
-    void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius);
+    void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
+    void loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit);
 };

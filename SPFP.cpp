@@ -259,6 +259,7 @@ int main(int argc, char *argv[]){
 
   cout << "------------- Loading checkins ---------------" << endl;
   GPOs* g = new GPOs(argv[2]);
+  g->countU2UCoOccurrences((uint) time_range_in_seconds);
   cout << "------------- Loading complete ---------------" << endl;
 
 
@@ -270,32 +271,28 @@ int main(int argc, char *argv[]){
 
 
   // test Gaussian noise with grouping
-  // GPOs* gg = new GPOs();
-  // GPOs* gpos = new GPOs();
-  // gg->loadPurturbedLocations(g, r1);
-  // cout << "------------- Locations perturbed -------------------" << endl;
-  // gpos->groupLocationsByRange(gg, r2, isOptimistic);
-  // cout << "------------- Locations Grouped -------------------" << endl;
+  GPOs* gg = new GPOs();
+  GPOs* gpos = new GPOs();
+  gg->loadPurturbedLocations(g, r1);
+  cout << "------------- Locations perturbed -------------------" << endl;
+  gpos->groupLocationsByRange(gg, r2, isOptimistic);
+  cout << "------------- Locations Grouped -------------------" << endl;
 
-  // test Gaussian for high node locality  noise with grouping
+  // test Gaussian for high node locality  noise without grouping
   // cout << "------------- Load computed node locality ---------------" << endl;
   // SPOs* tmp_spos = new SPOs();
   // map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
-  // GPOs* gg = new GPOs();
-  // gg->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1);
-  // cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
   // GPOs* gpos = new GPOs();
-  // gpos->groupLocationsByRange(gg, r2, isOptimistic);
-  // cout << "------------- Locations Grouped -------------------" << endl;
+  // gpos->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1, 0.75);
+  // gpos->generateFrequencyCache();
+  // cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
 
-  // test Gaussian for high node locality  noise without grouping
-  cout << "------------- Load computed node locality ---------------" << endl;
-  SPOs* tmp_spos = new SPOs();
-  map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
-  GPOs* gpos = new GPOs();
-  gpos->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1);
-  gpos->generateFrequencyCache();
-  cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
+  // test Gaussian for high location entropy noise without grouping
+  // GPOs* gpos = new GPOs();
+  // g->calculateLocationEntropy();
+  // gpos->loadPurturbedLocationsBasedOnLocationEntropy(g, r1, 1);
+  // gpos->generateFrequencyCache();
+  // cout << "------------- Locations perturbed Based on  Location Entropy -------------------" << endl;
 
 
   // test gaussian noise without grouping
@@ -318,8 +315,12 @@ int main(int argc, char *argv[]){
   // spos->load(argv[1]);
 
   cout << "------------- Loading SocialGraph ---------------" << endl;
-  SPOs* spos = new SPOs(gpos);
+  SPOs* spos = new SPOs(g);
   spos->load(argv[1]);
+
+  // cout << "------------- Loading SocialGraph ---------------" << endl;
+  // SPOs* spos = new SPOs(gpos);
+  // spos->load(argv[1]);
 
   // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
   // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
