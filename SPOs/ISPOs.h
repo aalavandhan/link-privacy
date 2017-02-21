@@ -6,4 +6,5 @@ public:
 	  virtual int getUserDegree(int id ) =0;
     virtual int getNumberOfFriends( ) =0;
     virtual double getKatzScore(int source, int target) = 0;
+    virtual map< int, double >* getNodeLocality()=0;
 };

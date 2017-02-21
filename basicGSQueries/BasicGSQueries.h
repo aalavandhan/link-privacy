@@ -22,5 +22,8 @@ public:
     void checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh);
     vector< unordered_set< pair<int,int>, PairHasher >* >* computeProximityUserList(const char* fileName, double radius, double tresh);
     void checkUtilityStats(const char* fileName, double radius);
+    void cacluateCooccurrenceDistribution(vector <int> *users);
+    void cacluateCooccurrenceDistributionBasedOnNodeLocality(double tresh);
+    void cacluateCooccurrenceDistributionBasedOnLocationEntropy(double tresh);
 };
 

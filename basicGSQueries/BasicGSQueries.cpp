@@ -416,3 +416,80 @@ map<int, vector<my_pair>*> SimpleQueries::cacluateSocialStrength(){
     }
     return social_strength_matrix;
 }
+
+void SimpleQueries::cacluateCooccurrenceDistributionBasedOnLocationEntropy(double tresh){
+  unordered_map<int, double>* location_to_H = gpos->getLocationEntropy();
+  vector <int> *users = new vector <int>();
+  map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
+
+  for(auto it=location_to_H->begin(); it != location_to_H->end(); it++){
+    int location = it->first;
+    double entropy = it->second;
+
+    if(entropy >= tresh){
+      auto l_it = location_to_user->find(location);
+      vector <Point*>* checkins = l_it->second;
+      for(auto checkin=checkins->begin(); checkin != checkins->end(); checkin++){
+        Point *p = *checkin;
+        users->push_back(p->getUID());
+      }
+    }
+  }
+
+  // Sorting user list
+  sort(users->begin(), users->end());
+  // Removing duplicates
+  users->erase( unique( users->begin(), users->end() ), users->end() );
+
+  cout << "Number of users who've checked into places with LE more than " << tresh << " is " << users->size() << endl;
+
+  cacluateCooccurrenceDistribution(users);
+
+  users->clear();
+  delete users;
+}
+
+void SimpleQueries::cacluateCooccurrenceDistributionBasedOnNodeLocality(double tresh){
+  map< int, double >* node_locality = spos->getNodeLocality();
+
+  vector <int> *users = new vector <int>();
+
+  for(auto it=node_locality->begin(); it != node_locality->end(); it++){
+    int user = it->first;
+    double locality = it->second;
+    if(locality >= tresh)
+      users->push_back(user);
+  }
+
+  cout << "Number of users with node locality more than " << tresh << " is " << users->size() << endl;
+
+  cacluateCooccurrenceDistribution(users);
+
+  users->clear();
+  delete users;
+}
+
+void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
+  map <int,int> co_occ_histogram;
+
+  for(auto u_it=users->begin(); u_it != users->end(); u_it++){
+    int c_user = (*u_it);
+    int count = gpos->getUserCooccurrences(c_user);
+
+    auto h_it = co_occ_histogram.find(count);
+    int bin = (int) floor(count/10);
+    if(h_it != co_occ_histogram.end()){
+      h_it->second = h_it->second + 1;
+    }
+    else{
+      co_occ_histogram.insert(make_pair(bin,1));
+    }
+  }
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Cooccurrence distribution  : " << endl;
+  for(auto b_it = co_occ_histogram.begin(); b_it != co_occ_histogram.end(); b_it++){
+    cout << "Bin : " << b_it->first << "\t Count : " << b_it->second << endl;
+  }
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}

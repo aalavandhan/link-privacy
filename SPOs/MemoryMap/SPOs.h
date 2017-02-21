@@ -41,6 +41,7 @@ public:
 	virtual int getUserDegree(int id);
     virtual int getNumberOfFriends();
 	virtual multiset<my_pair, pair_comparator_descending>* getDegreeSet();
+    virtual map< int, double >* getNodeLocality();
 
 	void printTriangles( int id, vector<int> friendList);
 

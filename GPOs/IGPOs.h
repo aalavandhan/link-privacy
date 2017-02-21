@@ -13,5 +13,7 @@ public:
     virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs()=0;
     virtual vector<int>* getUsersInRange(double x, double y, double radius)=0;
     virtual vector<int>* getUsersInRange(int source, double radius)=0;
+    virtual int getUserCooccurrences(int user_id)=0;
+    virtual map<int , vector< Point*>* >* getLocationToUser()=0;
 };
 

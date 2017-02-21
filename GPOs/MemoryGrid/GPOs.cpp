@@ -45,6 +45,10 @@ double GPOs::getTotalTime(){
   return totalTime;
 }
 
+map<int , vector< Point* >*>* GPOs::getLocationToUser(){
+  return &location_to_user;
+}
+
 void GPOs::generateFrequencyCache(){
   cout << "---- GENERATING CACHE ----" << endl;
   boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
@@ -907,4 +911,19 @@ double GPOs::distanceBetween(Point *a, Point *b){
   u = sin((lat2r - lat1r)/2);
   v = sin((lon2r - lon1r)/2);
   return 2.0 * EARTH_RADIUS_IN_KILOMETERS * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+
+int GPOs::getUserCooccurrences(int user_id){
+  int number_of_cooccurrences = 0;
+  auto it = cooccurrence_matrix.find(user_id);
+  if(it != cooccurrence_matrix.end()){
+    auto map_of_vectors = it->second;
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      auto vector_of_locations = it_map->second;
+      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+        number_of_cooccurrences += it_vector->second;
+      }
+    }
+  }
+  return number_of_cooccurrences;
 }

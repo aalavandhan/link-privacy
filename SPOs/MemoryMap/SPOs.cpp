@@ -33,6 +33,10 @@ multiset<my_pair, pair_comparator_descending>* SPOs::getDegreeSet(){
     return degreeSet;
 }
 
+map< int, double >* SPOs::getNodeLocality(){
+  return node_locality;
+}
+
 
 // Memorizing Katz computation
 double SPOs::getKatzScore(int source, int target){
@@ -87,6 +91,8 @@ double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh)
 
     vector<int>* relavent_users = gpos->getUsersInRange(source, dTresh);
     cout <<"Relevant user list size :"<< relavent_users->size() << endl;
+
+
 
     for(auto u2_it = relavent_users->begin(); u2_it != relavent_users->end(); u2_it++){
       int target = (*u2_it);

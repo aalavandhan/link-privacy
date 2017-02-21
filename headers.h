@@ -136,10 +136,11 @@ extern double GAMMA;
 #include "pTools/RenyiEntropy.h"
 #include "pTools/WeightedEntropy.h"
 
+#include "GPOs/MemoryGrid/grid/Point.h"
+
 #include "GPOs/IGPOs.h"
 #include "SPOs/ISPOs.h"
 
-#include "GPOs/MemoryGrid/grid/Point.h"
 #include "utilities/Group.h"
 #include "basicGSQueries/BasicGSQueries.h"
 
