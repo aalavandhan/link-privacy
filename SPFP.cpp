@@ -314,7 +314,7 @@ int main(int argc, char *argv[]){
   SPOs* spos = new SPOs();
   spos->load(argv[1]);
 
-  spos->precomputeKatzScore();
+  spos->precomputeKatzScore(r1, r2);
 
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs(g);

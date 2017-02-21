@@ -55,22 +55,39 @@ double SPOs::getKatzScore(int source, int target){
   return score;
 }
 
-double SPOs::precomputeKatzScore(){
+double SPOs::precomputeKatzScore(int parts, int part){
   ofstream output_file;
-  output_file.open("katz-score.csv");
 
-  for(auto u1_it = socialgraph_map->begin(); u1_it != socialgraph_map->end(); u1_it++){
+  ostringstream ss;
+  ss << "katz-score-" << part << ".txt";
+
+  output_file.open(ss.str());
+
+  int start  = socialgraph_map->size() * (part - 1) / parts; // 0
+  int offset = socialgraph_map->size() * part       / parts; // 3400
+  int it     = start;
+
+  cout << "Number of users: " << socialgraph_map->size() << endl;
+  cout << "Start:  " << start << endl;
+  cout << "Offset: " << offset << endl;
+
+  auto u1_it = socialgraph_map->begin();
+  std::advance(u1_it, start);
+
+  for(; it < offset; it++){
+    // cout << "Iterator: " << it << " Offset: " << offset <<endl;
     for(auto u2_it = socialgraph_map->begin(); u2_it != socialgraph_map->end(); u2_it++){
       int source = u1_it->first;
       int target = u2_it->first;
 
       if(u1_it != u2_it){
-        double score = getKatzScore(source, target);
-        output_file << source << " " << target << " " << score <<endl;
+         double score = getKatzScore(source, target);
+         if(score > 0)
+          output_file << source << " " << target << " " << score << endl;
       }
     }
   }
-  cout << "------- Wrote katz scores to file " << node_locality->size() << endl;
+  cout << "------- Wrote katz scores to file " << endl;
   output_file.close();
 }
 
