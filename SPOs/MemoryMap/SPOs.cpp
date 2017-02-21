@@ -57,7 +57,7 @@ double SPOs::getKatzScore(int source, int target){
   return score;
 }
 
-double SPOs::precomputeKatzScore(int parts, int part, double dTresh){
+double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
   cout.precision(15);
 
   ofstream output_file;
