@@ -17,7 +17,7 @@ private:
     bool isGposSet;
     map< int, double >* node_locality;
 
-    map<std::pair<int,int>, double> katzCache = map<std::pair<int,int>, double>();
+    unordered_map<std::pair<int,int>, double, PairHasher> katzCache = unordered_map<std::pair<int,int>, double, PairHasher>();
 
 public:
     SPOs();
@@ -63,4 +63,5 @@ public:
     map< int, double >* loadNodeLocalityFromFile();
     void writeNodeLocalityToFile();
     double precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
+    void loadKatzScoreFromMemory();
 };

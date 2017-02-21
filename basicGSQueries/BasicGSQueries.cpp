@@ -201,15 +201,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
         for(; u2_it != u_set->end(); u2_it++){
           int u1id = (*u1_it);
           int u2id = (*u2_it);
-          if(u1id > u2id){
-            int temp = u2id;
-            u2id = u1id;
-            u1id = temp;
-          }
-
-          // cout << u1id << " " << u2id << " ";
           double KatzScore = spos->getKatzScore(u1id, u2id);
-          // cout << KatzScore << endl;
           if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end() && KatzScore > 0){
             proximate_users->insert(make_pair(u1id, u2id));
             proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
@@ -223,11 +215,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
       for(int count=0; count < tresh && rk_it != proximate_users_set->end(); count++, rk_it++){
         int u1id = rk_it->getId1();
         int u2id = rk_it->getId2();
-        if(u1id > u2id){
-          int temp = u2id;
-          u2id = u1id;
-          u1id = temp;
-        }
+        cout << u1id << " " << u2id << " "<< rk_it->getScore() << endl;
         ranked_proximate_users->insert(make_pair(u1id, u2id));
       }
 
@@ -236,9 +224,14 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
 
     // Delete
     // proximate_users_set
+    proximate_users_set->clear();
+    delete proximate_users_set;
     // proximate_users
+    proximate_users->clear();
+    delete proximate_users;
+    // cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
 
-    cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
+
     proximate_users_list->push_back(ranked_proximate_users);
   }
 

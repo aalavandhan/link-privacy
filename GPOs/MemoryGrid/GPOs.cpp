@@ -487,10 +487,17 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
-      Point *p = (*loc);
-      pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-      loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime());
-      lid++;
+
+      if(radius != 0){
+        Point *p = (*loc);
+        pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime());
+        lid++;
+      } else {
+        Point *p = (*loc);
+        loadPoint(p->getX(), p->getY(), lid, u->first, p->getTime());
+        lid++;
+      }
 
       // int bin = (int) floor(noise_distance);
       // auto it = noise_histogram.find(bin);

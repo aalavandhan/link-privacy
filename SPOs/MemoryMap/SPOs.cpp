@@ -40,26 +40,44 @@ map< int, double >* SPOs::getNodeLocality(){
 
 // Memorizing Katz computation
 double SPOs::getKatzScore(int source, int target){
-  // if(source < target){
-  //   int temp = target;
-  //   target = source;
-  //   source = temp;
-  // }
+  if(source > target){
+    int temp = target;
+    target = source;
+    source = temp;
+  }
 
-  // auto katz_it = katzCache.find(std::make_pair(source,target));
-  // double score;
+  auto katz_it = katzCache.find(std::make_pair(source,target));
+  double score;
 
-  // if(katz_it != katzCache.end()){
-  //   score = katz_it->second;
-  // } else{
-  //   score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
-  //   katzCache[ std::make_pair(source,target) ] = score;
-  // }
-
-  double score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
+  if(katz_it != katzCache.end()){
+    score = katz_it->second;
+  } else{
+    score = 0;
+  }
 
   return score;
 }
+
+
+void SPOs::loadKatzScoreFromMemory(){
+  node_locality  = new map< int, double >();
+  ifstream fin("katz-score.txt");
+  if (!fin){
+    cout << "Cannot open katz score file katz-score.csv" << endl;
+  }
+  int u1, u2, count=0;
+  double katz_score;
+
+  while(fin){
+    fin >> u1 >> u2 >> katz_score;
+    katzCache.insert( make_pair(make_pair(u1, u2), katz_score) );
+    count++;
+  }
+  cout << "Processed " << count << " lines " << endl;
+  cout << "Loaded Katz score into memory : " << katzCache.size() << endl;
+}
+
+
 
 double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
   cout.precision(15);
@@ -91,7 +109,6 @@ double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh)
 
     vector<int>* relavent_users = gpos->getUsersInRange(source, dTresh);
     cout <<"Relevant user list size :"<< relavent_users->size() << endl;
-
 
 
     for(auto u2_it = relavent_users->begin(); u2_it != relavent_users->end(); u2_it++){
