@@ -252,15 +252,15 @@ int main(int argc, char *argv[]){
   // testpTools();
   // exit(-1);
 
-  // cout << "------------- Loading checkins ---------------" << endl;
-  // GPOs* gpos = new GPOs(argv[2]);
-  // cout << "------------- Loading complete ---------------" << endl;
-
-
   cout << "------------- Loading checkins ---------------" << endl;
-  GPOs* g = new GPOs(argv[2]);
-  // g->countU2UCoOccurrences((uint) time_range_in_seconds);
+  GPOs* gpos = new GPOs(argv[2]);
   cout << "------------- Loading complete ---------------" << endl;
+
+
+  // cout << "------------- Loading checkins ---------------" << endl;
+  // GPOs* g = new GPOs(argv[2]);
+  // g->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // cout << "------------- Loading complete ---------------" << endl;
 
 
   // testing grid snapping
@@ -310,19 +310,19 @@ int main(int argc, char *argv[]){
   // cout << "----- Completed Calculating Location Entropy --- " << endl;
 
   // Loading social network and checkins
-  cout << "------------- Loading SocialGraph ---------------" << endl;
-  SPOs* spos = new SPOs();
-  spos->load(argv[1]);
-
-  spos->precomputeKatzScore(r1, r2);
+  // cout << "------------- Loading SocialGraph ---------------" << endl;
+  // SPOs* spos = new SPOs();
+  // spos->load(argv[1]);
 
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs(g);
   // spos->load(argv[1]);
 
-  // cout << "------------- Loading SocialGraph ---------------" << endl;
-  // SPOs* spos = new SPOs(gpos);
-  // spos->load(argv[1]);
+  cout << "------------- Loading SocialGraph ---------------" << endl;
+  SPOs* spos = new SPOs(gpos);
+  spos->load(argv[1]);
+
+  spos->precomputeKatzScore(r1, r2, time_range_in_seconds);
 
   // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
   // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;

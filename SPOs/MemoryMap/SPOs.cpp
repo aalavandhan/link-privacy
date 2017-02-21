@@ -57,7 +57,7 @@ double SPOs::getKatzScore(int source, int target){
   return score;
 }
 
-double SPOs::precomputeKatzScore(int parts, int part){
+double SPOs::precomputeKatzScore(int parts, int part, double dTresh){
   cout.precision(15);
 
   ofstream output_file;
@@ -77,25 +77,27 @@ double SPOs::precomputeKatzScore(int parts, int part){
   auto u1_it = socialgraph_map->begin();
   std::advance(u1_it, start);
 
-  int pairs = 0;
-  struct timeval startTime, endTime;
-  gettimeofday(&startTime, NULL);
+  // int pairs = 0;
+  // struct timeval startTime, endTime;
+  // gettimeofday(&startTime, NULL);
 
   for(int i = start; i < offset; i++, u1_it++){
     int source = u1_it->first;
     cout<<"Trying source: "<< source<<endl;
-    for(auto u2_it = socialgraph_map->begin(); u2_it != socialgraph_map->end(); u2_it++){
-      int target = u2_it->first;
-      if(u1_it != u2_it){
+
+    vector<int>* relavent_users = gpos->getUsersInRange(source, dTresh);
+    cout <<"Relevant user list size :"<< relavent_users->size() << endl;
+
+    for(auto u2_it = relavent_users->begin(); u2_it != relavent_users->end(); u2_it++){
+      int target = (*u2_it);
+      if(source != target){
         if(source < target){
            double score = getKatzScore(source, target);
-
-           pairs++;
-           if(pairs % 1000 == 0){
-             gettimeofday(&endTime, NULL);
-             cout << "Number of pairs" << pairs << "\tTime: "<< util.print_time(startTime, endTime)/1000 << endl;
-           }
-
+           // pairs++;
+           // if(pairs % 1000 == 0){
+           //   gettimeofday(&endTime, NULL);
+           //   cout << "Number of pairs" << pairs << "\tTime: "<< util.print_time(startTime, endTime)/1000 << endl;
+           // }
            if(score > 0){
               output_file << source << " " << target << " " << score << endl;
               // cout<< source << " " << target << " " << score << endl;
@@ -104,6 +106,9 @@ double SPOs::precomputeKatzScore(int parts, int part){
           break;
       }
     }
+
+    relavent_users->clear();
+    delete relavent_users;
   }
   cout << "------- Wrote katz scores to file " << endl;
   output_file.close();
@@ -510,7 +515,6 @@ vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source,
       friend_checkins = new vector< Point* >();
 
     double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
-
 
     // Handling users without any checkins
     if(distance != inf)

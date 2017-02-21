@@ -406,7 +406,36 @@ vector<int>* GPOs::getUsersInRange(double x, double y, double radius){
 
   // Sorting user list
   sort(users->begin(), users->end());
+  // Removing duplicates
   users->erase( unique( users->begin(), users->end() ), users->end() );
+
+  return users;
+}
+
+vector<int>* GPOs::getUsersInRange(int source, double radius){
+  vector<int> *users = new vector<int>();
+  auto source_users_checkins_it = user_to_location.find(source);
+
+  if(source_users_checkins_it != user_to_location.end()){
+    vector< Point* >* source_users_checkins = source_users_checkins_it->second;
+
+    for(auto c_it=source_users_checkins->begin(); c_it != source_users_checkins->end(); c_it++){
+      Point* checkin = (*c_it);
+      vector<int> *n_users = getUsersInRange(checkin->getX(),  checkin->getY(), radius);
+      users->insert( users->end(), n_users->begin(), n_users->end() );
+      n_users->clear();
+      delete n_users;
+    }
+    // Sorting user list
+    sort(users->begin(), users->end());
+    // Removing duplicates
+    users->erase( unique( users->begin(), users->end() ), users->end() );
+  }
+
+  // cout << "List of users in range : [ ";
+  // for (auto i = users->begin(); i != users->end(); ++i)
+  //   cout << *i << ',';
+  // cout << " ] " << endl;
 
   return users;
 }

@@ -56,6 +56,7 @@ public:
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
     virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs();
     virtual vector<int>* getUsersInRange(double x, double y, double radius);
+    virtual vector<int>* getUsersInRange(int source, double radius);
 
     unordered_map<int, double>* calculateLocationEntropy();
 
