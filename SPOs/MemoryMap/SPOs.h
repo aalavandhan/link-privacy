@@ -8,7 +8,7 @@ private:
     double totalTime;
     map<int, Value*> hashTable;
 
-	unordered_map< int, unordered_set<int>* >* socialgraph_map = new unordered_map< int, unordered_set<int>* >();
+	map< int, unordered_set<int>* >* socialgraph_map = new map< int, unordered_set<int>* >();
 
 //    Value* hashTable2[DATASET_SIZE];
     int areFriendsExecutions, getFriendsExecutions;

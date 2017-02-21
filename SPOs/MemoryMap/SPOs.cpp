@@ -36,26 +36,30 @@ multiset<my_pair, pair_comparator_descending>* SPOs::getDegreeSet(){
 
 // Memorizing Katz computation
 double SPOs::getKatzScore(int source, int target){
-  if(source > target){
-    int temp = target;
-    target = source;
-    source = temp;
-  }
+  // if(source < target){
+  //   int temp = target;
+  //   target = source;
+  //   source = temp;
+  // }
 
-  auto katz_it = katzCache.find(std::make_pair(source,target));
-  double score;
+  // auto katz_it = katzCache.find(std::make_pair(source,target));
+  // double score;
 
-  if(katz_it != katzCache.end()){
-    score = katz_it->second;
-  } else{
-    score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
-    katzCache[ std::make_pair(source,target) ] = score;
-  }
+  // if(katz_it != katzCache.end()){
+  //   score = katz_it->second;
+  // } else{
+  //   score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
+  //   katzCache[ std::make_pair(source,target) ] = score;
+  // }
+
+  double score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
 
   return score;
 }
 
 double SPOs::precomputeKatzScore(int parts, int part){
+  cout.precision(15);
+
   ofstream output_file;
 
   ostringstream ss;
@@ -63,9 +67,8 @@ double SPOs::precomputeKatzScore(int parts, int part){
 
   output_file.open(ss.str());
 
-  int start  = socialgraph_map->size() * (part - 1) / parts; // 0
-  int offset = socialgraph_map->size() * part       / parts; // 3400
-  int it     = start;
+  int start  = socialgraph_map->size() * (part - 1) / parts;
+  int offset = socialgraph_map->size() * part       / parts;
 
   cout << "Number of users: " << socialgraph_map->size() << endl;
   cout << "Start:  " << start << endl;
@@ -74,16 +77,31 @@ double SPOs::precomputeKatzScore(int parts, int part){
   auto u1_it = socialgraph_map->begin();
   std::advance(u1_it, start);
 
-  for(; it < offset; it++){
-    // cout << "Iterator: " << it << " Offset: " << offset <<endl;
-    for(auto u2_it = socialgraph_map->begin(); u2_it != socialgraph_map->end(); u2_it++){
-      int source = u1_it->first;
-      int target = u2_it->first;
+  int pairs = 0;
+  struct timeval startTime, endTime;
+  gettimeofday(&startTime, NULL);
 
+  for(int i = start; i < offset; i++, u1_it++){
+    int source = u1_it->first;
+    cout<<"Trying source: "<< source<<endl;
+    for(auto u2_it = socialgraph_map->begin(); u2_it != socialgraph_map->end(); u2_it++){
+      int target = u2_it->first;
       if(u1_it != u2_it){
-         double score = getKatzScore(source, target);
-         if(score > 0)
-          output_file << source << " " << target << " " << score << endl;
+        if(source < target){
+           double score = getKatzScore(source, target);
+
+           pairs++;
+           if(pairs % 1000 == 0){
+             gettimeofday(&endTime, NULL);
+             cout << "Number of pairs" << pairs << "\tTime: "<< util.print_time(startTime, endTime)/1000 << endl;
+           }
+
+           if(score > 0){
+              output_file << source << " " << target << " " << score << endl;
+              // cout<< source << " " << target << " " << score << endl;
+           }
+        }else
+          break;
       }
     }
   }

@@ -112,7 +112,7 @@ extern double GAMMA;
 
 
 #define KATZ_ATTENUATION 0.1
-#define KATZ_PATH_LENGTH 3
+#define KATZ_PATH_LENGTH 2
 
 #define NODE_LOCALITY_BETA 384
 
