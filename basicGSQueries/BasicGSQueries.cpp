@@ -415,56 +415,48 @@ map<int, vector<my_pair>*> SimpleQueries::cacluateSocialStrength(){
     return social_strength_matrix;
 }
 
-void SimpleQueries::cacluateCooccurrenceDistributionBasedOnLocationEntropy(double tresh){
+void SimpleQueries::cacluateCooccurrenceDistributionBasedOnLocationEntropy(){
+  cout << "Computing correlation between location_entropy and cooccurrences : " << endl;
+
   unordered_map<int, double>* location_to_H = gpos->getLocationEntropy();
-  vector <int> *users = new vector <int>();
   map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
+  double diff=0.5;
 
-  for(auto it=location_to_H->begin(); it != location_to_H->end(); it++){
-    int location = it->first;
-    double entropy = it->second;
-
-    if(entropy >= tresh){
-      auto l_it = location_to_user->find(location);
-      vector <Point*>* checkins = l_it->second;
-      for(auto checkin=checkins->begin(); checkin != checkins->end(); checkin++){
-        Point *p = *checkin;
-        users->push_back(p->getUID());
+  for(double i=0; i <= 7.5; i = i + diff){
+    int cooccurrence_count = 0;
+    for(auto it=location_to_H->begin(); it != location_to_H->end(); it++){
+      int location = it->first;
+      double entropy = it->second;
+      if(entropy >= i && entropy < i+diff){
+        auto l_it = location_to_user->find(location);
+        vector <Point*>* checkins = l_it->second;
+        for(auto checkin=checkins->begin(); checkin != checkins->end(); checkin++){
+          Point *p = *checkin;
+          cooccurrence_count += gpos->getUserCooccurrences(p->getUID());
+        }
       }
     }
+    cout << i << " " << cooccurrence_count << endl;
   }
-
-  // Sorting user list
-  sort(users->begin(), users->end());
-  // Removing duplicates
-  users->erase( unique( users->begin(), users->end() ), users->end() );
-
-  cout << "Number of users who've checked into places with LE more than " << tresh << " is " << users->size() << endl;
-
-  cacluateCooccurrenceDistribution(users);
-
-  users->clear();
-  delete users;
 }
 
-void SimpleQueries::cacluateCooccurrenceDistributionBasedOnNodeLocality(double tresh){
+void SimpleQueries::cacluateCooccurrenceDistributionBasedOnNodeLocality(){
+  cout << "Computing correlation between node_locality and cooccurrences : " << endl;
+
   map< int, double >* node_locality = spos->getNodeLocality();
+  double diff = 0.1;
 
-  vector <int> *users = new vector <int>();
-
-  for(auto it=node_locality->begin(); it != node_locality->end(); it++){
-    int user = it->first;
-    double locality = it->second;
-    if(locality >= tresh)
-      users->push_back(user);
+  for(double i=0; i <= 1; i = i + diff){
+    int cooccurrence_count = 0;
+    for(auto it=node_locality->begin(); it != node_locality->end(); it++){
+      int user = it->first;
+      double locality = it->second;
+      if(locality >= i && locality < i + diff){
+        cooccurrence_count += gpos->getUserCooccurrences(user);
+      }
+    }
+    cout << i << " " << cooccurrence_count << endl;
   }
-
-  cout << "Number of users with node locality more than " << tresh << " is " << users->size() << endl;
-
-  cacluateCooccurrenceDistribution(users);
-
-  users->clear();
-  delete users;
 }
 
 void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
