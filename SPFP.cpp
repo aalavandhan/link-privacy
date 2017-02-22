@@ -261,7 +261,7 @@ int main(int argc, char *argv[]){
   double p3 = atof(argv[8]); // ( Parameter 3 )
 
   double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
-         total_parts, part_number, distance_treshold;
+         total_parts, part_number, distance_treshold, social_strength_tresh;
 
 
   switch(iteration_type){
@@ -346,6 +346,22 @@ int main(int argc, char *argv[]){
       spos->computeNodeLocality(gpos);
       spos->writeNodeLocalityToFile();
       break;
+    }
+
+    case 10:{
+      cout << "METRICS: Compute histograms" << endl;
+      bool preload_LE  = true;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, gpos);
+
+      social_strength_tresh = p1;
+
+      SimpleQueries* query = new SimpleQueries(gpos, spos);
+      query->buildMatrices(Q);
+      query->cacluateSocialStrength();
+      query->writeHistogramstoFile(social_strength_tresh);
     }
 
     default:
