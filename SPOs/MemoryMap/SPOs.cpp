@@ -80,8 +80,6 @@ void SPOs::loadKatzScoreFromMemory(){
 
 
 double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
-  cout.precision(15);
-
   ofstream output_file;
 
   ostringstream ss;
@@ -115,15 +113,15 @@ double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh)
       int target = (*u2_it);
       if(source != target){
         if(source < target){
-           double score = getKatzScore(source, target);
+           double score = KatzScore::calculateKatzScore(source, target, socialgraph_map, KATZ_ATTENUATION, KATZ_PATH_LENGTH);
            // pairs++;
            // if(pairs % 1000 == 0){
            //   gettimeofday(&endTime, NULL);
            //   cout << "Number of pairs" << pairs << "\tTime: "<< util.print_time(startTime, endTime)/1000 << endl;
            // }
            if(score > 0){
-              output_file << source << " " << target << " " << score << endl;
-              // cout<< source << " " << target << " " << score << endl;
+              output_file << setprecision(10) << source << " " << target << " " << score << endl;
+              cout<< source << " " << target << " " << score << endl;
            }
         }else
           break;
