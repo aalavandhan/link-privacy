@@ -15,5 +15,8 @@ public:
     virtual vector<int>* getUsersInRange(int source, double radius)=0;
     virtual int getUserCooccurrences(int user_id)=0;
     virtual map<int , vector< Point*>* >* getLocationToUser()=0;
+    virtual map<int, double>* getHiLasMap() = 0;
+    virtual map<int, double>* getHiJasMap() = 0;
+    virtual map<int, double>* getHlLasMap() = 0;
 };
 

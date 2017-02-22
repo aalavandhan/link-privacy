@@ -305,7 +305,7 @@ map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getCooccurrenceMatrix(){
   return &cooccurrence_matrix;
 }
 
-//TODO: VERIFY FOR CORRECTNESS ACCORDING TO FORMAT OF DATA STRUCTURE
+
 unordered_map<int, double>* GPOs::calculateLocationEntropy(){
   for(auto it = location_to_user.begin(); it != location_to_user.end(); it++){
     int location_id = it->first;
@@ -937,4 +937,148 @@ int GPOs::getUserCooccurrences(int user_id){
     }
   }
   return number_of_cooccurrences;
+}
+
+
+map<int, double>* GPOs::getHiLasMap(){
+  map<int, double>* HiL_histogram = new map<int, double>();
+  
+  //for each user user compute his total cooccurrences at all locations and users 
+  //then iterate again to produce probabilities
+  //then compute shanon entropy
+  for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
+    map <int, int> location_counts;
+    int user_id = it->first;
+    auto map_of_vectors = it->second;
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      auto vector_of_locations = it_map->second;
+      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+        // number_of_cooccurrences += it_vector->second;
+        int location_id = it_vector->first;
+        auto lc_it = location_counts.find(location_id);
+        if(lc_it != location_counts.end()){
+          lc_it->second = lc_it->second + it_vector->second;
+        }else{
+          location_counts.insert(make_pair(location_id,it_vector->second));
+        }
+
+      }
+    }
+
+    uint *freqVector = (uint *) calloc(location_counts.size(), sizeof(uint));
+    int i = 0;
+    for(auto u_it = location_counts.begin(); u_it!=location_counts.end(); u_it++){
+      freqVector[i] = u_it->second;
+      i++;
+    }
+    //converts the frequencies to probabilities before computing the total shannon entropy
+    double entropy = calcEntropyFromLocationVector(freqVector , location_counts.size());
+    HiL_histogram->insert(make_pair(user_id, entropy));
+  }
+
+  return HiL_histogram;
+}
+
+map<int, double>* GPOs::getHiJasMap(){
+  map<int, double>* HiJ_histogram = new map<int, double>();
+  
+  //for each user user compute his total cooccurrences at all locations and users 
+  //then iterate again to produce probabilities
+  //then compute shanon entropy
+  for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
+    map <int, int> user_counts;
+    int user_id = it->first;
+    auto map_of_vectors = it->second;
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      int user_id_j = it_map->first;
+      auto vector_of_locations = it_map->second;
+      int cooccurrence_count_for_user_j = 0;
+      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+        // number_of_cooccurrences += it_vector->second;
+        cooccurrence_count_for_user_j += it_vector->second;
+      }
+      user_counts.insert(make_pair(user_id_j,cooccurrence_count_for_user_j));
+    }
+
+    uint *freqVector = (uint *) calloc(user_counts.size(), sizeof(uint));
+    int i = 0;
+    for(auto u_it = user_counts.begin(); u_it!=user_counts.end(); u_it++){
+      freqVector[i] = u_it->second;
+      i++;
+    }
+    //converts the frequencies to probabilities before computing the total shannon entropy
+    double entropy = calcEntropyFromCoV(freqVector , user_counts.size());
+    HiJ_histogram->insert(make_pair(user_id, entropy));
+  }
+
+  return HiJ_histogram;
+}
+
+
+map<int, double>* GPOs::getHlLasMap(){
+  map<int, map<int,int>* > location_to_user_coocc_map;
+  map<int, double>* HlL_histogram = new map<int, double>();
+  
+  //for each user user compute his total cooccurrences at all locations and users 
+  //then iterate again to produce probabilities
+  //then compute shanon entropy
+  for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
+    
+    int user_id_1 = it->first;
+    auto map_of_vectors = it->second;
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      int user_id_2 = it_map->first;
+      auto vector_of_locations = it_map->second;
+
+      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+        // number_of_cooccurrences += it_vector->second;
+        int location_id = it_vector->first;
+
+        auto lc_it = location_to_user_coocc_map.find(location_id);
+        if(lc_it != location_to_user_coocc_map.end()){ //location found in outer map
+          auto user_coocc_map = lc_it->second;
+
+          //for user_id_1
+          auto inner_user_it = user_coocc_map->find(user_id_1);
+          if(inner_user_it!=user_coocc_map->end()){  //user in inner map
+            inner_user_it->second = inner_user_it->second + it_vector->second; // update user 1's cocc
+          }else{
+            user_coocc_map->insert(make_pair(user_id_1,it_vector->second));
+
+          }
+
+          //for user_id_2
+          inner_user_it = user_coocc_map->find(user_id_2);
+          if(inner_user_it!=user_coocc_map->end()){  //user in inner map
+            inner_user_it->second = inner_user_it->second + it_vector->second; // update user 1's cocc
+          }else{
+            user_coocc_map->insert(make_pair(user_id_2,it_vector->second));
+
+          }
+
+        }else{                                        //location not found in outer map
+          map<int,int>* user_coocc_map = new map<int,int>();
+          user_coocc_map->insert(make_pair(user_id_1,it_vector->second)); //add value for u1
+          user_coocc_map->insert(make_pair(user_id_2,it_vector->second)); //add value for u2
+          location_to_user_coocc_map.insert(make_pair(location_id,user_coocc_map)); //add inner map to outermap
+        }
+
+      }
+    }
+  }
+
+  for(auto it = location_to_user_coocc_map.begin(); it!= location_to_user_coocc_map.end(); it++){
+    int location_id = it->first;
+    auto user_coocc_map = it->second;
+    uint *freqVector = (uint *) calloc(user_coocc_map->size(), sizeof(uint));
+    int i = 0;
+    for(auto iter = user_coocc_map->begin() ; iter != user_coocc_map->end() ; iter++){
+      freqVector[i] = iter->second;
+      i++;
+    }
+    //converts the frequencies to probabilities before computing the total shannon entropy
+    double entropy = calcEntropyFromCoV(freqVector , user_coocc_map->size());
+    HlL_histogram->insert(make_pair(location_id, entropy));
+  }
+  return HlL_histogram;
 }

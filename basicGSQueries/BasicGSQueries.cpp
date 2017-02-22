@@ -510,3 +510,118 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
   }
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
+
+
+void SimpleQueries::writeHistogramstoFile(double tresh){
+
+  ofstream outfile;
+  outfile.open("HiL.csv");
+  map<int, double>* HiL_map = gpos->getHiLasMap();
+  for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
+    int user_id = it->first;
+    double H = it->second;
+    outfile<< std::fixed << setprecision(10) << user_id << " "<<H<<endl;
+  }
+  outfile.close();
+
+  cout<<"Printing HiL complete. size:"<<HiL_map->size()<<endl;
+
+  outfile.open("HiJ.csv");
+  map<int, double>* HiJ_map =gpos->getHiJasMap();
+  for(auto it = HiJ_map->begin(); it !=HiJ_map->end(); it++){
+    int user_id = it->first;
+    double H = it->second;
+    outfile<< std::fixed << setprecision(10) << user_id << " "<<H<<"\n";
+  }
+  outfile.close();
+
+  cout<<"Printing HiJ complete.size:"<<HiJ_map->size()<<endl;
+
+  outfile.open("HlL.csv");
+  map<int, double>* HlL_map =gpos->getHlLasMap();
+  for(auto it = HlL_map->begin(); it !=HlL_map->end(); it++){
+    int location_id = it->first;
+    double H = it->second;
+    outfile<< std::fixed << setprecision(10) << location_id << " "<<H<<"\n";
+  }
+  outfile.close();
+
+  cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
+
+  map<int,int> user_to_EBMfreq_map;
+  for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
+    int user_1 = s_it->first;
+    auto user_ss_list = s_it->second;
+
+    for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
+      int user_2 = ss_it->first;
+
+      if(ss_it->second >= tresh){
+        if(spos->areFriends(user_1, user_2)){
+
+          auto it = user_to_EBMfreq_map.find(user_1);
+          if(it!=user_to_EBMfreq_map.end()){
+            it->second = it->second+1;
+          }else{
+            user_to_EBMfreq_map.insert(make_pair(user_1,1));
+          }
+
+          it = user_to_EBMfreq_map.find(user_2);
+          if(it!=user_to_EBMfreq_map.end()){
+            it->second = it->second+1;
+          }else{
+            user_to_EBMfreq_map.insert(make_pair(user_2,1));
+          }
+
+        }
+      }
+    }
+  }
+
+  outfile.open("user_to_EBMfreq_map.csv");
+  for(auto it = user_to_EBMfreq_map.begin(); it !=user_to_EBMfreq_map.end(); it++){
+    int user_id = it->first;
+    int frequency = it->second;
+    outfile << std::fixed << std::setprecision(10) << user_id << " "<<frequency<<"\n";
+  }
+  outfile.close();
+
+  cout<<"Printing user_to_EBMfreq_map complete. size: "<<user_to_EBMfreq_map.size()<<endl;
+
+  map<int,int> location_count_map;
+  auto cooccurrence_matrix = gpos->getCooccurrenceMatrix();
+  for(auto it = cooccurrence_matrix->begin(); it!= cooccurrence_matrix->end(); it++){
+  
+    int user_id_1 = it->first;
+    auto map_of_vectors = it->second;
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      int user_id_2 = it_map->first;
+      auto vector_of_locations = it_map->second;
+      bool arefriend = areEBMFriends(user_id_1, user_id_2, tresh);
+      if(arefriend){
+        for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+          // number_of_cooccurrences += it_vector->second;
+          
+          int location_id = it_vector->first;
+          auto lc_it = location_count_map.find(location_id);
+          if(lc_it != location_count_map.end()){
+            lc_it->second = lc_it->second + 1;
+          }else{
+            location_count_map.insert(make_pair(location_id,1));
+          }
+        }
+      }
+    }
+  }
+
+  outfile.open("location_count_map.csv");
+  for(auto it = location_count_map.begin(); it !=location_count_map.end(); it++){
+    int user_id = it->first;
+    int frequency = it->second;
+    outfile<< std::fixed << setprecision(10) << user_id << " "<<frequency<<"\n";
+  }
+  outfile.close();
+
+  cout<<"Printing location_count_map complete. size: "<<location_count_map.size()<<endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}

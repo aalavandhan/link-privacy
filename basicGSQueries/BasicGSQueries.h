@@ -27,5 +27,6 @@ public:
     void cacluateCooccurrenceDistributionBasedOnLocationEntropy();
 
     bool areEBMFriends(int source, int target, double tresh);
+    void writeHistogramstoFile(double tresh);
 };
 

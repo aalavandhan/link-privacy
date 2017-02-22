@@ -62,6 +62,9 @@ public:
 
     unordered_map<int, double>* calculateLocationEntropy();
 
+    virtual map<int, double>* getHiLasMap();
+    virtual map<int, double>* getHiJasMap();
+    virtual map<int, double>* getHlLasMap();
 
     void generateFrequencyCache();
 
