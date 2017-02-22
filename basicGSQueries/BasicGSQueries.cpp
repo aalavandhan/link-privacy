@@ -251,7 +251,7 @@ map< int, bool >* SimpleQueries::getUsersOfInterest(double tresh){
     auto user_ss_list = s_it->second;
 
     for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
-      if(ss_it->getScore() >= tresh){
+      if(ss_it->second >= tresh){
         if(users_of_interest->find(user_1) == users_of_interest->end())
           users_of_interest->insert(make_pair(user_1, true));
       }
@@ -259,6 +259,33 @@ map< int, bool >* SimpleQueries::getUsersOfInterest(double tresh){
   }
 
   return users_of_interest;
+}
+
+bool SimpleQueries::areEBMFriends(int source, int target, double tresh){
+  if(source > target){
+    int temp = target;
+    target = source;
+    source = temp;
+  }
+
+  auto iter = social_strength_matrix.find(source);
+
+  if(iter == social_strength_matrix.end())
+    return false;
+
+  auto user_social_strengths_map = iter->second;
+
+  auto user_social_strength_it = user_social_strengths_map->find(target);
+
+  if(user_social_strength_it == user_social_strengths_map->end())
+    return false;
+
+  double social_strength = user_social_strength_it->second;
+
+  if(social_strength >= tresh)
+    return true;
+  else
+    return false;
 }
 
 void SimpleQueries::verifySocialStrength(double tresh){
@@ -270,14 +297,14 @@ void SimpleQueries::verifySocialStrength(double tresh){
     auto user_ss_list = s_it->second;
 
     for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
-      int user_2 = ss_it->getId();
+      int user_2 = ss_it->first;
 
-      if(ss_it->getScore() >= tresh){
+      if(ss_it->second >= tresh){
         if(spos->areFriends(user_1, user_2)){
           true_positive++;
         }
         postitive++;
-        total_score += ss_it->getScore();
+        total_score += ss_it->second;
       }
     }
   }
@@ -371,7 +398,7 @@ void SimpleQueries::buildMatrices(double q){
 }
 
 
-map<int, vector<my_pair>*> SimpleQueries::cacluateSocialStrength(){
+map<int, map<int, double>*> SimpleQueries::cacluateSocialStrength(){
     for (auto d_it = diversity_matrix.begin(); d_it != diversity_matrix.end(); d_it++){
         int user_1 = d_it->first;
         auto user_diversity_list = d_it->second;
@@ -403,12 +430,12 @@ map<int, vector<my_pair>*> SimpleQueries::cacluateSocialStrength(){
             //insert into existing list
             auto ss_it = social_strength_matrix.find(user_1);
             if(ss_it == social_strength_matrix.end()){
-                vector<my_pair>* sslist = new vector<my_pair>();
-                sslist->push_back(my_pair(user_2,social_strength_value));
-                social_strength_matrix.insert(make_pair(user_1, sslist));
+                map<int, double> *ssmap = new map<int, double>();
+                ssmap->insert(make_pair(user_2,social_strength_value));
+                social_strength_matrix.insert(make_pair(user_1, ssmap));
             }else{
-                vector<my_pair>* sslist = ss_it->second;
-                sslist->push_back(my_pair(user_2,social_strength_value));
+                map<int, double> *ssmap = ss_it->second;
+                ssmap->insert(make_pair(user_2,social_strength_value));
             }
         }
     }

@@ -5,7 +5,7 @@ private:
     ISPOs *spos;
     Utilities util;
 
-    map<int, vector<my_pair>*> social_strength_matrix;
+    map<int, map<int, double>*> social_strength_matrix;
     map<int, map<int, double>*> diversity_matrix;
     map<int, map<int, double>*> weighted_frequency_matrix;
 
@@ -13,7 +13,7 @@ public:
     SimpleQueries(IGPOs *spatialIndex, ISPOs *socialGraph);
     ~SimpleQueries();
 
-    map<int, vector<my_pair>*> cacluateSocialStrength();
+    map<int, map<int, double>*> cacluateSocialStrength();
     void verifySocialStrength(double tresh);
     void buildMatrices(double q);
     int countCooccurredFriends();
@@ -25,5 +25,7 @@ public:
     void cacluateCooccurrenceDistribution(vector <int> *users);
     void cacluateCooccurrenceDistributionBasedOnNodeLocality();
     void cacluateCooccurrenceDistributionBasedOnLocationEntropy();
+
+    bool areEBMFriends(int source, int target, double tresh);
 };
 
