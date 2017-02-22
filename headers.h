@@ -123,6 +123,9 @@ extern double GAMMA;
 
 #define LOCATION_NOISE_BOUND 9999999
 
+
+#define TIME_RANGE_IN_SECONDS 1200 // defines the time difference between 2 checkins to be considered a co-occurrence
+
 #include "utilities/res_point.h"
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"

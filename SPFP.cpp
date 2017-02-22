@@ -27,7 +27,7 @@ double ALPHA = 0.480;
 double GAMMA = 0;
 double BETA = 0.520;
 double Q=0.1; // Order of diversity
-int TIME_RANGE_IN_SECONDS = 1200;  // defines the time difference between 2 checkins to be considered a co-occurrence
+// int TIME_RANGE_IN_SECONDS = 1200;
 
 // Global parameters
 char *checkins_file, *graph_file, *query_file;
@@ -244,6 +244,8 @@ int main(int argc, char *argv[]){
     iteration_type = 7;
   else if (strcmp(argv[4], "compute-katz") == 0)
     iteration_type = 8;
+  else if (strcmp(argv[4], "compute-node-locality") == 0)
+    iteration_type = 9;
 
   else
     iteration_type = -1;
@@ -323,6 +325,16 @@ int main(int argc, char *argv[]){
       spos->precomputeKatzScore(gpos, total_parts, part_number, distance_treshold);
       break;
     }
+
+    case 9:{
+      cout << "METRICS: Pre-Compute node_locality" << endl;
+      GPOs* gpos = loadCheckins(checkins_file);
+      SPOs* spos = loadSocialGraph(graph_file);
+      spos->computeNodeLocality(gpos);
+      spos->writeNodeLocalityToFile();
+      break;
+    }
+
     default:
       cout << "Invalid iteration type; Enter a valid option" << endl;
   }

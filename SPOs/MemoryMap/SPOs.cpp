@@ -497,12 +497,22 @@ double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, ve
 
   for(auto s_it=source_checkins->begin(); s_it != source_checkins->end(); s_it++){
     Point * source_checkin = (*s_it);
+    auto source_checkin_time = source_checkin->getTime();
+
     for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
       Point * friend_checkin = (*f_it);
-      double distSq = gpos->distanceBetween(source_checkin, friend_checkin);
-      if(distSq < closestDistance){
-        closestDistance = distSq;
+      auto friend_checkin_time = friend_checkin->getTime();
+
+      boost::posix_time::time_duration time_difference = source_checkin_time - friend_checkin_time;
+      int time_diff_seconds = abs(time_difference.total_seconds());
+
+      if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
+        double distSq = gpos->distanceBetween(source_checkin, friend_checkin);
+        if(distSq < closestDistance){
+          closestDistance = distSq;
+        }
       }
+
     }
   }
 
@@ -613,6 +623,7 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
     double locality = computeNodeLocality(gpos, source);
     node_locality->insert(make_pair(source, locality));
 
+    // cout << source << " " << locality << endl;
     if(count%1000 == 0)
       cout << "User Count : " << count << endl;
 
