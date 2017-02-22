@@ -249,6 +249,8 @@ int main(int argc, char *argv[]){
     iteration_type = 8;
   else if (strcmp(argv[4], "compute-node-locality") == 0)
     iteration_type = 9;
+  else if (strcmp(argv[4], "compute-histograms") == 0)
+    iteration_type = 10;
 
   else
     iteration_type = -1;
