@@ -62,6 +62,6 @@ public:
     map< int, double >* computeNodeLocality(GPOs* gpos);
     map< int, double >* loadNodeLocalityFromFile();
     void writeNodeLocalityToFile();
-    double precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
+    void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
     void loadKatzScoreFromMemory();
 };

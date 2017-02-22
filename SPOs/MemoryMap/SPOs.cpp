@@ -79,7 +79,7 @@ void SPOs::loadKatzScoreFromMemory(){
 
 
 
-double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
+void SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
   ofstream output_file;
 
   ostringstream ss;
