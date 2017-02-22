@@ -547,9 +547,7 @@ vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source,
 
     double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
 
-    // Handling users without any checkins
-    if(distance != inf)
-      distances->push_back(distance);
+    distances->push_back(distance);
   }
 
   return distances;

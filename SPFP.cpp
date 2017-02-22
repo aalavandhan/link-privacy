@@ -164,14 +164,17 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius){
 }
 
 void nodeLocalityNoiseVsEBM(double noise_radius, double locality_treshold){
-  cout << "------------- Load computed node locality ---------------" << endl;
-  SPOs *tmp_spos = new SPOs();
-  map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
+  bool preload_LE  = false;
+  bool preload_OCC = true;
 
-  GPOs* baseGPOs = loadCheckins(checkins_file);
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
   GPOs* cmpGPOs  = new GPOs();
+
+  cout << "------------- Load computed node locality ---------------" << endl;
+  SPOs *tmp_spos = new SPOs();
+  map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
 
   cmpGPOs->loadPurturbedLocationsBasedOnNodeLocality(baseGPOs, node_locality, noise_radius, locality_treshold);
   cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
@@ -309,11 +312,21 @@ int main(int argc, char *argv[]){
       is_noise_method = true;
       break;
 
-    case 7:
+    case 7:{
       cout << "METRICS: Calculating Cooccurrence distribution" << endl;
-      // query->cacluateCooccurrenceDistributionBasedOnNodeLocality();
-      // query->cacluateCooccurrenceDistributionBasedOnLocationEntropy();
+      bool preload_LE  = true;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file);
+      spos->loadNodeLocalityFromFile();
+
+      SimpleQueries* query = new SimpleQueries(gpos, spos);
+
+      query->cacluateCooccurrenceDistributionBasedOnNodeLocality();
+      query->cacluateCooccurrenceDistributionBasedOnLocationEntropy();
       break;
+    }
 
     case 8:{
       cout << "METRICS: Pre-Compute KATZ score" << endl;
