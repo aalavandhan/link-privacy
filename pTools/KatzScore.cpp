@@ -8,6 +8,7 @@
 #include <iostream>
 #include <unordered_set>
 #include <map>
+#include <math.h>
 
 using namespace std;
 
@@ -27,11 +28,11 @@ inline void print_path(vector<int>path)
     }
     cout<<"]"<<endl;
 }
-bool isadjacency_node_not_present_in_current_path(int node,vector<int>*path)
+bool isadjacency_node_not_present_in_current_path(int node,vector<int>path)
 {
-    for(int i=0;i<path->size();++i)
+    for(int i=0;i<path.size();++i)
     {
-        if(path->at(i)==node)
+        if(path[i]==node)
         return false;
     }
     return true;
@@ -39,9 +40,9 @@ bool isadjacency_node_not_present_in_current_path(int node,vector<int>*path)
 
 int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, map<int, unordered_set<int>* >* social_graph_map, int katz_path_limit)
 {
-    vector<int>* path = new  vector<int>();
-    path->push_back(source);
-    queue<vector<int>* >q;
+    vector<int>path;
+    path.push_back(source);
+    queue<vector<int> >q;
     q.push(path);
 
     while(!q.empty())
@@ -49,14 +50,14 @@ int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, map<int,
         path=q.front();
         q.pop();
 
-        int last_nodeof_path=path->at(path->size()-1);
+        int last_nodeof_path=path[path.size()-1];
         if(last_nodeof_path==target)
         {
-            auto it = pathLen_to_freq->find(path->size());
+            auto it = pathLen_to_freq->find(path.size());
             if(it!=pathLen_to_freq->end()){
                 it->second = it->second + 1;
             }else{
-                pathLen_to_freq->insert(make_pair(path->size(),1));
+                pathLen_to_freq->insert(make_pair(path.size(),1));
             }
 
             // if(source == 0 && target == 4){
@@ -67,11 +68,11 @@ int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, map<int,
         else
         {
             // if(source == 0 && target == 4){
-                // print_path(path);
+                print_path(path);
             // }
         }
 
-        if(path->size() > katz_path_limit)
+        if(path.size() > katz_path_limit)
             continue;
 
         auto it = social_graph_map->find(last_nodeof_path);
@@ -85,9 +86,8 @@ int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, map<int,
                 int friend_id = *set_it;
                 if(isadjacency_node_not_present_in_current_path(friend_id,path))
                 {
-                    vector<int>* new_path = new vector<int>(path->begin(),path->end());
-
-                    new_path->push_back(friend_id);
+                    vector<int>new_path(path.begin(),path.end());
+                    new_path.push_back(friend_id);
                     q.push(new_path);
 
                     // if(source == 0 && target == 4){
@@ -96,7 +96,6 @@ int findpaths(int source ,int target, map <int, int >* pathLen_to_freq, map<int,
                     // }
                 }
             }
-            delete path;
 
         }
     }
@@ -111,7 +110,6 @@ double KatzScore::calculateKatzScore(int source ,int target, map< int, unordered
         int path_length = it->first;
         int path_freq = it->second;
         katz_score += pow(katz_epsilon, path_length - 1) * path_freq;
-        // cout<<"path_length: "<<path_length<<" path_freq : "<<path_freq<<endl;
     }
     return katz_score;
 }

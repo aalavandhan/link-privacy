@@ -120,7 +120,7 @@ double SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh)
            //   cout << "Number of pairs" << pairs << "\tTime: "<< util.print_time(startTime, endTime)/1000 << endl;
            // }
            if(score > 0){
-              output_file << setprecision(10) << source << " " << target << " " << score << endl;
+              output_file << std::fixed << std::setprecision(5) << source << " " << target << " " << score << "\n";
               cout<< source << " " << target << " " << score << endl;
            }
         }else
