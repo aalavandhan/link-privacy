@@ -62,9 +62,13 @@ pair<double,double> Utilities::addGaussianNoise(double x, double y, double radiu
   lon = x;
   lat = y;
 
-  nLat = lat  + (noise_distance / R) * (1/DEG_TO_RAD);
-  nLon = lon  + (noise_distance / R) * (1/DEG_TO_RAD) / cos(lat * DEG_TO_RAD);
+  // nLat = lat  + noise_distance * cos( direction );
+  // nLon = lon  + noise_distance * sin( direction );
 
+  nLat = lat  + (noise_distance * cos( direction ) / R) * (1/DEG_TO_RAD);
+  nLon = lon  + (noise_distance * sin( direction ) / R) * (1/DEG_TO_RAD) / cos(lat * DEG_TO_RAD);
+
+  // cout << lat << " " << lon << " " << nLat << " " << nLon << endl;
   // cout << distanceBetween(nLat, nLon, y, x) * 1000 << " " << abs(noise_distance)  << " " << direction <<endl;
 
   return make_pair(nLon, nLat);
