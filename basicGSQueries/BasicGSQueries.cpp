@@ -141,7 +141,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
       int u1=pair_it->first;
       int u2=pair_it->second;
 
-      cout << "Checking pair " << u1 << " " << u2 << endl;
+      // cout << "Checking pair " << u1 << " " << u2 << endl;
 
       if(cmp_proximate_users->find(make_pair(u1, u2)) != cmp_proximate_users->end())
         tp++;
@@ -178,7 +178,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
 
-  vector<int> *u1_set, *u2_set;
+  vector<int> *u1_set, *u2_set, *u_set;
   int lno=-1;
 
   vector< unordered_set< pair<int,int>, PairHasher >* >* proximate_users_list = new vector< unordered_set< pair<int,int>, PairHasher >* >();
@@ -187,16 +187,19 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     fin >> y >> x;
     lno++;
 
-    // cout << "Processing location number: " << lno << endl;
+    cout << "Processing location number: " << lno << endl;
 
-    u1_set = gpos->getUsersInRange(x, y, radius);
-    u2_set = gpos->getUsersInRange(x, y, radius);
+    // u1_set = gpos->getUsersInRange(x, y, radius);
+    // u2_set = gpos->getUsersInRange(x, y, radius);
+    u_set = gpos->getUsersInRange(x, y, radius);
+    u1_set = u_set;
+    u2_set = u_set;
 
     multiset<ranked_pair, ranked_pair_comparator_descending>* proximate_users_set = new multiset<ranked_pair, ranked_pair_comparator_descending>();
     unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
     unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
-    // cout << "number of users around this location : " << u_set->size() << endl;
+    cout << "number of users around this location : " << u_set->size() << endl;
     if(u1_set->size() > 1){
       for(auto u1_it=u1_set->begin(); u1_it != u1_set->end(); u1_it++){
         for(auto u2_it=u2_set->begin(); u2_it != u2_set->end(); u2_it++){
@@ -220,11 +223,11 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
         ranked_proximate_users->insert(make_pair(u1id, u2id));
         min_score = rk_it->getScore();
       }
-      cout << "\tMinimum pair score is " << min_score << endl;
-      if(ranked_proximate_users->size() > 0 && min_score > 0.01){
-        cout << y << " " << x << " "  << min_score << endl;
-      }
-      // cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
+      // cout << "\tMinimum pair score is " << min_score << endl;
+      // if(ranked_proximate_users->size() > 0 && min_score > 0.01){
+      //   cout << y << " " << x << " "  << min_score << " " << ranked_proximate_users->size() << endl;
+      // }
+      cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
     }
 
     // Delete
@@ -591,7 +594,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   map<int,int> location_count_map;
   auto cooccurrence_matrix = gpos->getCooccurrenceMatrix();
   for(auto it = cooccurrence_matrix->begin(); it!= cooccurrence_matrix->end(); it++){
-  
+
     int user_id_1 = it->first;
     auto map_of_vectors = it->second;
     for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
@@ -601,7 +604,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
       if(arefriend){
         for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
           // number_of_cooccurrences += it_vector->second;
-          
+
           int location_id = it_vector->first;
           auto lc_it = location_count_map.find(location_id);
           if(lc_it != location_count_map.end()){

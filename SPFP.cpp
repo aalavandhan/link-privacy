@@ -85,14 +85,15 @@ void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range proximity ---------------" << endl;
-  query->checkUtilityProximity(query_file, baseGPOs, 1000, 100);
+  query->checkUtilityProximity(query_file, baseGPOs, 1000, 500);
 }
 
 void runUtilities(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
-  if(is_noise_method && run_utilties){
-    runRangeUtility(baseGPOs, cmpGPOs, spos);
-    runProximityUtility(baseGPOs, cmpGPOs, spos);
-  }
+  runProximityUtility(baseGPOs, cmpGPOs, spos);
+  // if(is_noise_method && run_utilties){
+  //   // runRangeUtility(baseGPOs, cmpGPOs, spos);
+  //   runProximityUtility(baseGPOs, cmpGPOs, spos);
+  // }
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
@@ -364,6 +365,7 @@ int main(int argc, char *argv[]){
       query->buildMatrices(Q);
       query->cacluateSocialStrength();
       query->writeHistogramstoFile(social_strength_tresh);
+      break;
     }
 
     default:

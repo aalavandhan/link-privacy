@@ -843,7 +843,7 @@ void GPOs::countU2UCoOccurrences(uint time_block){
     }
   }
 
-
+  cout << "Number of users with alteast once cooccurrence : " << cooccurrence_matrix.size() << endl;
   cout << "------ Total Cooccrrences ---------  " << total_cooccurrences << endl;
   cout << "------ User pairs who've co-occurred ---------  " << cooccured_user_pairs.size() << endl;
   cout << "------ User pairs who've co-occurred more than once ---------  " << significantly_cooccured_user_pairs.size() << endl;
@@ -942,8 +942,8 @@ int GPOs::getUserCooccurrences(int user_id){
 
 map<int, double>* GPOs::getHiLasMap(){
   map<int, double>* HiL_histogram = new map<int, double>();
-  
-  //for each user user compute his total cooccurrences at all locations and users 
+
+  //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities
   //then compute shanon entropy
   for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
@@ -981,8 +981,8 @@ map<int, double>* GPOs::getHiLasMap(){
 
 map<int, double>* GPOs::getHiJasMap(){
   map<int, double>* HiJ_histogram = new map<int, double>();
-  
-  //for each user user compute his total cooccurrences at all locations and users 
+
+  //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities
   //then compute shanon entropy
   for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
@@ -1018,12 +1018,12 @@ map<int, double>* GPOs::getHiJasMap(){
 map<int, double>* GPOs::getHlLasMap(){
   map<int, map<int,int>* > location_to_user_coocc_map;
   map<int, double>* HlL_histogram = new map<int, double>();
-  
-  //for each user user compute his total cooccurrences at all locations and users 
+
+  //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities
   //then compute shanon entropy
   for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
-    
+
     int user_id_1 = it->first;
     auto map_of_vectors = it->second;
     for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
