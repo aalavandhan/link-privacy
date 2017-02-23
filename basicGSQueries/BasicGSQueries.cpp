@@ -147,7 +147,11 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
         tp++;
     }
 
-    precision = (double) tp / (double) positive;
+    if(positive != 0)
+      precision = (double) tp / (double) positive;
+    else
+      precision = 0;
+
     recall    = (double) tp / (double) gt;
 
     cout << "\tPrecision : " << precision <<"\tRecall : "<< recall << endl;
