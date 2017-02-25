@@ -32,6 +32,8 @@ public:
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
+
+    map< int, map<int,int>* >* location_to_user_to_cooccurrences;
     map< int, map<int, pair<int,double> >* >* user_to_order_to_location_displacment;
 
     // map<int, unordered_map<int, vector<uint>* >*> users_locations_frequency_map;
@@ -70,6 +72,7 @@ public:
     virtual map<int, double>* getHiLasMap();
     virtual map<int, double>* getHiJasMap();
     virtual map<int, double>* getHlLasMap();
+    virtual map< int, map<int,int>* >* getL2U2COOCC();
 
     void generateFrequencyCache();
 
@@ -102,5 +105,6 @@ public:
     void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
     void loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit);
     void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius);
+    void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius);
     
 };

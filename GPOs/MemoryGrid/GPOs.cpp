@@ -743,6 +743,8 @@ void GPOs::verifyRange(double radius){
 
 void GPOs::countU2UCoOccurrences(uint time_block){
 
+
+
   int total_cooccurrences=0;
 
   cout<<"Number of locations: "<<locations_users_frequency_map.size()<<endl;
@@ -837,6 +839,9 @@ void GPOs::countU2UCoOccurrences(uint time_block){
     }
   }
 
+  //instantiating map for use with combination function based on CiL
+  location_to_user_to_cooccurrences = new map< int, map<int,int>* >();
+
   for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){
     int user_1 = c_it->first;
     auto users_location_frequency_map = c_it->second;
@@ -846,8 +851,35 @@ void GPOs::countU2UCoOccurrences(uint time_block){
       vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
 
       for(auto l_it=cooccurrence_counts_vector->begin(); l_it != cooccurrence_counts_vector->end(); l_it++){
+        int location_id = l_it->first;
         int cooccrences_at_l = l_it->second;
         cooccurrence_count += cooccrences_at_l;
+
+        auto iter_outer = location_to_user_to_cooccurrences->find(user_1);
+        if(iter_outer != location_to_user_to_cooccurrences->end()){
+          //update/create for both users
+          map<int,int>* user_to_cooccurrences_map = iter_outer->second;
+          auto iter_inner = user_to_cooccurrences_map->find(user_1);
+          if(iter_inner != user_to_cooccurrences_map->end()){
+            iter_inner->second = iter_inner->second + cooccrences_at_l;
+          }else{
+            user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
+          }
+
+          iter_inner = user_to_cooccurrences_map->find(user_2);
+          if(iter_inner != user_to_cooccurrences_map->end()){
+            iter_inner->second = iter_inner->second + cooccrences_at_l;
+          }else{
+            user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
+          }
+        }else{
+          map<int,int>* user_to_cooccurrences_map = new map<int,int>();
+          user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
+          user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
+          location_to_user_to_cooccurrences->insert(make_pair(location_id,user_to_cooccurrences_map));
+        }
+
+
       }
 
       if(cooccurrence_count>1){
@@ -918,6 +950,10 @@ void GPOs::countU2UCoOccurrences(uint time_block){
   // }
 }
 
+
+map< int, map<int,int>* >* GPOs::getL2U2COOCC(){
+  return location_to_user_to_cooccurrences;
+}
 
 void GPOs::clearNextNN(){
 
@@ -1206,7 +1242,20 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
         }
       } 
 
-      double noise = checkin_locality_value * ( exp(-hiL) + exp(-hiJ) );
+      double expHil=0,expHiJ=0;
+      if(hiL == 0){
+        expHil = 0;
+      }else{
+        expHil = exp(-hiL);
+      }
+
+      if(hiJ == 0){
+        expHiJ = 0;
+      }else{
+        expHiJ = exp(-hiJ);
+      }
+
+      double noise = checkin_locality_value * ( expHil + expHiJ );
 
       pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
@@ -1224,3 +1273,55 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   output_file.close();
   generateFrequencyCache();
 }
+
+void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius){
+  
+  map<int, double>* HiL_map = gpos->getHiLasMap();
+  map<int, double>* HiJ_map = gpos->getHiJasMap();
+
+  int lid   = 0;
+  int new_order = 0;
+
+  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+
+    int user_id = u_it->first;
+    vector< Point* > *checkins = u_it->second;
+
+    double hiL = 0, hiJ = 0;
+
+    auto hil_it = HiL_map->find(user_id);
+    if(hil_it != HiL_map->end())
+      hiL = hil_it->second;
+
+    auto hij_it = HiJ_map->find(user_id);
+    if(hij_it != HiJ_map->end())
+      hiL = hij_it->second;
+
+    for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+      Point *p = (*loc_it);
+      double user_cooccurrenes = 0;
+      auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
+      if(iter_outer!= _location_to_user_to_cooccurrences->end()){
+        map<int,int>* user_to_cooccurrences_map = iter_outer->second;
+        auto iter_inner = user_to_cooccurrences_map->find(user_id);
+        if(iter_inner != user_to_cooccurrences_map->end()){
+          user_cooccurrenes = iter_inner->second;
+        }
+      }
+
+      double noise = user_cooccurrenes * ( exp(-hiL) + exp(-hiJ) );
+
+      pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+      total_displacement+=displacement;
+
+      loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+      new_order++;
+      lid++;
+    }
+  }
+  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
+  cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
+  generateFrequencyCache();
+}
+
