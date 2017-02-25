@@ -705,7 +705,7 @@ double SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vec
     // if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
 
       double distSq = util.computeMinimumDistance(point_source->getX(), point_source->getY(), friend_checkin->getX(), friend_checkin->getY());
-        
+
       if(distSq < closestDistance){
         closestDistance = distSq;
       }
@@ -746,15 +746,15 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
 
   for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
     double dist = (*d_it);
-
-    locality_sum += exp( -dist / NODE_LOCALITY_BETA );
+    locality_sum += exp( -dist / (double)NODE_LOCALITY_BETA );
   }
 
   if(distances->size() != 0)
-    checkin_locality = 1/distances->size() * locality_sum;
+    checkin_locality = (double) 1/distances->size() * locality_sum;
   else
     checkin_locality = 0;
 
+  delete distances;
   return checkin_locality;
 }
 
@@ -774,21 +774,23 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
     map<int, pair<int,double> >* order_locality_map = new map<int,pair<int,double> >();
 
     auto f_it = socialgraph_map->find(source_user_id);
+
     if(f_it==socialgraph_map->end())
       continue;
+
     unordered_set<int>* friends = f_it->second;
 
     for(auto loc = location_vector->begin(); loc != location_vector->end(); loc++){
       Point* p = *loc;
-      
       double locality = computeCheckinLocality(gpos, p, friends);
-
-      //for users wiht multiple checkins at the smae location
-      //overwrites old location value (since it is identical)
-      order_locality_map->insert(make_pair(p->getOrder(),make_pair(p->getID(),locality)));
+      // cout << p->getUID() << " " << p->getOrder() << " " << locality << endl;
+      if(locality != 0)
+        order_locality_map->insert(make_pair(p->getOrder(),make_pair(p->getID(),locality)));
     }
-    checkin_locality_map->insert(make_pair(source_user_id, order_locality_map));
-    // cout << source << " " << locality << endl;
+
+    if(order_locality_map->size() != 0)
+      checkin_locality_map->insert(make_pair(source_user_id, order_locality_map));
+
     if(count%1000 == 0)
       cout << "User Count : " << count << endl;
 
@@ -799,9 +801,6 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
 
   return checkin_locality_map;
 }
-
-
-
 
 void SPOs::writeCheckinLocalityToFile(){
   ofstream output_file;

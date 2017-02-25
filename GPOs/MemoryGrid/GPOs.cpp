@@ -569,6 +569,44 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
+// void GPOs::loadPurturbedLocationsBasedOnHiLHiJ(GPOs* gpos, double radius){
+//   map<int, double>* HiL_map = getHiLasMap();
+//   map<int, double>* HiJ_map = getHiJasMap();
+
+//   int lid   = 0;
+//   int order = 0;
+
+//   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+
+//     int user = u_it->first;
+//     vector< Point* > *checkins = u_it->second;
+
+//     double hiL = 0, hiJ = 0;
+
+//     auto hil_it = HiL_map.find(user);
+//     if(hil_it != HiL_map.end())
+//       hiL = hil_it->second;
+
+//     auto hij_it = HiJ_map.find(user);
+//     if(hij_it != HiJ_map.end())
+//       hiL = hij_it->second;
+
+//     for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+//       Point *p = (*loc_it);
+
+
+//       double noise = ( 1/hiL ) + ( 1/hiJ ) * radius;
+
+//       pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), noise);
+
+//       loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), order);
+//       order++;
+//       lid++;
+//     }
+
+//   }
+// }
+
 void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit){
   int lid = LOCATION_NOISE_BOUND; int order = 0;
   for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
