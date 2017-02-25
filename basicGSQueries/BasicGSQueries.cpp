@@ -807,7 +807,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
       for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
         int user_id_2 = it_map->first;
         auto vector_of_locations = it_map->second;
-        bool arefriend = areEBMFriends(user_id_1, user_id_2, tresh);
+        bool arefriend = aretrueEBMFriends(user_id_1, user_id_2, tresh);
         if(arefriend){
           for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
             int location_id = it_vector->first;
