@@ -3,7 +3,7 @@ class Point {
 public:
     Point ();
     Point (double x, double y, int id);
-    Point (double x, double y, int id, int uid, boost::posix_time::ptime time);
+    Point (double x, double y, int id, int uid, boost::posix_time::ptime time, int order);
     virtual ~Point ();
 
     virtual double getX();
@@ -12,6 +12,7 @@ public:
     virtual int getID();
     virtual int getUID();
     virtual boost::posix_time::ptime getTime();
+    virtual int getOrder();
     virtual double computeMinDist(double x, double y);
     virtual void printDetails();
     virtual double getMinDist();
@@ -27,7 +28,7 @@ public:
     };
 
 private:
-    int p_id, p_uid;
+    int p_id, p_uid, p_order;
     double p_minDist;
     double p_x, p_y;
     boost::posix_time::ptime p_time;

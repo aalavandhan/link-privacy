@@ -87,7 +87,7 @@ public:
 
     void updateCheckin(Point* p);
 
-    void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time);
+    void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order);
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void verifyRange(double radius);

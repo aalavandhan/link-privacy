@@ -30,7 +30,7 @@ inline void print_path(vector<int>path)
 }
 bool isadjacency_node_not_present_in_current_path(int node,vector<int>path)
 {
-    for(int i=0;i<path.size();++i)
+    for(unsigned int i=0;i<path.size();++i)
     {
         if(path[i]==node)
         return false;

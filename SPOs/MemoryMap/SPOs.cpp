@@ -34,7 +34,7 @@ multiset<my_pair, pair_comparator_descending>* SPOs::getDegreeSet(){
 }
 
 map< int, double >* SPOs::getNodeLocality(){
-  return node_locality;
+  return node_locality_map;
 }
 
 
@@ -60,7 +60,6 @@ double SPOs::getKatzScore(int source, int target){
 
 
 void SPOs::loadKatzScoreFromMemory(){
-  node_locality  = new map< int, double >();
   ifstream fin("katz-score.txt");
   if (!fin){
     cout << "Cannot open katz score file katz-score.csv" << endl;
@@ -507,7 +506,12 @@ double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, ve
       int time_diff_seconds = abs(time_difference.total_seconds());
 
       if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
-        double distSq = gpos->distanceBetween(source_checkin, friend_checkin);
+
+
+//         double Utilities::computeMinimumDistance(double x1, double y1, double x2, double y2){
+//     return sqrt(((x1-x2)*(x1-x2))+ ((y1 - y2)*(y1 - y2)));
+// }
+        double distSq = util.computeMinimumDistance(source_checkin->getX(), source_checkin->getY(), friend_checkin->getX(), friend_checkin->getY());
         if(distSq < closestDistance){
           closestDistance = distSq;
         }
@@ -519,6 +523,7 @@ double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, ve
   return closestDistance;
 }
 
+/*
 vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends){
   double inf=std::numeric_limits<double>::infinity();
   vector<double>* distances = new vector<double>();
@@ -552,7 +557,37 @@ vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source,
 
   return distances;
 }
+*/
 
+vector<double>* SPOs::computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends){
+  vector<double>* distances = new vector<double>();
+
+  vector< Point* >* source_checkins;
+
+  auto source_checkins_it = gpos->user_to_location.find(source);
+
+  // Ensuring check-ins are present
+  if(source_checkins_it != gpos->user_to_location.end())
+    source_checkins = source_checkins_it->second;
+  else
+    source_checkins = new vector< Point* >();
+
+  for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
+    int fid = (*f_it);
+
+    auto friend_checkins_it = gpos->user_to_location.find(fid);
+    vector< Point* >* friend_checkins;
+
+    // Ensuring check-ins are present
+    if(friend_checkins_it != gpos->user_to_location.end()){
+      friend_checkins = friend_checkins_it->second;
+      double distance = computeDistanceBetweenFriends(source_checkins, friend_checkins);
+      distances->push_back(distance);
+    }
+  }
+
+  return distances;
+}
 
 double SPOs::computeMeanDistanceBetweenAllFriends(GPOs* gpos){
   unsigned int count=0, sum_distance=0, f_counter=0;
@@ -610,7 +645,7 @@ double SPOs::computeNodeLocality(GPOs* gpos, int source){
 }
 
 map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
-  node_locality  = new map< int, double >();
+  node_locality_map  = new map< int, double >();
 
   int count=0;
 
@@ -619,7 +654,7 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
   for(auto u_it = socialgraph_map->begin(); u_it != socialgraph_map->end(); u_it++){
     int source = u_it->first;
     double locality = computeNodeLocality(gpos, source);
-    node_locality->insert(make_pair(source, locality));
+    node_locality_map->insert(make_pair(source, locality));
 
     // cout << source << " " << locality << endl;
     if(count%1000 == 0)
@@ -630,24 +665,161 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
 
   cout << "Completed node locality" << endl;
 
-  return node_locality;
+  return node_locality_map;
 }
+
+
+
+
+double SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins){
+
+  double closestDistance = std::numeric_limits<double>::infinity();
+
+  // auto point_source_time = point_source->getTime();
+
+  for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
+    Point * friend_checkin = (*f_it);
+
+    // time difference test DISABLED for testing
+
+    // auto friend_checkin_time = friend_checkin->getTime();
+    // boost::posix_time::time_duration time_difference = point_source_time - friend_checkin_time;
+    // int time_diff_seconds = abs(time_difference.total_seconds());
+    // if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
+
+      double distSq = util.computeMinimumDistance(point_source->getX(), point_source->getY(), friend_checkin->getX(), friend_checkin->getY());
+        
+      if(distSq < closestDistance){
+        closestDistance = distSq;
+      }
+    // }
+
+  }
+
+  return closestDistance;
+}
+
+vector<double>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
+  vector<double>* distances = new vector<double>();
+
+  for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
+    int fid = (*f_it);
+
+    auto friend_checkins_it = gpos->user_to_location.find(fid);
+    vector< Point* >* friend_checkins;
+
+    // Ensuring check-ins are present
+    if(friend_checkins_it != gpos->user_to_location.end()){
+      friend_checkins = friend_checkins_it->second;
+      double distance = computeMinimumdistanceToFriend(gpos, point_source, friend_checkins);
+      distances->push_back(distance);
+    }
+  }
+
+  return distances;
+}
+
+// Distance matters: Geo-social metrics for online social networks
+double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
+
+
+  double locality_sum=0, checkin_locality=0;
+
+  vector<double>* distances = computeDistancesToCheckinFriends(gpos, point_source, friends);
+
+  for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
+    double dist = (*d_it);
+
+    locality_sum += exp( -dist / NODE_LOCALITY_BETA );
+  }
+
+  if(distances->size() != 0)
+    checkin_locality = 1/distances->size() * locality_sum;
+  else
+    checkin_locality = 0;
+
+  return checkin_locality;
+}
+
+
+
+
+map< int, map<int, double>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos){
+  checkin_locality_map  = new map< int, map<int, double>* >();
+
+  int count=0;
+
+  cout << "Computing node locality" << endl;
+
+  for(auto it = gpos->user_to_location.begin(); it != gpos->user_to_location.end(); it++){
+    int source_user_id = it->first;
+    auto location_vector = it->second;
+    map<int, double>* locations_locality_map = new map<int,double>();
+
+    auto f_it = socialgraph_map->find(source_user_id);
+    if(f_it==socialgraph_map->end())
+      continue;
+    unordered_set<int>* friends = f_it->second;
+
+    for(auto loc = location_vector->begin(); loc != location_vector->end(); loc++){
+      Point* p = *loc;
+      
+      double locality = computeCheckinLocality(gpos, p, friends);
+
+      //for users wiht multiple checkins at the smae location
+      //overwrites old location value (since it is identical)
+      locations_locality_map->insert(make_pair(p->getID(),locality));
+    }
+    checkin_locality_map->insert(make_pair(source_user_id, locations_locality_map));
+    // cout << source << " " << locality << endl;
+    if(count%1000 == 0)
+      cout << "User Count : " << count << endl;
+
+    count++;
+  }
+
+  cout << "Completed checkin locality" << endl;
+
+  return checkin_locality_map;
+}
+
+
+
+
+void SPOs::writeCheckinLocalityToFile(){
+  ofstream output_file;
+  output_file.open("checkin-locality.csv");
+  int counter = 0;
+  for (auto u_it = checkin_locality_map->begin(); u_it != checkin_locality_map->end(); u_it++){
+    double user_id = u_it->first;
+    map<int, double>* locations_locality_map = u_it->second;
+    for(auto iter =locations_locality_map->begin(); iter!=locations_locality_map->end(); iter++){
+      int location_id = iter->first;
+      double locality = iter->second;
+      output_file << user_id << "\t" << location_id <<"\t"<< locality <<endl;
+      counter++;
+    }
+  }
+  cout << "------- Wrote checkin locality to files " << counter << endl;
+  output_file.close();
+}
+
 
 void SPOs::writeNodeLocalityToFile(){
   ofstream output_file;
   output_file.open("node-locality.csv");
-  for (auto u_it = node_locality->begin(); u_it != node_locality->end(); u_it++){
+  for (auto u_it = node_locality_map->begin(); u_it != node_locality_map->end(); u_it++){
     double uid = u_it->first;
     double locality = u_it->second;
     output_file << uid << "\t" << locality <<endl;
   }
-  cout << "------- Wrote node locality to files " << node_locality->size() << endl;
+  cout << "------- Wrote node locality to files " << node_locality_map->size() << endl;
   output_file.close();
 }
 
 
 map< int, double >* SPOs::loadNodeLocalityFromFile(){
-  node_locality  = new map< int, double >();
+  node_locality_map  = new map< int, double >();
   ifstream fin("node-locality.csv");
   if (!fin){
     cout << "Cannot open node locality file node_locality.csv" << endl;
@@ -656,8 +828,8 @@ map< int, double >* SPOs::loadNodeLocalityFromFile(){
 
   while(fin){
     fin >> user_id >> locality;
-    node_locality->insert(make_pair(user_id, locality));
+    node_locality_map->insert(make_pair(user_id, locality));
   }
 
-  return node_locality;
+  return node_locality_map;
 }

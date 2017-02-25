@@ -15,7 +15,8 @@ private:
     Utilities util;
     GPOs *gpos;
     bool isGposSet;
-    map< int, double >* node_locality;
+    map< int, double >* node_locality_map;
+    map< int, map<int, double>* >* checkin_locality_map;
 
     unordered_map<std::pair<int,int>, double, PairHasher> katzCache = unordered_map<std::pair<int,int>, double, PairHasher>();
 
@@ -55,13 +56,22 @@ public:
 
     int edges=0;
 
+    double computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins);
+    double computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
+    vector<double>* computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
+
+
+
     double computeDistanceBetweenFriends(vector< Point* >* source_checkins, vector< Point* >* friend_checkins);
     double computeMeanDistanceBetweenAllFriends(GPOs* gpos);
     vector<double>* computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends);
     double computeNodeLocality(GPOs* gpos, int source);
     map< int, double >* computeNodeLocality(GPOs* gpos);
+    map< int, map<int, double>* >* computeCheckinLocalityMap(GPOs* gpos);
+
     map< int, double >* loadNodeLocalityFromFile();
     void writeNodeLocalityToFile();
+    void writeCheckinLocalityToFile();
     void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
     void loadKatzScoreFromMemory();
 };

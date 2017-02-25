@@ -346,8 +346,9 @@ int main(int argc, char *argv[]){
       cout << "METRICS: Pre-Compute node_locality" << endl;
       GPOs* gpos = loadCheckins(checkins_file);
       SPOs* spos = loadSocialGraph(graph_file);
-      spos->computeNodeLocality(gpos);
-      spos->writeNodeLocalityToFile();
+      spos->computeCheckinLocalityMap(gpos);
+      // spos->computeNodeLocality(gpos);
+      spos->writeCheckinLocalityToFile();
       break;
     }
 

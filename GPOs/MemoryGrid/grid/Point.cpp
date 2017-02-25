@@ -8,12 +8,13 @@ Point::Point (double x, double y, int id){
     p_id = id;
 }
 
-Point::Point (double x, double y, int id, int uid, boost::posix_time::ptime time){
+Point::Point (double x, double y, int id, int uid, boost::posix_time::ptime time, int order){
     p_x = x;
     p_y = y;
     p_id = id;
     p_uid = uid;
     p_time = time;
+    p_order = order;
 }
 
 Point::~Point (){
@@ -30,6 +31,8 @@ double Point::getY(){return p_y;}
 int Point::getID(){return p_id;}
 
 int Point::getUID(){return p_uid;}
+
+int Point::getOrder(){return p_order;}
 
 boost::posix_time::ptime Point::getTime(){return p_time;}
 

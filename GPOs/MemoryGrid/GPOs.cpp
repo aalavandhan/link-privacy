@@ -273,7 +273,7 @@ bool GPOs::loadLocations(const char* fileName){
     // skip newlines
     if (!fin.good()) continue;
 
-    loadPoint(x, y, lid, uid, dtm);
+    loadPoint(x, y, lid, uid, dtm, count);
 
     count ++;
 
@@ -370,10 +370,10 @@ unordered_map<int, double>* GPOs::calculateLocationEntropy(){
 }
 
 
-void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time){
+void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order){
   Point* l;
 
-  l = new Point(x, y, lid, uid, time);
+  l = new Point(x, y, lid, uid, time, order);
 
   locations.insert(pair<int, Point*>(lid, l));
   auto lh_it = user_to_location.find(uid);
@@ -453,8 +453,8 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 }
 
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
-double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
-  unsigned int lid, uid, count=0;
+  double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
+  unsigned int lid, count=0, order =0;
   set<int>* seenLocations = new set<int>();
   boost::posix_time::ptime time;
 
@@ -462,16 +462,16 @@ double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
     x   = l->second->getX();
     y   = l->second->getY();
     lid = l->second->getID();
-    uid = l->second->getUID();
-    time = l->second->getTime();
 
     vector<res_point*>* checkins = gpos->getRange(x, y, radius_geo_dist);
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if(isOptimistic){
-        loadPoint(x, y, lid, (*c)->uid, (*c)->time);
+        loadPoint(x, y, lid, (*c)->uid, (*c)->time, order);
+        order++;
       } else {
         if(seenLocations->find( (*c)->id ) == seenLocations->end()){
-          loadPoint(x, y, lid, (*c)->uid, (*c)->time);
+          loadPoint(x, y, lid, (*c)->uid, (*c)->time, order);
+          order++;
           seenLocations->insert( (*c)->id );
         }
       }
@@ -499,11 +499,11 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
       if(radius != 0){
         Point *p = (*loc);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime());
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime(), lid);
         lid++;
       } else {
         Point *p = (*loc);
-        loadPoint(p->getX(), p->getY(), lid, u->first, p->getTime());
+        loadPoint(p->getX(), p->getY(), lid, u->first, p->getTime(), lid);
         lid++;
       }
 
@@ -535,7 +535,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 }
 
 void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit){
-  int lid = LOCATION_NOISE_BOUND;
+  int lid = LOCATION_NOISE_BOUND; int order = 0;
   for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
     int location = l_it->first;
     vector< Point* > *checkins = l_it->second;
@@ -549,13 +549,15 @@ void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radiu
       for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
         Point *p = (*loc_it);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime());
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), order);
+        order++;
         lid++;
       }
     } else {
       for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
         Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime());
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), order);
+        order++;
       }
     }
   }
@@ -570,7 +572,7 @@ void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radiu
 
 void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit){
   // TODO: Pick a random id
-  int lid = LOCATION_NOISE_BOUND;
+  int lid = LOCATION_NOISE_BOUND;int order = 0;
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
     int user_id = u_it->first;
     vector< Point* > *user_checkins = u_it->second;
@@ -585,13 +587,15 @@ void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime());
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(),order);
+        order++;
         lid++;
       }
     } else {
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime());
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(),order);
+        order++;
       }
     }
   }
@@ -651,6 +655,7 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
   //  find which cell it belongs to
   //  get the cell corner which is closest
   //  load this point to this corner
+  int order = 0;
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
 
@@ -687,7 +692,8 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
           }
         }
         int location_id = ((closest_corner_i + q_x)*grid_size)+( closest_corner_j + q_y);
-        loadPoint(closest_x, closest_y, location_id, u->first, p->getTime());
+        loadPoint(closest_x, closest_y, location_id, u->first, p->getTime(), order);
+        order++;
       }
       else{
         cout<<"cell out of bounds...check grid size"<<endl;
