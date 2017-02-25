@@ -98,7 +98,7 @@ void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range proximity ---------------" << endl;
-  query->checkUtilityProximity(query_file, baseGPOs, 1000, 500);
+  query->checkUtilityProximity(query_file, baseGPOs, 1000, 500, noise_radius);
 }
 
 void runUtilities(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]){
       cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
       // spos->computeCheckinLocalityMap(gpos);
       // spos->computeNodeLocality(gpos);
-      /
+
       break;
     }
 
