@@ -352,9 +352,11 @@ int main(int argc, char *argv[]){
       cout << "METRICS: Pre-Compute node_locality" << endl;
       GPOs* gpos = loadCheckins(checkins_file);
       SPOs* spos = loadSocialGraph(graph_file);
-      spos->computeCheckinLocalityMap(gpos);
+      // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
+      cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
+      // spos->computeCheckinLocalityMap(gpos);
       // spos->computeNodeLocality(gpos);
-      spos->writeCheckinLocalityToFile();
+      /
       break;
     }
 

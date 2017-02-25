@@ -524,10 +524,6 @@ double SPOs::computeDistanceBetweenFriends(vector< Point* >* source_checkins, ve
 
       if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
 
-
-//         double Utilities::computeMinimumDistance(double x1, double y1, double x2, double y2){
-//     return sqrt(((x1-x2)*(x1-x2))+ ((y1 - y2)*(y1 - y2)));
-// }
         double distSq = util.computeMinimumDistance(source_checkin->getX(), source_checkin->getY(), friend_checkin->getX(), friend_checkin->getY());
         if(distSq < closestDistance){
           closestDistance = distSq;
@@ -654,7 +650,7 @@ double SPOs::computeNodeLocality(GPOs* gpos, int source){
   }
 
   if(distances->size() != 0)
-    node_locality = 1/distances->size() * locality_sum;
+    node_locality = 1/(double)distances->size() * locality_sum;
   else
     node_locality = 0;
 
@@ -750,7 +746,7 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
   }
 
   if(distances->size() != 0)
-    checkin_locality = (double) 1/distances->size() * locality_sum;
+    checkin_locality = 1/(double)distances->size() * locality_sum;
   else
     checkin_locality = 0;
 
