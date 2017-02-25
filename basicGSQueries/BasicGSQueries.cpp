@@ -23,7 +23,7 @@ int SimpleQueries::countCooccurredFriends(){
   return friends;
 }
 
-void SimpleQueries::checkUtilityStats(const char* fileName, double radius){
+void SimpleQueries::checkUtilityStats(const char* fileName, double radius, double noise_distance){
   ifstream fin(fileName);
   double x,y, avg_users;
   int total_users=0, locations_with_users=0;
@@ -37,7 +37,7 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius){
 
   while (fin){
     fin >> y >> x;
-    u_set = gpos->getUsersInRange(x, y, radius);
+    u_set = gpos->getUsersInRange(x, y, radius, noise_distance);
 
     if(u_set->size() > 0)
       locations_with_users++;

@@ -75,11 +75,11 @@ void runRangeUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range utility ---------------" << endl;
-  query->checkUtilityRange(query_file, baseGPOs, 50, noise_radius);
-  query->checkUtilityRange(query_file, baseGPOs, 100, noise_radius);
-  query->checkUtilityRange(query_file, baseGPOs, 200, noise_radius);
-  query->checkUtilityRange(query_file, baseGPOs, 400, noise_radius);
-  query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
+  query->checkUtilityRange(query_file, baseGPOs, 50, 25);
+  query->checkUtilityRange(query_file, baseGPOs, 100, 50);
+  query->checkUtilityRange(query_file, baseGPOs, 200, 100);
+  query->checkUtilityRange(query_file, baseGPOs, 400, 200);
+  query->checkUtilityRange(query_file, baseGPOs, 800, 400);
 }
 
 void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -210,14 +210,14 @@ void checkQueryFileStats(){
 
   SimpleQueries* query = new SimpleQueries(baseGPOs, spos);
 
-  query->checkUtilityStats(query_file, 10);
-  query->checkUtilityStats(query_file, 25);
-  query->checkUtilityStats(query_file, 50);
-  query->checkUtilityStats(query_file, 100);
-  query->checkUtilityStats(query_file, 200);
-  query->checkUtilityStats(query_file, 400);
-  query->checkUtilityStats(query_file, 800);
-  query->checkUtilityStats(query_file, 1600);
+  query->checkUtilityStats(query_file, 10, noise_radius);
+  query->checkUtilityStats(query_file, 25, noise_radius);
+  query->checkUtilityStats(query_file, 50, noise_radius);
+  query->checkUtilityStats(query_file, 100, noise_radius);
+  query->checkUtilityStats(query_file, 200, noise_radius);
+  query->checkUtilityStats(query_file, 400, noise_radius);
+  query->checkUtilityStats(query_file, 800, noise_radius);
+  query->checkUtilityStats(query_file, 1600, noise_radius);
 }
 
 int main(int argc, char *argv[]){
@@ -256,6 +256,9 @@ int main(int argc, char *argv[]){
     iteration_type = 9;
   else if (strcmp(argv[4], "compute-histograms") == 0)
     iteration_type = 10;
+
+  else if (strcmp(argv[4], "query-metrics") == 0)
+    iteration_type = 11;
 
   else
     iteration_type = -1;
@@ -374,6 +377,10 @@ int main(int argc, char *argv[]){
       query->writeHistogramstoFile(social_strength_tresh);
       spos->writeUserFriendsToFile();
       break;
+    }
+
+    case 11:{
+      checkQueryFileStats();
     }
 
     default:

@@ -416,12 +416,24 @@ vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
 
   vector<int> *result_list = new vector<int>();
 
+  // cout << "Computed user lists " << u1_list->size() << " : " << u2_list->size() << endl;
 
-  auto it=std::set_difference(u1_list->begin(), u1_list->end(), u2_list->begin(), u2_list->end(), result_list->begin());
-  result_list->resize(it - result_list->begin());
+  std::set_difference(
+    u1_list->begin(), u1_list->end(),
+    u2_list->begin(), u2_list->end(),
+    result_list->begin());
 
-  delete u1_list;
-  delete u2_list;
+
+
+  // std::cout << "The difference has " << (result_list->size()) << " elements:\n";
+  // for (auto it=result_list->begin(); it!=result_list->end(); ++it)
+  //   std::cout << ' ' << *it;
+  // std::cout << '\n';
+
+  // result_list->resize(it - result_list->begin());
+
+  // delete u1_list;
+  // delete u2_list;
 
   return result_list;
 }
