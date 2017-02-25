@@ -40,6 +40,7 @@ public:
     int countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>* arr2, uint time_block, bool debug);
 
     pair<double,double> addGaussianNoise(double x, double y, double radius);
+    pair<double,double> addNoise(double x, double y, double radius);
     double distanceBetween(double lat1, double lon1, double lat2, double lon2);
     double angleFromCoordinate(double lat1, double long1, double lat2, double long2);
 };

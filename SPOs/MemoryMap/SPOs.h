@@ -70,7 +70,10 @@ public:
     double computeNodeLocality(GPOs* gpos, int source);
     map< int, double >* computeNodeLocality(GPOs* gpos);
 
+    map< int, map<int, pair<int,double> >* >* getCheckinLocalityMap();
     map< int, double >* loadNodeLocalityFromFile();
+    map< int, map<int, pair<int,double> >* >* loadCheckinLocalityFromFile();
+
     void writeNodeLocalityToFile();
     void writeCheckinLocalityToFile();
     void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);

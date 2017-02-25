@@ -174,6 +174,30 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius){
   runEBMOnNoised(baseGPOs, cmpGPOs, spos);
 }
 
+void CombinationNoiseVsEBM(double noise_radius){
+  bool preload_LE  = false;
+  bool preload_OCC = true;
+
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+  cout << "------------- Load computed checkin locality ---------------" << endl;
+  SPOs *tmp_spos = new SPOs();
+  map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality = tmp_spos->loadCheckinLocalityFromFile();
+
+  GPOs* purturbedGPOs = new GPOs();
+  GPOs* cmpGPOs  = new GPOs();
+
+  purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius);
+  cout << "------------- Locations perturbed -------------------" << endl;
+
+  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+  cout << "------------- Locations Grouped -------------------" << endl;
+
+  runEBMOnNoised(baseGPOs, cmpGPOs, spos);
+}
+
+
 void nodeLocalityNoiseVsEBM(double noise_radius, double locality_treshold){
   bool preload_LE  = false;
   bool preload_OCC = true;
@@ -265,6 +289,8 @@ int main(int argc, char *argv[]){
 
   else if (strcmp(argv[4], "query-metrics") == 0)
     iteration_type = 11;
+  else if (strcmp(argv[4], "comb-v-ebm") == 0)
+    iteration_type = 12;
 
   else
     iteration_type = -1;
@@ -384,6 +410,12 @@ int main(int argc, char *argv[]){
     case 11:{
       checkQueryFileStats();
     }
+
+    case 12:
+      cout << "ITRATION: Running EBM with combination noise" << endl;
+      noise_radius = p1;
+      CombinationNoiseVsEBM(noise_radius);
+      break;
 
     default:
       cout << "Invalid iteration type; Enter a valid option" << endl;

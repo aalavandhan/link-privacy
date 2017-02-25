@@ -19,5 +19,7 @@ public:
     virtual map<int, double>* getHiLasMap() = 0;
     virtual map<int, double>* getHiJasMap() = 0;
     virtual map<int, double>* getHlLasMap() = 0;
+    virtual void printCooccurrenceMatrix() = 0;
+
 };
 

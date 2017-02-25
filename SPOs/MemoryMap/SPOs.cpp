@@ -793,7 +793,7 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
     count++;
   }
 
-  cout << "Completed checkin locality" << endl;
+  cout << "Completed checkin locality of size: "<<checkin_locality_map->size() << endl;
 
   return checkin_locality_map;
 }
@@ -816,6 +816,10 @@ void SPOs::writeCheckinLocalityToFile(){
   output_file.close();
 }
 
+
+map< int, map<int, pair<int,double> >* >* SPOs::getCheckinLocalityMap(){
+  return checkin_locality_map;
+}
 
 void SPOs::writeNodeLocalityToFile(){
   ofstream output_file;
@@ -844,4 +848,34 @@ map< int, double >* SPOs::loadNodeLocalityFromFile(){
   }
 
   return node_locality_map;
+}
+
+
+map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(){
+  int count=0;
+  map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality  = new map<int, map<int, pair<int,double> >*>();
+  ifstream fin("checkin-locality.csv");
+  if (!fin){
+    cout << "Cannot open checkin locality file checkin-locality.csv" << endl;
+  }
+  double user_id,location_id,order, locality_value;
+
+  while(fin){
+    fin >> user_id >> location_id >> order >> locality_value;
+    count++;
+    auto it = user_to_order_to_location_locality->find(user_id);
+    if(it!=user_to_order_to_location_locality->end()){  //user id found
+      map<int, pair<int,double> >* order_locality_map = it->second;
+      order_locality_map->insert(make_pair(order,make_pair(location_id,locality_value)));
+    }else{  //create new map and add user checkin order record
+      map<int, pair<int,double> >* order_locality_map = new map<int, pair<int,double> >();
+      order_locality_map->insert(make_pair(order,make_pair(location_id,locality_value)));
+      user_to_order_to_location_locality->insert(make_pair(user_id,order_locality_map));
+    }
+    
+  }
+  checkin_locality_map = user_to_order_to_location_locality;
+
+  cout<<"Loaded user_to_order_to_location_locality map of unique users: "<<user_to_order_to_location_locality->size()<<" and total values: "<<count<<endl;
+  return user_to_order_to_location_locality;
 }

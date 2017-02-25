@@ -507,14 +507,15 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
 void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   // map <int,int> noise_histogram;
   unsigned int lid = 0;
-  Utilities* util = new Utilities();
 
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
 
       if(radius != 0){
         Point *p = (*loc);
-        pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), radius);
+        double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+        total_displacement+=displacement;
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime(), lid);
         lid++;
       } else {
@@ -533,6 +534,8 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
       // }
     }
   }
+  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
+  cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/lid)*1000 <<" in meters"<<endl;
 
   // int inRange=0, total=0;
   // double percentage;
@@ -549,44 +552,6 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   // cout << "In Range : " << percentage << endl;
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
-
-// void GPOs::loadPurturbedLocationsBasedOnHiLHiJ(GPOs* gpos, double radius){
-//   map<int, double>* HiL_map = getHiLasMap();
-//   map<int, double>* HiJ_map = getHiJasMap();
-
-//   int lid   = 0;
-//   int order = 0;
-
-//   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
-
-//     int user = u_it->first;
-//     vector< Point* > *checkins = u_it->second;
-
-//     double hiL = 0, hiJ = 0;
-
-//     auto hil_it = HiL_map.find(user);
-//     if(hil_it != HiL_map.end())
-//       hiL = hil_it->second;
-
-//     auto hij_it = HiJ_map.find(user);
-//     if(hij_it != HiJ_map.end())
-//       hiL = hij_it->second;
-
-//     for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
-//       Point *p = (*loc_it);
-
-
-//       double noise = ( 1/hiL ) + ( 1/hiJ ) * radius;
-
-//       pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), noise);
-
-//       loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), order);
-//       order++;
-//       lid++;
-//     }
-
-//   }
-// }
 
 void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit){
   int lid = LOCATION_NOISE_BOUND; int order = 0;
@@ -1086,6 +1051,37 @@ map<int, double>* GPOs::getHiJasMap(){
 }
 
 
+void GPOs::printCooccurrenceMatrix(){
+
+  ofstream outfile;
+  outfile.open("cooccurrence_matrix.csv");
+
+  //for each user user compute his total cooccurrences at all locations and users
+  //then iterate again to produce probabilities
+  //then compute shanon entropy
+  for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
+
+    int user_id_1 = it->first;
+    auto map_of_vectors = it->second;
+
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      int user_id_2 = it_map->first;
+      auto vector_of_locations = it_map->second;
+
+      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+        // number_of_cooccurrences += it_vector->second;
+        int location_id = it_vector->first;
+
+        outfile << user_id_1 << " " << user_id_2<<" "<<location_id <<" "<< it_vector->second << endl;
+
+      }
+    }
+
+  }
+  outfile.close();
+}
+
+
 map<int, double>* GPOs::getHlLasMap(){
   map<int, map<int,int>* > location_to_user_coocc_map;
   map<int, double>* HlL_histogram = new map<int, double>();
@@ -1163,4 +1159,68 @@ map<int, double>* GPOs::getHlLasMap(){
     HlL_histogram->insert(make_pair(location_id, entropy));
   }
   return HlL_histogram;
+}
+
+
+void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius){
+  
+  user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
+  map<int, double>* HiL_map = gpos->getHiLasMap();
+  map<int, double>* HiJ_map = gpos->getHiJasMap();
+  // map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality = spos->getCheckinLocalityMap();
+
+  int lid   = 0;
+  int new_order = 0;
+
+  ofstream output_file;
+  output_file.open("displacement-combination-function.csv");
+
+  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+
+    int user_id = u_it->first;
+    vector< Point* > *checkins = u_it->second;
+
+    double hiL = 0, hiJ = 0;
+
+    auto hil_it = HiL_map->find(user_id);
+    if(hil_it != HiL_map->end())
+      hiL = hil_it->second;
+
+    auto hij_it = HiJ_map->find(user_id);
+    if(hij_it != HiJ_map->end())
+      hiL = hij_it->second;
+
+    for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+      Point *p = (*loc_it);
+      int order = p->getOrder();
+
+
+      double checkin_locality_value = 0;
+      auto iter = user_to_order_to_location_locality->find(user_id);
+      if(iter!=user_to_order_to_location_locality->end()){
+        map<int,pair<int,double > >* order_to_location_locality_map = iter->second;
+        auto iter_inner = order_to_location_locality_map->find(order);
+        if(iter_inner!= order_to_location_locality_map->end()){
+          pair<int,double> p = iter_inner->second;
+          checkin_locality_value = p.second;
+        }
+      } 
+
+      double noise = checkin_locality_value * ( exp(-hiL) + exp(-hiJ) );
+
+      pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+      total_displacement+=displacement;
+
+      output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
+
+      loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+      new_order++;
+      lid++;
+    }
+  }
+  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
+  cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
+  output_file.close();
+  generateFrequencyCache();
 }

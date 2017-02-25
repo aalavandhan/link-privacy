@@ -128,6 +128,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
 
   double precision, recall, avg_precision=0, avg_recall=0;
   int count=base_proximity_list->size();
+  int invalid_query_points = 0;
 
   for(int i=0; i<count; i++){
     unordered_set< pair<int,int>, PairHasher >* base_proximate_users = base_proximity_list->at(i);
@@ -136,6 +137,11 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
     cout << "Location : " << i << endl;
 
     int positive = cmp_proximate_users->size(), tp=0, gt=base_proximate_users->size();
+
+    if(gt == 0){
+      invalid_query_points++;
+      continue;
+    }
 
     for(auto pair_it=base_proximate_users->begin(); pair_it != base_proximate_users->end(); pair_it++){
       int u1=pair_it->first;
@@ -160,17 +166,18 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
     avg_recall    += recall;
   }
 
-  avg_precision /= count;
-  avg_recall    /= count;
+  avg_precision /= ( count - invalid_query_points );
+  avg_recall    /= ( count - invalid_query_points );
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ Proximity QUERY ]" << endl;
-  cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
+  cout << "Number of locations " << ( count - invalid_query_points ) << " | Range " << radius << "m " << endl;
+  cout << "Number of invalid locations " << invalid_query_points << endl;
   cout << "Precision :" << avg_precision << endl;
   cout << "Recall    :" << avg_recall    << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
-
+  
 
 // Threshold defines
 vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computeProximityUserList(const char* fileName, double radius, double tresh, double noise_distance){
@@ -241,7 +248,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     // proximate_users
     proximate_users->clear();
     delete proximate_users;
-    // cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
+    cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
 
 
     proximate_users_list->push_back(ranked_proximate_users);
@@ -526,6 +533,8 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
 
 void SimpleQueries::writeHistogramstoFile(double tresh){
 
+  gpos->printCooccurrenceMatrix();
+
   ofstream outfile;
   outfile.open("HiL.csv");
   map<int, double>* HiL_map = gpos->getHiLasMap();
@@ -807,7 +816,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
       for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
         int user_id_2 = it_map->first;
         auto vector_of_locations = it_map->second;
-        bool arefriend = aretrueEBMFriends(user_id_1, user_id_2, tresh);
+        bool arefriend = areTrueEBMFriends(user_id_1, user_id_2, tresh);
         if(arefriend){
           for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
             int location_id = it_vector->first;

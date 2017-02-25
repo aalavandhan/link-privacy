@@ -55,6 +55,22 @@ double Utilities::angleFromCoordinate(double lat1, double long1, double lat2, do
   return brng;
 }
 
+pair<double,double> Utilities::addNoise(double x, double y, double radius){
+  static unsigned int seed = rand() % 10000;
+  int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
+  int direction = getRandom<int>(0,360, seed);
+
+  double nLat = y  + (radius * cos( direction ) / R) * (1/DEG_TO_RAD);
+  double nLon = x  + (radius * sin( direction ) / R) * (1/DEG_TO_RAD) / cos(y * DEG_TO_RAD);
+
+  // cout << lat << " " << lon << " " << nLat << " " << nLon << endl;
+  // double newDirection = angleFromCoordinate(nLat, nLon, lat, lon);
+  // cout << distanceBetween(nLat, nLon, y, x) * 1000 << " " << abs(noise_distance)  << " " << direction << " " << newDirection <<endl;
+
+  return make_pair(nLon, nLat);
+}
+
+
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
   boost::mt19937 rng;
   static unsigned int seed = rand() % 10000;
@@ -325,12 +341,12 @@ int Utilities::countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>
     // }
 
 
-    int diff = (arr1->at(i) - arr2->at(j));
+    uint diff = abs(arr1->at(i) - arr2->at(j));
 
     if(debug)
         cout<<"diff: "<<  diff <<" ";
 
-    if(abs(diff) <= time_block) {
+    if(diff <= time_block) {
       ++count;
       ++j;
       i++;

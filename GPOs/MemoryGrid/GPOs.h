@@ -2,7 +2,6 @@ class GPOs : public IGPOs
 {
 
 private:
-
     // Point* locations2[DATASET_SIZE];
     map<int, Point*>::iterator it;
 
@@ -29,9 +28,11 @@ public:
     ~GPOs();
     vector<int> ids;
     map<int, Point*> locations;
+    double total_displacement =0;
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
+    map< int, map<int, pair<int,double> >* >* user_to_order_to_location_displacment;
 
     // map<int, unordered_map<int, vector<uint>* >*> users_locations_frequency_map;
     map<int, map<int, vector<uint>* >*> locations_users_frequency_map;
@@ -62,6 +63,9 @@ public:
     virtual map<int , vector< Point* >*>* getLocationToUser();
 
     unordered_map<int, double>* calculateLocationEntropy();
+
+    void printCooccurrenceMatrix();
+
 
     virtual map<int, double>* getHiLasMap();
     virtual map<int, double>* getHiJasMap();
@@ -97,4 +101,6 @@ public:
 
     void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
     void loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit);
+    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius);
+    
 };
