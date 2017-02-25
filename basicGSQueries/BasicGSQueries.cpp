@@ -210,12 +210,13 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
     unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
-    cout << "number of users around this location : " << u_set->size() << endl;
+    // cout << "number of users around this location : " << u_set->size() << endl;
     if(u1_set->size() > 1){
       for(auto u1_it=u1_set->begin(); u1_it != u1_set->end(); u1_it++){
         for(auto u2_it=u2_set->begin(); u2_it != u2_set->end(); u2_it++){
           int u1id = (*u1_it);
           int u2id = (*u2_it);
+
           if(u1id != u2id){
             double KatzScore = spos->getKatzScore(u1id, u2id);
             if(proximate_users->find(make_pair(u1id, u2id)) == proximate_users->end() && KatzScore > 0){
@@ -223,6 +224,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
               proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
             }
           }
+
         }
       }
       // cout << "computed ranked pair : " << proximate_users->size() << endl;
@@ -304,7 +306,6 @@ bool SimpleQueries::areEBMFriends(int source, int target, double tresh){
 
 bool SimpleQueries::areTrueEBMFriends(int source, int target, double tresh){
   return ( areEBMFriends(source, target, tresh) && spos->areFriends(source, target) );
-  // return areEBMFriends(source, target, tresh);
 }
 
 void SimpleQueries::verifySocialStrength(double tresh){
@@ -735,7 +736,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   }
 
   //OUT user - location - ebm - truebm - precision
-  
+
 
   {
     //-----------------------------------
@@ -795,8 +796,8 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
         int frequency = iter->second;
         outfile<< std::fixed << setprecision(10) << user_id << " " <<location_id<<" "<<frequency<<"\n";
       }
-      
-      
+
+
     }
     outfile.close();
 
@@ -862,8 +863,8 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
         int frequency = iter->second;
         outfile<< std::fixed << setprecision(10) << user_id << " " <<location_id<<" "<<frequency<<"\n";
       }
-      
-      
+
+
     }
     outfile.close();
 

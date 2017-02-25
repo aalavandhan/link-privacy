@@ -376,11 +376,17 @@ int main(int argc, char *argv[]){
 
     case 9:{
       cout << "METRICS: Pre-Compute node_locality" << endl;
-      GPOs* gpos = loadCheckins(checkins_file);
-      SPOs* spos = loadSocialGraph(graph_file);
+      bool preload_LE  = false;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, gpos);
+
+      spos->computeCheckinLocalityMap(gpos);
+      spos->writeCheckinLocalityToFile();
       // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
-      cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
-      // spos->computeCheckinLocalityMap(gpos);
+      // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
+
       // spos->computeNodeLocality(gpos);
 
       break;
