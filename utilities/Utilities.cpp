@@ -44,6 +44,16 @@ double Utilities::distanceBetween(double lat1, double lon1, double lat2, double 
   return 2.0 * EARTH_RADIUS_IN_KILOMETERS * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
 
+double Utilities::angleFromCoordinate(double lat1, double long1, double lat2, double long2) {
+  double dLon = (long2 - long1);
+  double y = sin(dLon) * cos(lat2);
+  double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+  double brng = atan2(y, x);
+  brng = brng * (1/DEG_TO_RAD);
+  brng = ((int)brng + 360) % 360;
+  brng = 360 - brng; // count degrees counter-clockwise - remove to make clockwise
+  return brng;
+}
 
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
   boost::mt19937 rng;
@@ -69,7 +79,8 @@ pair<double,double> Utilities::addGaussianNoise(double x, double y, double radiu
   nLon = lon  + (noise_distance * sin( direction ) / R) * (1/DEG_TO_RAD) / cos(lat * DEG_TO_RAD);
 
   // cout << lat << " " << lon << " " << nLat << " " << nLon << endl;
-  // cout << distanceBetween(nLat, nLon, y, x) * 1000 << " " << abs(noise_distance)  << " " << direction <<endl;
+  // double newDirection = angleFromCoordinate(nLat, nLon, lat, lon);
+  // cout << distanceBetween(nLat, nLon, y, x) * 1000 << " " << abs(noise_distance)  << " " << direction << " " << newDirection <<endl;
 
   return make_pair(nLon, nLat);
 }

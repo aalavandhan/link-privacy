@@ -75,4 +75,5 @@ public:
     void writeCheckinLocalityToFile();
     void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
     void loadKatzScoreFromMemory();
+    void writeUserFriendsToFile();
 };

@@ -34,6 +34,9 @@ char *checkins_file, *graph_file, *query_file;
 int iteration_type = 1;
 bool run_utilties = false;
 bool is_noise_method = false;
+
+double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
+         total_parts, part_number, distance_treshold, social_strength_tresh;
 #endif
 
 GPOs* loadCheckins(char* checkins_file){
@@ -72,11 +75,11 @@ void runRangeUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range utility ---------------" << endl;
-  query->checkUtilityRange(query_file, baseGPOs, 50);
-  query->checkUtilityRange(query_file, baseGPOs, 100);
-  query->checkUtilityRange(query_file, baseGPOs, 200);
-  query->checkUtilityRange(query_file, baseGPOs, 400);
-  query->checkUtilityRange(query_file, baseGPOs, 800);
+  query->checkUtilityRange(query_file, baseGPOs, 50, noise_radius);
+  query->checkUtilityRange(query_file, baseGPOs, 100, noise_radius);
+  query->checkUtilityRange(query_file, baseGPOs, 200, noise_radius);
+  query->checkUtilityRange(query_file, baseGPOs, 400, noise_radius);
+  query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
 }
 
 void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -89,7 +92,8 @@ void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
 }
 
 void runUtilities(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
-  runProximityUtility(baseGPOs, cmpGPOs, spos);
+  // runProximityUtility(baseGPOs, cmpGPOs, spos);
+  runRangeUtility(baseGPOs, cmpGPOs, spos);
   // if(is_noise_method && run_utilties){
   //   // runRangeUtility(baseGPOs, cmpGPOs, spos);
   //   runProximityUtility(baseGPOs, cmpGPOs, spos);
@@ -105,7 +109,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  for(double i = 1; i < 3; i = i + 0.1){
+  for(double i = 0.5; i < 3; i = i + 0.1){
     cout << "----- Computing accuracy for threshold --- " << i <<endl;
     query->verifySocialStrength(i);
     cout << "--------------------------------------------";
@@ -263,9 +267,6 @@ int main(int argc, char *argv[]){
   double p2 = atof(argv[7]); // ( Parameter 2 )
   double p3 = atof(argv[8]); // ( Parameter 3 )
 
-  double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
-         total_parts, part_number, distance_treshold, social_strength_tresh;
-
 
   switch(iteration_type){
     case 1:
@@ -275,8 +276,9 @@ int main(int argc, char *argv[]){
 
     case 2:
       cout << "ITRATION: Running EBM with grouping" << endl;
+      noise_radius = 0;
       group_radius = p2;
-      gaussianNoiseVsEBM(0, group_radius);
+      gaussianNoiseVsEBM(noise_radius, group_radius);
       is_noise_method = true;
       break;
 
@@ -292,6 +294,7 @@ int main(int argc, char *argv[]){
     case 4:
       cout << "ITRATION: Running EBM with grid snapping noise" << endl;
       grid_size_in_km = p1;
+      noise_radius = grid_size_in_km * 1000;
 
       gridSnappingVsEBM(grid_size_in_km);
       is_noise_method = true;
@@ -365,7 +368,11 @@ int main(int argc, char *argv[]){
       SimpleQueries* query = new SimpleQueries(gpos, spos);
       query->buildMatrices(Q);
       query->cacluateSocialStrength();
+
+      cout << "Using Threshold" << social_strength_tresh << endl;
+
       query->writeHistogramstoFile(social_strength_tresh);
+      spos->writeUserFriendsToFile();
       break;
     }
 

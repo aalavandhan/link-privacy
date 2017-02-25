@@ -134,6 +134,23 @@ void SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
   output_file.close();
 }
 
+void SPOs::writeUserFriendsToFile(){
+  ofstream output_file;
+  output_file.open("user-friendships.csv");
+
+  for(auto it=socialgraph_map->begin(); it != socialgraph_map->end(); it++){
+    int user = it->first;
+    int n_friends = it->second->size();
+
+    if(n_friends > 0)
+      output_file << user << " " << n_friends << endl;
+  }
+
+  cout << "Users friends written to user-friendships.csv";
+
+  output_file.close();
+}
+
 /*
 loads the social graph into a map/hashtable containing
 (id, value) pair. The "value" data structure stores the
@@ -250,8 +267,8 @@ int SPOs::load(const char* file){
 	}
 	*/
 
-    cout << "Users loaded from Social Graph " << times << endl;
-    cout << "totalFriends = " << (totalFriends/(1024)) << "KB" << endl;
+    cout << "Users loaded from Social Graph File : " << times << endl;
+    cout << "TotalFriends : " << (totalFriends/(1024)) << "KB" << endl;
     cout << "Edges : " << edges << endl;
     return 0;
 }

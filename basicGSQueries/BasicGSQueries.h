@@ -18,7 +18,7 @@ public:
     void buildMatrices(double q);
     int countCooccurredFriends();
     map< int, bool >* getUsersOfInterest(double tresh);
-    void checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius);
+    void checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius, double noise_distance);
     void checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh);
     vector< unordered_set< pair<int,int>, PairHasher >* >* computeProximityUserList(const char* fileName, double radius, double tresh);
     void checkUtilityStats(const char* fileName, double radius);
@@ -27,6 +27,7 @@ public:
     void cacluateCooccurrenceDistributionBasedOnLocationEntropy();
 
     bool areEBMFriends(int source, int target, double tresh);
+    bool areTrueEBMFriends(int source, int target, double tresh);
     void writeHistogramstoFile(double tresh);
 };
 

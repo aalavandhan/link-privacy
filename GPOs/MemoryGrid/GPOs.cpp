@@ -254,6 +254,10 @@ void GPOs::updateCheckin(Point* p){
 bool GPOs::loadLocations(const char* fileName){
   ifstream fin(fileName);
 
+
+  int location_blacklist[] = { 9246,672270,671606,672473,671698,9247,671886,672328,681993,9313 };
+  set<int> blacklist_set (location_blacklist, location_blacklist+10);
+
   if (!fin) {
     std::cerr << "Cannot open checkins file " << fileName << std::endl;
     return false;
@@ -273,12 +277,14 @@ bool GPOs::loadLocations(const char* fileName){
     // skip newlines
     if (!fin.good()) continue;
 
-    loadPoint(x, y, lid, uid, dtm, count);
-
-    count ++;
+    if(blacklist_set.find(lid) == blacklist_set.end()){
+      loadPoint(x, y, lid, uid, dtm, count);
+      count ++;
+    }
 
     if(count%100000==0)
-        cout << count << endl;
+      cout << count << endl;
+
   }
 
   fin.close();
@@ -402,6 +408,23 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
 
   ids.push_back(lid);
 };
+
+// r1 -> Outer radius, r2 -> inner radius
+vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
+  vector<int> *u1_list = getUsersInRange(x, y, r1);
+  vector<int> *u2_list = getUsersInRange(x, y, r2);
+
+  vector<int> *result_list = new vector<int>();
+
+
+  auto it=std::set_difference(u1_list->begin(), u1_list->end(), u2_list->begin(), u2_list->end(), result_list->begin());
+  result_list->resize(it - result_list->begin());
+
+  delete u1_list;
+  delete u2_list;
+
+  return result_list;
+}
 
 
 vector<int>* GPOs::getUsersInRange(double x, double y, double radius){
@@ -996,6 +1019,7 @@ map<int, double>* GPOs::getHiLasMap(){
 map<int, double>* GPOs::getHiJasMap(){
   map<int, double>* HiJ_histogram = new map<int, double>();
 
+
   //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities
   //then compute shanon entropy
@@ -1015,11 +1039,13 @@ map<int, double>* GPOs::getHiJasMap(){
     }
 
     uint *freqVector = (uint *) calloc(user_counts.size(), sizeof(uint));
-    int i = 0;
+    int i = 0; int sum_freq = 0;
     for(auto u_it = user_counts.begin(); u_it!=user_counts.end(); u_it++){
       freqVector[i] = u_it->second;
+      sum_freq += u_it->second;
       i++;
     }
+
     //converts the frequencies to probabilities before computing the total shannon entropy
     double entropy = calcEntropyFromCoV(freqVector , user_counts.size());
     HiJ_histogram->insert(make_pair(user_id, entropy));
@@ -1033,6 +1059,10 @@ map<int, double>* GPOs::getHlLasMap(){
   map<int, map<int,int>* > location_to_user_coocc_map;
   map<int, double>* HlL_histogram = new map<int, double>();
 
+
+  ofstream outfile;
+  outfile.open("user_to_cooccurrences.csv");
+
   //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities
   //then compute shanon entropy
@@ -1040,6 +1070,9 @@ map<int, double>* GPOs::getHlLasMap(){
 
     int user_id_1 = it->first;
     auto map_of_vectors = it->second;
+
+    set<int> number_of_locations;
+
     for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
       int user_id_2 = it_map->first;
       auto vector_of_locations = it_map->second;
@@ -1047,6 +1080,7 @@ map<int, double>* GPOs::getHlLasMap(){
       for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
         // number_of_cooccurrences += it_vector->second;
         int location_id = it_vector->first;
+        number_of_locations.insert(location_id);
 
         auto lc_it = location_to_user_coocc_map.find(location_id);
         if(lc_it != location_to_user_coocc_map.end()){ //location found in outer map
@@ -1079,7 +1113,10 @@ map<int, double>* GPOs::getHlLasMap(){
 
       }
     }
+
+    outfile << user_id_1 << " " << number_of_locations.size() << endl;
   }
+  outfile.close();
 
   for(auto it = location_to_user_coocc_map.begin(); it!= location_to_user_coocc_map.end(); it++){
     int location_id = it->first;
