@@ -114,7 +114,7 @@ extern double GAMMA;
 #define KATZ_ATTENUATION 0.1
 #define KATZ_PATH_LENGTH 2
 
-#define NODE_LOCALITY_BETA 384
+#define NODE_LOCALITY_BETA 40
 
 
 // Number of friendships in gowalla dataset with more than one

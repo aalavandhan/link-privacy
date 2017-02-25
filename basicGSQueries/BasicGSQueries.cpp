@@ -725,6 +725,142 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
     cout<<"Printing location_to_trueEBMinferred complete. size: "<<location_to_trueEBMinferred.size()<<endl;
   }
 
+  //OUT user - location - ebm - truebm - precision
+  
+
+  {
+    //-----------------------------------
+    //-- user and location to the number of ebm freinds inferred at the location
+    map<int, map<int,int> *> location_user_to_EBMinferred;
+    auto cooccurrence_matrix = gpos->getCooccurrenceMatrix();
+    for(auto it = cooccurrence_matrix->begin(); it!= cooccurrence_matrix->end(); it++){
+
+      int user_id_1 = it->first;
+      auto map_of_vectors = it->second;
+      for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+        int user_id_2 = it_map->first;
+        auto vector_of_locations = it_map->second;
+        bool arefriend = areEBMFriends(user_id_1, user_id_2, tresh);
+        if(arefriend){
+          for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+            int location_id = it_vector->first;
+
+            auto lc_it = location_user_to_EBMinferred.find(location_id);
+            if(lc_it != location_user_to_EBMinferred.end()){
+              map<int,int>* user_toEBMinferred = lc_it->second;
+
+              //check for both locations and update/create map as necessary
+
+              auto iter_u1 = user_toEBMinferred->find(user_id_1);
+              if(iter_u1 != user_toEBMinferred->end()){
+                iter_u1->second = iter_u1->second+1;
+              }else{
+                user_toEBMinferred->insert(make_pair(user_id_1 , 1));
+              }
+
+              auto iter_u2 = user_toEBMinferred->find(user_id_2);
+              if(iter_u2 != user_toEBMinferred->end()){
+                iter_u2->second = iter_u2->second+1;
+              }else{
+                user_toEBMinferred->insert(make_pair(user_id_2 , 1));
+              }
+
+            }else{
+              map<int,int>* user_toEBMinferred = new map<int,int>();
+              user_toEBMinferred->insert(make_pair(user_id_1,1));
+              user_toEBMinferred->insert(make_pair(user_id_2,1));
+              location_user_to_EBMinferred.insert(make_pair(location_id,user_toEBMinferred));
+            }
+          }
+        }
+      }
+    }
+
+    outfile.open("location_user_to_EBMinferred.csv");
+    for(auto it = location_user_to_EBMinferred.begin(); it !=location_user_to_EBMinferred.end(); it++){
+      int location_id = it->first;
+      map<int,int>* user_toEBMinferred = it->second;
+
+      for(auto iter = user_toEBMinferred->begin(); iter!= user_toEBMinferred->end(); iter++){
+        int user_id = iter->first;
+        int frequency = iter->second;
+        outfile<< std::fixed << setprecision(10) << user_id << " " <<location_id<<" "<<frequency<<"\n";
+      }
+      
+      
+    }
+    outfile.close();
+
+    cout<<"Printing location_user_to_EBMinferred complete. size: "<<location_user_to_EBMinferred.size()<<endl;
+
+  }
+
+  {
+    //-----------------------------------
+    //-- user and location to the number of ebm freinds inferred at the location
+    map<int, map<int,int> *> location_user_to_trueEBMinferred;
+    auto cooccurrence_matrix = gpos->getCooccurrenceMatrix();
+    for(auto it = cooccurrence_matrix->begin(); it!= cooccurrence_matrix->end(); it++){
+
+      int user_id_1 = it->first;
+      auto map_of_vectors = it->second;
+      for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+        int user_id_2 = it_map->first;
+        auto vector_of_locations = it_map->second;
+        bool arefriend = areEBMFriends(user_id_1, user_id_2, tresh);
+        if(arefriend){
+          for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+            int location_id = it_vector->first;
+
+            auto lc_it = location_user_to_trueEBMinferred.find(location_id);
+            if(lc_it != location_user_to_trueEBMinferred.end()){
+              map<int,int>* user_toEBMinferred = lc_it->second;
+
+              //check for both locations and update/create map as necessary
+
+              auto iter_u1 = user_toEBMinferred->find(user_id_1);
+              if(iter_u1 != user_toEBMinferred->end()){
+                iter_u1->second = iter_u1->second+1;
+              }else{
+                user_toEBMinferred->insert(make_pair(user_id_1 , 1));
+              }
+
+              auto iter_u2 = user_toEBMinferred->find(user_id_2);
+              if(iter_u2 != user_toEBMinferred->end()){
+                iter_u2->second = iter_u2->second+1;
+              }else{
+                user_toEBMinferred->insert(make_pair(user_id_2 , 1));
+              }
+
+            }else{
+              map<int,int>* user_toEBMinferred = new map<int,int>();
+              user_toEBMinferred->insert(make_pair(user_id_1,1));
+              user_toEBMinferred->insert(make_pair(user_id_2,1));
+              location_user_to_trueEBMinferred.insert(make_pair(location_id,user_toEBMinferred));
+            }
+          }
+        }
+      }
+    }
+
+    outfile.open("location_user_to_trueEBMinferred.csv");
+    for(auto it = location_user_to_trueEBMinferred.begin(); it !=location_user_to_trueEBMinferred.end(); it++){
+      int location_id = it->first;
+      map<int,int>* user_totrueEBMinferred = it->second;
+
+      for(auto iter = user_totrueEBMinferred->begin(); iter!= user_totrueEBMinferred->end(); iter++){
+        int user_id = iter->first;
+        int frequency = iter->second;
+        outfile<< std::fixed << setprecision(10) << user_id << " " <<location_id<<" "<<frequency<<"\n";
+      }
+      
+      
+    }
+    outfile.close();
+
+    cout<<"Printing location_user_to_trueEBMinferred complete. size: "<<location_user_to_trueEBMinferred.size()<<endl;
+
+  }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
