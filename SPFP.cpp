@@ -75,11 +75,21 @@ void runRangeUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range utility ---------------" << endl;
-  query->checkUtilityRange(query_file, baseGPOs, 50, 25);
-  query->checkUtilityRange(query_file, baseGPOs, 100, 50);
-  query->checkUtilityRange(query_file, baseGPOs, 200, 100);
-  query->checkUtilityRange(query_file, baseGPOs, 400, 200);
-  query->checkUtilityRange(query_file, baseGPOs, 800, 400);
+
+  if(noise_radius < 50)
+    query->checkUtilityRange(query_file, baseGPOs, 50, noise_radius);
+
+  if(noise_radius < 100)
+    query->checkUtilityRange(query_file, baseGPOs, 100, noise_radius);
+
+  if(noise_radius < 200)
+    query->checkUtilityRange(query_file, baseGPOs, 200, noise_radius);
+
+  if(noise_radius < 400)
+    query->checkUtilityRange(query_file, baseGPOs, 400, noise_radius);
+
+  if(noise_radius < 800)
+  query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
 }
 
 void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -92,12 +102,8 @@ void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
 }
 
 void runUtilities(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
-  // runProximityUtility(baseGPOs, cmpGPOs, spos);
   runRangeUtility(baseGPOs, cmpGPOs, spos);
-  // if(is_noise_method && run_utilties){
-  //   // runRangeUtility(baseGPOs, cmpGPOs, spos);
-  //   runProximityUtility(baseGPOs, cmpGPOs, spos);
-  // }
+  runProximityUtility(baseGPOs, cmpGPOs, spos);
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
@@ -210,14 +216,14 @@ void checkQueryFileStats(){
 
   SimpleQueries* query = new SimpleQueries(baseGPOs, spos);
 
-  query->checkUtilityStats(query_file, 10, noise_radius);
-  query->checkUtilityStats(query_file, 25, noise_radius);
-  query->checkUtilityStats(query_file, 50, noise_radius);
-  query->checkUtilityStats(query_file, 100, noise_radius);
-  query->checkUtilityStats(query_file, 200, noise_radius);
-  query->checkUtilityStats(query_file, 400, noise_radius);
-  query->checkUtilityStats(query_file, 800, noise_radius);
-  query->checkUtilityStats(query_file, 1600, noise_radius);
+  query->checkUtilityStats(query_file, 10, 5);
+  query->checkUtilityStats(query_file, 25, 12.5);
+  query->checkUtilityStats(query_file, 50, 25);
+  query->checkUtilityStats(query_file, 100, 50);
+  query->checkUtilityStats(query_file, 200, 100);
+  query->checkUtilityStats(query_file, 400, 200);
+  query->checkUtilityStats(query_file, 800, 400);
+  query->checkUtilityStats(query_file, 1600, 800);
 }
 
 int main(int argc, char *argv[]){
@@ -264,7 +270,6 @@ int main(int argc, char *argv[]){
     iteration_type = -1;
 
   run_utilties       = atoi(argv[5]); // [ 0 / 1]
-  is_noise_method    = false;
 
   double p1 = atof(argv[6]); // ( Parameter 1 )
   double p2 = atof(argv[7]); // ( Parameter 2 )
@@ -282,7 +287,6 @@ int main(int argc, char *argv[]){
       noise_radius = 0;
       group_radius = p2;
       gaussianNoiseVsEBM(noise_radius, group_radius);
-      is_noise_method = true;
       break;
 
     case 3:
@@ -291,7 +295,6 @@ int main(int argc, char *argv[]){
       group_radius = p2;
 
       gaussianNoiseVsEBM(noise_radius, group_radius);
-      is_noise_method = true;
       break;
 
     case 4:
@@ -300,7 +303,6 @@ int main(int argc, char *argv[]){
       noise_radius = grid_size_in_km * 1000;
 
       gridSnappingVsEBM(grid_size_in_km);
-      is_noise_method = true;
       break;
 
     case 5:
@@ -309,7 +311,6 @@ int main(int argc, char *argv[]){
       locality_treshold = p2;
 
       nodeLocalityNoiseVsEBM(noise_radius, locality_treshold);
-      is_noise_method = true;
       break;
 
     case 6:
@@ -318,7 +319,6 @@ int main(int argc, char *argv[]){
       entropy_treshold = p2;
 
       locationEntropyNoiseVsEBM(noise_radius, entropy_treshold);
-      is_noise_method = true;
       break;
 
     case 7:{

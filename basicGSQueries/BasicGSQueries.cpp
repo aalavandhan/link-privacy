@@ -50,7 +50,7 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
 
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
+  cout << "Number of locations " << count << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance << endl;
   cout << "Locations with users :" << locations_with_users << endl;
   cout << "Locations without users :" << count - locations_with_users << endl;
   cout << "Mean users around a location :" << avg_users << endl;
@@ -115,15 +115,15 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 
 // Given a set of locations of interest and a range  this utility counts the pairs of users with
 // katz score greater than the defined treshold
-void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh){
+void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh, double noise_distance){
   cout << "Computing user proximity list for base gpos " << endl;
   // Before adding noise
-  vector< unordered_set< pair<int,int>, PairHasher >* >* base_proximity_list = SimpleQueries(base_gpos, spos).computeProximityUserList(fileName, radius, tresh);
+  vector< unordered_set< pair<int,int>, PairHasher >* >* base_proximity_list = SimpleQueries(base_gpos, spos).computeProximityUserList(fileName, radius, tresh, noise_distance);
   cout << "Computed user proximity list for base gpos : " << base_proximity_list->size() << endl;
 
   // With noise
   cout << "Computing user proximity list for other gpos : " << endl;
-  vector< unordered_set< pair<int,int>, PairHasher >* >* cmp_proximity_list  = computeProximityUserList(fileName, radius, tresh);
+  vector< unordered_set< pair<int,int>, PairHasher >* >* cmp_proximity_list  = computeProximityUserList(fileName, radius, tresh, noise_distance);
   cout << "Computed user proximity list for other gpos : " << cmp_proximity_list->size() << endl;
 
   double precision, recall, avg_precision=0, avg_recall=0;
@@ -173,7 +173,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
 
 
 // Threshold defines
-vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computeProximityUserList(const char* fileName, double radius, double tresh){
+vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computeProximityUserList(const char* fileName, double radius, double tresh, double noise_distance){
   ifstream fin(fileName);
 
   double x,y;
@@ -195,7 +195,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
 
     // u1_set = gpos->getUsersInRange(x, y, radius);
     // u2_set = gpos->getUsersInRange(x, y, radius);
-    u_set = gpos->getUsersInRange(x, y, radius);
+    u_set = gpos->getUsersInRange(x, y, radius, noise_distance);
     u1_set = u_set;
     u2_set = u_set;
 

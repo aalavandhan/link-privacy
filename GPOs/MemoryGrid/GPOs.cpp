@@ -413,29 +413,10 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
 vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
   vector<int> *u1_list = getUsersInRange(x, y, r1);
   vector<int> *u2_list = getUsersInRange(x, y, r2);
-
-  vector<int> *result_list = new vector<int>();
-
-  // cout << "Computed user lists " << u1_list->size() << " : " << u2_list->size() << endl;
-
-  std::set_difference(
-    u1_list->begin(), u1_list->end(),
-    u2_list->begin(), u2_list->end(),
-    result_list->begin());
-
-
-
-  // std::cout << "The difference has " << (result_list->size()) << " elements:\n";
-  // for (auto it=result_list->begin(); it!=result_list->end(); ++it)
-  //   std::cout << ' ' << *it;
-  // std::cout << '\n';
-
-  // result_list->resize(it - result_list->begin());
-
-  // delete u1_list;
-  // delete u2_list;
-
-  return result_list;
+  vector<int> result_list, *result;
+  std::set_difference(u1_list->begin(), u1_list->end(), u2_list->begin(), u2_list->end(), std::inserter(result_list, result_list.begin()));
+  result = new vector<int>(result_list.begin(), result_list.end());
+  return result;
 }
 
 
