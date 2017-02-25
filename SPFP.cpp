@@ -118,7 +118,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  for(double i = 0.5; i < 3; i = i + 0.1){
+  for(double i = 0.3; i < 2.5; i = i + 0.1){
     cout << "----- Computing accuracy for threshold --- " << i <<endl;
     query->verifySocialStrength(i);
     cout << "--------------------------------------------";
@@ -196,9 +196,9 @@ void CombinationNoiseVsEBM(double noise_radius){
   } else if(combination_type == 1) {
     purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, true);
   } else if(combination_type == 2) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionCOOCC(baseGPOs, gpos->getL2U2COOCC(), noise_radius, false);
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, false);
   } else if(combination_type == 3) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionCOOCC(baseGPOs, gpos->getL2U2COOCC(), noise_radius, true);
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, true);
   }
 
   cout << "------------- Locations perturbed -------------------" << endl;
