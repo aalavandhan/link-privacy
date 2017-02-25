@@ -1,4 +1,6 @@
 #include "../headersMemory.h"
+#include <cmath>
+
 
 template<class T>
 struct distribution
@@ -341,12 +343,12 @@ int Utilities::countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>
     // }
 
 
-    uint diff = abs(arr1->at(i) - arr2->at(j));
+    int diff = arr1->at(i) - arr2->at(j);
 
     if(debug)
         cout<<"diff: "<<  diff <<" ";
 
-    if(diff <= time_block) {
+    if(abs(diff) <= (int) time_block) {
       ++count;
       ++j;
       i++;
