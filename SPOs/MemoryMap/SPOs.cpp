@@ -744,8 +744,8 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
 
 
 
-map< int, map<int, double>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos){
-  checkin_locality_map  = new map< int, map<int, double>* >();
+map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos){
+  checkin_locality_map  = new map<int, map<int, pair<int,double> >*>();
 
   int count=0;
 
@@ -754,7 +754,7 @@ map< int, map<int, double>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos){
   for(auto it = gpos->user_to_location.begin(); it != gpos->user_to_location.end(); it++){
     int source_user_id = it->first;
     auto location_vector = it->second;
-    map<int, double>* locations_locality_map = new map<int,double>();
+    map<int, pair<int,double> >* order_locality_map = new map<int,pair<int,double> >();
 
     auto f_it = socialgraph_map->find(source_user_id);
     if(f_it==socialgraph_map->end())
@@ -768,9 +768,9 @@ map< int, map<int, double>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos){
 
       //for users wiht multiple checkins at the smae location
       //overwrites old location value (since it is identical)
-      locations_locality_map->insert(make_pair(p->getID(),locality));
+      order_locality_map->insert(make_pair(p->getOrder(),make_pair(p->getID(),locality)));
     }
-    checkin_locality_map->insert(make_pair(source_user_id, locations_locality_map));
+    checkin_locality_map->insert(make_pair(source_user_id, order_locality_map));
     // cout << source << " " << locality << endl;
     if(count%1000 == 0)
       cout << "User Count : " << count << endl;
@@ -792,11 +792,11 @@ void SPOs::writeCheckinLocalityToFile(){
   int counter = 0;
   for (auto u_it = checkin_locality_map->begin(); u_it != checkin_locality_map->end(); u_it++){
     double user_id = u_it->first;
-    map<int, double>* locations_locality_map = u_it->second;
-    for(auto iter =locations_locality_map->begin(); iter!=locations_locality_map->end(); iter++){
-      int location_id = iter->first;
-      double locality = iter->second;
-      output_file << user_id << "\t" << location_id <<"\t"<< locality <<endl;
+    map<int, pair<int,double> >* order_locality_map = u_it->second;
+    for(auto iter =order_locality_map->begin(); iter!=order_locality_map->end(); iter++){
+      int order = iter->first;
+      auto location_nl_pair =  iter->second;
+      output_file << user_id << "\t" << location_nl_pair.first <<"\t" << order <<"\t"<< location_nl_pair.second <<endl;
       counter++;
     }
   }
