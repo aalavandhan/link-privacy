@@ -1198,8 +1198,8 @@ map<int, double>* GPOs::getHlLasMap(){
 }
 
 
-void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius){
-  
+void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius, bool isGaussainNoise){
+
   user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
   map<int, double>* HiL_map = gpos->getHiLasMap();
   map<int, double>* HiJ_map = gpos->getHiJasMap();
@@ -1240,7 +1240,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
           pair<int,double> p = iter_inner->second;
           checkin_locality_value = p.second;
         }
-      } 
+      }
 
       double expHil=0,expHiJ=0;
       if(hiL == 0){
@@ -1257,7 +1257,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
 
       double noise = checkin_locality_value * ( expHil + expHiJ );
 
-      pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      if(isGaussainNoise){
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
+      } else {
+        pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      }
+
       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
 
@@ -1274,8 +1279,8 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   generateFrequencyCache();
 }
 
-void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius){
-  
+void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise){
+
   map<int, double>* HiL_map = gpos->getHiLasMap();
   map<int, double>* HiJ_map = gpos->getHiJasMap();
 
@@ -1309,9 +1314,14 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
         }
       }
 
-      double noise = user_cooccurrenes * ( exp(-hiL) + exp(-hiJ) );
+      double noise = log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) );
 
-      pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      if(isGaussainNoise){
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
+      } else {
+        pair<double,double> coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      }
+
       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
 

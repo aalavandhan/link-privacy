@@ -36,7 +36,7 @@ bool run_utilties = false;
 bool is_noise_method = false;
 
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
-         total_parts, part_number, distance_treshold, social_strength_tresh;
+         total_parts, part_number, distance_treshold, social_strength_tresh, combination_type;
 #endif
 
 GPOs* loadCheckins(char* checkins_file){
@@ -89,7 +89,10 @@ void runRangeUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
     query->checkUtilityRange(query_file, baseGPOs, 400, noise_radius);
 
   if(noise_radius < 800)
-  query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
+    query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
+
+  if(noise_radius < 1600)
+    query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
 }
 
 void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -188,8 +191,18 @@ void CombinationNoiseVsEBM(double noise_radius){
   GPOs* purturbedGPOs = new GPOs();
   GPOs* cmpGPOs  = new GPOs();
 
-  purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius);
+  if(combination_type == 0){
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, false);
+  } else if(combination_type == 1) {
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, true);
+  } else if(combination_type == 2) {
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionCOOCC(baseGPOs, gpos->getL2U2COOCC(), noise_radius, false);
+  } else if(combination_type == 3) {
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionCOOCC(baseGPOs, gpos->getL2U2COOCC(), noise_radius, true);
+  }
+
   cout << "------------- Locations perturbed -------------------" << endl;
+
 
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
@@ -419,7 +432,9 @@ int main(int argc, char *argv[]){
 
     case 12:
       cout << "ITRATION: Running EBM with combination noise" << endl;
-      noise_radius = p1;
+      noise_radius     = p1;
+      group_radius     = p2;
+      combination_type = p3;
       CombinationNoiseVsEBM(noise_radius);
       break;
 
