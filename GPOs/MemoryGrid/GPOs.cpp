@@ -1273,6 +1273,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       if(noise != 0){
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
         purturbed_count++;
+        // cout << checkin_locality_value << " " << expHil <<  " " << expHiJ << " " << noise << endl;
       } else {
         loadPoint(p->getX(), p->getY(), lid, p->getUID(), p->getTime(), new_order);
       };
@@ -1354,4 +1355,3 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
   generateFrequencyCache();
 }
-
