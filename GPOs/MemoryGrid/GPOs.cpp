@@ -1247,13 +1247,13 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       if(hiL == 0){
         expHil = 0;
       }else{
-        expHil = exp(-hiL);
+        expHil = exp(-hiL/HIL_SCALE);
       }
 
       if(hiJ == 0){
         expHiJ = 0;
       }else{
-        expHiJ = exp(-hiJ);
+        expHiJ = exp(-hiJ/HIJ_SCALE);
       }
 
       double noise = 0.5 * checkin_locality_value * ( expHil + expHiJ ) * radius;
@@ -1325,7 +1325,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
         }
       }
 
-      double noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
+      double noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL/HIL_SCALE) + exp(-hiJ/HIJ_SCALE) ) * radius;
 
       pair<double,double> coordinates_with_noise;
       if(isGaussainNoise){

@@ -116,6 +116,9 @@ extern double GAMMA;
 
 #define NODE_LOCALITY_BETA 1
 
+#define HIJ_SCALE 5
+#define HIL_SCALE 5
+
 
 // Number of friendships in gowalla dataset with more than one
 // occccurrences
