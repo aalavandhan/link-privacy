@@ -111,10 +111,10 @@ extern double GAMMA;
 #define BOUNDARY_ERROR 0.00000000000001
 
 
-#define KATZ_ATTENUATION 0.1
+#define KATZ_ATTENUATION 0.05
 #define KATZ_PATH_LENGTH 2
 
-#define NODE_LOCALITY_BETA 40
+#define NODE_LOCALITY_BETA 1
 
 
 // Number of friendships in gowalla dataset with more than one
