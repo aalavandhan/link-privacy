@@ -1207,6 +1207,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
 
   int lid   = 0;
   int new_order = 0;
+  int purturbed_count = 0;
 
   ofstream output_file;
   output_file.open("displacement-combination-function.csv");
@@ -1255,7 +1256,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
         expHiJ = exp(-hiJ);
       }
 
-      double noise = checkin_locality_value * ( expHil + expHiJ );
+      double noise = 0.5 * checkin_locality_value * ( expHil + expHiJ ) * radius;
 
       pair<double,double> coordinates_with_noise;
       if(isGaussainNoise){
@@ -1269,11 +1270,19 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
 
       output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
 
-      loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+      if(noise != 0){
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+        purturbed_count++;
+      } else {
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), p->getTime(), new_order);
+      };
+
       new_order++;
       lid++;
     }
   }
+
+  cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
   cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
   output_file.close();
@@ -1287,6 +1296,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
 
   int lid   = 0;
   int new_order = 0;
+  int purturbed_count = 0;
 
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
@@ -1315,7 +1325,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
         }
       }
 
-      double noise = log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) );
+      double noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
 
       pair<double,double> coordinates_with_noise;
       if(isGaussainNoise){
@@ -1327,11 +1337,19 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
 
-      loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+      if(noise != 0){
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+        purturbed_count++;
+      } else {
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), p->getTime(), new_order);
+      };
+
       new_order++;
       lid++;
     }
   }
+
+  cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
   cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
   generateFrequencyCache();

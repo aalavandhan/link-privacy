@@ -202,7 +202,7 @@ void CombinationNoiseVsEBM(double noise_radius){
   }
 
   cout << "------------- Locations perturbed -------------------" << endl;
-
+  purturbedGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
 
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
