@@ -1205,7 +1205,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   map<int, double>* HiJ_map = gpos->getHiJasMap();
   // map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality = spos->getCheckinLocalityMap();
 
-  int lid   = 0;
+  int lid   = LOCATION_NOISE_BOUND;
   int new_order = 0;
   int purturbed_count = 0;
 
@@ -1274,7 +1274,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
         purturbed_count++;
       } else {
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), p->getTime(), new_order);
+        loadPoint(p->getX(), p->getY(), lid, p->getUID(), p->getTime(), new_order);
       };
 
       new_order++;
@@ -1294,7 +1294,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
   map<int, double>* HiL_map = gpos->getHiLasMap();
   map<int, double>* HiJ_map = gpos->getHiJasMap();
 
-  int lid   = 0;
+  int lid   = LOCATION_NOISE_BOUND;
   int new_order = 0;
   int purturbed_count = 0;
 
@@ -1341,7 +1341,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
         purturbed_count++;
       } else {
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), p->getTime(), new_order);
+        loadPoint(p->getX(), p->getY(), lid, p->getUID(), p->getTime(), new_order);
       };
 
       new_order++;

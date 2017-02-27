@@ -71,42 +71,42 @@ SPOs* loadSocialGraph(char* graph_file){
   return spos;
 }
 
-void runRangeUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
+void runRangeUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range utility ---------------" << endl;
 
   if(noise_radius < 50)
-    query->checkUtilityRange(query_file, baseGPOs, 50, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 50, noise_radius);
 
   if(noise_radius < 100)
-    query->checkUtilityRange(query_file, baseGPOs, 100, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 100, noise_radius);
 
   if(noise_radius < 200)
-    query->checkUtilityRange(query_file, baseGPOs, 200, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 200, noise_radius);
 
   if(noise_radius < 400)
-    query->checkUtilityRange(query_file, baseGPOs, 400, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 400, noise_radius);
 
   if(noise_radius < 800)
-    query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 800, noise_radius);
 
   if(noise_radius < 1600)
-    query->checkUtilityRange(query_file, baseGPOs, 800, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 800, noise_radius);
 }
 
-void runProximityUtility(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
+void runProximityUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
   spos->loadKatzScoreFromMemory();
 
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range proximity ---------------" << endl;
-  query->checkUtilityProximity(query_file, baseGPOs, 1000, 500, noise_radius);
+  query->checkUtilityProximity(query_file, purturbedGPOs, 1000, 500, noise_radius);
 }
 
-void runUtilities(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
-  runRangeUtility(baseGPOs, cmpGPOs, spos);
-  runProximityUtility(baseGPOs, cmpGPOs, spos);
+void runUtilities(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
+  runRangeUtility(purturbedGPOs, cmpGPOs, spos);
+  runProximityUtility(purturbedGPOs, cmpGPOs, spos);
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
@@ -125,12 +125,12 @@ void runEBM(GPOs *gpos, SPOs *spos){
   }
 }
 
-void runEBMOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos){
+void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
   cmpGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
   cmpGPOs->calculateLocationEntropy();
   runEBM(cmpGPOs, spos);
 
-  runUtilities(baseGPOs, cmpGPOs, spos);
+  runUtilities(purturbedGPOs, cmpGPOs, spos);
 }
 
 void plainEBM(){
@@ -155,7 +155,7 @@ void gridSnappingVsEBM(double grid_size_in_km){
   cout << "Number of locations loaded " << cmpGPOs->locations.size() << endl;
   cout << "------------- Noise added -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 }
 
 void gaussianNoiseVsEBM(double noise_radius, double group_radius){
@@ -174,7 +174,7 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius){
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos);
 }
 
 void CombinationNoiseVsEBM(double noise_radius){
@@ -207,7 +207,7 @@ void CombinationNoiseVsEBM(double noise_radius){
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos);
 }
 
 
@@ -227,7 +227,7 @@ void nodeLocalityNoiseVsEBM(double noise_radius, double locality_treshold){
   cmpGPOs->loadPurturbedLocationsBasedOnNodeLocality(baseGPOs, node_locality, noise_radius, locality_treshold);
   cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 }
 
 void locationEntropyNoiseVsEBM(double noise_radius, double entropy_treshold){
@@ -242,7 +242,7 @@ void locationEntropyNoiseVsEBM(double noise_radius, double entropy_treshold){
   cmpGPOs->loadPurturbedLocationsBasedOnLocationEntropy(baseGPOs, noise_radius, entropy_treshold);
   cout << "------------- Locations perturbed Based on  Location Entropy -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 }
 
 void checkQueryFileStats(){

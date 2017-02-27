@@ -177,7 +177,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
   cout << "Recall    :" << avg_recall    << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
-  
+
 
 // Threshold defines
 vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computeProximityUserList(const char* fileName, double radius, double tresh, double noise_distance){
@@ -198,7 +198,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     fin >> y >> x;
     lno++;
 
-    cout << "Processing location number: " << lno << endl;
+    // cout << "Processing location number: " << lno << endl;
 
     // u1_set = gpos->getUsersInRange(x, y, radius);
     // u2_set = gpos->getUsersInRange(x, y, radius);
@@ -240,7 +240,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
       // if(ranked_proximate_users->size() > 0 && min_score > 0.01){
       //   cout << y << " " << x << " "  << min_score << " " << ranked_proximate_users->size() << endl;
       // }
-      cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
+      // cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
     }
 
     // Delete
@@ -250,7 +250,7 @@ vector< unordered_set< pair<int,int>, PairHasher >* >* SimpleQueries::computePro
     // proximate_users
     proximate_users->clear();
     delete proximate_users;
-    cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
+    // cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
 
 
     proximate_users_list->push_back(ranked_proximate_users);

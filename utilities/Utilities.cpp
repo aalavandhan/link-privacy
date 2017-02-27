@@ -29,7 +29,6 @@ template <typename N> N getRandom(N min, N max, N sd)
 };
 
 Utilities::Utilities(){
-
   srand((unsigned)time(NULL));
 }
 
@@ -59,6 +58,8 @@ double Utilities::angleFromCoordinate(double lat1, double long1, double lat2, do
 
 pair<double,double> Utilities::addNoise(double x, double y, double radius){
   static unsigned int seed = rand() % 10000;
+  ++seed;
+
   int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
   int direction = getRandom<int>(0,360, seed);
 
