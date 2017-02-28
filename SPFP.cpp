@@ -37,7 +37,7 @@ bool is_noise_method = false;
 
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
          total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
-         function_type;
+         function_type, p1, p2, p3, p4;
 #endif
 
 GPOs* loadCheckins(char* checkins_file){
@@ -126,11 +126,95 @@ void runEBM(GPOs *gpos, SPOs *spos){
   }
 }
 
+void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
+  // cmpGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
+  // cmpGPOs->calculateLocationEntropy();
+  // runEBM(cmpGPOs, spos);
+
+  //grab cooccurence Matrix from baseGPOs 
+  //grab cooccurence matrix from cmpGPOs 
+  //compare them both.
+  map<int, pair<double,double>> user_to_precision_recall;
+
+  auto cooccurence_matrix_base = baseGPOs->getInsignificantCooccurrenceMatrix();
+  auto cooccurence_matrix_cmp = cmpGPOs->getInsignificantCooccurrenceMatrix();
+
+
+
+  for(auto c_it = cooccurence_matrix_base->begin(); c_it != cooccurence_matrix_base->end(); c_it++){
+    int user_1 = c_it->first;
+    auto users_location_frequency_map_base = c_it->second;
+    map<int, vector<pair<int, int> >* >* users_location_frequency_map_cmp = NULL;
+
+
+    auto iter_outer = cooccurence_matrix_cmp->find(user_1);
+    if(iter_outer != cooccurence_matrix_cmp->end()){
+      users_location_frequency_map_cmp = iter_outer->second;
+    }else{
+      cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurence matrices"<<endl;
+    } 
+
+    int cooccurrences_across_users_base = 0;
+    int cooccurrences_across_users_cmp = 0;
+    int cooccurrences_across_users_min = 0;
+    for(auto ulh_it = users_location_frequency_map_base->begin(); ulh_it != users_location_frequency_map_base->end(); ulh_it++){
+      int user_2 = ulh_it->first;
+      vector<pair<int, int>>* cooccurrence_counts_vector_base = ulh_it->second;
+      vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
+
+      auto iter_inner = users_location_frequency_map_cmp->find(user_2);
+      if(iter_inner != users_location_frequency_map_cmp->end()){
+        cooccurrence_counts_vector_cmp = iter_inner->second;
+      }else{
+        cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurrence_counts_vector"<<endl;
+      } 
+
+      int cooccurrence_count_base = 0;
+      int cooccurrence_count_cmp = 0;
+
+      for(auto l_it=cooccurrence_counts_vector_base->begin(); l_it != cooccurrence_counts_vector_base->end(); l_it++){
+        int cooccrences_at_l = l_it->second;
+        cooccurrence_count_base += cooccrences_at_l;
+      }     
+      cooccurrences_across_users_base += cooccurrence_count_base;
+
+
+      for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
+        int cooccrences_at_l = l_it->second;
+        cooccurrence_count_cmp += cooccrences_at_l;
+      }      
+      cooccurrences_across_users_cmp += cooccurrence_count_base;
+      cooccurrences_across_users_min += min(cooccurrence_count_cmp,cooccurrence_count_base);
+    }
+    double precision = cooccurrences_across_users_min/(double)cooccurrences_across_users_cmp;
+    double recall = cooccurrences_across_users_min/(double)cooccurrences_across_users_base;
+    user_to_precision_recall.insert(make_pair(user_1,make_pair(precision,recall)));
+  }
+
+  ofstream outfile;
+  ostringstream ss;
+  ss<<"Basic" << p1<<"_"<<p2<<" "<<p3<<"_"<<p4;
+
+
+  outfile.open(ss.str());
+
+
+  for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
+    auto precision_recall_pair = it->second;
+    double precision = precision_recall_pair.first;
+    double recall = precision_recall_pair.second;
+    outfile<<it->first<< " "<<precision<<" "<<recall<<endl;
+  }
+  outfile.close();
+
+  runUtilities(purturbedGPOs, cmpGPOs, spos);
+}
+
 void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
   cmpGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
   cmpGPOs->calculateLocationEntropy();
   runEBM(cmpGPOs, spos);
-
+  runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos);
   runUtilities(purturbedGPOs, cmpGPOs, spos);
 }
 
@@ -311,10 +395,10 @@ int main(int argc, char *argv[]){
 
   run_utilties       = atoi(argv[5]); // [ 0 / 1]
 
-  double p1 = atof(argv[6]); // ( Parameter 1 )
-  double p2 = atof(argv[7]); // ( Parameter 2 )
-  double p3 = atof(argv[8]); // ( Parameter 3 )
-  double p4 = atof(argv[9]); // ( Parameter 4 )
+  p1 = atof(argv[6]); // ( Parameter 1 )
+  p2 = atof(argv[7]); // ( Parameter 2 )
+  p3 = atof(argv[8]); // ( Parameter 3 )
+  p4 = atof(argv[9]); // ( Parameter 4 )
 
 
   switch(iteration_type){
