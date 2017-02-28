@@ -27,7 +27,7 @@ public:
     GPOs();
     ~GPOs();
     vector<int> ids;
-    map<int, Point*> locations;
+    vector<Point*> locations;
     double total_displacement =0;
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
@@ -93,8 +93,6 @@ public:
     double getTotalCPUTime();
     double getTotalTime();
 
-    void updateCheckin(Point* p);
-
     void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order);
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
     void loadPurturbedLocations(GPOs* gpos, double radius);
@@ -104,7 +102,7 @@ public:
 
     void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
     void loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit);
-    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius, bool isGaussainNoise);
-    void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise);
+    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius, bool isGaussainNoise, int function_type);
+    void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
 };

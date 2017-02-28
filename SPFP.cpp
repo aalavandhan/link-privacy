@@ -36,7 +36,8 @@ bool run_utilties = false;
 bool is_noise_method = false;
 
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
-         total_parts, part_number, distance_treshold, social_strength_tresh, combination_type;
+         total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
+         function_type;
 #endif
 
 GPOs* loadCheckins(char* checkins_file){
@@ -92,7 +93,7 @@ void runRangeUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
     query->checkUtilityRange(query_file, purturbedGPOs, 800, noise_radius);
 
   if(noise_radius < 1600)
-    query->checkUtilityRange(query_file, purturbedGPOs, 800, noise_radius);
+    query->checkUtilityRange(query_file, purturbedGPOs, 1600, noise_radius);
 }
 
 void runProximityUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -192,13 +193,13 @@ void CombinationNoiseVsEBM(double noise_radius){
   GPOs* cmpGPOs  = new GPOs();
 
   if(combination_type == 0){
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, false);
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, false, function_type);
   } else if(combination_type == 1) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, true);
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, true, function_type);
   } else if(combination_type == 2) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, false);
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, false, function_type);
   } else if(combination_type == 3) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, true);
+    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, true, function_type);
   }
 
   cout << "------------- Locations perturbed -------------------" << endl;
@@ -313,6 +314,7 @@ int main(int argc, char *argv[]){
   double p1 = atof(argv[6]); // ( Parameter 1 )
   double p2 = atof(argv[7]); // ( Parameter 2 )
   double p3 = atof(argv[8]); // ( Parameter 3 )
+  double p4 = atof(argv[9]); // ( Parameter 4 )
 
 
   switch(iteration_type){
@@ -435,6 +437,7 @@ int main(int argc, char *argv[]){
       noise_radius     = p1;
       group_radius     = p2;
       combination_type = p3;
+      function_type    = p4;
       CombinationNoiseVsEBM(noise_radius);
       break;
 
