@@ -270,8 +270,8 @@ int main(int argc, char *argv[]){
   DELTA_X = ((MAX_X - MIN_X)/ (X-1));
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
 
-  if (argc != 9){
-    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz] run_utilties p1 p2 p3" << endl;
+  if (argc != 10){
+    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz] run_utilties p1 p2 p3 p4" << endl;
     return -1;
   }
 
