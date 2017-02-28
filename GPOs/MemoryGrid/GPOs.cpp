@@ -1284,10 +1284,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       double noise;
       if(type == 0){
         noise = 0.5 * ( expHil + expHiJ ) * radius;
-      } else if(type == 1){
-        noise = checkin_locality_value * radius;
+      } else if (type == 1) {
+        noise = 0.5 * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
+      }else if(type == 2){
+        noise = checkin_locality_value * (expHil / HIL_SCALE) * radius;
       } else{
-        noise = 0.5 * checkin_locality_value * ( expHil + expHiJ ) * radius;
+        noise = 0.5 * checkin_locality_value * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
       }
 
       pair<double,double> coordinates_with_noise;
@@ -1362,6 +1364,10 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
       double noise;
       if(type == 0){
         noise = log( 1 + user_cooccurrenes ) * radius;
+      } else if(type == 1){
+        noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) ) * radius;
+      } else if(type == 2){
+        noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
       } else {
         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL/HIL_SCALE) + exp(-hiJ/HIJ_SCALE) ) * radius;
       };
