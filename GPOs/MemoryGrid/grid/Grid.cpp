@@ -428,6 +428,7 @@ vector<res_point*>* Grid::getRange(double x, double y, double radius){
                         rp->y = p->getY();
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
+                        rp->oid = p->getOrder();
                         result->push_back(rp);
                     }
                 }
