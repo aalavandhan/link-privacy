@@ -478,10 +478,10 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
         loadPoint(x, y, lid, (*c)->uid, (*c)->time, order);
         order++;
       } else {
-        if(seenLocations->find( (*c)->id ) == seenLocations->end()){
+        if(seenLocations->find( (*c)->oid ) == seenLocations->end()){
           loadPoint(x, y, lid, (*c)->uid, (*c)->time, order);
           order++;
-          seenLocations->insert( (*c)->id );
+          seenLocations->insert( (*c)->oid );
         }
       }
       delete (*c);
@@ -851,7 +851,7 @@ void GPOs::countU2UCoOccurrences(uint time_block){
         int cooccrences_at_l = l_it->second;
         cooccurrence_count += cooccrences_at_l;
 
-        auto iter_outer = location_to_user_to_cooccurrences->find(user_1);
+        auto iter_outer = location_to_user_to_cooccurrences->find(location_id);
         if(iter_outer != location_to_user_to_cooccurrences->end()){
           //update/create for both users
           map<int,int>* user_to_cooccurrences_map = iter_outer->second;
@@ -872,10 +872,8 @@ void GPOs::countU2UCoOccurrences(uint time_block){
           map<int,int>* user_to_cooccurrences_map = new map<int,int>();
           user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
           user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
-          location_to_user_to_cooccurrences->insert(make_pair(location_id,user_to_cooccurrences_map));
+          location_to_user_to_cooccurrences->insert(make_pair(location_id, user_to_cooccurrences_map));
         }
-
-
       }
 
       if(cooccurrence_count>1){
@@ -1208,6 +1206,8 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   ofstream output_file;
   output_file.open("displacement-combination-function.csv");
 
+  cout << "loadPurturbedLocationsBasedOnCombinationFunction : Running type " << type << "\tIsGaussian : " << isGaussainNoise << endl;
+
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
     int user_id = u_it->first;
@@ -1277,7 +1277,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
         purturbed_count++;
       } else {
-        loadPoint(p->getX(), p->getY(), lid, p->getUID(), p->getTime(), new_order);
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), new_order);
       };
 
       new_order++;
@@ -1300,6 +1300,8 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
   int lid   = LOCATION_NOISE_BOUND;
   int new_order = 0;
   int purturbed_count = 0;
+
+  cout << "loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC : Running type " << type << "\tIsGaussian : " << isGaussainNoise << endl;
 
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
@@ -1335,7 +1337,6 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL/HIL_SCALE) + exp(-hiJ/HIJ_SCALE) ) * radius;
       };
 
-
       pair<double,double> coordinates_with_noise;
       if(isGaussainNoise){
         coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
@@ -1348,10 +1349,9 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
 
       if(noise != 0){
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
-        // cout << checkin_locality_value << " " << expHil <<  " " << expHiJ << " " << noise << endl;
         purturbed_count++;
       } else {
-        loadPoint(p->getX(), p->getY(), lid, p->getUID(), p->getTime(), new_order);
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), new_order);
       };
 
       new_order++;

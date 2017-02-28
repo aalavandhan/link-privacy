@@ -1,6 +1,7 @@
 struct res_point{
     int id;
     int uid;
+    int oid;
     double x;
     double y;
     double dist;
