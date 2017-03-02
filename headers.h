@@ -114,7 +114,7 @@ extern double GAMMA;
 #define KATZ_ATTENUATION 0.05
 #define KATZ_PATH_LENGTH 2
 
-#define NODE_LOCALITY_BETA 1
+#define NODE_LOCALITY_BETA 0.1
 
 #define HIJ_SCALE 5
 #define HIL_SCALE 5

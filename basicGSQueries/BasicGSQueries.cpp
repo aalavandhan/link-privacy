@@ -454,7 +454,7 @@ map<int, map<int, double>*> SimpleQueries::cacluateSocialStrength(){
         }
     }
 
-    //Memory Cleanup for map<int, map<int, double>*> 
+    //Memory Cleanup for map<int, map<int, double>*>
     for(auto it = diversity_matrix.begin(); it!= diversity_matrix.end();it++){
         auto user_diversity_list = it->second;
         user_diversity_list->clear();
@@ -903,7 +903,7 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
       vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
 
       uint *cooccVector = (uint *) calloc(cooccurrence_counts_vector->size(), sizeof(uint));
-      
+
       vector<int> temporary_entropy_value_vector;
 
       int i=0;
@@ -932,6 +932,7 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
         }
       }
 
+      i=0;
       for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
         int location_id = u_it->first;
 
@@ -946,9 +947,9 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
 
         double partial_weighted_frequency = u_it->second * exp(-1 * location_entropy);
         outfile<<user_1<<" "<<user_2 <<" "<< location_id<<" "<<temporary_entropy_value_vector.at(i)<< " " <<partial_weighted_frequency<<endl;
+        i++;
       }
 
-      
     }
   }
 }

@@ -892,7 +892,7 @@ void GPOs::countU2UCoOccurrences(uint time_block){
 
 
   //To calculate basic cooccurence based metric on noised data
-  //  first calculate u1 - > u2 , u3, u4 , u5  cooccurrences. 
+  //  first calculate u1 - > u2 , u3, u4 , u5  cooccurrences.
 
   for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){
     int user_1 = c_it->first;
@@ -1272,13 +1272,13 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       if(hiL == 0){
         expHil = 0;
       }else{
-        expHil = exp(-hiL/HIL_SCALE);
+        expHil = exp(-hiL);
       }
 
       if(hiJ == 0){
         expHiJ = 0;
       }else{
-        expHiJ = exp(-hiJ/HIJ_SCALE);
+        expHiJ = exp(-hiJ);
       }
 
       double noise;
@@ -1365,7 +1365,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , 
       if(type == 0){
         noise = log( 1 + user_cooccurrenes ) * radius;
       } else if(type == 1){
-        noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) ) * radius;
+        noise = log( 1 + user_cooccurrenes ) * ( exp(-hiL) ) * radius;
       } else if(type == 2){
         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
       } else {

@@ -685,28 +685,21 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
 
 
 double SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins){
-
   double closestDistance = std::numeric_limits<double>::infinity();
-
-  // auto point_source_time = point_source->getTime();
+  auto point_source_time = point_source->getTime();
 
   for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
     Point * friend_checkin = (*f_it);
-
     // time difference test DISABLED for testing
-
-    // auto friend_checkin_time = friend_checkin->getTime();
-    // boost::posix_time::time_duration time_difference = point_source_time - friend_checkin_time;
-    // int time_diff_seconds = abs(time_difference.total_seconds());
-    // if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
-
+    auto friend_checkin_time = friend_checkin->getTime();
+    boost::posix_time::time_duration time_difference = point_source_time - friend_checkin_time;
+    int time_diff_seconds = abs(time_difference.total_seconds());
+    if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
       double distSq = util.computeMinimumDistance(point_source->getX(), point_source->getY(), friend_checkin->getX(), friend_checkin->getY());
-
       if(distSq < closestDistance){
         closestDistance = distSq;
       }
-    // }
-
+    }
   }
 
   return closestDistance;
@@ -872,7 +865,7 @@ map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(){
       order_locality_map->insert(make_pair(order,make_pair(location_id,locality_value)));
       user_to_order_to_location_locality->insert(make_pair(user_id,order_locality_map));
     }
-    
+
   }
   checkin_locality_map = user_to_order_to_location_locality;
 
