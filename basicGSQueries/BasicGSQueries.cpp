@@ -545,6 +545,7 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
 void SimpleQueries::writeHistogramstoFile(double tresh){
 
   gpos->printCooccurrenceMatrix();
+  printPartialDiversityAndWeightedFrequencyValues();
 
   ofstream outfile;
   outfile.open("HiL.csv");
@@ -903,25 +904,11 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
 
       uint *cooccVector = (uint *) calloc(cooccurrence_counts_vector->size(), sizeof(uint));
       
-      vector<int> temporary_wf_value_vector;
+      vector<int> temporary_entropy_value_vector;
 
       int i=0;
 
       for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
-        int location_id = u_it->first;
-
-        double location_entropy;
-
-        auto it_ltH = location_to_H->find(location_id);
-        if(it_ltH !=  location_to_H->end()){
-          location_entropy = it_ltH->second;
-        } else {
-          location_entropy = 0;
-        }
-
-        double partial_weighted_frequency = u_it->second * exp(-1 * location_entropy);
-        temporary_wf_value_vector.push_back(partial_weighted_frequency);
-
         cooccVector[i] = u_it->second;
         i++;
       }
@@ -936,13 +923,32 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
 
       for (i = 0; i < stateLength; i++) {
         double tempValue = stateProbs[i];
-
         if (tempValue > 0) {
             double shannon_entropy = -1 * tempValue * log(tempValue);
-            outfile<<user_1<<" "<<user_2<<" "<<shannon_entropy<<" "<<temporary_wf_value_vector.at(i)<<endl;
+            temporary_entropy_value_vector.push_back(shannon_entropy);
             // printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
+        }else{
+            temporary_entropy_value_vector.push_back(0);
         }
       }
+
+      for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
+        int location_id = u_it->first;
+
+        double location_entropy;
+
+        auto it_ltH = location_to_H->find(location_id);
+        if(it_ltH !=  location_to_H->end()){
+          location_entropy = it_ltH->second;
+        } else {
+          location_entropy = 0;
+        }
+
+        double partial_weighted_frequency = u_it->second * exp(-1 * location_entropy);
+        outfile<<user_1<<" "<<user_2 <<" "<< location_id<<" "<<temporary_entropy_value_vector.at(i)<< " " <<partial_weighted_frequency<<endl;
+      }
+
+      
     }
   }
 }
