@@ -29,5 +29,7 @@ public:
     bool areEBMFriends(int source, int target, double tresh);
     bool areTrueEBMFriends(int source, int target, double tresh);
     void writeHistogramstoFile(double tresh);
+
+    void printPartialDiversityAndWeightedFrequencyValues();
 };
 

@@ -417,7 +417,6 @@ void SimpleQueries::buildMatrices(double q){
   }
 }
 
-
 map<int, map<int, double>*> SimpleQueries::cacluateSocialStrength(){
     for (auto d_it = diversity_matrix.begin(); d_it != diversity_matrix.end(); d_it++){
         int user_1 = d_it->first;
@@ -425,7 +424,7 @@ map<int, map<int, double>*> SimpleQueries::cacluateSocialStrength(){
 
         auto fm_fit = weighted_frequency_matrix.find(user_1);
         if(fm_fit == weighted_frequency_matrix.end())
-            cout<<"ERROR---user not found--------"<<endl;
+            cout<<"ERROR---user not found---mismatch in diversity and weighted frequency matrices-----"<<endl;
         auto user_wfreq_list = fm_fit->second;
 
         for(auto list_it = user_diversity_list->begin(); list_it!= user_diversity_list->end();list_it++){
@@ -443,11 +442,6 @@ map<int, map<int, double>*> SimpleQueries::cacluateSocialStrength(){
               user_1 = temp;
             }
 
-            //find in matrix
-            //if not found create new list
-            // insert list as pair
-            //if found
-            //insert into existing list
             auto ss_it = social_strength_matrix.find(user_1);
             if(ss_it == social_strength_matrix.end()){
                 map<int, double> *ssmap = new map<int, double>();
@@ -459,6 +453,22 @@ map<int, map<int, double>*> SimpleQueries::cacluateSocialStrength(){
             }
         }
     }
+
+    //Memory Cleanup for map<int, map<int, double>*> 
+    for(auto it = diversity_matrix.begin(); it!= diversity_matrix.end();it++){
+        auto user_diversity_list = it->second;
+        user_diversity_list->clear();
+        delete(user_diversity_list);
+    }
+    diversity_matrix.clear();
+
+    for(auto it = weighted_frequency_matrix.begin(); it!= weighted_frequency_matrix.end();it++){
+        auto user_diversity_list = it->second;
+        user_diversity_list->clear();
+        delete(user_diversity_list);
+    }
+    weighted_frequency_matrix.clear();
+
     return social_strength_matrix;
 }
 
@@ -874,3 +884,66 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
+
+void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
+  unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
+  map<int, map<int, vector<pair<int, int> >* >*>* cooccurrence_matrix = gpos->getCooccurrenceMatrix();
+
+  ofstream outfile;
+  outfile.open("partialDWFmatrix");
+
+
+  for(auto c_it = cooccurrence_matrix->begin(); c_it != cooccurrence_matrix->end(); c_it++){
+    int user_1 = c_it->first;
+    auto users_location_frequency_map = c_it->second;
+
+    for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
+      int user_2 = ulh_it->first;
+      vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
+
+      uint *cooccVector = (uint *) calloc(cooccurrence_counts_vector->size(), sizeof(uint));
+      
+      vector<int> temporary_wf_value_vector;
+
+      int i=0;
+
+      for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
+        int location_id = u_it->first;
+
+        double location_entropy;
+
+        auto it_ltH = location_to_H->find(location_id);
+        if(it_ltH !=  location_to_H->end()){
+          location_entropy = it_ltH->second;
+        } else {
+          location_entropy = 0;
+        }
+
+        double partial_weighted_frequency = u_it->second * exp(-1 * location_entropy);
+        temporary_wf_value_vector.push_back(partial_weighted_frequency);
+
+        cooccVector[i] = u_it->second;
+        i++;
+      }
+
+      double *stateProbs;
+      double stateLength = cooccurrence_counts_vector->size();
+      stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
+      int sumOfCo = sumState(cooccVector, stateLength);
+      for (i = 0; i < stateLength; i++) {
+         stateProbs[i] = cooccVector[i]/(double)sumOfCo;
+      }
+
+      for (i = 0; i < stateLength; i++) {
+        double tempValue = stateProbs[i];
+
+        if (tempValue > 0) {
+            double shannon_entropy = -1 * tempValue * log(tempValue);
+            outfile<<user_1<<" "<<user_2<<" "<<shannon_entropy<<" "<<temporary_wf_value_vector.at(i)<<endl;
+            // printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
+        }
+      }
+    }
+  }
+}
+

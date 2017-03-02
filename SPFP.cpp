@@ -139,10 +139,11 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
   auto cooccurence_matrix_base = baseGPOs->getInsignificantCooccurrenceMatrix();
   auto cooccurence_matrix_cmp = cmpGPOs->getInsignificantCooccurrenceMatrix();
 
-
+  unordered_set<int> seen_users_in_base;
 
   for(auto c_it = cooccurence_matrix_base->begin(); c_it != cooccurence_matrix_base->end(); c_it++){
     int user_1 = c_it->first;
+    seen_users_in_base.insert(user_1);
     auto users_location_frequency_map_base = c_it->second;
     map<int, vector<pair<int, int> >* >* users_location_frequency_map_cmp = NULL;
 
@@ -150,55 +151,62 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
     auto iter_outer = cooccurence_matrix_cmp->find(user_1);
     if(iter_outer != cooccurence_matrix_cmp->end()){
       users_location_frequency_map_cmp = iter_outer->second;
+      int cooccurrences_across_users_base = 0;
+      int cooccurrences_across_users_cmp = 0;
+      int cooccurrences_across_users_min = 0;
+      for(auto ulh_it = users_location_frequency_map_base->begin(); ulh_it != users_location_frequency_map_base->end(); ulh_it++){
+        int user_2 = ulh_it->first;
+        vector<pair<int, int>>* cooccurrence_counts_vector_base = ulh_it->second;
+        vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
+
+
+        int cooccurrence_count_cmp = 0; 
+        int cooccurrence_count_base = 0;
+        auto iter_inner = users_location_frequency_map_cmp->find(user_2);
+        if(iter_inner != users_location_frequency_map_cmp->end()){
+          cooccurrence_counts_vector_cmp = iter_inner->second;
+
+          for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
+          int cooccrences_at_l = l_it->second;
+          cooccurrence_count_cmp += cooccrences_at_l;
+          }      
+        }else{
+          // do nothing because cooccurences are zero  
+          // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurrence_counts_vector"<<endl;
+        } 
+
+        for(auto l_it=cooccurrence_counts_vector_base->begin(); l_it != cooccurrence_counts_vector_base->end(); l_it++){
+          int cooccrences_at_l = l_it->second;
+          cooccurrence_count_base += cooccrences_at_l;
+        }     
+        cooccurrences_across_users_base += cooccurrence_count_base;
+        cooccurrences_across_users_cmp += cooccurrence_count_cmp;
+
+        cooccurrences_across_users_min += min(cooccurrence_count_cmp,cooccurrence_count_base);
+      }
+      double precision = cooccurrences_across_users_min/(double)cooccurrences_across_users_cmp;
+      double recall = cooccurrences_across_users_min/(double)cooccurrences_across_users_base;
+      if(recall > 1) {recall=1;}
+      user_to_precision_recall.insert(make_pair(user_1,make_pair(precision,recall)));
     }else{
-      cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurence matrices"<<endl;
+      //case when user is not there in cmp cooccurrence matrix
+      user_to_precision_recall.insert(make_pair(user_1,make_pair(0,0)));
+      // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurence matrices"<<endl;
     } 
-
-    int cooccurrences_across_users_base = 0;
-    int cooccurrences_across_users_cmp = 0;
-    int cooccurrences_across_users_min = 0;
-    for(auto ulh_it = users_location_frequency_map_base->begin(); ulh_it != users_location_frequency_map_base->end(); ulh_it++){
-      int user_2 = ulh_it->first;
-      vector<pair<int, int>>* cooccurrence_counts_vector_base = ulh_it->second;
-      vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
-
-      auto iter_inner = users_location_frequency_map_cmp->find(user_2);
-      if(iter_inner != users_location_frequency_map_cmp->end()){
-        cooccurrence_counts_vector_cmp = iter_inner->second;
-      }else{
-        cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurrence_counts_vector"<<endl;
-      } 
-
-      int cooccurrence_count_base = 0;
-      int cooccurrence_count_cmp = 0;
-
-      for(auto l_it=cooccurrence_counts_vector_base->begin(); l_it != cooccurrence_counts_vector_base->end(); l_it++){
-        int cooccrences_at_l = l_it->second;
-        cooccurrence_count_base += cooccrences_at_l;
-      }     
-      cooccurrences_across_users_base += cooccurrence_count_base;
-
-
-      for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
-        int cooccrences_at_l = l_it->second;
-        cooccurrence_count_cmp += cooccrences_at_l;
-      }      
-      cooccurrences_across_users_cmp += cooccurrence_count_base;
-      cooccurrences_across_users_min += min(cooccurrence_count_cmp,cooccurrence_count_base);
-    }
-    double precision = cooccurrences_across_users_min/(double)cooccurrences_across_users_cmp;
-    double recall = cooccurrences_across_users_min/(double)cooccurrences_across_users_base;
-    user_to_precision_recall.insert(make_pair(user_1,make_pair(precision,recall)));
   }
 
+  for(auto c_it = cooccurence_matrix_base->begin(); c_it != cooccurence_matrix_base->end(); c_it++){
+    int user = c_it->first;
+    if(seen_users_in_base.find(user) == seen_users_in_base.end()){
+      user_to_precision_recall.insert(make_pair(user,make_pair(0,-1)));
+    }
+  }
+
+  //printing--------
   ofstream outfile;
   ostringstream ss;
   ss<<"Basic" << p1<<"_"<<p2<<" "<<p3<<"_"<<p4;
-
-
   outfile.open(ss.str());
-
-
   for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
     auto precision_recall_pair = it->second;
     double precision = precision_recall_pair.first;
@@ -206,6 +214,7 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
     outfile<<it->first<< " "<<precision<<" "<<recall<<endl;
   }
   outfile.close();
+  //------------------
 
   runUtilities(purturbedGPOs, cmpGPOs, spos);
 }
