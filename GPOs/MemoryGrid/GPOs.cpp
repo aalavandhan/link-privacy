@@ -306,15 +306,6 @@ map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getInsignificantCooccurren
   return &cooccurrence_matrix_insignificant;
 }
 
-void writeLocationEntropyToFile(unordered_map<int, double>* location_to_H){
-  ofstream outfile;
-  outfile.open("locationEntropy.txt");
-  for(auto it = location_to_H->begin();it!=location_to_H->end();it++){
-    outfile<<it->first<<" "<<it->second<<endl;
-  }
-  outfile.close();
-}
-
 unordered_map<int, double>* GPOs::calculateLocationEntropy(){
   for(auto it = location_to_user.begin(); it != location_to_user.end(); it++){
     int location_id = it->first;
@@ -366,7 +357,6 @@ unordered_map<int, double>* GPOs::calculateLocationEntropy(){
   //   cout << "Bin : " << b_it->first << "\t Count : " << b_it->second << endl;
   // }
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  writeLocationEntropyToFile(&location_to_H);
   return &location_to_H;
 }
 

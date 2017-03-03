@@ -546,8 +546,16 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
 
   gpos->printCooccurrenceMatrix();
   printPartialDiversityAndWeightedFrequencyValues();
+  unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 
   ofstream outfile;
+  cout << "Writing location entropy to file : " << endl;
+  outfile.open("locationEntropy.txt");
+  for(auto it = location_to_H->begin();it!=location_to_H->end();it++){
+    outfile<<it->first<<" "<<it->second<<endl;
+  }
+  outfile.close();
+
   outfile.open("HiL.csv");
   map<int, double>* HiL_map = gpos->getHiLasMap();
   for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
@@ -580,7 +588,6 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   outfile.close();
 
   cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
-
 
   //-------------------------------------
   //-- for a given user how many friends ebm truly inferred
@@ -904,7 +911,7 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
 
       uint *cooccVector = (uint *) calloc(cooccurrence_counts_vector->size(), sizeof(uint));
 
-      vector<int> temporary_entropy_value_vector;
+      vector<double> temporary_entropy_value_vector;
 
       int i=0;
 

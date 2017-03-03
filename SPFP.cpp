@@ -131,8 +131,8 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
   // cmpGPOs->calculateLocationEntropy();
   // runEBM(cmpGPOs, spos);
 
-  //grab cooccurence Matrix from baseGPOs 
-  //grab cooccurence matrix from cmpGPOs 
+  //grab cooccurence Matrix from baseGPOs
+  //grab cooccurence matrix from cmpGPOs
   //compare them both.
   map<int, pair<double,double>> user_to_precision_recall;
 
@@ -160,7 +160,7 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
         vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
 
 
-        int cooccurrence_count_cmp = 0; 
+        int cooccurrence_count_cmp = 0;
         int cooccurrence_count_base = 0;
         auto iter_inner = users_location_frequency_map_cmp->find(user_2);
         if(iter_inner != users_location_frequency_map_cmp->end()){
@@ -169,16 +169,16 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
           for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
           int cooccrences_at_l = l_it->second;
           cooccurrence_count_cmp += cooccrences_at_l;
-          }      
+          }
         }else{
-          // do nothing because cooccurences are zero  
+          // do nothing because cooccurences are zero
           // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurrence_counts_vector"<<endl;
-        } 
+        }
 
         for(auto l_it=cooccurrence_counts_vector_base->begin(); l_it != cooccurrence_counts_vector_base->end(); l_it++){
           int cooccrences_at_l = l_it->second;
           cooccurrence_count_base += cooccrences_at_l;
-        }     
+        }
         cooccurrences_across_users_base += cooccurrence_count_base;
         cooccurrences_across_users_cmp += cooccurrence_count_cmp;
 
@@ -192,7 +192,7 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
       //case when user is not there in cmp cooccurrence matrix
       user_to_precision_recall.insert(make_pair(user_1,make_pair(0,0)));
       // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurence matrices"<<endl;
-    } 
+    }
   }
 
   for(auto c_it = cooccurence_matrix_base->begin(); c_it != cooccurence_matrix_base->end(); c_it++){
@@ -215,8 +215,6 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
   }
   outfile.close();
   //------------------
-
-  runUtilities(purturbedGPOs, cmpGPOs, spos);
 }
 
 void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -356,6 +354,15 @@ void checkQueryFileStats(){
   query->checkUtilityStats(query_file, 800, 400);
   query->checkUtilityStats(query_file, 1600, 800);
 }
+
+// void test(){
+//   Utilities util;
+//   pair<double,double> point;
+//   for(int i = 0; i < 2000; i++){
+//      point = util.addGaussianNoise(0,0,200);
+//      cout << util.computeMinimumDistance(point.first, point.second);
+//   }
+// }
 
 int main(int argc, char *argv[]){
   cout.precision(15);
