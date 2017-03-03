@@ -1,5 +1,5 @@
-#include<unordered_set>
-#include<unordered_map>
+#include <unordered_set>
+#include <unordered_map>
 
 class SPOs : public ISPOs
 {
@@ -58,9 +58,9 @@ public:
 
     //checkin locality functions
     map< int, map<int, pair<int,double>>* >* computeCheckinLocalityMap(GPOs* gpos);
-    double computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins);
+    pair<int,double> computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins);
     double computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
-    vector<double>* computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
+    vector<pair<int,double>>* computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
     //----------------------------
 
 

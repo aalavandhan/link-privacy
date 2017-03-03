@@ -684,8 +684,9 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
 
 
 
-double SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins){
+pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins){
   double closestDistance = std::numeric_limits<double>::infinity();
+  int location_id = -1
   auto point_source_time = point_source->getTime();
 
   for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
@@ -698,15 +699,16 @@ double SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vec
       double distSq = util.computeMinimumDistance(point_source->getX(), point_source->getY(), friend_checkin->getX(), friend_checkin->getY());
       if(distSq < closestDistance){
         closestDistance = distSq;
+        location_id = friend_checkin->getID();
       }
     }
   }
 
-  return closestDistance;
+  return make_pair(location_id,closestDistance);
 }
 
-vector<double>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
-  vector<double>* distances = new vector<double>();
+vector<pair<int,double>>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
+  vector<pair<int,double>>* location_distances = new vector<pair<int,double> >();
 
   for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
     int fid = (*f_it);
@@ -717,12 +719,12 @@ vector<double>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Point* point_
     // Ensuring check-ins are present
     if(friend_checkins_it != gpos->user_to_location.end()){
       friend_checkins = friend_checkins_it->second;
-      double distance = computeMinimumdistanceToFriend(gpos, point_source, friend_checkins);
-      distances->push_back(distance);
+      pair<int,double> location_distance_pair = computeMinimumdistanceToFriend(gpos, point_source, friend_checkins);
+      location_distances->push_back(location_distance_pair);
     }
   }
 
-  return distances;
+  return location_distances;
 }
 
 // Distance matters: Geo-social metrics for online social networks
@@ -730,13 +732,26 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
 
 
   double locality_sum=0, checkin_locality=0;
+  unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 
-  vector<double>* distances = computeDistancesToCheckinFriends(gpos, point_source, friends);
+  vector<pair<int,double>>* location_distances = computeDistancesToCheckinFriends(gpos, point_source, friends);
 
-  for(auto d_it=distances->begin(); d_it != distances->end(); d_it++){
-    double dist = (*d_it);
-    locality_sum += exp( -dist / (double)NODE_LOCALITY_BETA );
+  for(auto d_it=location_distances->begin(); d_it != location_distances->end(); d_it++){
+    int location_id = (*d_it).first;
+    double dist = (*d_it).second;
+    double location_entropy;
+
+    auto it_ltH = location_to_H->find(location_id);
+    if(it_ltH !=  location_to_H->end()){
+      location_entropy = it_ltH->second;
+    } else {
+      location_entropy = 0;
+    }
+
+    locality_sum += exp( (-dist / (double)NODE_LOCALITY_BETA) + (-location_entropy/(double)7) );
   }
+  location_distances->clear();
+  delete(location_distances);
 
   if(distances->size() != 0)
     checkin_locality = 1/(double)distances->size() * locality_sum;
