@@ -931,7 +931,6 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
 
 
       {
-
         double power_factor = 1/(double)(1.0-alpha);
         double diversity_from_new = 0;
 
@@ -942,21 +941,25 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
           }
         }
         diversity_from_new = pow(diversity_from_new,power_factor);
-        temporary_entropy_value_vector.push_back(diversity_from_new);
-      }
 
 
-
-      for (i = 0; i < stateLength; i++) {
-        double tempValue = stateProbs[i];
-        if (tempValue > 0) {
-            double shannon_entropy = -1 * tempValue * log(tempValue);
-            temporary_entropy_value_vector.push_back(shannon_entropy);
-            // printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
-        }else{
-            temporary_entropy_value_vector.push_back(0);
+        for (i = 0; i < state.numStates; i++) {
+          tempValue = state.probabilityVector[i];
+          temporary_entropy_value_vector.push_back(diversity_from_new * tempValue);
         }
       }
+
+
+      // for (i = 0; i < stateLength; i++) {
+      //   double tempValue = stateProbs[i];
+      //   if (tempValue > 0) {
+      //       double shannon_entropy = -1 * tempValue * log(tempValue);
+      //       temporary_entropy_value_vector.push_back(shannon_entropy);
+      //       // printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
+      //   }else{
+      //       temporary_entropy_value_vector.push_back(0);
+      //   }
+      // }
 
       i=0;
       for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
