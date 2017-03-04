@@ -355,6 +355,93 @@ void checkQueryFileStats(){
   query->checkUtilityStats(query_file, 1600, 800);
 }
 
+void testpTools(){
+
+  // int i;
+  // double length, entropyTarget;
+  double firstEntropy, secondEntropy, thirdEntropy, targetEntropy;
+  // double firstMItarget, secondMItarget, thirdMItarget, targetMItarget;
+  // int testFirstVector, testSecondVector, testThirdVector, testMergedVector;
+  // struct timeval start,end;
+
+  uint firstVector = (uint ) calloc(4,sizeof(uint));
+  uint secondVector = (uint ) calloc(4,sizeof(uint));
+  uint thirdVector = (uint ) calloc(4,sizeof(uint));
+  uint targetVector = (uint ) calloc(4,sizeof(uint));
+
+  firstVector[0] = 0;
+  firstVector[1] = 0;
+  firstVector[2] = 1;
+  firstVector[3] = 1;
+
+  secondVector[0] = 0;
+  secondVector[1] = 1;
+  secondVector[2] = 0;
+  secondVector[3] = 1;
+
+  thirdVector[0] = 0;
+  thirdVector[1] = 1;
+  thirdVector[2] = 1;
+  thirdVector[3] = 1;
+
+  targetVector[0] = 0;
+  targetVector[1] = 1;
+  targetVector[2] = 1;
+  targetVector[3] = 0;
+
+  firstEntropy = calcEntropy(firstVector,4);
+  secondEntropy = calcEntropy(secondVector,4);
+  thirdEntropy = calcEntropy(thirdVector,4);
+  targetEntropy = calcEntropy(targetVector,4);
+  // targetEntropy = calcRenyiEntropy(0.1,targetVector,4 );
+
+  printf("Entropies - first: %f, second: %f, third: %f, target %f\n",firstEntropy,secondEntropy,thirdEntropy,targetEntropy);
+
+  //verifying section 3.4 EBM
+
+  cout<<" -----------------------Entropy Example ------------------------"<<endl;
+  cout<<" ------------------------Section  3.4---------------------------"<<endl;
+  uint CabOcc = (uint ) calloc(5,sizeof(uint));
+  uint CcdOccur = (uint ) calloc(5,sizeof(uint));
+
+  CabOcc[0] = 10;
+  CabOcc[1] = 1;
+  CabOcc[2] = 0;
+  CabOcc[3] = 0;
+  CabOcc[4] = 9;
+
+  CcdOccur[0] = 2;
+  CcdOccur[1] = 3;
+  CcdOccur[2] = 2;
+  CcdOccur[3] = 2;
+  CcdOccur[4] = 3;
+
+  cout<<" C_ab is : 10 , 1, 0, 0, 9"<<endl;
+  cout<<" C_cd is : 2 , 3, 2, 2, 3"<<endl;
+
+  cout<<" ------------------Testing Shannon Entropy------------------------"<<endl;
+  double CabEntropy, CcdEntropy, CabDiversity, CcdDiversity;
+
+  CabEntropy = calcEntropyFromCoV(CabOcc,5);
+  CcdEntropy = calcEntropyFromCoV(CcdOccur,5);
+  CabDiversity = exp(CabEntropy);
+  CcdDiversity = exp(CcdEntropy);
+
+
+  cout<<"CabEntropy = "<<CabEntropy<<" CcdEntropy = "<<CcdEntropy <<" CabEntropy/CcdEntropy = " << CabEntropy/CcdEntropy <<endl;
+  cout<<"CabDiversity = "<<CabDiversity<<" CabDiversity = "<<CcdDiversity<<" CabDiversity/CcdDiversity = " << CabDiversity/CcdDiversity <<endl;
+
+  cout<<" ------------------Testing Renyi Entropy------------------------"<<endl;
+  double CabRenEntropy, CcdRenEntropy, CabRenDiversity, CcdRenDiversity;
+
+  CabRenEntropy = calcRenyiEntropyFromCoV(0.5,CabOcc,5);
+  CcdRenEntropy = calcRenyiEntropyFromCoV(0.5,CcdOccur,5);
+  CabRenDiversity = exp(CabRenEntropy);
+  CcdRenDiversity = exp(CcdRenEntropy);
+
+  cout<<"CabRenEntropy = "<<CabRenEntropy<<" CcdRenEntropy = "<<CcdRenEntropy<< " CabRenEntropy/CcdRenEntropy = " << CabRenEntropy/CcdRenEntropy<<endl;
+  cout<<"CabRenDiversity = "<<CabRenDiversity<<" CcdRenDiversity = "<<CcdRenDiversity<<" CabRenDiversity/CcdRenDiversity = "<< CabRenDiversity/CcdRenDiversity << endl;
+}
 // void test(){
 //   Utilities util;
 //   pair<double,double> point;
@@ -366,6 +453,8 @@ void checkQueryFileStats(){
 
 int main(int argc, char *argv[]){
   cout.precision(15);
+
+  testpTools();
 
   DELTA_X = ((MAX_X - MIN_X)/ (X-1));
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
@@ -400,12 +489,10 @@ int main(int argc, char *argv[]){
     iteration_type = 9;
   else if (strcmp(argv[4], "compute-histograms") == 0)
     iteration_type = 10;
-
   else if (strcmp(argv[4], "query-metrics") == 0)
     iteration_type = 11;
   else if (strcmp(argv[4], "comb-v-ebm") == 0)
     iteration_type = 12;
-
   else
     iteration_type = -1;
 

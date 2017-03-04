@@ -43,6 +43,31 @@ double renyiEntropy(ProbabilityState state, double alpha) {
   // printf(" after base conversion = %f",entropy);
   entropy /= (1.0-alpha);
   // printf(" divided by q-1 = %f\n",entropy);
+
+  //test module
+  {
+    double diversity_from_original = exp(entropy);
+
+    double power_factor = alpha/(double)(1.0-alpha);
+    double diversity_from_new = exp(entropy);
+    for (i = 0; i < state.numStates; i++) {
+      tempValue = state.probabilityVector[i];
+      if (tempValue > 0) {
+        diversity_from_new += pow(tempValue,power_factor);
+        // printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
+      }
+    }
+    
+    if(std::abs(diversity_from_original - diversity_from_new) < 0.000001)
+      cout<<" RENYI IS A GO."<<endl;
+    else{
+      cout<<" RENYI IS A BUST."<<endl;
+      exit(-1);
+    }
+
+  }
+
+
   return entropy;
 }
 
