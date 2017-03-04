@@ -57,11 +57,11 @@ double renyiEntropy(ProbabilityState state, double alpha) {
         // printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
       }
     }
-    
-    if(std::abs(diversity_from_original - diversity_from_new) < 0.000001)
-      cout<<" RENYI IS A GO."<<endl;
+
+    if(abs(diversity_from_original - diversity_from_new) < 0.000001)
+      printf(" RENYI IS A GO. \n");
     else{
-      cout<<" RENYI IS A BUST."<<endl;
+      printf(" RENYI IS A BUST. \n");
       exit(-1);
     }
 

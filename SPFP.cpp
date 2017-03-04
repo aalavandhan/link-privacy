@@ -364,10 +364,10 @@ void testpTools(){
   // int testFirstVector, testSecondVector, testThirdVector, testMergedVector;
   // struct timeval start,end;
 
-  uint firstVector = (uint ) calloc(4,sizeof(uint));
-  uint secondVector = (uint ) calloc(4,sizeof(uint));
-  uint thirdVector = (uint ) calloc(4,sizeof(uint));
-  uint targetVector = (uint ) calloc(4,sizeof(uint));
+  uint *firstVector = (uint *) calloc(4,sizeof(uint));
+  uint *secondVector = (uint *) calloc(4,sizeof(uint));
+  uint *thirdVector = (uint *) calloc(4,sizeof(uint));
+  uint *targetVector = (uint *) calloc(4,sizeof(uint));
 
   firstVector[0] = 0;
   firstVector[1] = 0;
@@ -401,8 +401,8 @@ void testpTools(){
 
   cout<<" -----------------------Entropy Example ------------------------"<<endl;
   cout<<" ------------------------Section  3.4---------------------------"<<endl;
-  uint CabOcc = (uint ) calloc(5,sizeof(uint));
-  uint CcdOccur = (uint ) calloc(5,sizeof(uint));
+  uint *CabOcc = (uint *) calloc(5,sizeof(uint));
+  uint *CcdOccur = (uint *) calloc(5,sizeof(uint));
 
   CabOcc[0] = 10;
   CabOcc[1] = 1;

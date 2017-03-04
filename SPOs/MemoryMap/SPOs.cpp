@@ -686,7 +686,7 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
 
 pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins){
   double closestDistance = std::numeric_limits<double>::infinity();
-  int location_id = -1
+  int location_id = -1;
   auto point_source_time = point_source->getTime();
 
   for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
@@ -750,15 +750,15 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
 
     locality_sum += exp( (-dist / (double)NODE_LOCALITY_BETA) + (-location_entropy/(double)7) );
   }
-  location_distances->clear();
-  delete(location_distances);
 
-  if(distances->size() != 0)
-    checkin_locality = 1/(double)distances->size() * locality_sum;
+  if(location_distances->size() != 0)
+    checkin_locality = 1/(double)location_distances->size() * locality_sum;
   else
     checkin_locality = 0;
 
-  delete distances;
+  location_distances->clear();
+  delete(location_distances);
+
   return checkin_locality;
 }
 
