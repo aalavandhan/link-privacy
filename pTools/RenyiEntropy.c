@@ -48,15 +48,19 @@ double renyiEntropy(ProbabilityState state, double alpha) {
   {
     double diversity_from_original = exp(entropy);
 
-    double power_factor = alpha/(double)(1.0-alpha);
-    double diversity_from_new = exp(entropy);
+    double power_factor = 1/(double)(1.0-alpha);
+    double diversity_from_new = 0;
+
     for (i = 0; i < state.numStates; i++) {
       tempValue = state.probabilityVector[i];
       if (tempValue > 0) {
-        diversity_from_new += pow(tempValue,power_factor);
-        // printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
+        diversity_from_new += pow(tempValue,alpha);
+        printf("tempValue: %f \t alpha: %f",tempValue,alpha);
+        printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
       }
     }
+    diversity_from_new = pow(diversity_from_new,power_factor);
+    printf("Original : %f \t New : %f", diversity_from_original, diversity_from_new);
 
     if(abs(diversity_from_original - diversity_from_new) < 0.000001)
       printf(" RENYI IS A GO. \n");

@@ -434,8 +434,8 @@ void testpTools(){
   cout<<" ------------------Testing Renyi Entropy------------------------"<<endl;
   double CabRenEntropy, CcdRenEntropy, CabRenDiversity, CcdRenDiversity;
 
-  CabRenEntropy = calcRenyiEntropyFromCoV(0.5,CabOcc,5);
-  CcdRenEntropy = calcRenyiEntropyFromCoV(0.5,CcdOccur,5);
+  CabRenEntropy = calcRenyiEntropyFromCoV(0.1,CabOcc,5);
+  CcdRenEntropy = calcRenyiEntropyFromCoV(0.1,CcdOccur,5);
   CabRenDiversity = exp(CabRenEntropy);
   CcdRenDiversity = exp(CcdRenEntropy);
 

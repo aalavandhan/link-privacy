@@ -893,7 +893,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
+void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha){
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
   map<int, map<int, vector<pair<int, int> >* >*>* cooccurrence_matrix = gpos->getCooccurrenceMatrix();
 
@@ -927,6 +927,25 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(){
       for (i = 0; i < stateLength; i++) {
          stateProbs[i] = cooccVector[i]/(double)sumOfCo;
       }
+
+
+
+      {
+
+        double power_factor = 1/(double)(1.0-alpha);
+        double diversity_from_new = 0;
+
+        for (i = 0; i < state.numStates; i++) {
+          tempValue = state.probabilityVector[i];
+          if (tempValue > 0) {
+            diversity_from_new += pow(tempValue,alpha);
+          }
+        }
+        diversity_from_new = pow(diversity_from_new,power_factor);
+        temporary_entropy_value_vector.push_back(diversity_from_new);
+      }
+
+
 
       for (i = 0; i < stateLength; i++) {
         double tempValue = stateProbs[i];
