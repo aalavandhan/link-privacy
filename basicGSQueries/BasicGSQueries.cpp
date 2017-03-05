@@ -545,7 +545,7 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
 void SimpleQueries::writeHistogramstoFile(double tresh){
 
   gpos->printCooccurrenceMatrix();
-  printPartialDiversityAndWeightedFrequencyValues();
+  printPartialDiversityAndWeightedFrequencyValues(RENY_Q);
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 
   ofstream outfile;
@@ -930,23 +930,19 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
 
 
 
-      {
-        double power_factor = 1/(double)(1.0-alpha);
-        double diversity_from_new = 0;
+      double power_factor = 1/(double)(1.0-alpha);
+      double diversity_from_new = 0;
 
-        for (i = 0; i < state.numStates; i++) {
-          tempValue = state.probabilityVector[i];
-          if (tempValue > 0) {
-            diversity_from_new += pow(tempValue,alpha);
-          }
+      for (i = 0; i < stateLength; i++) {
+        double tempValue = stateProbs[i];
+        if (tempValue > 0) {
+          diversity_from_new += pow(tempValue,alpha);
         }
-        diversity_from_new = pow(diversity_from_new,power_factor);
-
-
-        for (i = 0; i < state.numStates; i++) {
-          tempValue = state.probabilityVector[i];
-          temporary_entropy_value_vector.push_back(diversity_from_new * tempValue);
-        }
+      }
+      diversity_from_new = pow(diversity_from_new,power_factor);
+      for (i = 0; i < stateLength; i++) {
+        double tempValue = stateProbs[i];
+        temporary_entropy_value_vector.push_back(diversity_from_new * tempValue);
       }
 
 

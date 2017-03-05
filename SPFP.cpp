@@ -26,7 +26,7 @@ int MAXT = 0;
 double ALPHA = 0.480;
 double GAMMA = 0;
 double BETA = 0.520;
-double Q=0.1; // Order of diversity
+double RENY_Q=0.1; // Order of diversity
 // int TIME_RANGE_IN_SECONDS = 1200;
 
 // Global parameters
@@ -114,7 +114,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
   cout << "----- Precomputing matrices --- " << endl;
-  query->buildMatrices(Q);
+  query->buildMatrices(RENY_Q);
 
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
@@ -287,10 +287,6 @@ void CombinationNoiseVsEBM(double noise_radius){
     purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, false, function_type);
   } else if(combination_type == 1) {
     purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, true, function_type);
-  } else if(combination_type == 2) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, false, function_type);
-  } else if(combination_type == 3) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(baseGPOs, baseGPOs->getL2U2COOCC(), noise_radius, true, function_type);
   }
 
   cout << "------------- Locations perturbed -------------------" << endl;
@@ -454,7 +450,7 @@ void testpTools(){
 int main(int argc, char *argv[]){
   cout.precision(15);
 
-  testpTools();
+  // testpTools();
 
   DELTA_X = ((MAX_X - MIN_X)/ (X-1));
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
@@ -605,7 +601,7 @@ int main(int argc, char *argv[]){
       social_strength_tresh = p1;
 
       SimpleQueries* query = new SimpleQueries(gpos, spos);
-      query->buildMatrices(Q);
+      query->buildMatrices(RENY_Q);
       query->cacluateSocialStrength();
 
       cout << "Using Threshold" << social_strength_tresh << endl;

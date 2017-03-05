@@ -1246,6 +1246,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       Point *p = (*loc_it);
       int order = p->getOrder();
 
+      auto entropy_it = gpos->location_to_H.find(p->getID());
+      double entropy = 0;
+
+      if(entropy_it != gpos->location_to_H.end())
+        entropy = entropy_it->second;
+
 
       double checkin_locality_value = 0;
       auto iter = user_to_order_to_location_locality->find(user_id);
@@ -1262,25 +1268,33 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       if(hiL == 0){
         expHil = 0;
       }else{
-        expHil = exp(-hiL);
+        expHil = exp(-hiL / HIL_SCALE);
       }
 
       if(hiJ == 0){
         expHiJ = 0;
       }else{
-        expHiJ = exp(-hiJ);
+        expHiJ = exp(-hiJ / HIJ_SCALE);
       }
 
+      double expHL = exp(-entropy / HL_SCALE);
+
       double noise;
-      if(type == 0){
-        noise = 0.5 * ( expHil + expHiJ ) * radius;
-      } else if (type == 1) {
-        noise = 0.5 * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
-      }else if(type == 2){
-        noise = checkin_locality_value * (expHil / HIL_SCALE) * radius;
-      } else{
-        noise = 0.5 * checkin_locality_value * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
-      }
+      // if(type == 0){
+      //   noise = 0.5 * ( expHil + expHiJ ) * radius;
+      // } else if (type == 1) {
+      //   noise = 0.5 * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
+      // }else if(type == 2){
+      //   noise = checkin_locality_value * (expHil / HIL_SCALE) * radius;
+      // } else{
+      //   noise = 0.5 * checkin_locality_value * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
+      // }
+      noise = 0.5 * ( expHil + expHiJ );
+      noise = noise * expHL * checkin_locality_value;
+
+      // Offset
+      noise = noise + 0.25;
+      noise = noise * radius;
 
       pair<double,double> coordinates_with_noise;
       if(isGaussainNoise){
@@ -1313,79 +1327,79 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   generateFrequencyCache();
 }
 
-void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int type){
+// void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int type){
 
-  map<int, double>* HiL_map = gpos->getHiLasMap();
-  map<int, double>* HiJ_map = gpos->getHiJasMap();
+//   map<int, double>* HiL_map = gpos->getHiLasMap();
+//   map<int, double>* HiJ_map = gpos->getHiJasMap();
 
-  int lid   = LOCATION_NOISE_BOUND;
-  int new_order = 0;
-  int purturbed_count = 0;
+//   int lid   = LOCATION_NOISE_BOUND;
+//   int new_order = 0;
+//   int purturbed_count = 0;
 
-  cout << "loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC : Running type " << type << "\tIsGaussian : " << isGaussainNoise << endl;
+//   cout << "loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC : Running type " << type << "\tIsGaussian : " << isGaussainNoise << endl;
 
-  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+//   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
-    int user_id = u_it->first;
-    vector< Point* > *checkins = u_it->second;
+//     int user_id = u_it->first;
+//     vector< Point* > *checkins = u_it->second;
 
-    double hiL = 0, hiJ = 0;
+//     double hiL = 0, hiJ = 0;
 
-    auto hil_it = HiL_map->find(user_id);
-    if(hil_it != HiL_map->end())
-      hiL = hil_it->second;
+//     auto hil_it = HiL_map->find(user_id);
+//     if(hil_it != HiL_map->end())
+//       hiL = hil_it->second;
 
-    auto hij_it = HiJ_map->find(user_id);
-    if(hij_it != HiJ_map->end())
-      hiL = hij_it->second;
+//     auto hij_it = HiJ_map->find(user_id);
+//     if(hij_it != HiJ_map->end())
+//       hiL = hij_it->second;
 
-    for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
-      Point *p = (*loc_it);
-      double user_cooccurrenes = 0;
-      auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
-      if(iter_outer!= _location_to_user_to_cooccurrences->end()){
-        map<int,int>* user_to_cooccurrences_map = iter_outer->second;
-        auto iter_inner = user_to_cooccurrences_map->find(user_id);
-        if(iter_inner != user_to_cooccurrences_map->end()){
-          user_cooccurrenes = iter_inner->second;
-        }
-      }
+//     for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+//       Point *p = (*loc_it);
+//       double user_cooccurrenes = 0;
+//       auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
+//       if(iter_outer!= _location_to_user_to_cooccurrences->end()){
+//         map<int,int>* user_to_cooccurrences_map = iter_outer->second;
+//         auto iter_inner = user_to_cooccurrences_map->find(user_id);
+//         if(iter_inner != user_to_cooccurrences_map->end()){
+//           user_cooccurrenes = iter_inner->second;
+//         }
+//       }
 
-      double noise;
-      if(type == 0){
-        noise = log( 1 + user_cooccurrenes ) * radius;
-      } else if(type == 1){
-        noise = log( 1 + user_cooccurrenes ) * ( exp(-hiL) ) * radius;
-      } else if(type == 2){
-        noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
-      } else {
-        noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL/HIL_SCALE) + exp(-hiJ/HIJ_SCALE) ) * radius;
-      };
+//       double noise;
+//       if(type == 0){
+//         noise = log( 1 + user_cooccurrenes ) * radius;
+//       } else if(type == 1){
+//         noise = log( 1 + user_cooccurrenes ) * ( exp(-hiL) ) * radius;
+//       } else if(type == 2){
+//         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
+//       } else {
+//         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL/HIL_SCALE) + exp(-hiJ/HIJ_SCALE) ) * radius;
+//       };
 
-      pair<double,double> coordinates_with_noise;
-      if(isGaussainNoise){
-        coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
-      } else {
-        coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
-      }
+//       pair<double,double> coordinates_with_noise;
+//       if(isGaussainNoise){
+//         coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
+//       } else {
+//         coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+//       }
 
-      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-      total_displacement+=displacement;
+//       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+//       total_displacement+=displacement;
 
-      if(noise != 0){
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
-        purturbed_count++;
-      } else {
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), new_order);
-      };
+//       if(noise != 0){
+//         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+//         purturbed_count++;
+//       } else {
+//         loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), new_order);
+//       };
 
-      new_order++;
-      lid++;
-    }
-  }
+//       new_order++;
+//       lid++;
+//     }
+//   }
 
-  cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
-  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
-  cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
-  generateFrequencyCache();
-}
+//   cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
+//   cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
+//   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
+//   generateFrequencyCache();
+// }

@@ -74,6 +74,7 @@ extern int MAXT;
 extern double ALPHA;
 extern double BETA;
 extern double GAMMA;
+extern double RENY_Q;
 
 //scallability
 
@@ -116,8 +117,9 @@ extern double GAMMA;
 
 #define NODE_LOCALITY_BETA 0.1
 
-#define HIJ_SCALE 5
-#define HIL_SCALE 5
+#define HIJ_SCALE 7
+#define HIL_SCALE 7
+#define HL_SCALE 0.68
 
 
 // Number of friendships in gowalla dataset with more than one

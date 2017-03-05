@@ -30,6 +30,6 @@ public:
     bool areTrueEBMFriends(int source, int target, double tresh);
     void writeHistogramstoFile(double tresh);
 
-    void printPartialDiversityAndWeightedFrequencyValues();
+    void printPartialDiversityAndWeightedFrequencyValues(double alpha);
 };
 

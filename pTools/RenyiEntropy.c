@@ -45,31 +45,31 @@ double renyiEntropy(ProbabilityState state, double alpha) {
   // printf(" divided by q-1 = %f\n",entropy);
 
   //test module
-  {
-    double diversity_from_original = exp(entropy);
+  // {
+  //   double diversity_from_original = exp(entropy);
 
-    double power_factor = 1/(double)(1.0-alpha);
-    double diversity_from_new = 0;
+  //   double power_factor = 1/(double)(1.0-alpha);
+  //   double diversity_from_new = 0;
 
-    for (i = 0; i < state.numStates; i++) {
-      tempValue = state.probabilityVector[i];
-      if (tempValue > 0) {
-        diversity_from_new += pow(tempValue,alpha);
-        printf("tempValue: %f \t alpha: %f",tempValue,alpha);
-        printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
-      }
-    }
-    diversity_from_new = pow(diversity_from_new,power_factor);
-    printf("Original : %f \t New : %f", diversity_from_original, diversity_from_new);
+  //   for (i = 0; i < state.numStates; i++) {
+  //     tempValue = state.probabilityVector[i];
+  //     if (tempValue > 0) {
+  //       diversity_from_new += pow(tempValue,alpha);
+  //       // printf("tempValue: %f \t alpha: %f",tempValue,alpha);
+  //       // printf("Pij ^ q Value at i=%d, is %f\n",i, pow(tempValue,alpha));
+  //     }
+  //   }
+  //   diversity_from_new = pow(diversity_from_new,power_factor);
+  //   // printf("Original : %f \t New : %f", diversity_from_original, diversity_from_new);
 
-    if(abs(diversity_from_original - diversity_from_new) < 0.000001)
-      printf(" RENYI IS A GO. \n");
-    else{
-      printf(" RENYI IS A BUST. \n");
-      exit(-1);
-    }
+  //   // if(abs(diversity_from_original - diversity_from_new) < 0.000001)
+  //   //   printf(" RENYI IS A GO. \n");
+  //   // else{
+  //   //   printf(" RENYI IS A BUST. \n");
+  //   //   exit(-1);
+  //   // }
 
-  }
+  // }
 
 
   return entropy;
