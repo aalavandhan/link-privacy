@@ -134,7 +134,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
     unordered_set< pair<int,int>, PairHasher >* base_proximate_users = base_proximity_list->at(i);
     unordered_set< pair<int,int>, PairHasher >* cmp_proximate_users  = cmp_proximity_list->at(i);
 
-    cout << "Location : " << i << endl;
+    // cout << "Location : " << i << endl;
 
     int positive = cmp_proximate_users->size(), tp=0, gt=base_proximate_users->size();
 
@@ -160,7 +160,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
 
     recall    = (double) tp / (double) gt;
 
-    cout << "\tPrecision : " << precision <<"\tRecall : "<< recall << endl;
+    // cout << "\tPrecision : " << precision <<"\tRecall : "<< recall << endl;
 
     avg_precision += precision;
     avg_recall    += recall;

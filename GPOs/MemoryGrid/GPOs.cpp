@@ -1293,7 +1293,9 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       noise = noise * expHL * checkin_locality_value;
 
       // Offset
-      noise = noise + 0.25;
+      if(noise != 0)
+        noise = noise + 0.25;
+
       noise = noise * radius;
 
       pair<double,double> coordinates_with_noise;
