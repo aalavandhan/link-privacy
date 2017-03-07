@@ -63,6 +63,8 @@ public:
     virtual vector<int>* getUsersInRange(double x, double y, double r1, double r2);
     virtual vector<int>* getUsersInRange(double x, double y, double radius);
     virtual vector<int>* getUsersInRange(int source, double radius);
+    virtual map<int, res_point*>* getPointsInRange(double x, double y, double radius);
+    virtual map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);
     virtual int getUserCooccurrences(int user_id);
     virtual map<int , vector< Point* >*>* getLocationToUser();
 

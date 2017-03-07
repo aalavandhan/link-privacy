@@ -102,7 +102,7 @@ void runProximityUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
 
   cout << "------------- Evaluating range proximity ---------------" << endl;
-  query->checkUtilityProximity(query_file, purturbedGPOs, 1000, 500, noise_radius);
+  query->checkUtilityProximity(query_file, purturbedGPOs, 500, 200, noise_radius);
 }
 
 void runUtilities(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){

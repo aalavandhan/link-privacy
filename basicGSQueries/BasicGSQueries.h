@@ -20,7 +20,7 @@ public:
     map< int, bool >* getUsersOfInterest(double tresh);
     void checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius, double noise_distance);
     void checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh, double noise_distance);
-    vector< unordered_set< pair<int,int>, PairHasher >* >* computeProximityUserList(const char* fileName, double radius, double tresh, double noise_distance);
+    unordered_set< pair<int,int>, PairHasher >* computeProximityUserList(double x, double y, double radius, double tresh, double noise_distance);
     void checkUtilityStats(const char* fileName, double radius, double noise_radius);
     void cacluateCooccurrenceDistribution(vector <int> *users);
     void cacluateCooccurrenceDistributionBasedOnNodeLocality();

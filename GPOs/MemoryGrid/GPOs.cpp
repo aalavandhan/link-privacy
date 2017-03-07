@@ -394,6 +394,63 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
   ids.push_back(lid);
 };
 
+map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double radius){
+  double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+  vector<res_point*> *points = getRange(x, y, radius_geo_dist);
+
+  map<int, res_point*> *result = new map<int, res_point*>();
+
+  for(auto p_it = points->begin(); p_it != points->end(); p_it++){
+    res_point *p = *p_it;
+    result->insert(make_pair(p->oid, p));
+  }
+
+  return result;
+}
+
+// r1 -> Outer radius, r2 -> inner radius
+map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double r1, double r2){
+  map<int, res_point*> *r1_points = getPointsInRange(x,y,r1);
+  map<int, res_point*> *r2_points = getPointsInRange(x,y,r2);
+
+  map<int, res_point*> *result = new map<int, res_point*>();
+
+  vector<int> r1_orders;
+  vector<int> r2_orders;
+
+  for(auto r_it = r1_points->begin(); r_it != r1_points->end(); r_it++)
+    r1_orders.push_back( r_it->first );
+
+  for(auto r_it = r2_points->begin(); r_it != r2_points->end(); r_it++)
+    r2_orders.push_back( r_it->first );
+
+  sort(r1_orders.begin(), r1_orders.end());
+  sort(r2_orders.begin(), r2_orders.end());
+
+  std::vector<int> order_intersection;
+
+  std::set_intersection(r1_orders.begin(), r1_orders.end(),
+                        r2_orders.begin(), r2_orders.end(),
+                          std::back_inserter(order_intersection));
+
+  for(auto o_it = order_intersection.begin(); o_it != order_intersection.end(); o_it++){
+    int oid = (*o_it);
+
+    auto p_it = r1_points->find(oid);
+    res_point *p = p_it->second;
+
+    result->insert(make_pair(p->oid, p));
+  }
+
+  r1_points->clear();
+  delete r1_points;
+
+  r2_points->clear();
+  delete r2_points;
+
+  return result;
+}
+
 // r1 -> Outer radius, r2 -> inner radius
 vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
   vector<int> *u1_list = getUsersInRange(x, y, r1);
@@ -455,8 +512,9 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
-  unsigned int lid, count=0, order =0;
-  set<int>* seenLocations = new set<int>();
+  unsigned int lid, count=0;
+  long unsigned int iterations=0;
+  unordered_set<int>* seenLocations = new unordered_set<int>();
   boost::posix_time::ptime time;
 
   for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
@@ -469,26 +527,28 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if(isOptimistic){
-        loadPoint(x, y, lid, (*c)->uid, (*c)->time, order);
-        order++;
+        loadPoint(x, y, lid, (*c)->uid, (*c)->time, (*c)->oid);
+        count++;
       } else {
-        if(seenLocations->find( (*c)->oid ) == seenLocations->end()){
-          loadPoint(x, y, lid, (*c)->uid, (*c)->time, order);
-          order++;
+        if( seenLocations->find( (*c)->oid ) == seenLocations->end() ){
+          loadPoint(x, y, lid, (*c)->uid, (*c)->time, (*c)->oid);
           seenLocations->insert( (*c)->oid );
+          count++;
         }
+        iterations++;
       }
       delete (*c);
     }
     delete checkins;
 
-    count++;
     if(count % 100000==0)
       cout << count << " " << endl;
 
   };
-  cout << "Checkins inserted : " << order << endl;
+  cout << "Checkins inserted : " << count << endl;
+  cout << "Checkins failed lookup : " << iterations << endl;
 
+  delete seenLocations;
   generateFrequencyCache();
 }
 
@@ -506,11 +566,11 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), radius);
         double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
         total_displacement+=displacement;
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, (*loc)->getTime(), lid);
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
         lid++;
       } else {
         Point *p = (*loc);
-        loadPoint(p->getX(), p->getY(), lid, u->first, p->getTime(), lid);
+        loadPoint( p->getX(), p->getY(), lid, u->first, p->getTime(), p->getOrder() );
         lid++;
       }
 
@@ -544,7 +604,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 }
 
 void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit){
-  int lid = LOCATION_NOISE_BOUND; int order = 0;
+  int lid = LOCATION_NOISE_BOUND;
   for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
     int location = l_it->first;
     vector< Point* > *checkins = l_it->second;
@@ -558,15 +618,13 @@ void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radiu
       for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
         Point *p = (*loc_it);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), order);
-        order++;
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
         lid++;
       }
     } else {
       for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
         Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), order);
-        order++;
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
       }
     }
   }
@@ -581,7 +639,7 @@ void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radiu
 
 void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit){
   // TODO: Pick a random id
-  int lid = LOCATION_NOISE_BOUND;int order = 0;
+  int lid = LOCATION_NOISE_BOUND;
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
     int user_id = u_it->first;
     vector< Point* > *user_checkins = u_it->second;
@@ -596,15 +654,13 @@ void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
         pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(),order);
-        order++;
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(),p->getOrder());
         lid++;
       }
     } else {
       for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
         Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(),order);
-        order++;
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(),p->getOrder());
       }
     }
   }
@@ -664,7 +720,6 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
   //  find which cell it belongs to
   //  get the cell corner which is closest
   //  load this point to this corner
-  int order = 0;
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
 
@@ -701,8 +756,7 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
           }
         }
         int location_id = ((closest_corner_i + q_x)*grid_size)+( closest_corner_j + q_y);
-        loadPoint(closest_x, closest_y, location_id, u->first, p->getTime(), order);
-        order++;
+        loadPoint(closest_x, closest_y, location_id, u->first, p->getTime(), p->getOrder());
       }
       else{
         cout<<"cell out of bounds...check grid size"<<endl;
@@ -1311,10 +1365,10 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
 
       if(noise != 0){
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
         purturbed_count++;
       } else {
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), new_order);
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
       };
 
       new_order++;
