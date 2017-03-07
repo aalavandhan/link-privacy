@@ -50,7 +50,7 @@ GPOs::GPOs(GPOs *_gpos){
   }
 }
 
-GPOs::~GPOs (){
+GPOs::~GPOs(){
   delete grid;
   delete &locations;
 }
@@ -576,6 +576,7 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   cout << "Checkins failed lookup : " << iterations << endl;
 
   delete seenLocations;
+  delete _duplicate_gpos;
   generateFrequencyCache();
 }
 

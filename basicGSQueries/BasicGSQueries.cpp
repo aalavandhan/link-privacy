@@ -194,7 +194,7 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
   unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
   unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
-  cout << "number of users around this location : " << u_set->size() << endl;
+  // cout << "number of users around this location : " << u_set->size() << endl;
 
   if(u1_set->size() > 1){
     for(auto u1_it=u1_set->begin(); u1_it != u1_set->end(); u1_it++){
@@ -218,7 +218,7 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
       }
     }
 
-    cout << "computed ranked pair : " << proximate_users->size() << endl;
+    // cout << "computed ranked pair : " << proximate_users->size() << endl;
     double min_score=0;
     auto rk_it=proximate_users_set->begin();
     for(int count=0; count < tresh && rk_it != proximate_users_set->end(); count++, rk_it++){
@@ -234,7 +234,7 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
     proximate_users_set->clear();
     delete proximate_users_set;
 
-    cout << "\tMinimum pair score is " << min_score << endl;
+    // cout << "\tMinimum pair score is " << min_score << endl;
 
     // if(ranked_proximate_users->size() > 0 && min_score > 0.01){
     //   cout << y << " " << x << " "  << min_score << " " << ranked_proximate_users->size() << endl;
