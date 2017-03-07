@@ -41,7 +41,7 @@ GPOs::GPOs(GPOs *_gpos){
   grid = new Grid;
   objects = 0;
   computedNN = returnedNN = finalNextNN = 0;
-  nextNNList = new vector<res_point*>();
+
   flagNextNN = true;
 
   for(auto l = _gpos->locations.begin(); l != _gpos->locations.end(); l++){
@@ -52,7 +52,7 @@ GPOs::GPOs(GPOs *_gpos){
 
 GPOs::~GPOs(){
   delete grid;
-  delete &locations;
+
 }
 
 
