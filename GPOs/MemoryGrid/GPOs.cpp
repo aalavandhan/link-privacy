@@ -31,6 +31,25 @@ GPOs::GPOs(){
   flagNextNN = true;
 }
 
+GPOs::GPOs(GPOs *_gpos){
+  kNNExecutions = 0;
+  LocationExecutions = 0;
+  NextNNExecutions = 0;
+  RangeExecutions = 0;
+  pureNNexec = 0;
+  totalCPUTime = totalTime = 0.0;
+  grid = new Grid;
+  objects = 0;
+  computedNN = returnedNN = finalNextNN = 0;
+  nextNNList = new vector<res_point*>();
+  flagNextNN = true;
+
+  for(auto l = _gpos->locations.begin(); l != _gpos->locations.end(); l++){
+    Point *p = *l;
+    this->loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+  }
+}
+
 GPOs::~GPOs (){
   delete grid;
   delete &locations;
@@ -160,6 +179,12 @@ vector<res_point*>* GPOs::getkNN(double x, double y, int k){
     return res;
 }
 
+
+
+vector<res_point*>* GPOs::getRangeAndDelete(double x, double y, double radius){
+  vector<res_point*>* res = grid->getRangeAndDelete(x, y, radius);
+  return res;
+}
 
 vector<res_point*>* GPOs::getRange(double x, double y, double radius){
     clock_t startC, endC;
@@ -517,13 +542,15 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   unordered_set<int>* seenLocations = new unordered_set<int>();
   boost::posix_time::ptime time;
 
+  GPOs *_duplicate_gpos = new GPOs(gpos);
+
   for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
     Point *p = *l;
     x   = p->getX();
     y   = p->getY();
     lid = p->getID();
 
-    vector<res_point*>* checkins = gpos->getRange(x, y, radius_geo_dist);
+    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist);
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if(isOptimistic){

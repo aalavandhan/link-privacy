@@ -25,6 +25,7 @@ public:
     Grid *grid;
     GPOs(char* gridFileName);
     GPOs();
+    GPOs(GPOs *gpos);
     ~GPOs();
     vector<int> ids;
     vector<Point*> locations;
@@ -52,6 +53,7 @@ public:
     virtual res_point* getNextNN(double x, double y, int incrStep);
     virtual vector<res_point*>* getkNN(double x, double y, int k);
     virtual vector<res_point*>* getRange(double x, double y, double radius);
+    virtual vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
     virtual set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
     virtual double estimateNearestDistance(double x, double y, int k);
