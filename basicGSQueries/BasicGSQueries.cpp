@@ -162,6 +162,7 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
       avg_precision += precision;
       avg_recall    += recall;
     }
+
   }
 
   avg_precision /= valid_query_points;
@@ -179,9 +180,9 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
 
 // Threshold defines
 unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserList(double x, double y, double radius, double tresh, double noise_distance){
-  map<int, res_point*> *u1_set, *u2_set, *u_set;
+  vector<int> *u1_set, *u2_set, *u_set;
 
-  u_set = gpos->getPointsInRange(x, y, radius, radius-noise_distance);
+  u_set = gpos->getUsersInRange(x, y, radius, radius-noise_distance);
   u1_set = u_set;
   u2_set = u_set;
 
@@ -195,19 +196,14 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
     for(auto u1_it=u1_set->begin(); u1_it != u1_set->end(); u1_it++){
       for(auto u2_it=u2_set->begin(); u2_it != u2_set->end(); u2_it++){
 
-        int order1_id = u1_it->first;
-        int order2_id = u2_it->first;
+        int u1id = (*u1_it);
+        int u2id = (*u2_it);
 
-        if(order1_id != order2_id){
-          int u1id = u1_it->second->uid;
-          int u2id = u2_it->second->uid;
+        if(u1_it != u2_it){
           double KatzScore = spos->getKatzScore(u1id, u2id);
-
-
-          // Persisting top pairs based on order-ID
-          if( proximate_users->find( make_pair(order1_id, order2_id) ) == proximate_users->end() && KatzScore > 0.01 ){
-            proximate_users->insert(make_pair(order1_id, order2_id));
-            proximate_users_set->insert(ranked_pair(order1_id, order2_id, KatzScore));
+          if( proximate_users->find( make_pair(u1id, u2id) ) == proximate_users->end() && KatzScore > 0.01 ){
+            proximate_users->insert(make_pair(u1id, u2id));
+            proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
           }
         }
 
