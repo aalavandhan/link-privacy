@@ -1406,6 +1406,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
   cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
+  cout<<"Average Displacemnt based on purturbed_count : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
   output_file.close();
   generateFrequencyCache();
 }
