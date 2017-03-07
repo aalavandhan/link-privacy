@@ -139,7 +139,6 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
 
       unordered_set< pair<int,int>, PairHasher >*  cmp_proximate_users  = computeProximityUserList(x, y, radius, tresh, noise_distance);
 
-
       int positive = cmp_proximate_users->size(), tp=0, gt=base_proximate_users->size();
 
       for(auto pair_it=base_proximate_users->begin(); pair_it != base_proximate_users->end(); pair_it++){
@@ -163,6 +162,12 @@ void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos
       avg_recall    += recall;
     }
 
+
+    base_proximate_users->clear();
+    delete base_proximate_users;
+
+    cmp_proximate_users->clear();
+    delete cmp_proximate_users;
   }
 
   avg_precision /= valid_query_points;
@@ -186,8 +191,8 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
   u1_set = u_set;
   u2_set = u_set;
 
-  multiset<ranked_pair, ranked_pair_comparator_descending>* proximate_users_set = new multiset<ranked_pair, ranked_pair_comparator_descending>();
-  unordered_set< pair<int,int>, PairHasher >* proximate_users = new unordered_set< pair<int,int>, PairHasher >();
+  multiset<ranked_pair, ranked_pair_comparator_descending> proximate_users_set = new multiset<ranked_pair, ranked_pair_comparator_descending>();
+  unordered_set< pair<int,int>, PairHasher > proximate_users = new unordered_set< pair<int,int>, PairHasher >();
   unordered_set< pair<int,int>, PairHasher >* ranked_proximate_users = new unordered_set< pair<int,int>, PairHasher >();
 
   cout << "number of users around this location : " << u_set->size() << endl;
@@ -201,40 +206,35 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
 
         if(u1_it != u2_it){
           double KatzScore = spos->getKatzScore(u1id, u2id);
-          if( proximate_users->find( make_pair(u1id, u2id) ) == proximate_users->end() && KatzScore > 0.01 ){
-            proximate_users->insert(make_pair(u1id, u2id));
-            proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
+
+          cout << u1id << " " << u2id << " " << KatzScore << endl;
+
+          if( proximate_users.find( make_pair(u1id, u2id) ) == proximate_users.end() && KatzScore > 0.01 ){
+            proximate_users.insert(make_pair(u1id, u2id));
+            proximate_users_set.insert(ranked_pair(u1id, u2id, KatzScore));
           }
         }
 
       }
     }
 
-    cout << "computed ranked pair : " << proximate_users->size() << endl;
-    double min_score;
-    auto rk_it=proximate_users_set->begin();
-    for(int count=0; count < tresh && rk_it != proximate_users_set->end(); count++, rk_it++){
+    cout << "computed ranked pair : " << proximate_users.size() << endl;
+    double min_score=0;
+    auto rk_it=proximate_users_set.begin();
+    for(int count=0; count < tresh && rk_it != proximate_users_set.end(); count++, rk_it++){
       int u1id = rk_it->getId1();
       int u2id = rk_it->getId2();
-      ranked_proximate_users->insert(make_pair(u1id, u2id));
+      ranked_proximate_users.insert(make_pair(u1id, u2id));
       min_score = rk_it->getScore();
     }
 
     cout << "\tMinimum pair score is " << min_score << endl;
 
-    // if(ranked_proximate_users->size() > 0 && min_score > 0.01){
-    //   cout << y << " " << x << " "  << min_score << " " << ranked_proximate_users->size() << endl;
+    // if(ranked_proximate_users.size() > 0 && min_score > 0.01){
+    //   cout << y << " " << x << " "  << min_score << " " << ranked_proximate_users.size() << endl;
     // }
-    // cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
+    // cout << "Persisting top " << ranked_proximate_users.size() << " friendships" << endl;
   }
-
-  // Delete
-  // proximate_users_set
-  proximate_users_set->clear();
-  delete proximate_users_set;
-  // proximate_users
-  proximate_users->clear();
-  delete proximate_users;
 
   cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
 
