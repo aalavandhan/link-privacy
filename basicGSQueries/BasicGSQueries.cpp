@@ -242,7 +242,7 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
     // cout << "Persisting top " << ranked_proximate_users->size() << " friendships" << endl;
   }
 
-  cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
+  // cout << "keeping top " << ranked_proximate_users->size() <<" user_paris " << endl;
 
   return ranked_proximate_users;
 }

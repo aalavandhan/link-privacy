@@ -434,6 +434,7 @@ map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double radius){
 }
 
 // r1 -> Outer radius, r2 -> inner radius
+// TODO FIX this: NEEDS TO BE DIFFERENCE
 map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double r1, double r2){
   map<int, res_point*> *r1_points = getPointsInRange(x,y,r1);
   map<int, res_point*> *r2_points = getPointsInRange(x,y,r2);
