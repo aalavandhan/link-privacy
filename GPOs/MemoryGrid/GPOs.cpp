@@ -327,9 +327,9 @@ map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getCooccurrenceMatrix(){
   return &cooccurrence_matrix;
 }
 
-map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getInsignificantCooccurrenceMatrix(){
-  return &cooccurrence_matrix_insignificant;
-}
+// map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getInsignificantCooccurrenceMatrix(){
+//   return &cooccurrence_matrix_insignificant;
+// }
 
 unordered_map<int, double>* GPOs::calculateLocationEntropy(){
   for(auto it = location_to_user.begin(); it != location_to_user.end(); it++){
@@ -966,27 +966,25 @@ void GPOs::countU2UCoOccurrences(uint time_block){
 
   //To calculate basic cooccurence based metric on noised data
   //  first calculate u1 - > u2 , u3, u4 , u5  cooccurrences.
+  // for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){
+  //   int user_1 = c_it->first;
+  //   auto users_location_frequency_map = c_it->second;
+  //   map<int, vector<pair<int, int> >* >* users_location_frequency_map_insignificant = new map<int, vector<pair<int, int> >* >();
 
-  for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){
-    int user_1 = c_it->first;
-    auto users_location_frequency_map = c_it->second;
-    map<int, vector<pair<int, int> >* >* users_location_frequency_map_insignificant = new map<int, vector<pair<int, int> >* >();
+  //   for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
+  //     int user_2 = ulh_it->first;
+  //     vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
+  //     vector<pair<int, int>>* cooccurrence_counts_vector_insignificant =  new vector<pair<int, int>>();
 
-    for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
-      int user_2 = ulh_it->first;
-      vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
-      vector<pair<int, int>>* cooccurrence_counts_vector_insignificant =  new vector<pair<int, int>>();
-
-      for(auto l_it=cooccurrence_counts_vector->begin(); l_it != cooccurrence_counts_vector->end(); l_it++){
-        int location_id = l_it->first;
-        int cooccrences_at_l = l_it->second;
-        cooccurrence_counts_vector_insignificant->push_back(make_pair(location_id,cooccrences_at_l));
-      }
-      users_location_frequency_map_insignificant->insert(make_pair(user_2,cooccurrence_counts_vector_insignificant));
-    }
-    cooccurrence_matrix_insignificant.insert(make_pair(user_1, users_location_frequency_map_insignificant));
-  }
-
+  //     for(auto l_it=cooccurrence_counts_vector->begin(); l_it != cooccurrence_counts_vector->end(); l_it++){
+  //       int location_id = l_it->first;
+  //       int cooccrences_at_l = l_it->second;
+  //       cooccurrence_counts_vector_insignificant->push_back(make_pair(location_id,cooccrences_at_l));
+  //     }
+  //     users_location_frequency_map_insignificant->insert(make_pair(user_2,cooccurrence_counts_vector_insignificant));
+  //   }
+  //   cooccurrence_matrix_insignificant.insert(make_pair(user_1, users_location_frequency_map_insignificant));
+  // }
 
   for(auto p=insignificantly_cooccured_user_pairs.begin(); p!=insignificantly_cooccured_user_pairs.end(); p++){
     int u1=p->first, u2=p->second;

@@ -46,7 +46,7 @@ public:
 
     unordered_map<int, double> location_to_H;
     map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
-    map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix_insignificant;
+    // map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix_insignificant;
 
     void createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km);
     virtual vector< Point* >* getLocations(int user_id);
@@ -60,7 +60,7 @@ public:
     virtual void clearNextNN();
     virtual unordered_map<int, double>* getLocationEntropy();
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
-    virtual map<int, map<int, vector<pair<int, int> >* >*>* getInsignificantCooccurrenceMatrix();
+    // virtual map<int, map<int, vector<pair<int, int> >* >*>* getInsignificantCooccurrenceMatrix();
     virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs();
     virtual vector<int>* getUsersInRange(double x, double y, double r1, double r2);
     virtual vector<int>* getUsersInRange(double x, double y, double radius);
