@@ -695,7 +695,9 @@ pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_s
     auto friend_checkin_time = friend_checkin->getTime();
     boost::posix_time::time_duration time_difference = point_source_time - friend_checkin_time;
     int time_diff_seconds = abs(time_difference.total_seconds());
-    if(time_diff_seconds <= TIME_RANGE_IN_SECONDS){
+
+    // I DAY IN SECONDS
+    if(time_diff_seconds <= 86400){
       double distSq = util.computeMinimumDistance(point_source->getX(), point_source->getY(), friend_checkin->getX(), friend_checkin->getY());
       if(distSq < closestDistance){
         closestDistance = distSq;
@@ -729,8 +731,6 @@ vector<pair<int,double>>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Poi
 
 // Distance matters: Geo-social metrics for online social networks
 double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
-
-
   double locality_sum=0, checkin_locality=0;
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 

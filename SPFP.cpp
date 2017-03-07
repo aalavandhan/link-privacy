@@ -138,8 +138,8 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
   //compare them both.
   map<int, pair<double,double>> user_to_precision_recall;
 
-  auto cooccurence_matrix_base = baseGPOs->getInsignificantCooccurrenceMatrix();
-  auto cooccurence_matrix_cmp = cmpGPOs->getInsignificantCooccurrenceMatrix();
+  auto cooccurence_matrix_base = baseGPOs->getCooccurrenceMatrix();
+  auto cooccurence_matrix_cmp = cmpGPOs->getCooccurrenceMatrix();
 
   unordered_set<int> seen_users_in_base;
 
@@ -158,9 +158,9 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
       int cooccurrences_across_users_min = 0;
       for(auto ulh_it = users_location_frequency_map_base->begin(); ulh_it != users_location_frequency_map_base->end(); ulh_it++){
         int user_2 = ulh_it->first;
+
         vector<pair<int, int>>* cooccurrence_counts_vector_base = ulh_it->second;
         vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
-
 
         int cooccurrence_count_cmp = 0;
         int cooccurrence_count_base = 0;
@@ -169,8 +169,8 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
           cooccurrence_counts_vector_cmp = iter_inner->second;
 
           for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
-          int cooccrences_at_l = l_it->second;
-          cooccurrence_count_cmp += cooccrences_at_l;
+            int cooccrences_at_l = l_it->second;
+            cooccurrence_count_cmp += cooccrences_at_l;
           }
         }else{
           // do nothing because cooccurences are zero
@@ -181,9 +181,9 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
           int cooccrences_at_l = l_it->second;
           cooccurrence_count_base += cooccrences_at_l;
         }
+
         cooccurrences_across_users_base += cooccurrence_count_base;
         cooccurrences_across_users_cmp += cooccurrence_count_cmp;
-
         cooccurrences_across_users_min += min(cooccurrence_count_cmp,cooccurrence_count_base);
       }
       double precision = cooccurrences_across_users_min/(double)cooccurrences_across_users_cmp;
@@ -207,7 +207,7 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
   //printing--------
   ofstream outfile;
   ostringstream ss;
-  ss<<"Basic" << p1<<"_"<<p2<<" "<<p3<<"_"<<p4;
+  ss<<"RES_Basic" << p1<<"_"<<p2<<"_"<<p3<<"_"<<p4;
   outfile.open(ss.str());
   for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
     auto precision_recall_pair = it->second;
