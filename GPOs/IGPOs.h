@@ -19,9 +19,11 @@ public:
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2)=0;
     virtual int getUserCooccurrences(int user_id)=0;
     virtual map<int , vector< Point*>* >* getLocationToUser()=0;
-    virtual map<int, double>* getHiLasMap() = 0;
-    virtual map<int, double>* getHiJasMap() = 0;
-    virtual map<int, double>* getHlLasMap() = 0;
+
+    virtual unordered_map<int, double>* getHiLasMap() = 0;
+    virtual unordered_map<int, double>* getHiJasMap() = 0;
+    virtual unordered_map<int, double>* getHlLasMap() = 0;
+
     virtual map< int, map<int,int>* >* getL2U2COOCC() = 0;
     virtual void printCooccurrenceMatrix() = 0;
 

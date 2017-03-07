@@ -542,7 +542,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   outfile.close();
 
   outfile.open("HiL.csv");
-  map<int, double>* HiL_map = gpos->getHiLasMap();
+  unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
   for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
     int user_id = it->first;
     double H = it->second;
@@ -553,7 +553,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   cout<<"Printing HiL complete. size:"<<HiL_map->size()<<endl;
 
   outfile.open("HiJ.csv");
-  map<int, double>* HiJ_map =gpos->getHiJasMap();
+  unordered_map<int, double>* HiJ_map =gpos->getHiJasMap();
   for(auto it = HiJ_map->begin(); it !=HiJ_map->end(); it++){
     int user_id = it->first;
     double H = it->second;
@@ -564,7 +564,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   cout<<"Printing HiJ complete.size:"<<HiJ_map->size()<<endl;
 
   outfile.open("HlL.csv");
-  map<int, double>* HlL_map =gpos->getHlLasMap();
+  unordered_map<int, double>* HlL_map =gpos->getHlLasMap();
   for(auto it = HlL_map->begin(); it !=HlL_map->end(); it++){
     int location_id = it->first;
     double H = it->second;

@@ -73,9 +73,10 @@ public:
     void printCooccurrenceMatrix();
 
 
-    virtual map<int, double>* getHiLasMap();
-    virtual map<int, double>* getHiJasMap();
-    virtual map<int, double>* getHlLasMap();
+    virtual unordered_map<int, double>* getHiLasMap();
+    virtual unordered_map<int, double>* getHiJasMap();
+    virtual unordered_map<int, double>* getHlLasMap();
+
     virtual map< int, map<int,int>* >* getL2U2COOCC();
 
     void generateFrequencyCache();

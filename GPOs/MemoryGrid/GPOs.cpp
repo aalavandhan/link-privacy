@@ -1076,8 +1076,8 @@ int GPOs::getUserCooccurrences(int user_id){
 }
 
 
-map<int, double>* GPOs::getHiLasMap(){
-  map<int, double>* HiL_histogram = new map<int, double>();
+unordered_map<int, double>* GPOs::getHiLasMap(){
+  unordered_map<int, double>* HiL_histogram = new unordered_map<int, double>();
 
   //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities
@@ -1115,8 +1115,8 @@ map<int, double>* GPOs::getHiLasMap(){
   return HiL_histogram;
 }
 
-map<int, double>* GPOs::getHiJasMap(){
-  map<int, double>* HiJ_histogram = new map<int, double>();
+unordered_map<int, double>* GPOs::getHiJasMap(){
+  unordered_map<int, double>* HiJ_histogram = new unordered_map<int, double>();
 
 
   //for each user user compute his total cooccurrences at all locations and users
@@ -1185,9 +1185,9 @@ void GPOs::printCooccurrenceMatrix(){
 }
 
 
-map<int, double>* GPOs::getHlLasMap(){
+unordered_map<int, double>* GPOs::getHlLasMap(){
   map<int, map<int,int>* > location_to_user_coocc_map;
-  map<int, double>* HlL_histogram = new map<int, double>();
+  unordered_map<int, double>* HlL_histogram = new unordered_map<int, double>();
 
 
   ofstream outfile;
@@ -1268,8 +1268,8 @@ map<int, double>* GPOs::getHlLasMap(){
 void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius, bool isGaussainNoise, int type){
 
   user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
-  map<int, double>* HiL_map = gpos->getHiLasMap();
-  map<int, double>* HiJ_map = gpos->getHiJasMap();
+  unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
+  unordered_map<int, double>* HiJ_map = gpos->getHiJasMap();
   // map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality = spos->getCheckinLocalityMap();
 
   int lid   = LOCATION_NOISE_BOUND;
