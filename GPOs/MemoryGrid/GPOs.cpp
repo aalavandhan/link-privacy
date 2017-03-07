@@ -1386,7 +1386,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
         coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
       }
 
-      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+      double displacement = util.distanceBetween(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
 
       output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
@@ -1394,19 +1394,20 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       if(noise != 0){
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
         purturbed_count++;
+        lid++;
       } else {
         loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
       };
 
       new_order++;
-      lid++;
+
     }
   }
 
   cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
-  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
-  cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
-  cout<<"Average Displacemnt based on purturbed_count : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
+  cout<<"Total Displacemnt : "<< total_displacement <<" in km"<<endl;
+  cout<<"Average Displacemnt : "<< total_displacement / new_order  <<" in meters"<<endl;
+  cout<<"Average Displacemnt based on purturbed_count : "<< total_displacement / purturbed_count <<" in meters"<<endl;
   output_file.close();
   generateFrequencyCache();
 }
