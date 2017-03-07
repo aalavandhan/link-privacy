@@ -208,10 +208,11 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
 
           // cout << u1id << " " << u2id << " " << KatzScore << endl;
 
-          if( proximate_users->find( make_pair(u1id, u2id) ) == proximate_users->end() && KatzScore > 0.01 ){
+          if( proximate_users->find( make_pair(u1id, u2id) ) == proximate_users->end() && KatzScore > 0.005 ){
             proximate_users->insert(make_pair(u1id, u2id));
             proximate_users_set->insert(ranked_pair(u1id, u2id, KatzScore));
           }
+
         }
 
       }
