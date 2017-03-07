@@ -206,7 +206,7 @@ unordered_set< pair<int,int>, PairHasher >* SimpleQueries::computeProximityUserL
         if(u1_it != u2_it){
           double KatzScore = spos->getKatzScore(u1id, u2id);
 
-          cout << u1id << " " << u2id << " " << KatzScore << endl;
+          // cout << u1id << " " << u2id << " " << KatzScore << endl;
 
           if( proximate_users->find( make_pair(u1id, u2id) ) == proximate_users->end() && KatzScore > 0.01 ){
             proximate_users->insert(make_pair(u1id, u2id));
