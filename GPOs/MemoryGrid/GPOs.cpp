@@ -1387,12 +1387,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
         noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
         // Offset
         if(noise != 0)
-          noise = noise + 0.25;
+          noise = noise + 0.45;
       } else{
         noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
         // Offset
-        if(noise != 0)
-          noise = noise + 0.25;
+        // if(noise != 0)
+        //   noise = noise + 0.25;
       }
 
       noise = noise * radius;
