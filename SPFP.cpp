@@ -613,11 +613,20 @@ int main(int argc, char *argv[]){
       bool preload_OCC = true;
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
-      SPOs* spos = loadSocialGraph(graph_file, gpos);
+
+      // TODO change it back
+      GPOs* purturbedGPOs = new GPOs();
+      GPOs* cmpGPOs  = new GPOs();
+      purturbedGPOs->loadPurturbedLocations(gpos, 0);
+      cmpGPOs->groupLocationsByRange(purturbedGPOs, 5, false);
+      cmpGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
+      cmpGPOs->calculateLocationEntropy();
+
+      SPOs* spos = loadSocialGraph(graph_file, cmpGPOs);
 
       social_strength_tresh = p1;
 
-      SimpleQueries* query = new SimpleQueries(gpos, spos);
+      SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
       query->buildMatrices(RENY_Q);
       query->cacluateSocialStrength();
 
