@@ -545,6 +545,9 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
 
   GPOs *_duplicate_gpos = new GPOs(gpos);
 
+  // Shuffling the locations
+  std::random_shuffle( gpos->locations.begin(), gpos->locations.end() );
+
   for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
     Point *p = *l;
     x   = p->getX();
