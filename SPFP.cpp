@@ -77,23 +77,8 @@ void runRangeUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
 
   cout << "------------- Evaluating range utility ---------------" << endl;
 
-  if(noise_radius < 50)
-    query->checkUtilityRange(query_file, purturbedGPOs, 50, noise_radius);
-
-  if(noise_radius < 100)
-    query->checkUtilityRange(query_file, purturbedGPOs, 100, noise_radius);
-
-  if(noise_radius < 200)
-    query->checkUtilityRange(query_file, purturbedGPOs, 200, noise_radius);
-
-  if(noise_radius < 400)
-    query->checkUtilityRange(query_file, purturbedGPOs, 400, noise_radius);
-
-  if(noise_radius < 800)
-    query->checkUtilityRange(query_file, purturbedGPOs, 800, noise_radius);
-
-  if(noise_radius < 1600)
-    query->checkUtilityRange(query_file, purturbedGPOs, 1600, noise_radius);
+  double base_radius = (double) max((int)noise_radius, (int)800);
+  query->checkUtilityRange(query_file, purturbedGPOs, base_radius, noise_radius);
 }
 
 void runProximityUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
@@ -103,7 +88,7 @@ void runProximityUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
 
   cout << "------------- Evaluating range proximity ---------------" << endl;
 
-  double base_radius = (double) max((int)noise_radius, (int)500);
+  double base_radius = (double) max((int)noise_radius, (int)800);
   query->checkUtilityProximity(query_file, purturbedGPOs, base_radius, 100, noise_radius);
 }
 
