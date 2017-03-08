@@ -1392,7 +1392,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
         noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
         // Offset
         if(noise != 0)
-          noise = noise + 0.45;
+          noise = noise + 0.25;
       }
 
       noise = noise * radius;
@@ -1425,8 +1425,8 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
   cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
   cout<<"Total Displacemnt : "<< total_displacement <<" in km"<<endl;
-  cout<<"Average Displacemnt : "<< total_displacement / new_order  <<" in meters"<<endl;
-  cout<<"Average Displacemnt based on purturbed_count : "<< total_displacement / purturbed_count <<" in meters"<<endl;
+  cout<<"Average Displacemnt : "<< total_displacement * 1000 / new_order  <<" in meters"<<endl;
+  cout<<"Average Displacemnt based on purturbed_count : "<< total_displacement * 1000 / purturbed_count <<" in meters"<<endl;
   // output_file.close();
   generateFrequencyCache();
 }

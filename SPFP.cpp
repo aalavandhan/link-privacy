@@ -72,29 +72,29 @@ SPOs* loadSocialGraph(char* graph_file){
   return spos;
 }
 
-void runRangeUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
-  SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
+void runRangeUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
+  SimpleQueries* query = new SimpleQueries(purturbedGPOs, spos);
 
   cout << "------------- Evaluating range utility ---------------" << endl;
 
   double base_radius = (double) max((int)noise_radius, (int)800);
-  query->checkUtilityRange(query_file, purturbedGPOs, base_radius, noise_radius);
+  query->checkUtilityRange(query_file, baseGPOs, base_radius, noise_radius);
 }
 
-void runProximityUtility(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
+void runProximityUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
   spos->loadKatzScoreFromMemory();
 
-  SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
+  SimpleQueries* query = new SimpleQueries(purturbedGPOs, spos);
 
   cout << "------------- Evaluating range proximity ---------------" << endl;
 
   double base_radius = (double) max((int)noise_radius, (int)800);
-  query->checkUtilityProximity(query_file, purturbedGPOs, base_radius, 100, noise_radius);
+  query->checkUtilityProximity(query_file, baseGPOs, base_radius, 100, noise_radius);
 }
 
-void runUtilities(GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
-  runRangeUtility(purturbedGPOs, cmpGPOs, spos);
-  runProximityUtility(purturbedGPOs, cmpGPOs, spos);
+void runUtilities(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
+  runRangeUtility(purturbedGPOs, baseGPOs, spos);
+  runProximityUtility(purturbedGPOs, baseGPOs, spos);
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
@@ -237,7 +237,7 @@ void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *sp
   runEBM(cmpGPOs, spos);
   runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, false);
   runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, true);
-  runUtilities(purturbedGPOs, cmpGPOs, spos);
+  runUtilities(purturbedGPOs, baseGPOs, spos);
 }
 
 void plainEBM(){
