@@ -624,6 +624,9 @@ int main(int argc, char *argv[]){
 
       SPOs* spos = loadSocialGraph(graph_file, cmpGPOs);
 
+      spos->computeCheckinLocalityMap(cmpGPOs);
+      spos->writeCheckinLocalityToFile();
+
       social_strength_tresh = p1;
 
       SimpleQueries* query = new SimpleQueries(cmpGPOs, spos);
