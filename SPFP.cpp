@@ -293,16 +293,18 @@ void CombinationNoiseVsEBM(double noise_radius){
 
   cout << "------------- Load computed checkin locality ---------------" << endl;
   SPOs *tmp_spos = new SPOs();
-  map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality = tmp_spos->loadCheckinLocalityFromFile();
 
   GPOs* purturbedGPOs = new GPOs();
   GPOs* cmpGPOs  = new GPOs();
 
-  if(combination_type == 0){
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, false, function_type);
-  } else if(combination_type == 1) {
-    purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(baseGPOs, user_to_order_to_location_locality, noise_radius, true, function_type);
-  }
+  bool isGaussian = (combination_type == 1);
+
+
+  purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
+    baseGPOs,
+    tmp_spos->loadCheckinLocalityFromFile(),
+    baseGPOs->getL2U2COOCC(),
+    noise_radius, isGaussian, function_type);
 
   cout << "------------- Locations perturbed -------------------" << endl;
   purturbedGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);

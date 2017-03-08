@@ -109,7 +109,7 @@ public:
 
     void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
     void loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit);
-    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius, bool isGaussainNoise, int function_type);
-    void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
+    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality, map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
+    // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
 };

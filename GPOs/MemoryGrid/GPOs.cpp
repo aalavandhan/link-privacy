@@ -1295,7 +1295,11 @@ unordered_map<int, double>* GPOs::getHlLasMap(){
 }
 
 
-void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality , double radius, bool isGaussainNoise, int type){
+void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
+  GPOs* gpos,
+  map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality,
+  map< int, map<int,int>* >* _location_to_user_to_cooccurrences ,
+  double radius, bool isGaussainNoise, int type){
 
   user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
   unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
@@ -1306,10 +1310,16 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   int new_order = 0;
   int purturbed_count = 0;
 
-  ofstream output_file;
-  output_file.open("displacement-combination-function.csv");
+  // ofstream output_file;
+  // output_file.open("displacement-combination-function.csv");
 
-  cout << "loadPurturbedLocationsBasedOnCombinationFunction : Running type " << type << "\tIsGaussian : " << isGaussainNoise << endl;
+  cout << "Running type ";
+  if(type == 0){
+    cout << "  0.5 * ( expHil + expHiJ ) * expHL * checkin_locality ";
+  } else {
+    cout << "  0.5 * ( expHil + expHiJ ) * expHL * CIL ";
+  }
+  cout << "\tIsGaussian : " << isGaussainNoise << endl;
 
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
@@ -1336,6 +1346,15 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       if(entropy_it != gpos->location_to_H.end())
         entropy = entropy_it->second;
 
+      double user_cooccurrenes = 0;
+      auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
+      if(iter_outer!= _location_to_user_to_cooccurrences->end()){
+        map<int,int>* user_to_cooccurrences_map = iter_outer->second;
+        auto iter_inner = user_to_cooccurrences_map->find(user_id);
+        if(iter_inner != user_to_cooccurrences_map->end()){
+          user_cooccurrenes = iter_inner->second;
+        }
+      }
 
       double checkin_locality_value = 0;
       auto iter = user_to_order_to_location_locality->find(user_id);
@@ -1364,23 +1383,20 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       double expHL = exp(-entropy / HL_SCALE);
 
       double noise;
-      // if(type == 0){
-      //   noise = 0.5 * ( expHil + expHiJ ) * radius;
-      // } else if (type == 1) {
-      //   noise = 0.5 * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
-      // }else if(type == 2){
-      //   noise = checkin_locality_value * (expHil / HIL_SCALE) * radius;
-      // } else{
-      //   noise = 0.5 * checkin_locality_value * ( (expHil / HIL_SCALE) + (expHiJ / HIJ_SCALE) ) * radius;
-      // }
-      noise = 0.5 * ( expHil + expHiJ );
-      noise = noise * expHL * checkin_locality_value;
-
-      // Offset
-      if(noise != 0)
-        noise = noise + 0.25;
+      if(type == 0){
+        noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
+        // Offset
+        if(noise != 0)
+          noise = noise + 0.25;
+      } else{
+        noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
+        // Offset
+        if(noise != 0)
+          noise = noise + 0.45;
+      }
 
       noise = noise * radius;
+
 
       pair<double,double> coordinates_with_noise;
       if(isGaussainNoise){
@@ -1392,7 +1408,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
       double displacement = util.distanceBetween(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
 
-      output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
+      // output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
 
       if(noise != 0){
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
@@ -1411,7 +1427,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int
   cout<<"Total Displacemnt : "<< total_displacement <<" in km"<<endl;
   cout<<"Average Displacemnt : "<< total_displacement / new_order  <<" in meters"<<endl;
   cout<<"Average Displacemnt based on purturbed_count : "<< total_displacement / purturbed_count <<" in meters"<<endl;
-  output_file.close();
+  // output_file.close();
   generateFrequencyCache();
 }
 
