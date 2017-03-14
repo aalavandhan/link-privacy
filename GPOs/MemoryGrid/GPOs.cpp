@@ -616,7 +616,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
       // }
     }
   }
-  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
+  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360) ) <<" in km"<<endl;
   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/lid)*1000 <<" in meters"<<endl;
 
   // int inRange=0, total=0;
