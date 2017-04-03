@@ -26,11 +26,13 @@ public:
 	bool loadFromFile(const char* fileName, int numOfFiles);
 
     list<Cell*>* getIntersectedCellsWithRectangle(double x1, double y1, double x2, double y2);
-    double estimateNearestDistance(double x, double y, int k);
+    double estimateNearestDistance(double x, double y, int k, double max_radius);
     void deleteEmptyCells();
 
     Cell* makeCell(double x, double y);
 
     int num_failed=0;
+
+    double getCellCornerCoordinates(int c_i, int c_j, int corner_id);
 };
 

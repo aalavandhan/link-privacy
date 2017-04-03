@@ -265,7 +265,7 @@ map< int, bool >* SimpleQueries::getUsersOfInterest(double tresh){
   return users_of_interest;
 }
 
-bool SimpleQueries::areEBMFriends(int source, int target, double tresh){
+double SimpleQueries::getSocialStrength(int source, int target){
   if(source > target){
     int temp = target;
     target = source;
@@ -286,14 +286,71 @@ bool SimpleQueries::areEBMFriends(int source, int target, double tresh){
 
   double social_strength = user_social_strength_it->second;
 
-  if(social_strength >= tresh)
-    return true;
-  else
-    return false;
+  return social_strength;
+}
+
+bool SimpleQueries::areEBMFriends(int source, int target, double tresh){
+  return ( getSocialStrength(source, target) >= tresh );
 }
 
 bool SimpleQueries::areTrueEBMFriends(int source, int target, double tresh){
   return ( areEBMFriends(source, target, tresh) && spos->areFriends(source, target) );
+}
+
+void SimpleQueries::computeAccuracyOfSocialStrength(){
+
+  double prev_precision = 0, precision, recall, mean_score, f1, i;
+  int postitive, true_positive, gt, total_score, nFriends;
+  double tresh;
+
+  for(i = 0; i < 100; i = i + 0.05){
+    tresh = i;
+    postitive=0;
+    true_positive=0;
+    // gt = countCooccurredFriends();
+    gt = RECALL_BOUND;
+    total_score=0;
+    nFriends=spos->getNumberOfFriends();
+
+    for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
+      int user_1 = s_it->first;
+      auto user_ss_list = s_it->second;
+
+      for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
+        int user_2 = ss_it->first;
+
+        if(ss_it->second >= tresh){
+          if(spos->areFriends(user_1, user_2)){
+            true_positive++;
+          }
+          postitive++;
+          total_score += ss_it->second;
+        }
+      }
+    }
+
+    precision = true_positive / (double) postitive;
+    recall    = true_positive / (double) gt;
+    mean_score    = total_score / (double) postitive;
+    f1 = 2 * precision * recall / ( precision + recall );
+
+    if(prev_precision <= 0.80 && precision >= 0.80)
+      break;
+
+    prev_precision = precision;
+  }
+
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Number of correct friendships inferred " << true_positive << endl;
+  cout << "Number of  friendships inferred " << postitive << endl;
+  cout << "Number of friendships with more than one cooccrrences " << gt << endl;
+  cout << "Number of friendships " << nFriends << endl;
+  cout << "Threshold : " << i << endl;
+  cout << "Precision : " << precision << endl;
+  cout << "Recall : " << recall << endl;
+  cout << "F1 Score  :" << f1   << endl;
+  cout << "Mean Score : " << mean_score << endl;
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
 void SimpleQueries::verifySocialStrength(double tresh){
@@ -529,8 +586,7 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::writeHistogramstoFile(double tresh){
-
+void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_day, double time_block, int max_checkins,  double max_radius){
   gpos->printCooccurrenceMatrix();
   printPartialDiversityAndWeightedFrequencyValues(RENY_Q);
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
@@ -576,48 +632,73 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
 
   cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
 
-  //-------------------------------------
-  //-- for a given user how many friends ebm truly inferred
-  //-- this is not the true detected freinds
-  map<int,int> user_to_trueEBMinferred;
-  for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
-    int user_1 = s_it->first;
-    auto user_ss_list = s_it->second;
+  // Plt map
+  {
+    unordered_map< int, map< int, map<int, double >* >* >* Plt_map = gpos_on_specific_day->getPltMap(time_block, max_checkins, max_radius);
+    outfile.open("Plt.csv");
 
-    for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
-      int user_2 = ss_it->first;
-
-      if(ss_it->second >= tresh){
-        if(spos->areFriends(user_1, user_2)){
-
-          auto it = user_to_trueEBMinferred.find(user_1);
-          if(it!=user_to_trueEBMinferred.end()){
-            it->second = it->second+1;
-          }else{
-            user_to_trueEBMinferred.insert(make_pair(user_1,1));
-          }
-
-          it = user_to_trueEBMinferred.find(user_2);
-          if(it!=user_to_trueEBMinferred.end()){
-            it->second = it->second+1;
-          }else{
-            user_to_trueEBMinferred.insert(make_pair(user_2,1));
-          }
-
+    for(auto l_it = Plt_map->begin(); l_it !=Plt_map->end(); l_it++){
+      int location_id = l_it->first;
+      map< int, map<int, double >* >* day_time_prob_map = l_it->second;
+      for(auto d_it = day_time_prob_map->begin(); d_it !=day_time_prob_map->end(); d_it++){
+        int day = d_it->first;
+        map<int, double >* time_prob_map = d_it->second;
+        for(auto t_it = time_prob_map->begin(); t_it !=time_prob_map->end(); t_it++){
+          int time_block = t_it->first;
+          double prob = t_it->second;
+          outfile<< std::fixed << setprecision(10) << location_id << " " << day << " " << time_block << " " << prob <<"\n";
         }
       }
     }
+    outfile.close();
+
+    cout<<"Printing PLT complete. size:"<<Plt_map->size()<<endl;
   }
 
-  outfile.open("user_to_trueEBMinferred.csv");
-  for(auto it = user_to_trueEBMinferred.begin(); it !=user_to_trueEBMinferred.end(); it++){
-    int user_id = it->first;
-    int frequency = it->second;
-    outfile << std::fixed << std::setprecision(10) << user_id << " "<<frequency<<"\n";
-  }
-  outfile.close();
+  //-------------------------------------
+  //-- for a given user how many friends ebm truly inferred
+  //-- this is not the true detected freinds
+  {
+    map<int,int> user_to_trueEBMinferred;
+    for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
+      int user_1 = s_it->first;
+      auto user_ss_list = s_it->second;
 
-  cout<<"Printing user_to_trueEBMinferred complete. size: "<<user_to_trueEBMinferred.size()<<endl;
+      for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
+        int user_2 = ss_it->first;
+
+        if(ss_it->second >= tresh){
+          if(spos->areFriends(user_1, user_2)){
+
+            auto it = user_to_trueEBMinferred.find(user_1);
+            if(it!=user_to_trueEBMinferred.end()){
+              it->second = it->second+1;
+            }else{
+              user_to_trueEBMinferred.insert(make_pair(user_1,1));
+            }
+
+            it = user_to_trueEBMinferred.find(user_2);
+            if(it!=user_to_trueEBMinferred.end()){
+              it->second = it->second+1;
+            }else{
+              user_to_trueEBMinferred.insert(make_pair(user_2,1));
+            }
+
+          }
+        }
+      }
+    }
+
+    outfile.open("user_to_trueEBMinferred.csv");
+    for(auto it = user_to_trueEBMinferred.begin(); it !=user_to_trueEBMinferred.end(); it++){
+      int user_id = it->first;
+      int frequency = it->second;
+      outfile << std::fixed << std::setprecision(10) << user_id << " "<<frequency<<"\n";
+    }
+    outfile.close();
+
+    cout<<"Printing user_to_trueEBMinferred complete. size: "<<user_to_trueEBMinferred.size()<<endl;
+  }
 
 
   //number of freinds ebm inferred that may not be true
@@ -659,7 +740,6 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
 
       cout<<"Printing user_to_EBMinferred complete. size: "<<user_to_EBMinferred.size()<<endl;
   }
-
 
   {
     //-----------------------------------
@@ -741,8 +821,6 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
   }
 
   //OUT user - location - ebm - truebm - precision
-
-
   {
     //-----------------------------------
     //-- user and location to the number of ebm freinds inferred at the location
@@ -877,6 +955,201 @@ void SimpleQueries::writeHistogramstoFile(double tresh){
 
   }
 
+  {
+    map< int, double >* temoral_locality_map = gpos->computeTemporalLocality(max_checkins, max_radius);
+    map<int , vector< Point* >*>* location_to_user = gpos_on_specific_day->getLocationToUser();
+
+    outfile.open("locationTime_Locality.csv");
+
+    for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
+      int location_id = l_it->first;
+      vector< Point* >* checkins_at_l = l_it->second;
+
+      for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
+        Point *p = (*c_it);
+        int user_id = p->getUID(), order = p->getOrder();
+        boost::posix_time::ptime l_time = p->getTime();
+        int l_time_block = p->getTimeBlock( time_block );
+        int l_day        = l_time.date().day_of_year() + ( l_time.date().year() - 2000 ) * 365;
+
+
+        double locality=0;
+
+        auto loc_it = temoral_locality_map->find(order);
+        if(loc_it != temoral_locality_map->end())
+          locality = loc_it->second;
+
+        outfile<< std::fixed << setprecision(10) << location_id << " " <<  l_day << " " << l_time_block <<" "<<  locality << endl;
+      }
+    }
+
+    outfile.close();
+  }
+
+
+  //OUT location - time - ebm - truebm/ebm - precision
+  {
+
+    map<int , vector< Point* >*>* location_to_user = gpos_on_specific_day->getLocationToUser();
+    outfile.open("locationTime_EBM.csv");
+
+    for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
+      int location_id = l_it->first;
+      vector< Point* >* checkins_at_l = l_it->second;
+
+      unordered_map<int, map< int, vector<int>*>* >* day_time_block_ulist_map = new unordered_map<int, map< int, vector<int>*>* >();
+      map< int, vector<int>*>* time_block_ulist_map;
+      vector<int> *u_list;
+
+      for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
+        Point *p = (*c_it);
+        int user_id = p->getUID();
+        boost::posix_time::ptime l_time = p->getTime();
+        int l_time_block = p->getTimeBlock( time_block );
+        int l_day        = l_time.date().day_of_year() + ( l_time.date().year() - 2000 ) * 365;
+
+        auto dtb_it = day_time_block_ulist_map->find(l_day);
+        if(dtb_it == day_time_block_ulist_map->end()){
+          time_block_ulist_map = new map< int, vector<int>*>();
+          u_list = new vector<int>();
+          time_block_ulist_map->insert(make_pair(l_time_block, u_list));
+          day_time_block_ulist_map->insert(make_pair(l_day, time_block_ulist_map));
+        } else {
+          time_block_ulist_map = dtb_it->second;
+          auto tb_it = time_block_ulist_map->find(l_time_block);
+          if(tb_it == time_block_ulist_map->end()){
+            u_list = new vector<int>();
+            time_block_ulist_map->insert(make_pair(l_time_block, u_list));
+          } else {
+            u_list = tb_it->second;
+          }
+        }
+        u_list->push_back(user_id);
+      }
+
+      for(auto d_it=day_time_block_ulist_map->begin(); d_it!=day_time_block_ulist_map->end(); d_it++){
+        time_block_ulist_map = d_it->second;
+        for(auto t_it=time_block_ulist_map->begin(); t_it != time_block_ulist_map->end(); t_it++){
+          vector<int> *u_list = t_it->second;
+          sort(u_list->begin(), u_list->end());
+          u_list->erase( unique( u_list->begin(), u_list->end() ), u_list->end() );
+        }
+      }
+
+      for(auto d_it=day_time_block_ulist_map->begin(); d_it!=day_time_block_ulist_map->end(); d_it++){
+        int l_day = d_it->first;
+        time_block_ulist_map = d_it->second;
+
+        for(auto t_it=time_block_ulist_map->begin(); t_it != time_block_ulist_map->end(); t_it++){
+          int l_time_block = t_it->first;
+          vector<int> *u_list = t_it->second;
+
+          int trueEbmFriends=0,ebmFriends=0, actualFriends=0;
+
+          for(auto u1_it = u_list->begin(); u1_it != u_list->end(); u1_it++){
+            for(auto u2_it = u1_it; u2_it != u_list->end(); u2_it++){
+              if(u1_it != u2_it){
+                int user_1 = (*u1_it);
+                int user_2 = (*u2_it);
+                if(areTrueEBMFriends(user_1, user_2, tresh))
+                  trueEbmFriends++;
+                if(areEBMFriends(user_1, user_2, tresh))
+                  ebmFriends++;
+                if(spos-> areFriends(user_1, user_2))
+                  actualFriends++;
+              }
+            }
+          }
+
+          outfile<< std::fixed << setprecision(10) << location_id << " " <<  l_day << " " << l_time_block <<" "<< trueEbmFriends << " " << ebmFriends << " " << actualFriends << endl;
+        }
+      }
+
+      delete day_time_block_ulist_map;
+    }
+    outfile.close();
+    cout<<"Printing locationTime_EBM complete. " << endl;
+  }
+
+
+  //OUT location - time - u1,u2 - number of co-occ
+  {
+
+    map<int , vector< Point* >*>* location_to_user = gpos_on_specific_day->getLocationToUser();
+    outfile.open("locationTime_CoOcc.csv");
+
+    for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
+      int location_id = l_it->first;
+      vector< Point* >* checkins_at_l = l_it->second;
+
+      unordered_map<int, map< int, vector<int>*>* >* day_time_block_ulist_map = new unordered_map<int, map< int, vector<int>*>* >();
+      map< int, vector<int>*>* time_block_ulist_map;
+      vector<int> *u_list;
+
+      for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
+        Point *p = (*c_it);
+        int user_id = p->getUID();
+        boost::posix_time::ptime l_time = p->getTime();
+        int l_time_block = p->getTimeBlock( time_block );
+        int l_day        = l_time.date().day_of_year() + ( l_time.date().year() - 2000 ) * 365;
+
+        auto dtb_it = day_time_block_ulist_map->find(l_day);
+        if(dtb_it == day_time_block_ulist_map->end()){
+          time_block_ulist_map = new map< int, vector<int>*>();
+          u_list = new vector<int>();
+          time_block_ulist_map->insert(make_pair(l_time_block, u_list));
+          day_time_block_ulist_map->insert(make_pair(l_day, time_block_ulist_map));
+        } else {
+          time_block_ulist_map = dtb_it->second;
+          auto tb_it = time_block_ulist_map->find(l_time_block);
+          if(tb_it == time_block_ulist_map->end()){
+            u_list = new vector<int>();
+            time_block_ulist_map->insert(make_pair(l_time_block, u_list));
+          } else {
+            u_list = tb_it->second;
+          }
+        }
+        u_list->push_back(user_id);
+      }
+
+      for(auto d_it=day_time_block_ulist_map->begin(); d_it!=day_time_block_ulist_map->end(); d_it++){
+        time_block_ulist_map = d_it->second;
+        for(auto t_it=time_block_ulist_map->begin(); t_it != time_block_ulist_map->end(); t_it++){
+          vector<int> *u_list = t_it->second;
+          sort(u_list->begin(), u_list->end());
+          u_list->erase( unique( u_list->begin(), u_list->end() ), u_list->end() );
+        }
+      }
+
+      for(auto d_it=day_time_block_ulist_map->begin(); d_it!=day_time_block_ulist_map->end(); d_it++){
+        int l_day = d_it->first;
+        time_block_ulist_map = d_it->second;
+
+        for(auto t_it=time_block_ulist_map->begin(); t_it != time_block_ulist_map->end(); t_it++){
+          int l_time_block = t_it->first;
+          vector<int> *u_list = t_it->second;
+
+          int trueEbmFriends=0,ebmFriends=0, actualFriends=0;
+
+          for(auto u1_it = u_list->begin(); u1_it != u_list->end(); u1_it++){
+            for(auto u2_it = u1_it; u2_it != u_list->end(); u2_it++){
+              if(u1_it != u2_it){
+                int user_1 = (*u1_it);
+                int user_2 = (*u2_it);
+                outfile<< std::fixed << setprecision(10) << location_id << " " <<  l_day << " " << l_time_block <<" "<< user_1 << " " << user_2 << endl;
+              }
+            }
+          }
+
+        }
+      }
+
+      delete day_time_block_ulist_map;
+    }
+    outfile.close();
+    cout<<"Printing locationTime_EBM complete. " << endl;
+  }
+
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
@@ -886,7 +1159,6 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
 
   ofstream outfile;
   outfile.open("partialDWFmatrix");
-
 
   for(auto c_it = cooccurrence_matrix->begin(); c_it != cooccurrence_matrix->end(); c_it++){
     int user_1 = c_it->first;
@@ -915,8 +1187,6 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
          stateProbs[i] = cooccVector[i]/(double)sumOfCo;
       }
 
-
-
       double power_factor = 1/(double)(1.0-alpha);
       double diversity_from_new = 0;
 
@@ -931,18 +1201,6 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
         double tempValue = stateProbs[i];
         temporary_entropy_value_vector.push_back(diversity_from_new * tempValue);
       }
-
-
-      // for (i = 0; i < stateLength; i++) {
-      //   double tempValue = stateProbs[i];
-      //   if (tempValue > 0) {
-      //       double shannon_entropy = -1 * tempValue * log(tempValue);
-      //       temporary_entropy_value_vector.push_back(shannon_entropy);
-      //       // printf("Entropy Value at i=%d, is %f\n",i,tempValue * log(tempValue));
-      //   }else{
-      //       temporary_entropy_value_vector.push_back(0);
-      //   }
-      // }
 
       i=0;
       for(auto u_it = cooccurrence_counts_vector->begin(); u_it!=cooccurrence_counts_vector->end(); u_it++){
@@ -965,4 +1223,3 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
     }
   }
 }
-

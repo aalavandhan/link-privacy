@@ -30,6 +30,9 @@ public:
     vector<int> ids;
     vector<Point*> locations;
     double total_displacement =0;
+    double total_time_displacement =0;
+    int purturbed_count = 0;
+
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
@@ -56,7 +59,7 @@ public:
     virtual vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
     virtual set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
-    virtual double estimateNearestDistance(double x, double y, int k);
+    virtual double estimateNearestDistance(double x, double y, int k, double max_radius);
     virtual void clearNextNN();
     virtual unordered_map<int, double>* getLocationEntropy();
     virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
@@ -65,6 +68,7 @@ public:
     virtual vector<int>* getUsersInRange(double x, double y, double r1, double r2);
     virtual vector<int>* getUsersInRange(double x, double y, double radius);
     virtual vector<int>* getUsersInRange(int source, double radius);
+
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double radius);
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);
     virtual int getUserCooccurrences(int user_id);
@@ -74,10 +78,13 @@ public:
 
     void printCooccurrenceMatrix();
 
-
+    virtual vector<Point*>* getLocations();
     virtual unordered_map<int, double>* getHiLasMap();
     virtual unordered_map<int, double>* getHiJasMap();
     virtual unordered_map<int, double>* getHlLasMap();
+
+    virtual unordered_map< int, map< int, map<int, double >* >* >* getPltMap(double time_block, int max_checkins, double max_radius);
+    virtual vector<int>* getUsersInRangeAndTimeBlock(double x, double y, double time_block, int max_checkins, double max_radius);
 
     virtual map< int, map<int,int>* >* getL2U2COOCC();
 
@@ -97,12 +104,14 @@ public:
 
     bool loadLocations(const char* fileName);
 	bool loadLocations(const char* fileName, int numOfFiles);
+    void loadLocationsByDayOfWeek(GPOs* gpos, int day_of_week);
     double getTotalCPUTime();
     double getTotalTime();
 
     void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order);
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
     void loadPurturbedLocations(GPOs* gpos, double radius);
+    void loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation);
     void verifyRange(double radius);
     void countU2UCoOccurrences(uint time_block);
     double distanceBetween(Point *a, Point *b);
@@ -112,4 +121,5 @@ public:
     void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality, map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
+    virtual map< int, double >* computeTemporalLocality(int max_checkins, double max_radius);
 };

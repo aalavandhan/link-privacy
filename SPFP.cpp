@@ -14,11 +14,11 @@ double MAX_X = -66.885444;
 double MIN_Y = 24.396308;
 double MAX_Y = 49.384358;
 
-double DATASET_SIZE = 0;
+double DATASET_SIZE = 3661488;
 double DELTA_X = 0;
 double DELTA_Y = 0;
 int MAXSC = 0;                // maximum number of friends plus one
-double MAXDIST = 0;          // maximum distance between to points
+double MAXDIST = 50;        // maximum distance between to points
 int MAXT = 0;
 
 
@@ -37,8 +37,31 @@ bool is_noise_method = false;
 
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
          total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
-         function_type, p1, p2, p3, p4;
+         function_type, p1, p2, p3, p4, p5, p6,
+         time_deviation,
+         time_range_in_seconds = TIME_RANGE_IN_SECONDS,
+         day_of_week, time_block;
 #endif
+
+void printParameters(){
+  cout << "------------- Input Parameters -------------" << endl;
+  cout << "noise_radius         : " << noise_radius << endl;
+  cout << "group_radius         : " << group_radius << endl;
+  cout << "grid_size_in_km      : " << grid_size_in_km << endl;
+  cout << "locality_treshold    : " << locality_treshold << endl;
+  cout << "entropy_treshold     : " << entropy_treshold << endl;
+  cout << "total_parts          : " << total_parts << endl;
+  cout << "part_number          : " << part_number << endl;
+  cout << "distance_treshold    : " << distance_treshold << endl;
+  cout << "social_strength_tresh: " << social_strength_tresh << endl;
+  cout << "combination_type     : " << combination_type << endl;
+  cout << "function_type        : " << function_type << endl;
+  cout << "time_deviation       : " << time_deviation << endl;
+  cout << "time_range_in_seconds: " << time_range_in_seconds << endl;
+  cout << "day_of_week          : " << day_of_week << endl;
+  cout << "time_block           : " << time_block << endl;
+  cout << "------------------------------------------" << endl;
+}
 
 GPOs* loadCheckins(char* checkins_file){
   cout << "------------- Loading checkins ---------------" << endl;
@@ -53,7 +76,7 @@ GPOs* loadCheckins(char* checkins_file, bool preload_LE, bool preload_OCC){
     gpos->calculateLocationEntropy();
 
   if(preload_OCC)
-    gpos->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
+    gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
 
   return gpos;
 }
@@ -106,15 +129,14 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  for(double i = 0.3; i < 2.5; i = i + 0.1){
-    cout << "----- Computing accuracy for threshold --- " << i <<endl;
-    query->verifySocialStrength(i);
-    cout << "--------------------------------------------";
-  }
+  // for(double i = 0; i < 3; i = i + 0.1){
+  //   query->verifySocialStrength(i);
+  // }
+  query->computeAccuracyOfSocialStrength();
 }
 
 void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
-  // cmpGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
+  // cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
   // cmpGPOs->calculateLocationEntropy();
   // runEBM(cmpGPOs, spos);
 
@@ -232,12 +254,16 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
 }
 
 void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
-  cmpGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
+  cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
   cmpGPOs->calculateLocationEntropy();
   runEBM(cmpGPOs, spos);
-  runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, false);
-  runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, true);
-  runUtilities(purturbedGPOs, baseGPOs, spos);
+
+  if(run_utilties){
+    runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, false);
+    runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, true);
+    runUtilities(purturbedGPOs, baseGPOs, spos);
+  }
+
 }
 
 void plainEBM(){
@@ -250,38 +276,42 @@ void plainEBM(){
   runEBM(gpos, spos);
 }
 
-void gridSnappingVsEBM(double grid_size_in_km){
-  bool preload_LE  = false;
-  bool preload_OCC = true;
+// Out dated
+// void gridSnappingVsEBM(double grid_size_in_km){
+//   bool preload_LE  = false;
+//   bool preload_OCC = true;
 
-  GPOs* baseGPOs   = loadCheckins(checkins_file, preload_LE, preload_OCC);
-  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+//   GPOs* baseGPOs   = loadCheckins(checkins_file, preload_LE, preload_OCC);
+//   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* cmpGPOs    = new GPOs();
-  cmpGPOs->createNewGPOsbyGridSnapping(baseGPOs, grid_size_in_km);
-  cout << "Number of locations loaded " << cmpGPOs->locations.size() << endl;
-  cout << "------------- Noise added -------------------" << endl;
+//   GPOs* cmpGPOs    = new GPOs();
+//   cmpGPOs->createNewGPOsbyGridSnapping(baseGPOs, grid_size_in_km);
+//   cout << "Number of locations loaded " << cmpGPOs->locations.size() << endl;
+//   cout << "------------- Noise added -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
-}
+//   runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
+// }
 
-void gaussianNoiseVsEBM(double noise_radius, double group_radius){
+void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* purturbedGPOs = new GPOs();
+  GPOs* spatiallyPurturbedGPOs = new GPOs();
+  GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs();
   GPOs* cmpGPOs  = new GPOs();
 
-  purturbedGPOs->loadPurturbedLocations(baseGPOs, noise_radius);
-  cout << "------------- Locations perturbed -------------------" << endl;
+  spatiallyPurturbedGPOs->loadPurturbedLocations(baseGPOs, noise_radius);
+  cout << "------------- Locations spatially perturbed -------------------" << endl;
+  spatiallyAndTemporallyPurturbedGPOs->loadPurturbedLocationsByTime(spatiallyPurturbedGPOs, time_deviation);
+  cout << "------------- Locations temporally perturbed -------------------" << endl;
 
-  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+  cmpGPOs->groupLocationsByRange(spatiallyAndTemporallyPurturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
 }
 
 void CombinationNoiseVsEBM(double noise_radius){
@@ -294,61 +324,28 @@ void CombinationNoiseVsEBM(double noise_radius){
   cout << "------------- Load computed checkin locality ---------------" << endl;
   SPOs *tmp_spos = new SPOs();
 
-  GPOs* purturbedGPOs = new GPOs();
+  GPOs* spatiallyPurturbedGPOs = new GPOs();
+  GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs();
   GPOs* cmpGPOs  = new GPOs();
 
   bool isGaussian = (combination_type == 1);
 
-
-  purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
+  spatiallyPurturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
     baseGPOs,
     tmp_spos->loadCheckinLocalityFromFile(),
     baseGPOs->getL2U2COOCC(),
     noise_radius, isGaussian, function_type);
+  cout << "------------- Locations spatially perturbed -------------------" << endl;
+  spatiallyAndTemporallyPurturbedGPOs->loadPurturbedLocationsByTime(spatiallyPurturbedGPOs, time_deviation);
+  cout << "------------- Locations temporally perturbed -------------------" << endl;
 
-  cout << "------------- Locations perturbed -------------------" << endl;
-  purturbedGPOs->countU2UCoOccurrences((uint) TIME_RANGE_IN_SECONDS);
-
-  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+  // spatiallyAndTemporallyPurturbedGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+  cmpGPOs->groupLocationsByRange(spatiallyAndTemporallyPurturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
 }
 
-
-void nodeLocalityNoiseVsEBM(double noise_radius, double locality_treshold){
-  bool preload_LE  = false;
-  bool preload_OCC = true;
-
-  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
-  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-
-  GPOs* cmpGPOs  = new GPOs();
-
-  cout << "------------- Load computed node locality ---------------" << endl;
-  SPOs *tmp_spos = new SPOs();
-  map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
-
-  cmpGPOs->loadPurturbedLocationsBasedOnNodeLocality(baseGPOs, node_locality, noise_radius, locality_treshold);
-  cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
-
-  runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
-}
-
-void locationEntropyNoiseVsEBM(double noise_radius, double entropy_treshold){
-  bool preload_LE  = true;
-  bool preload_OCC = true;
-
-  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
-  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-
-  GPOs* cmpGPOs  = new GPOs();
-
-  cmpGPOs->loadPurturbedLocationsBasedOnLocationEntropy(baseGPOs, noise_radius, entropy_treshold);
-  cout << "------------- Locations perturbed Based on  Location Entropy -------------------" << endl;
-
-  runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
-}
 
 void checkQueryFileStats(){
   cout << "------------- Evaluating query locations ---------------" << endl;
@@ -455,14 +452,6 @@ void testpTools(){
   cout<<"CabRenEntropy = "<<CabRenEntropy<<" CcdRenEntropy = "<<CcdRenEntropy<< " CabRenEntropy/CcdRenEntropy = " << CabRenEntropy/CcdRenEntropy<<endl;
   cout<<"CabRenDiversity = "<<CabRenDiversity<<" CcdRenDiversity = "<<CcdRenDiversity<<" CabRenDiversity/CcdRenDiversity = "<< CabRenDiversity/CcdRenDiversity << endl;
 }
-// void test(){
-//   Utilities util;
-//   pair<double,double> point;
-//   for(int i = 0; i < 2000; i++){
-//      point = util.addGaussianNoise(0,0,200);
-//      cout << util.computeMinimumDistance(point.first, point.second);
-//   }
-// }
 
 int main(int argc, char *argv[]){
   cout.precision(15);
@@ -472,8 +461,8 @@ int main(int argc, char *argv[]){
   DELTA_X = ((MAX_X - MIN_X)/ (X-1));
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
 
-  if (argc != 10){
-    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz] run_utilties p1 p2 p3 p4" << endl;
+  if (argc != 12){
+    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
     return -1;
   }
 
@@ -481,33 +470,35 @@ int main(int argc, char *argv[]){
   checkins_file = argv[2];
   query_file    = argv[3];
 
-
   if (strcmp(argv[4], "ebm") == 0)
     iteration_type = 1;
   else if (strcmp(argv[4], "grouped-ebm") == 0)
     iteration_type = 2;
   else if (strcmp(argv[4], "gaussian-v-ebm") == 0)
     iteration_type = 3;
-  else if (strcmp(argv[4], "snapping-v-ebm") == 0)
-    iteration_type = 4;
-  else if (strcmp(argv[4], "nl-v-ebm") == 0)
-    iteration_type = 5;
-  else if (strcmp(argv[4], "le-v-ebm") == 0)
-    iteration_type = 6;
-  else if (strcmp(argv[4], "occ-hist") == 0)
-    iteration_type = 7;
-  else if (strcmp(argv[4], "compute-katz") == 0)
-    iteration_type = 8;
-  else if (strcmp(argv[4], "compute-node-locality") == 0)
-    iteration_type = 9;
-  else if (strcmp(argv[4], "compute-histograms") == 0)
-    iteration_type = 10;
-  else if (strcmp(argv[4], "query-metrics") == 0)
-    iteration_type = 11;
   else if (strcmp(argv[4], "comb-v-ebm") == 0)
-    iteration_type = 12;
+    iteration_type = 4;
+
+  else if (strcmp(argv[4], "occ-hist") == 0)
+    iteration_type = 90;
+  else if (strcmp(argv[4], "compute-katz") == 0)
+    iteration_type = 91;
+  else if (strcmp(argv[4], "compute-node-locality") == 0)
+    iteration_type = 92;
+  else if (strcmp(argv[4], "compute-histograms") == 0)
+    iteration_type = 93;
+  else if (strcmp(argv[4], "query-metrics") == 0)
+    iteration_type = 94;
+
   else
     iteration_type = -1;
+
+  // else if (strcmp(argv[4], "snapping-v-ebm") == 0)
+  //   iteration_type = 4;
+  // else if (strcmp(argv[4], "nl-v-ebm") == 0)
+  //   iteration_type = 5;
+  // else if (strcmp(argv[4], "le-v-ebm") == 0)
+  //   iteration_type = 6;
 
   run_utilties       = atoi(argv[5]); // [ 0 / 1]
 
@@ -515,58 +506,78 @@ int main(int argc, char *argv[]){
   p2 = atof(argv[7]); // ( Parameter 2 )
   p3 = atof(argv[8]); // ( Parameter 3 )
   p4 = atof(argv[9]); // ( Parameter 4 )
+  p5 = atof(argv[10]); // ( Parameter 5 )
+  p6 = atof(argv[11]); // ( Parameter 6 )
 
 
   switch(iteration_type){
-    case 1:
+    case 1:{
       cout << "ITRATION: Running EBM" << endl;
+      noise_radius            = 0;
+      time_deviation          = 0;
+      group_radius            = 0;
+      time_range_in_seconds   = p4;
+      printParameters();
       plainEBM();
       break;
+    }
 
-    case 2:
+    case 2:{
       cout << "ITRATION: Running EBM with grouping" << endl;
-      noise_radius = 0;
-      group_radius = p2;
-      gaussianNoiseVsEBM(noise_radius, group_radius);
-      break;
+      noise_radius            = 0;
+      time_deviation          = 0;
+      group_radius            = p3;
+      time_range_in_seconds   = p4;
 
-    case 3:
+      printParameters();
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation);
+      break;
+    }
+
+    case 3:{
       cout << "ITRATION: Running EBM with gaussian noise" << endl;
-      noise_radius = p1;
-      group_radius = p2;
+      noise_radius            = p1;
+      time_deviation          = p2;
+      group_radius            = p3;
+      time_range_in_seconds   = p4;
 
-      gaussianNoiseVsEBM(noise_radius, group_radius);
+      printParameters();
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation);
       break;
+    }
 
-    case 4:
-      cout << "ITRATION: Running EBM with grid snapping noise" << endl;
-      grid_size_in_km = p1;
-      noise_radius = grid_size_in_km * 1000;
+    case 4:{
+      cout << "ITRATION: Running EBM with combination noise" << endl;
+      noise_radius            = p1;
+      time_deviation          = p2;
+      group_radius            = p3;
+      time_range_in_seconds   = p4;
+      combination_type        = p5;
+      function_type           = p6;
 
-      gridSnappingVsEBM(grid_size_in_km);
+      printParameters();
+      CombinationNoiseVsEBM(noise_radius);
       break;
+    }
 
-    case 5:
-      cout << "ITRATION: Running EBM with node locality noise" << endl;
-      noise_radius = p1;
-      locality_treshold = p2;
+    // case 4:
+    //   cout << "ITRATION: Running EBM with grid snapping noise" << endl;
+    //   grid_size_in_km         = p1;
+    //   noise_radius            = grid_size_in_km * 1000;
+    //   time_deviation          = p2;
+    //   group_radius            = p3;
+    //   time_range_in_seconds   = p4;
 
-      nodeLocalityNoiseVsEBM(noise_radius, locality_treshold);
-      break;
+    //   printParameters();
+    //   gridSnappingVsEBM(grid_size_in_km);
+    //   break;
 
-    case 6:
-      cout << "ITRATION: Running EBM with location entropy noise noise" << endl;
-      noise_radius = p1;
-      entropy_treshold = p2;
-
-      locationEntropyNoiseVsEBM(noise_radius, entropy_treshold);
-      break;
-
-    case 7:{
-      cout << "METRICS: Calculating Cooccurrence distribution" << endl;
+    case 90:{
+      cout << "METRICS: Calculating Co occurrence distribution" << endl;
       bool preload_LE  = true;
       bool preload_OCC = true;
 
+      printParameters();
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file);
       spos->loadNodeLocalityFromFile();
@@ -578,18 +589,20 @@ int main(int argc, char *argv[]){
       break;
     }
 
-    case 8:{
+    case 91:{
       cout << "METRICS: Pre-Compute KATZ score" << endl;
       GPOs* gpos = loadCheckins(checkins_file);
       SPOs* spos = loadSocialGraph(graph_file);
       total_parts = p1;
       part_number = p2;
       distance_treshold = p3;
+
+      printParameters();
       spos->precomputeKatzScore(gpos, total_parts, part_number, distance_treshold);
       break;
     }
 
-    case 9:{
+    case 92:{
       cout << "METRICS: Pre-Compute node_locality" << endl;
       bool preload_LE  = false;
       bool preload_OCC = true;
@@ -597,49 +610,55 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
+      printParameters();
       spos->computeCheckinLocalityMap(gpos);
       spos->writeCheckinLocalityToFile();
       // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
       // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
-
       // spos->computeNodeLocality(gpos);
-
       break;
     }
 
-    case 10:{
+    case 93:{
       cout << "METRICS: Compute histograms" << endl;
+
+      social_strength_tresh = p1;
+      // day_of_week           = p2;
+      time_block            = p2;
+
+
+      int max_checkins             = 250;  // checkins in vicinity
+      double max_radius            = 2000; // max_radius 10km
+
+      printParameters();
+      cout << "Data driven search Max checkins : " << max_checkins << endl;
+      cout << "Data driven search Max radius   : " << max_radius << endl;
+
       bool preload_LE  = true;
       bool preload_OCC = true;
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      social_strength_tresh = p1;
+
+      // Using all days of the week
+      // GPOs* reduced_gpos = new GPOs();
+      // reduced_gpos->loadLocationsByDayOfWeek(gpos, day_of_week);
 
       SimpleQueries* query = new SimpleQueries(gpos, spos);
       query->buildMatrices(RENY_Q);
       query->cacluateSocialStrength();
-
       cout << "Using Threshold" << social_strength_tresh << endl;
 
-      query->writeHistogramstoFile(social_strength_tresh);
+      query->writeHistogramstoFile(social_strength_tresh, gpos, time_block, max_checkins,  max_radius);
       spos->writeUserFriendsToFile();
       break;
     }
 
-    case 11:{
+    case 94:{
+      printParameters();
       checkQueryFileStats();
     }
-
-    case 12:
-      cout << "ITRATION: Running EBM with combination noise" << endl;
-      noise_radius     = p1;
-      group_radius     = p2;
-      combination_type = p3;
-      function_type    = p4;
-      CombinationNoiseVsEBM(noise_radius);
-      break;
 
     default:
       cout << "Invalid iteration type; Enter a valid option" << endl;

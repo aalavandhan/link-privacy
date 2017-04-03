@@ -86,3 +86,8 @@ bool Point::operator> (const Point& p) const
 {
     return p_minDist < p.p_minDist;
 }
+
+int Point::getTimeBlock(int time_block_duration){
+    int p_time_block = (int)( (double)( p_time.time_of_day().hours() * 60 + p_time.time_of_day().minutes() ) / time_block_duration );
+    return p_time_block;
+}

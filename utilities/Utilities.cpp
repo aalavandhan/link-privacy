@@ -104,6 +104,19 @@ pair<double,double> Utilities::addGaussianNoise(double x, double y, double radiu
   return make_pair(nLon, nLat);
 }
 
+boost::posix_time::ptime Utilities::addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds){
+  boost::mt19937 rng;
+  static unsigned int seed = rand() % 10000;
+  rng.seed(++seed);
+
+  boost::normal_distribution<> nd(0.0, deviation_in_seconds/2);
+  boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
+
+  int noise_in_seconds = (int) var_norormal();
+
+  return ( time + boost::posix_time::seconds(noise_in_seconds) );
+}
+
 //change
 //for Diversity between topk results
 double Utilities::getDistanceBetween(int friendsO[], int friendsK[], int friendsSizeO, int friendsSizeK, string f){

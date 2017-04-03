@@ -32,6 +32,7 @@
 #include "boost/date_time/posix_time/posix_time_io.hpp"
 #include <boost/math/distributions/inverse_gaussian.hpp>
 #include <boost/random.hpp>
+#include <boost/math/distributions.hpp>
 #include <boost/math/distributions/normal.hpp>
 
 #include <stdint.h>

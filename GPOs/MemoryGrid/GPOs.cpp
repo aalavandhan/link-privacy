@@ -68,6 +68,10 @@ map<int , vector< Point* >*>* GPOs::getLocationToUser(){
   return &location_to_user;
 }
 
+vector<Point*>* GPOs::getLocations(){
+  return &locations;
+}
+
 void GPOs::generateFrequencyCache(){
   cout << "---- GENERATING CACHE ----" << endl;
   boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
@@ -508,6 +512,33 @@ vector<int>* GPOs::getUsersInRange(double x, double y, double radius){
   return users;
 }
 
+vector<int>* GPOs::getUsersInRangeAndTimeBlock(double x, double y, double time_block, int max_checkins, double max_radius){
+  vector<int> *users = new vector<int>();
+
+  double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+
+  double radius_bound = estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
+  vector<res_point*>* checkins = getRange( x, y, radius_bound );
+
+  for(auto c = checkins->begin(); c != checkins->end(); c++){
+    res_point *rp = (*c);
+    boost::posix_time::ptime p_time = rp->time;
+    int p_time_block = (int)( (double)( p_time.time_of_day().hours() * 60 + p_time.time_of_day().minutes() ) / time_block );
+    if(p_time_block == time_block)
+      users->push_back( rp->uid );
+
+    delete (*c);
+  }
+  delete checkins;
+
+  // Sorting user list
+  sort(users->begin(), users->end());
+  // Removing duplicates
+  users->erase( unique( users->begin(), users->end() ), users->end() );
+
+  return users;
+}
+
 vector<int>* GPOs::getUsersInRange(int source, double radius){
   vector<int> *users = new vector<int>();
   auto source_users_checkins_it = user_to_location.find(source);
@@ -576,19 +607,67 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
       cout << count << " " << endl;
 
   };
-  cout << "Checkins inserted : " << count << endl;
-  cout << "Checkins failed lookup : " << iterations << endl;
+  cout << "Check-ins inserted : " << count << endl;
+  cout << "Check-ins failed lookup : " << iterations << endl;
 
   delete seenLocations;
   delete _duplicate_gpos;
+
   generateFrequencyCache();
 }
 
-// Radius in meters Adding gaussian noise
-// SEED HAS BEEN SET
-void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
-  // map <int,int> noise_histogram;
+void GPOs::loadLocationsByDayOfWeek(GPOs* gpos, int day_of_week){
+  vector<Point*>* o_locations = gpos->getLocations();
+  for(auto l_it=o_locations->begin(); l_it != o_locations->end(); l_it++){
+    Point *p = (*l_it);
+    boost::posix_time::ptime l_time = p->getTime();
+
+    if(l_time.date().day_of_week() == day_of_week)
+      loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+  }
+  cout << "Loaded checkins with day of the week " << day_of_week << endl;
+  cout << "Original data set : " << gpos->location_to_user.size() << endl;
+  cout << "Reduced data set : " << location_to_user.size() << endl;
+  cout << "-------------------------------------------------------" << endl;
+}
+
+// Time deviation in seconds
+void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
   unsigned int lid = 0;
+
+  purturbed_count = 0;
+  total_time_displacement=0;
+
+  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
+    for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
+
+      if(time_deviation != 0){
+        Point *p = (*loc);
+        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
+        loadPoint( p->getX(), p->getY(), lid, u->first, purtubed_time, p->getOrder() );
+        double displacement = abs((int)  ((p->getTime() - purtubed_time).total_milliseconds() / 1000.0));
+        total_time_displacement+=displacement;
+        purturbed_count++;
+        lid++;
+      } else {
+        Point *p = (*loc);
+        loadPoint( p->getX(), p->getY(), lid, u->first, p->getTime(), p->getOrder() );
+        lid++;
+      }
+
+    }
+  }
+
+  cout<<"Total Displacement : "<< total_time_displacement/3600.0 <<" hours"<<endl;
+  cout<<"Average Displacement : "<< total_time_displacement/3600.0  * (1/(float)purturbed_count) <<" hours"<<endl;
+}
+
+// Radius in meters Adding Gaussian noise
+void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
+  unsigned int lid = 0;
+
+  purturbed_count = 0;
+  total_displacement = 0;
 
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
@@ -598,116 +677,24 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), radius);
         double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
         total_displacement+=displacement;
-        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
+        purturbed_count++;
         lid++;
+
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
       } else {
         Point *p = (*loc);
         loadPoint( p->getX(), p->getY(), lid, u->first, p->getTime(), p->getOrder() );
         lid++;
       }
 
-      // int bin = (int) floor(noise_distance);
-      // auto it = noise_histogram.find(bin);
-      // if(it != noise_histogram.end()){
-      //   it->second = it->second + 1;
-      // }
-      // else{
-      //   noise_histogram.insert(make_pair(bin,1));
-      // }
     }
   }
-  cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360) ) <<" in km"<<endl;
-  cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/lid)*1000 <<" in meters"<<endl;
-
-  // int inRange=0, total=0;
-  // double percentage;
-  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  // cout << "Noise distribution  : " << endl;
-  // for(auto b_it = noise_histogram.begin(); b_it != noise_histogram.end(); b_it++){
-  //   cout << "Bin : " << b_it->first << "\t Count : " << b_it->second << endl;
-  //   if(abs(b_it->first) <= radius ){
-  //     inRange+=b_it->second;
-  //   }
-  //   total+=b_it->second;
-  // }
-  // percentage = (double) inRange / (double) total;
-  // cout << "In Range : " << percentage << endl;
-  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-}
-
-void GPOs::loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit){
-  int lid = LOCATION_NOISE_BOUND;
-  for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
-    int location = l_it->first;
-    vector< Point* > *checkins = l_it->second;
-
-    auto h_it = gpos->location_to_H.find(location);
-    double entropy = h_it->second;
-
-    Utilities* util = new Utilities();
-
-    if(entropy > limit){
-      for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
-        Point *p = (*loc_it);
-        pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
-        lid++;
-      }
-    } else {
-      for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
-        Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
-      }
-    }
-  }
-
-  generateFrequencyCache();
-
-  cout << "------- Perturbed checkins based on location entropy --------- " << endl;
-  cout << "Done! Number of locations: " <<  locations.size() << endl;
-  cout << "Number of locations with added noise: " <<  lid - LOCATION_NOISE_BOUND << endl;
-  cout << " -------------------------------------- " << endl;
-}
-
-void GPOs::loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit){
-  // TODO: Pick a random id
-  int lid = LOCATION_NOISE_BOUND;
-  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
-    int user_id = u_it->first;
-    vector< Point* > *user_checkins = u_it->second;
-
-    auto nl_it = node_locality->find(user_id);
-    double locality = nl_it->second;
-
-    Utilities* util = new Utilities();
-
-    // Add noise
-    if(locality > limit){
-      for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
-        Point *p = (*loc_it);
-        pair<double,double> coordinates_with_noise = util->addGaussianNoise(p->getX(), p->getY(), radius);
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(),p->getOrder());
-        lid++;
-      }
-    } else {
-      for(auto loc_it = user_checkins->begin(); loc_it != user_checkins->end(); loc_it++){
-        Point *p = (*loc_it);
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(),p->getOrder());
-      }
-    }
-  }
-
-  generateFrequencyCache();
-
-  cout << "------- Perturbed checkins based on node locality --------- " << endl;
-  cout << "Done! Number of locations: " <<  locations.size() << endl;
-  cout << "Number of locations with added noise: " <<  lid - LOCATION_NOISE_BOUND << endl;
-  cout << " -------------------------------------- " << endl;
+  cout<<"Total Displacement : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360) ) <<" in km"<<endl;
+  cout<<"Average Displacement : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
 }
 
 //input:  grid cell distance in x direction (say, 100m grid). This value is independent of grid size in headers.h.
 //output: all checkins are snapped to the nearest cell corner.
-
 void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km){
   //TODO: create a vistual grid from the input grid dimension = grid_distance_on_x_axis
   //assign location id to each grid corner = n^2 location ids
@@ -799,28 +786,8 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
   generateFrequencyCache();
 }
 
-void GPOs::verifyRange(double radius){
-  double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,
-         meanGroupSize=0;
-  unsigned int places=0;
-
-  vector<res_point*>* checkins;
-
-  for(auto l = locations.begin(); l != locations.end(); l++){
-    checkins = grid->getRange((*l)->getX(), (*l)->getY(), radius_geo_dist);
-    places += checkins->size();
-  };
-
-  cout << "Sum of points in range : " << places << endl;
-  meanGroupSize = places / locations.size();
-  cout << "Mean points in range : " << " " << meanGroupSize << endl;
-}
-
 
 void GPOs::countU2UCoOccurrences(uint time_block){
-
-
-
   int total_cooccurrences=0;
 
   cout<<"Number of locations: "<<locations_users_frequency_map.size()<<endl;
@@ -1075,8 +1042,8 @@ void GPOs::clearNextNN(){
 	pureNNexec = 0;
 }
 
-double GPOs::estimateNearestDistance(double x, double y, int k){
-    return grid->estimateNearestDistance(x,y,k);
+double GPOs::estimateNearestDistance(double x, double y, int k, double max_radius){
+    return grid->estimateNearestDistance(x,y,k,max_radius);
 }
 
 double GPOs::distanceBetween(Point *a, Point *b){
@@ -1105,6 +1072,55 @@ int GPOs::getUserCooccurrences(int user_id){
   return number_of_cooccurrences;
 }
 
+
+map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_radius){
+  int counter=0;
+  map< int, double >* temporal_locality_map = new map< int, double >();
+  double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+  for(auto l_it=location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+    vector< Point* >* checkins_at_l = l_it->second;
+    Point *p_sample = checkins_at_l->front();
+    double x = p_sample->getX(), y = p_sample->getY();
+
+    double radius_bound = estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
+    vector<res_point*>* checkins_in_city = getRange( x, y, radius_bound );
+
+    for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
+      Point *p = (*c_it);
+      boost::posix_time::ptime l_time = p->getTime();
+
+      double locality_sum=0, vicinity_count=0, temporal_locality=0;
+
+      for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+        boost::posix_time::ptime c_time = (*c)->time;
+
+        boost::posix_time::time_duration time_difference = (c_time - l_time);
+        double diff = (double) abs(time_difference.total_seconds());
+
+        if( diff <= 12 * 3600){
+          locality_sum += exp( (-diff / (double) (8*3600) ) );
+          vicinity_count++;
+        }
+      }
+
+      if(vicinity_count > 0)
+        temporal_locality = locality_sum/vicinity_count;
+
+      temporal_locality_map->insert(make_pair(p->getOrder(), temporal_locality));
+    }
+
+    for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+      delete (*c);
+    }
+    delete checkins_in_city;
+
+    counter++;
+    if(counter%10000 == 0)
+      cout << counter << endl;
+  }
+
+  return temporal_locality_map;
+}
 
 unordered_map<int, double>* GPOs::getHiLasMap(){
   unordered_map<int, double>* HiL_histogram = new unordered_map<int, double>();
@@ -1215,6 +1231,92 @@ void GPOs::printCooccurrenceMatrix(){
 }
 
 
+unordered_map< int, map< int, map<int, double >* >* >* GPOs::getPltMap(double time_block, int max_checkins, double max_radius){
+  unordered_map< int, map< int, map<int, double >* >* >* Plt_histogram = new unordered_map< int, map< int, map<int, double >* >* >();
+
+  double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+  int processing_count=0;
+
+  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+  cout << "Computing getPltMap : " << endl;
+
+  for(auto l_it=location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+    processing_count++;
+
+    if(processing_count%10000 == 0)
+      cout << processing_count << endl;
+
+    int location_id = l_it->first;
+    vector< Point* >* checkins_at_l = l_it->second;
+    Point *p_sample = checkins_at_l->front();
+    double x = p_sample->getX(), y = p_sample->getY();
+
+    double radius_bound = estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
+    vector<res_point*>* checkins_in_city = getRange( x, y, radius_bound );
+
+    for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
+      Point *p = (*c_it);
+      boost::posix_time::ptime l_time = p->getTime();
+      int l_time_block = p->getTimeBlock( time_block );
+      int l_day        = l_time.date().day_of_year() + ( l_time.date().year() - 2000 ) * 365;
+
+      double prob_lt = 0;
+      int points_in_vicinity = 0;
+      double h = 60.0;
+
+      for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+        boost::posix_time::ptime c_time = (*c)->time;
+
+        boost::posix_time::time_duration time_difference = (c_time - l_time);
+        double diff = (double) time_difference.total_seconds();
+
+        if(abs(diff) <= 3600*12){
+          prob_lt = prob_lt + exp( - (diff * diff / h) / (double)( 2* (5*60)^2 ) );
+          points_in_vicinity++;
+        }
+      }
+
+      if(points_in_vicinity > 0)
+        prob_lt = 1/((double)points_in_vicinity*h) * prob_lt;
+
+      map< int, map<int, double >* > *day_block_prob_map;
+      map<int, double> *block_prob_map;
+
+      auto pl_it = Plt_histogram->find( location_id );
+      if(pl_it == Plt_histogram->end()){
+        day_block_prob_map = new map< int, map<int, double >* >();
+        block_prob_map = new map<int, double>();
+
+        block_prob_map->insert(make_pair(l_time_block, prob_lt));
+        day_block_prob_map->insert(make_pair(l_day, block_prob_map));
+        Plt_histogram->insert(make_pair(location_id, day_block_prob_map));
+      } else{
+        day_block_prob_map = pl_it->second;
+        auto pldt_it = day_block_prob_map->find(l_day);
+        if(pldt_it == day_block_prob_map->end()){
+          block_prob_map = new map<int, double>();
+        } else {
+          block_prob_map = pldt_it->second;
+        }
+        auto plt_it = block_prob_map->find(l_time_block);
+        if(plt_it == block_prob_map->end()){
+          block_prob_map->insert(make_pair(l_time_block, prob_lt));
+        } else {
+          plt_it->second = plt_it->second + prob_lt;
+        }
+      }
+    }
+
+    for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+      delete (*c);
+    }
+    delete checkins_in_city;
+  }
+
+  return Plt_histogram;
+}
+
+
 unordered_map<int, double>* GPOs::getHlLasMap(){
   map<int, map<int,int>* > location_to_user_coocc_map;
   unordered_map<int, double>* HlL_histogram = new unordered_map<int, double>();
@@ -1304,14 +1406,10 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
   unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
   unordered_map<int, double>* HiJ_map = gpos->getHiJasMap();
-  // map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality = spos->getCheckinLocalityMap();
 
   int lid   = LOCATION_NOISE_BOUND;
   int new_order = 0;
-  int purturbed_count = 0;
 
-  // ofstream output_file;
-  // output_file.open("displacement-combination-function.csv");
 
   cout << "Running type ";
   if(type == 0){
@@ -1408,7 +1506,6 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
 
-      // output_file << user_id << "\t" << p->getID() <<"\t" << order <<"\t"<< displacement <<endl;
 
       if(noise != 0){
         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
@@ -1428,83 +1525,5 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   cout<<"Total Displacemnt : "<<  total_displacement <<" in km"<<endl;
   cout<<"Average Displacemnt : "<< (total_displacement / new_order) * 1000  <<" in meters"<<endl;
   cout<<"Average Displacemnt based on purturbed_count : "<< (total_displacement / purturbed_count) * 1000 <<" in meters"<<endl;
-  // output_file.close();
   generateFrequencyCache();
 }
-
-// void GPOs::loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos , map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int type){
-
-//   map<int, double>* HiL_map = gpos->getHiLasMap();
-//   map<int, double>* HiJ_map = gpos->getHiJasMap();
-
-//   int lid   = LOCATION_NOISE_BOUND;
-//   int new_order = 0;
-//   int purturbed_count = 0;
-
-//   cout << "loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC : Running type " << type << "\tIsGaussian : " << isGaussainNoise << endl;
-
-//   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
-
-//     int user_id = u_it->first;
-//     vector< Point* > *checkins = u_it->second;
-
-//     double hiL = 0, hiJ = 0;
-
-//     auto hil_it = HiL_map->find(user_id);
-//     if(hil_it != HiL_map->end())
-//       hiL = hil_it->second;
-
-//     auto hij_it = HiJ_map->find(user_id);
-//     if(hij_it != HiJ_map->end())
-//       hiL = hij_it->second;
-
-//     for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
-//       Point *p = (*loc_it);
-//       double user_cooccurrenes = 0;
-//       auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
-//       if(iter_outer!= _location_to_user_to_cooccurrences->end()){
-//         map<int,int>* user_to_cooccurrences_map = iter_outer->second;
-//         auto iter_inner = user_to_cooccurrences_map->find(user_id);
-//         if(iter_inner != user_to_cooccurrences_map->end()){
-//           user_cooccurrenes = iter_inner->second;
-//         }
-//       }
-
-//       double noise;
-//       if(type == 0){
-//         noise = log( 1 + user_cooccurrenes ) * radius;
-//       } else if(type == 1){
-//         noise = log( 1 + user_cooccurrenes ) * ( exp(-hiL) ) * radius;
-//       } else if(type == 2){
-//         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL) + exp(-hiJ) ) * radius;
-//       } else {
-//         noise = 0.5 * log( 1 + user_cooccurrenes ) * ( exp(-hiL/HIL_SCALE) + exp(-hiJ/HIJ_SCALE) ) * radius;
-//       };
-
-//       pair<double,double> coordinates_with_noise;
-//       if(isGaussainNoise){
-//         coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
-//       } else {
-//         coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
-//       }
-
-//       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-//       total_displacement+=displacement;
-
-//       if(noise != 0){
-//         loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), new_order);
-//         purturbed_count++;
-//       } else {
-//         loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), new_order);
-//       };
-
-//       new_order++;
-//       lid++;
-//     }
-//   }
-
-//   cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
-//   cout<<"Total Displacemnt : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360)/1000) <<" in km"<<endl;
-//   cout<<"Average Displacemnt : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/new_order)*1000 <<" in meters"<<endl;
-//   generateFrequencyCache();
-// }

@@ -230,7 +230,8 @@ list<Cell*>* Grid::getIntersectedCellsWithRectangle(double x1, double y1, double
         for(int y = y_start; y <= y_end; y++){
             Cell *c = getCell(x, y);
             //cout << "intersected cell: (" << x << ", " << y << ") => " << "x1 = " << c->getX1() << "\t y1 = " << c->getY1() << "\t x2 = " << c->getX2() << "\t y2 = " << c->getY2() << endl;
-            result->push_front(c);
+            if(c != NULL)
+                result->push_front(c);
         }
     }
 
@@ -624,11 +625,26 @@ bool Grid::loadFromFile(const char* fileName){
     return true;
 }
 
+//returns single coordinate x1 (1) , x2(2), y1(3), y2(4)
+double Grid::getCellCornerCoordinates(int c_i, int c_j, int corner_id){
+    if(corner_id == 1){
+        return MIN_X+(c_i*DELTA_X);
+    }else if(corner_id == 2){
+        return MIN_X+((c_i+1)*DELTA_X);
+    }else if(corner_id == 3){
+        return MIN_Y+((c_j+0)*DELTA_Y);
+    }else if(corner_id == 4){
+        return MIN_Y+((c_j+1)*DELTA_Y);
+    }
+    return 0;
+}
+
+
 /*
 TKDE 2004 Tao, papadias
 An efficient cost model for optimization of nearest neighbor search in low and medium dimensional
 */
-double Grid::estimateNearestDistance(double x, double y, int k){
+double Grid::estimateNearestDistance(double x, double y, int k, double max_radius){
     //double lx_plus, lx_minus, ly_plus, ly_minus;
     //priority_queue<double, vector<double>, greater<double>> HP;
     int En_old = 0;
@@ -651,10 +667,14 @@ double Grid::estimateNearestDistance(double x, double y, int k){
     double Cv = 1.7724538509;            // Cv = sprt(pi) for 2 dimensional scale;
 
     if(DATASET_SIZE<k)  {
-        HP_lastCells[0][0] = X-1;        HP_lastCells[0][1] = Y-1;
-        HP_lastCells[1][0] =X-1;        HP_lastCells[1][1] =0;
-        HP_lastCells[2][0]= 0;        HP_lastCells[2][1]= 0;
-        HP_lastCells[3][0] =0;        HP_lastCells[3][1] =Y-1;
+        cout << "BOUNDARY_ERROR DATASET_SIZE is less than k" << endl;
+        exit(1);
+
+        HP_lastCells[0][0] = X-1;   HP_lastCells[0][1] = Y-1;
+        HP_lastCells[1][0] = X-1;   HP_lastCells[1][1] = 0;
+        HP_lastCells[2][0] = 0;     HP_lastCells[2][1] = 0;
+        HP_lastCells[3][0] = 0;     HP_lastCells[3][1] = Y-1;
+
         HP[0] = query->computeMinDist(getCell(HP_lastCells[0][0], HP_lastCells[0][1])->getX2(), getCell(HP_lastCells[0][0], HP_lastCells[0][1])->getY2());
         HP[1] = query->computeMinDist(getCell(HP_lastCells[1][0], HP_lastCells[1][1])->getX2(), getCell(HP_lastCells[1][0], HP_lastCells[1][1])->getY1());
         HP[2] = query->computeMinDist(getCell(HP_lastCells[2][0], HP_lastCells[2][1])->getX1(), getCell(HP_lastCells[2][0], HP_lastCells[2][1])->getY1());
@@ -679,21 +699,21 @@ double Grid::estimateNearestDistance(double x, double y, int k){
 
     do{
 
-        HP[0] = query->computeMinDist(getCell(HP_lastCells[0][0], HP_lastCells[0][1])->getX2(), y);
-        HP[1] = query->computeMinDist(getCell(HP_lastCells[1][0], HP_lastCells[1][1])->getX1(), y);
-        HP[2] = query->computeMinDist(x, getCell(HP_lastCells[2][0], HP_lastCells[2][1])->getY2());
-        HP[3] = query->computeMinDist(x, getCell(HP_lastCells[3][0], HP_lastCells[3][1])->getY1());
+        HP[0] = query->computeMinDist(getCellCornerCoordinates(HP_lastCells[0][0], HP_lastCells[0][1], 2), y);
+        HP[1] = query->computeMinDist(getCellCornerCoordinates(HP_lastCells[1][0], HP_lastCells[1][1], 1), y);
+        HP[2] = query->computeMinDist(x, getCellCornerCoordinates(HP_lastCells[2][0], HP_lastCells[2][1], 4));
+        HP[3] = query->computeMinDist(x, getCellCornerCoordinates(HP_lastCells[3][0], HP_lastCells[3][1], 3));
 
         min = MAXDIST;
         for(int i = 0; i < 4; i++){
-
-            //            cout << "Min("<< i << ") = " << HP[i] << endl;
-
             if(min > HP[i] && validity[i]){
                 direction = i;
                 min = HP[i];
             }
         }
+
+        // cout << "Min("<< direction << ") = " << min << endl;
+
         L = 2*min;
 
         list<Cell*>* intersectedCells = getIntersectedCellsWithRectangle(x-L/2+BOUNDARY_ERROR, y-L/2+BOUNDARY_ERROR, x+L/2-BOUNDARY_ERROR, y+L/2-BOUNDARY_ERROR);
@@ -703,6 +723,7 @@ double Grid::estimateNearestDistance(double x, double y, int k){
         double intersectedVolPercentage = 0;
 
         for(list<Cell*>::iterator it = intersectedCells->begin(); it!= intersectedCells->end(); ++it){
+
             Cell *tmp = *it;
 
             intersectedVolPercentage = tmp->intersectedVolumeWithRectangle(x-L/2, y-L/2, x+L/2, y+L/2)/(DELTA_X*DELTA_Y);
@@ -713,28 +734,30 @@ double Grid::estimateNearestDistance(double x, double y, int k){
             usersInIntersectedCells+=tmp->getCheckIns()->size();
         }
 
+        delete intersectedCells;
+
         //u=(int)usersCount;
 
-        if(k <= u){
+        if(k <= u || min >= max_radius){
             // compute Lr
             Lr = pow((l_old*l_old*(k-u)-L*L*(k-En_old))/(En_old-u), 0.5);
             // cout << "Total # of intersected cells = " << intersectedCells->size()<<endl;
-            //cout<< "--------------------------------------" << endl;
-            //cout<< "Total number of users in the intersected cells = " << usersInIntersectedCells << endl;
+            // cout<< "--------------------------------------" << endl;
+            // cout<< "Total number of users in the intersected cells = " << usersInIntersectedCells << endl;
 
             // compute Dk
             Dk = Lr/Cv;
-            /*
-            cout <<"--------------------------------------" << endl;
-            cout<<"Data Dependent Estimation Completed with"<<endl;
-            cout<<"Estimated radius (Dk) of circle = " << Dk <<endl;
-            cout<< "--------------------------------------" << endl;
-            cout<<"Estimated number of users enclosed(En) in the rectangle"<<endl;
-            cout<<"with extent Lr = "<<Lr<<" are within " << En_old <<" and "<<u<<"."<< endl;
-            cout<< "--------------------------------------" << endl;
-            cout<< "Actual Users in the estimated radius = " << getRange(x, y, Dk)->size() << endl;
-            cout<< "--------------------------------------" << endl;
-                         */
+
+            // cout <<"--------------------------------------" << endl;
+            // cout<<"Data Dependent Estimation Completed with"<<endl;
+            // cout<<"Estimated radius (Dk) of circle = " << Dk <<endl;
+            // cout<< "--------------------------------------" << endl;
+            // cout<<"Estimated number of users enclosed(En) in the rectangle"<<endl;
+            // cout<<"with extent Lr = "<<Lr<<" are within " << En_old <<" and "<<u<<"."<< endl;
+            // cout<< "--------------------------------------" << endl;
+            // cout<< "Actual Users in the estimated radius = " << getRange(x, y, Dk)->size() << endl;
+            // cout<< "--------------------------------------" << endl;
+
             return Dk;
         }
         else{
