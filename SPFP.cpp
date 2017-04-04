@@ -40,7 +40,7 @@ double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_t
          function_type, p1, p2, p3, p4, p5, p6,
          time_deviation,
          time_range_in_seconds = TIME_RANGE_IN_SECONDS,
-         day_of_week, time_block;
+         day_of_week, time_block, noise_type;
 #endif
 
 void printParameters(){
@@ -60,6 +60,7 @@ void printParameters(){
   cout << "time_range_in_seconds: " << time_range_in_seconds << endl;
   cout << "day_of_week          : " << day_of_week << endl;
   cout << "time_block           : " << time_block << endl;
+  cout << "noise_type           : " << noise_type << endl;
   cout << "------------------------------------------" << endl;
 }
 
@@ -292,7 +293,7 @@ void plainEBM(){
 //   runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 // }
 
-void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation){
+void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation, bool add_gaussian, bool add_temporal){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -303,10 +304,15 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs();
   GPOs* cmpGPOs  = new GPOs();
 
-  spatiallyPurturbedGPOs->loadPurturbedLocations(baseGPOs, noise_radius);
-  cout << "------------- Locations spatially perturbed -------------------" << endl;
-  spatiallyAndTemporallyPurturbedGPOs->loadPurturbedLocationsByTime(spatiallyPurturbedGPOs, time_deviation);
-  cout << "------------- Locations temporally perturbed -------------------" << endl;
+  if( add_gaussian ){
+    spatiallyPurturbedGPOs->loadPurturbedLocations(baseGPOs, noise_radius);
+    cout << "------------- Locations spatially perturbed -------------------" << endl;
+  }
+
+  if( add_temporal ){
+    spatiallyAndTemporallyPurturbedGPOs->loadPurturbedLocationsByTime(spatiallyPurturbedGPOs, time_deviation);
+    cout << "------------- Locations temporally perturbed -------------------" << endl;
+  }
 
   cmpGPOs->groupLocationsByRange(spatiallyAndTemporallyPurturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
@@ -528,9 +534,25 @@ int main(int argc, char *argv[]){
       time_deviation          = 0;
       group_radius            = p3;
       time_range_in_seconds   = p4;
-
+      noise_type              = p5;
+      bool add_temporal, add_gaussian;
       printParameters();
-      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation);
+      if( noise_type == 0 ){
+        add_gaussian = true;
+        add_temporal = true;
+        cout << "Adding both spatial and temporal noise" << endl;
+      } else if( noise_type == 1){
+        add_gaussian = true;
+        add_temporal = false;
+        cout << "Adding spatial noise" << endl;
+      } else if( noise_type == 2){
+        add_gaussian = false;
+        add_temporal = true;
+        cout << "Adding temporal noise" << endl;
+      } else {
+        cout << "Invalid option" << endl;
+      }
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, add_gaussian, add_temporal);
       break;
     }
 
@@ -540,9 +562,25 @@ int main(int argc, char *argv[]){
       time_deviation          = p2;
       group_radius            = p3;
       time_range_in_seconds   = p4;
-
+      noise_type              = p5;
+      bool add_temporal, add_gaussian;
       printParameters();
-      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation);
+      if( noise_type == 0 ){
+        add_gaussian = true;
+        add_temporal = true;
+        cout << "Adding both spatial and temporal noise" << endl;
+      } else if( noise_type == 1){
+        add_gaussian = true;
+        add_temporal = false;
+        cout << "Adding spatial noise" << endl;
+      } else if( noise_type == 2){
+        add_gaussian = false;
+        add_temporal = true;
+        cout << "Adding temporal noise" << endl;
+      } else {
+        cout << "Invalid option" << endl;
+      }
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, add_gaussian, add_temporal);
       break;
     }
 
@@ -650,7 +688,8 @@ int main(int argc, char *argv[]){
       query->cacluateSocialStrength();
       cout << "Using Threshold" << social_strength_tresh << endl;
 
-      query->writeHistogramstoFile(social_strength_tresh, gpos, time_block, max_checkins,  max_radius);
+      map< int, double >* temoral_locality_map = spos->computeTemporalLocality(max_radius, max_checkins, gpos);
+      query->writeHistogramstoFile(social_strength_tresh, time_block, temoral_locality_map);
       spos->writeUserFriendsToFile();
       break;
     }

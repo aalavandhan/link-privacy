@@ -44,8 +44,8 @@ public:
     map<int, map<int, vector<uint>* >*> locations_users_frequency_map;
 
     unordered_set< pair<int,int>, PairHasher > cooccured_user_pairs;
-    unordered_set< pair<int,int>, PairHasher > significantly_cooccured_user_pairs;
     unordered_set< pair<int,int>, PairHasher > insignificantly_cooccured_user_pairs;
+    unordered_set< pair<int,int>, PairHasher > significantly_cooccured_user_pairs;
 
     unordered_map<int, double> location_to_H;
     map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;

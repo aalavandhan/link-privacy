@@ -898,6 +898,7 @@ void GPOs::countU2UCoOccurrences(uint time_block){
         int cooccrences_at_l = l_it->second;
         cooccurrence_count += cooccrences_at_l;
 
+        //for cil
         auto iter_outer = location_to_user_to_cooccurrences->find(location_id);
         if(iter_outer != location_to_user_to_cooccurrences->end()){
           //update/create for both users
@@ -922,11 +923,15 @@ void GPOs::countU2UCoOccurrences(uint time_block){
           location_to_user_to_cooccurrences->insert(make_pair(location_id, user_to_cooccurrences_map));
         }
       }
+      //-------------------------
 
       if(cooccurrence_count>1){
         if(significantly_cooccured_user_pairs.find(make_pair(user_1, user_2)) == significantly_cooccured_user_pairs.end())
           significantly_cooccured_user_pairs.insert(make_pair( user_1, user_2 ));
       } else {
+    // remove
+
+
         if(insignificantly_cooccured_user_pairs.find(make_pair(user_1, user_2)) == insignificantly_cooccured_user_pairs.end())
           insignificantly_cooccured_user_pairs.insert(make_pair( user_1, user_2 ));
       }
@@ -963,12 +968,19 @@ void GPOs::countU2UCoOccurrences(uint time_block){
     if(u1_it != cooccurrence_matrix.end()){
       auto users_location_frequency_map = u1_it->second;
       auto u2_it = users_location_frequency_map->find(u2);
+      vector<pair<int, int>>* cooccurrence_counts_vector = u2_it->second;
+      // delete cooccurrence_counts_vector;
 
-      if(u2_it != users_location_frequency_map->end())
+      if(u2_it != users_location_frequency_map->end()){
+        vector<pair<int, int>>* cooccurrence_counts_vector = u2_it->second;
+        delete cooccurrence_counts_vector;
         users_location_frequency_map->erase(u2_it);
+      }
 
-      if(users_location_frequency_map->size() == 0)
+      if(users_location_frequency_map->size() == 0){
         cooccurrence_matrix.erase(u1_it);
+        delete users_location_frequency_map;
+      }
     }
   }
 
@@ -1083,13 +1095,14 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
     double x = p_sample->getX(), y = p_sample->getY();
 
     double radius_bound = estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
-    vector<res_point*>* checkins_in_city = getRange( x, y, radius_bound );
+    set<res_point*, res_point_ascending_id>* checkins_in_city = getSetRange( x, y, radius_bound );
 
     for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
       Point *p = (*c_it);
       boost::posix_time::ptime l_time = p->getTime();
 
       double locality_sum=0, vicinity_count=0, temporal_locality=0;
+      int c_count = 0;
 
       for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
         boost::posix_time::ptime c_time = (*c)->time;
@@ -1097,10 +1110,15 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
         boost::posix_time::time_duration time_difference = (c_time - l_time);
         double diff = (double) abs(time_difference.total_seconds());
 
-        if( diff <= 12 * 3600){
+        if( diff <= 8 * 3600  && (*c)->oid != p->getOrder() ){
           locality_sum += exp( (-diff / (double) (8*3600) ) );
           vicinity_count++;
         }
+
+        if(c_count == max_checkins)
+          break;
+
+        c_count++;
       }
 
       if(vicinity_count > 0)
@@ -1109,9 +1127,9 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
       temporal_locality_map->insert(make_pair(p->getOrder(), temporal_locality));
     }
 
-    for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
-      delete (*c);
-    }
+    // for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+    //   delete (*c);
+    // }
     delete checkins_in_city;
 
     counter++;
@@ -1270,7 +1288,7 @@ unordered_map< int, map< int, map<int, double >* >* >* GPOs::getPltMap(double ti
         boost::posix_time::time_duration time_difference = (c_time - l_time);
         double diff = (double) time_difference.total_seconds();
 
-        if(abs(diff) <= 3600*12){
+        if( abs(diff) <= 3600*12 && (*c)->oid != p->getOrder() ){
           prob_lt = prob_lt + exp( - (diff * diff / h) / (double)( 2* (5*60)^2 ) );
           points_in_vicinity++;
         }
@@ -1505,6 +1523,9 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
       double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
       total_displacement+=displacement;
+
+
+      // Temporal noise
 
 
       if(noise != 0){

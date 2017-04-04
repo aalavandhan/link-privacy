@@ -29,7 +29,7 @@ public:
     double getSocialStrength(int source, int target);
     bool areEBMFriends(int source, int target, double tresh);
     bool areTrueEBMFriends(int source, int target, double tresh);
-    void writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_day, double time_block, int max_checkins,  double max_radius);
+    void writeHistogramstoFile(double tresh, double time_block, map< int, double >* temoral_locality_map);
 
     void printPartialDiversityAndWeightedFrequencyValues(double alpha);
 

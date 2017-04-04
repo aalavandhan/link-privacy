@@ -147,8 +147,9 @@ extern double RENY_Q;
 
 #include "GPOs/MemoryGrid/grid/Point.h"
 
-#include "GPOs/IGPOs.h"
 #include "SPOs/ISPOs.h"
+#include "GPOs/IGPOs.h"
+
 
 #include "utilities/Group.h"
 #include "basicGSQueries/BasicGSQueries.h"

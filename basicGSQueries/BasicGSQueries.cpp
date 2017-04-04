@@ -586,7 +586,7 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_day, double time_block, int max_checkins,  double max_radius){
+void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< int, double >* temoral_locality_map){
   gpos->printCooccurrenceMatrix();
   printPartialDiversityAndWeightedFrequencyValues(RENY_Q);
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
@@ -633,27 +633,27 @@ void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_
   cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
 
   // Plt map
-  {
-    unordered_map< int, map< int, map<int, double >* >* >* Plt_map = gpos_on_specific_day->getPltMap(time_block, max_checkins, max_radius);
-    outfile.open("Plt.csv");
+  // {
+  //   unordered_map< int, map< int, map<int, double >* >* >* Plt_map = gpos_on_specific_day->getPltMap(time_block, max_checkins, max_radius);
+  //   outfile.open("Plt.csv");
 
-    for(auto l_it = Plt_map->begin(); l_it !=Plt_map->end(); l_it++){
-      int location_id = l_it->first;
-      map< int, map<int, double >* >* day_time_prob_map = l_it->second;
-      for(auto d_it = day_time_prob_map->begin(); d_it !=day_time_prob_map->end(); d_it++){
-        int day = d_it->first;
-        map<int, double >* time_prob_map = d_it->second;
-        for(auto t_it = time_prob_map->begin(); t_it !=time_prob_map->end(); t_it++){
-          int time_block = t_it->first;
-          double prob = t_it->second;
-          outfile<< std::fixed << setprecision(10) << location_id << " " << day << " " << time_block << " " << prob <<"\n";
-        }
-      }
-    }
-    outfile.close();
+  //   for(auto l_it = Plt_map->begin(); l_it !=Plt_map->end(); l_it++){
+  //     int location_id = l_it->first;
+  //     map< int, map<int, double >* >* day_time_prob_map = l_it->second;
+  //     for(auto d_it = day_time_prob_map->begin(); d_it !=day_time_prob_map->end(); d_it++){
+  //       int day = d_it->first;
+  //       map<int, double >* time_prob_map = d_it->second;
+  //       for(auto t_it = time_prob_map->begin(); t_it !=time_prob_map->end(); t_it++){
+  //         int time_block = t_it->first;
+  //         double prob = t_it->second;
+  //         outfile<< std::fixed << setprecision(10) << location_id << " " << day << " " << time_block << " " << prob <<"\n";
+  //       }
+  //     }
+  //   }
+  //   outfile.close();
 
-    cout<<"Printing PLT complete. size:"<<Plt_map->size()<<endl;
-  }
+  //   cout<<"Printing PLT complete. size:"<<Plt_map->size()<<endl;
+  // }
 
   //-------------------------------------
   //-- for a given user how many friends ebm truly inferred
@@ -956,8 +956,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_
   }
 
   {
-    map< int, double >* temoral_locality_map = gpos->computeTemporalLocality(max_checkins, max_radius);
-    map<int , vector< Point* >*>* location_to_user = gpos_on_specific_day->getLocationToUser();
+    map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
 
     outfile.open("locationTime_Locality.csv");
 
@@ -990,7 +989,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_
   //OUT location - time - ebm - truebm/ebm - precision
   {
 
-    map<int , vector< Point* >*>* location_to_user = gpos_on_specific_day->getLocationToUser();
+    map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
     outfile.open("locationTime_EBM.csv");
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
@@ -1075,7 +1074,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_
   //OUT location - time - u1,u2 - number of co-occ
   {
 
-    map<int , vector< Point* >*>* location_to_user = gpos_on_specific_day->getLocationToUser();
+    map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
     outfile.open("locationTime_CoOcc.csv");
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
@@ -1147,7 +1146,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, IGPOs *gpos_on_specific_
       delete day_time_block_ulist_map;
     }
     outfile.close();
-    cout<<"Printing locationTime_EBM complete. " << endl;
+    cout<<"Printing locationTime_CoOcc complete. " << endl;
   }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -1181,6 +1180,7 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha
 
       double *stateProbs;
       double stateLength = cooccurrence_counts_vector->size();
+
       stateProbs = (double *) checkedCalloc(stateLength,sizeof(double));
       int sumOfCo = sumState(cooccVector, stateLength);
       for (i = 0; i < stateLength; i++) {
