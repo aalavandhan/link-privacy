@@ -682,7 +682,7 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
 }
 
 
-map< int, double >* SPOs::computeTemporalLocality(double max_radius, int max_checkins, GPOs *gpos){
+map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos){
   int counter=0;
   map< int, double >* temporal_locality_map = new map< int, double >();
   double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;

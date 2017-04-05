@@ -1095,14 +1095,13 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
     double x = p_sample->getX(), y = p_sample->getY();
 
     double radius_bound = estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
-    set<res_point*, res_point_ascending_id>* checkins_in_city = getSetRange( x, y, radius_bound );
+    vector<res_point*>* checkins_in_city = getRange( x, y, radius_bound );
 
     for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
       Point *p = (*c_it);
       boost::posix_time::ptime l_time = p->getTime();
 
       double locality_sum=0, vicinity_count=0, temporal_locality=0;
-      int c_count = 0;
 
       for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
         boost::posix_time::ptime c_time = (*c)->time;
@@ -1114,11 +1113,6 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
           locality_sum += exp( (-diff / (double) (8*3600) ) );
           vicinity_count++;
         }
-
-        if(c_count == max_checkins)
-          break;
-
-        c_count++;
       }
 
       if(vicinity_count > 0)

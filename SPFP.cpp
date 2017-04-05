@@ -535,7 +535,7 @@ int main(int argc, char *argv[]){
       group_radius            = p3;
       time_range_in_seconds   = p4;
       noise_type              = p5;
-      bool add_temporal, add_gaussian;
+      bool add_temporal=false, add_gaussian=false;
       printParameters();
       if( noise_type == 0 ){
         add_gaussian = true;
@@ -563,7 +563,7 @@ int main(int argc, char *argv[]){
       group_radius            = p3;
       time_range_in_seconds   = p4;
       noise_type              = p5;
-      bool add_temporal, add_gaussian;
+      bool add_temporal=false, add_gaussian=false;
       printParameters();
       if( noise_type == 0 ){
         add_gaussian = true;
@@ -688,7 +688,7 @@ int main(int argc, char *argv[]){
       query->cacluateSocialStrength();
       cout << "Using Threshold" << social_strength_tresh << endl;
 
-      map< int, double >* temoral_locality_map = spos->computeTemporalLocality(max_radius, max_checkins, gpos);
+      map< int, double >* temoral_locality_map = gpos->computeTemporalLocality(max_checkins, max_radius);
       query->writeHistogramstoFile(social_strength_tresh, time_block, temoral_locality_map);
       spos->writeUserFriendsToFile();
       break;

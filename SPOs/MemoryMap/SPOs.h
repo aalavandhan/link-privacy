@@ -70,7 +70,7 @@ public:
     double computeNodeLocality(GPOs* gpos, int source);
     map< int, double >* computeNodeLocality(GPOs* gpos);
 
-    map< int, double >* computeTemporalLocality(double max_radius, int max_checkins, GPOs *gpos);
+    map< int, double >* computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos);
 
     map< int, map<int, pair<int,double> >* >* getCheckinLocalityMap();
     map< int, double >* loadNodeLocalityFromFile();
