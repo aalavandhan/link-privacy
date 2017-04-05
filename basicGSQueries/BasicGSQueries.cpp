@@ -978,7 +978,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
         if(loc_it != temoral_locality_map->end())
           locality = loc_it->second;
 
-        outfile<< std::fixed << setprecision(10) << location_id << " " <<  l_day << " " << l_time_block <<" "<<  locality << endl;
+        outfile<< std::fixed << setprecision(10) << location_id << " " <<  l_day << " " << l_time_block <<" " << user_id << " " <<  locality << endl;
       }
     }
 
