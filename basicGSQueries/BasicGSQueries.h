@@ -33,6 +33,6 @@ public:
 
     void printPartialDiversityAndWeightedFrequencyValues(double alpha);
 
-    void computeAccuracyOfSocialStrength();
+    void computeAccuracyOfSocialStrength(double precision_limit);
 };
 

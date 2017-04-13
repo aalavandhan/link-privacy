@@ -1089,6 +1089,7 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
   int counter=0;
   map< int, double >* temporal_locality_map = new map< int, double >();
   double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+
   for(auto l_it=location_to_user.begin(); l_it != location_to_user.end(); l_it++){
     vector< Point* >* checkins_at_l = l_it->second;
     Point *p_sample = checkins_at_l->front();
@@ -1113,6 +1114,7 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
           locality_sum += exp( (-diff / (double) (8*3600) ) );
           vicinity_count++;
         }
+
       }
 
       if(vicinity_count > 0)
@@ -1121,9 +1123,9 @@ map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_r
       temporal_locality_map->insert(make_pair(p->getOrder(), temporal_locality));
     }
 
-    // for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
-    //   delete (*c);
-    // }
+    for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+      delete (*c);
+    }
     delete checkins_in_city;
 
     counter++;

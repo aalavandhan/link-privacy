@@ -130,10 +130,10 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  // for(double i = 0; i < 3; i = i + 0.1){
+  // for(double i = 0; i < 25; i = i + 0.1){
   //   query->verifySocialStrength(i);
   // }
-  query->computeAccuracyOfSocialStrength();
+  query->computeAccuracyOfSocialStrength(0.25);
 }
 
 void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
@@ -645,11 +645,13 @@ int main(int argc, char *argv[]){
       bool preload_LE  = false;
       bool preload_OCC = true;
 
+      double max_radius            = std::numeric_limits<double>::infinity(); // max_radius 2km
+
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
       printParameters();
-      spos->computeCheckinLocalityMap(gpos);
+      spos->computeCheckinLocalityMap(gpos, max_radius);
       spos->writeCheckinLocalityToFile();
       // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
       // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
@@ -661,12 +663,11 @@ int main(int argc, char *argv[]){
       cout << "METRICS: Compute histograms" << endl;
 
       social_strength_tresh = p1;
-      // day_of_week           = p2;
       time_block            = p2;
 
 
       int max_checkins             = 250;  // checkins in vicinity
-      double max_radius            = 2000; // max_radius 10km
+      double max_radius            = 1000; // max_radius 2km
 
       printParameters();
       cout << "Data driven search Max checkins : " << max_checkins << endl;
@@ -688,6 +689,7 @@ int main(int argc, char *argv[]){
       query->cacluateSocialStrength();
       cout << "Using Threshold" << social_strength_tresh << endl;
 
+      // map< int, double >* temoral_locality_map = spos->computeTemporalLocality(max_checkins, max_radius, gpos);
       map< int, double >* temoral_locality_map = gpos->computeTemporalLocality(max_checkins, max_radius);
       query->writeHistogramstoFile(social_strength_tresh, time_block, temoral_locality_map);
       spos->writeUserFriendsToFile();

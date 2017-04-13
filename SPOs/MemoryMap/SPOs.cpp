@@ -682,84 +682,33 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
 }
 
 
-map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos){
-  int counter=0;
-  map< int, double >* temporal_locality_map = new map< int, double >();
-  double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
-
-
-  for(auto l_it=gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
-    vector< Point* >* checkins_at_l = l_it->second;
-    Point *p_sample = checkins_at_l->front();
-    double x = p_sample->getX(), y = p_sample->getY();
-
-    double radius_bound = gpos->estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
-    vector<res_point*>* checkins_in_city = gpos->getRange( x, y, radius_bound );
-
-    for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
-      Point *p = (*c_it);
-      boost::posix_time::ptime l_time = p->getTime();
-
-      double locality_sum=0, vicinity_count=0, temporal_locality=0;
-
-      for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
-        boost::posix_time::ptime c_time = (*c)->time;
-
-        boost::posix_time::time_duration time_difference = (c_time - l_time);
-        double diff = (double) abs(time_difference.total_seconds());
-
-        if( diff <= 8 * 3600  && (*c)->oid != p->getOrder() && areFriends((*c)->uid, p->getUID()) ){
-          locality_sum += exp( (-diff / (double) (8*3600) ) );
-          vicinity_count++;
-        }
-      }
-
-      if(vicinity_count > 0)
-        temporal_locality = locality_sum/vicinity_count;
-
-      temporal_locality_map->insert(make_pair(p->getOrder(), temporal_locality));
-    }
-
-    for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
-      delete (*c);
-    }
-    delete checkins_in_city;
-
-    counter++;
-    if(counter%10000 == 0)
-      cout << counter << endl;
-  }
-
-  return temporal_locality_map;
-}
-
-
-pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins){
+pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins, double max_radius){
   double closestDistance = std::numeric_limits<double>::infinity();
   int location_id = -1;
   auto point_source_time = point_source->getTime();
 
   for(auto f_it=friend_checkins->begin(); f_it != friend_checkins->end(); f_it++){
     Point * friend_checkin = (*f_it);
-    // time difference test DISABLED for testing
+
     auto friend_checkin_time = friend_checkin->getTime();
     boost::posix_time::time_duration time_difference = point_source_time - friend_checkin_time;
     int time_diff_seconds = abs(time_difference.total_seconds());
 
-    // I DAY IN SECONDS
-    if(time_diff_seconds <= 86400){
+    // Ranges HARD-CODED !!
+    if( time_diff_seconds <= ( 8 * 3600 ) ){
       double distSq = util.computeMinimumDistance(point_source->getX(), point_source->getY(), friend_checkin->getX(), friend_checkin->getY());
-      if(distSq < closestDistance){
+      double distInKm = 1000 * distSq * EARTH_CIRCUMFERENCE / 360;
+
+      if( distSq < closestDistance && distInKm <= max_radius){
         closestDistance = distSq;
         location_id = friend_checkin->getID();
       }
     }
   }
-
   return make_pair(location_id,closestDistance);
 }
 
-vector<pair<int,double>>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
+vector<pair<int,double>>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends, double max_radius){
   vector<pair<int,double>>* location_distances = new vector<pair<int,double> >();
 
   for(auto f_it = friends->begin(); f_it != friends->end(); f_it++){
@@ -771,7 +720,10 @@ vector<pair<int,double>>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Poi
     // Ensuring check-ins are present
     if(friend_checkins_it != gpos->user_to_location.end()){
       friend_checkins = friend_checkins_it->second;
-      pair<int,double> location_distance_pair = computeMinimumdistanceToFriend(gpos, point_source, friend_checkins);
+      pair<int,double> location_distance_pair = computeMinimumdistanceToFriend(gpos, point_source, friend_checkins, max_radius);
+
+      // Only of users are within range
+      // if( location_distance_pair.second != std::numeric_limits<double>::infinity() )
       location_distances->push_back(location_distance_pair);
     }
   }
@@ -780,16 +732,16 @@ vector<pair<int,double>>* SPOs::computeDistancesToCheckinFriends(GPOs* gpos, Poi
 }
 
 // Distance matters: Geo-social metrics for online social networks
-double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends){
+double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends,double max_radius){
   double locality_sum=0, checkin_locality=0;
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 
-  vector<pair<int,double>>* location_distances = computeDistancesToCheckinFriends(gpos, point_source, friends);
+  vector<pair<int,double>>* location_distances = computeDistancesToCheckinFriends(gpos, point_source, friends, max_radius);
 
   for(auto d_it=location_distances->begin(); d_it != location_distances->end(); d_it++){
     int location_id = (*d_it).first;
     double dist = (*d_it).second;
-    double location_entropy;
+    double location_entropy, partial_sum=0;
 
     auto it_ltH = location_to_H->find(location_id);
     if(it_ltH !=  location_to_H->end()){
@@ -798,7 +750,9 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
       location_entropy = 0;
     }
 
-    locality_sum += exp( (-dist / (double)NODE_LOCALITY_BETA) + (-location_entropy/(double)7) );
+    partial_sum = exp( (-dist / (double)NODE_LOCALITY_BETA) + (-location_entropy/(double)7) );
+
+    locality_sum += partial_sum;
   }
 
   if(location_distances->size() != 0)
@@ -813,9 +767,7 @@ double SPOs::computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_s
 }
 
 
-
-
-map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos){
+map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* gpos, double max_radius){
   checkin_locality_map  = new map<int, map<int, pair<int,double> >*>();
 
   int count=0;
@@ -836,7 +788,7 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
 
     for(auto loc = location_vector->begin(); loc != location_vector->end(); loc++){
       Point* p = *loc;
-      double locality = computeCheckinLocality(gpos, p, friends);
+      double locality = computeCheckinLocality(gpos, p, friends, max_radius);
       // cout << p->getUID() << " " << p->getOrder() << " " << locality << endl;
       if(locality != 0)
         order_locality_map->insert(make_pair(p->getOrder(),make_pair(p->getID(),locality)));
@@ -854,6 +806,65 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
   cout << "Completed checkin locality of size: "<<checkin_locality_map->size() << endl;
 
   return checkin_locality_map;
+}
+
+map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos){
+  int counter=0;
+  map< int, double >* temporal_locality_map = new map< int, double >();
+  double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+
+  for(auto l_it=gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
+    vector< Point* >* checkins_at_l = l_it->second;
+    Point *p_sample = checkins_at_l->front();
+    double x = p_sample->getX(), y = p_sample->getY();
+
+    double radius_bound = gpos->estimateNearestDistance( x, y, max_checkins, max_radius_geo_dist);
+    vector<res_point*>* checkins_in_city = gpos->getRange( x, y, radius_bound );
+
+    for(auto c_it=checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
+      Point *p = (*c_it);
+      boost::posix_time::ptime l_time = p->getTime();
+
+      map<int, double> user_dist;
+
+      double locality_sum=0, temporal_locality=0, number_of_friends = getFriends( p->getUID() )->size();
+
+      for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+        boost::posix_time::ptime c_time = (*c)->time;
+        boost::posix_time::time_duration time_difference = (c_time - l_time);
+        double diff = (double) abs(time_difference.total_seconds());
+
+        if( areFriends(p->getUID(), (*c)->uid) ){
+          auto ud_it = user_dist.find( (*c)->uid );
+          if( ud_it == user_dist.end() ){
+            user_dist.insert(make_pair((*c)->uid, diff));
+          } else if(ud_it->second > diff){
+              ud_it->second = diff;
+          }
+        }
+      }
+
+      for(auto ud_it = user_dist.begin(); ud_it != user_dist.end(); ud_it++){
+        locality_sum += exp( (-ud_it->second / (double) ( 8 * 3600 )) );
+      }
+
+      if(number_of_friends > 0)
+        temporal_locality = locality_sum * 1/(double)number_of_friends;
+
+      temporal_locality_map->insert(make_pair(p->getOrder(), temporal_locality));
+    }
+
+    for(auto c = checkins_in_city->begin(); c != checkins_in_city->end(); c++){
+      delete (*c);
+    }
+    delete checkins_in_city;
+
+    counter++;
+    if(counter%10000 == 0)
+      cout << counter << endl;
+  }
+
+  return temporal_locality_map;
 }
 
 void SPOs::writeCheckinLocalityToFile(){

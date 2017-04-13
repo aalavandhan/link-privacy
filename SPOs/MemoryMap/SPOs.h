@@ -57,10 +57,10 @@ public:
     int edges=0;
 
     //checkin locality functions
-    map< int, map<int, pair<int,double>>* >* computeCheckinLocalityMap(GPOs* gpos);
-    pair<int,double> computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins);
-    double computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
-    vector<pair<int,double>>* computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends);
+    map< int, map<int, pair<int,double>>* >* computeCheckinLocalityMap(GPOs* gpos, double max_radius);
+    pair<int,double> computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins, double max_radius);
+    double computeCheckinLocality(GPOs* gpos, Point* point_source, unordered_set<int>* friends, double max_radius);
+    vector<pair<int,double>>* computeDistancesToCheckinFriends(GPOs* gpos, Point* point_source, unordered_set<int>* friends, double max_radius);
     //----------------------------
 
 
@@ -69,9 +69,7 @@ public:
     vector<double>* computeDistancesBetweenUserFriends(GPOs* gpos, int source, unordered_set<int>* friends);
     double computeNodeLocality(GPOs* gpos, int source);
     map< int, double >* computeNodeLocality(GPOs* gpos);
-
     map< int, double >* computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos);
-
     map< int, map<int, pair<int,double> >* >* getCheckinLocalityMap();
     map< int, double >* loadNodeLocalityFromFile();
     map< int, map<int, pair<int,double> >* >* loadCheckinLocalityFromFile();

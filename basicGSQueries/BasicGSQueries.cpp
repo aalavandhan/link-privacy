@@ -297,7 +297,7 @@ bool SimpleQueries::areTrueEBMFriends(int source, int target, double tresh){
   return ( areEBMFriends(source, target, tresh) && spos->areFriends(source, target) );
 }
 
-void SimpleQueries::computeAccuracyOfSocialStrength(){
+void SimpleQueries::computeAccuracyOfSocialStrength(double precision_limit){
 
   double prev_precision = 0, precision, recall, mean_score, f1, i;
   int postitive, true_positive, gt, total_score, nFriends;
@@ -334,7 +334,7 @@ void SimpleQueries::computeAccuracyOfSocialStrength(){
     mean_score    = total_score / (double) postitive;
     f1 = 2 * precision * recall / ( precision + recall );
 
-    if(prev_precision <= 0.80 && precision >= 0.80)
+    if(prev_precision <= precision_limit && precision >= precision_limit)
       break;
 
     prev_precision = precision;
