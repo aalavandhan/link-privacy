@@ -117,8 +117,8 @@ void runProximityUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
 }
 
 void runUtilities(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
-  runRangeUtility(purturbedGPOs, baseGPOs, spos);
-  runProximityUtility(purturbedGPOs, baseGPOs, spos);
+  // runRangeUtility(purturbedGPOs, baseGPOs, spos);
+  // runProximityUtility(purturbedGPOs, baseGPOs, spos);
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
@@ -293,7 +293,7 @@ void plainEBM(){
 //   runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 // }
 
-void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation, bool add_gaussian, bool add_temporal){
+void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -304,7 +304,7 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs();
   GPOs* cmpGPOs  = new GPOs();
 
-  if( add_gaussian ){
+  if( add_spatial ){
     spatiallyPurturbedGPOs->loadPurturbedLocations(baseGPOs, noise_radius);
     cout << "------------- Locations spatially perturbed -------------------" << endl;
   }
@@ -320,7 +320,7 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
 }
 
-void CombinationNoiseVsEBM(double noise_radius){
+void CombinationNoiseVsEBM(double noise_radius, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -330,26 +330,21 @@ void CombinationNoiseVsEBM(double noise_radius){
   cout << "------------- Load computed checkin locality ---------------" << endl;
   SPOs *tmp_spos = new SPOs();
 
-  GPOs* spatiallyPurturbedGPOs = new GPOs();
-  GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs();
-  GPOs* cmpGPOs  = new GPOs();
+  GPOs* purturbedGPOs = new GPOs();
+  GPOs* cmpGPOs       = new GPOs();
 
-  bool isGaussian = (combination_type == 1);
-
-  spatiallyPurturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
+  purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
     baseGPOs,
     tmp_spos->loadCheckinLocalityFromFile(),
+    tmp_spos->loadTemporalLocalityFromFile(),
     baseGPOs->getL2U2COOCC(),
-    noise_radius, isGaussian, function_type);
-  cout << "------------- Locations spatially perturbed -------------------" << endl;
-  spatiallyAndTemporallyPurturbedGPOs->loadPurturbedLocationsByTime(spatiallyPurturbedGPOs, time_deviation);
-  cout << "------------- Locations temporally perturbed -------------------" << endl;
+    noise_radius, add_spatial, add_temporal);
+  cout << "------------- Locations perturbed -------------------" << endl;
 
-  // spatiallyAndTemporallyPurturbedGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
-  cmpGPOs->groupLocationsByRange(spatiallyAndTemporallyPurturbedGPOs, group_radius, false);
+  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cout << "------------- Locations Grouped -------------------" << endl;
 
-  runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
+  runEBMOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos);
 }
 
 
@@ -534,25 +529,8 @@ int main(int argc, char *argv[]){
       time_deviation          = 0;
       group_radius            = p3;
       time_range_in_seconds   = p4;
-      noise_type              = p5;
-      bool add_temporal=false, add_gaussian=false;
       printParameters();
-      if( noise_type == 0 ){
-        add_gaussian = true;
-        add_temporal = true;
-        cout << "Adding both spatial and temporal noise" << endl;
-      } else if( noise_type == 1){
-        add_gaussian = true;
-        add_temporal = false;
-        cout << "Adding spatial noise" << endl;
-      } else if( noise_type == 2){
-        add_gaussian = false;
-        add_temporal = true;
-        cout << "Adding temporal noise" << endl;
-      } else {
-        cout << "Invalid option" << endl;
-      }
-      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, add_gaussian, add_temporal);
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, false, false);
       break;
     }
 
@@ -563,24 +541,24 @@ int main(int argc, char *argv[]){
       group_radius            = p3;
       time_range_in_seconds   = p4;
       noise_type              = p5;
-      bool add_temporal=false, add_gaussian=false;
+      bool add_temporal=false, add_spatial=false;
       printParameters();
       if( noise_type == 0 ){
-        add_gaussian = true;
+        add_spatial = true;
         add_temporal = true;
         cout << "Adding both spatial and temporal noise" << endl;
       } else if( noise_type == 1){
-        add_gaussian = true;
+        add_spatial = true;
         add_temporal = false;
         cout << "Adding spatial noise" << endl;
       } else if( noise_type == 2){
-        add_gaussian = false;
+        add_spatial = false;
         add_temporal = true;
         cout << "Adding temporal noise" << endl;
       } else {
         cout << "Invalid option" << endl;
       }
-      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, add_gaussian, add_temporal);
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, add_spatial, add_temporal);
       break;
     }
 
@@ -590,11 +568,26 @@ int main(int argc, char *argv[]){
       time_deviation          = p2;
       group_radius            = p3;
       time_range_in_seconds   = p4;
-      combination_type        = p5;
-      function_type           = p6;
+      noise_type              = p5;
+      bool add_temporal=false, add_spatial=false;
 
       printParameters();
-      CombinationNoiseVsEBM(noise_radius);
+      if( noise_type == 0 ){
+        add_spatial = true;
+        add_temporal = true;
+        cout << "Adding both spatial and temporal noise" << endl;
+      } else if( noise_type == 1){
+        add_spatial = true;
+        add_temporal = false;
+        cout << "Adding spatial noise" << endl;
+      } else if( noise_type == 2){
+        add_spatial = false;
+        add_temporal = true;
+        cout << "Adding temporal noise" << endl;
+      } else {
+        cout << "Invalid option" << endl;
+      }
+      CombinationNoiseVsEBM(noise_radius, add_spatial, add_temporal);
       break;
     }
 
@@ -647,9 +640,6 @@ int main(int argc, char *argv[]){
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
-
-      social_strength_tresh = p1;
-      time_block            = p2;
 
       int max_checkins          = 250;  // checkins in vicinity
       double max_radius         = 1000; // max_radius 2km

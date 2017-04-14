@@ -654,7 +654,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   unsigned int lid = 0;
 
   purturbed_count = 0;
-  total_displacement = 0;
+  total_spatial_displacement = 0;
 
   for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
     for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
@@ -663,7 +663,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
         Point *p = (*loc);
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), radius);
         double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-        total_displacement+=displacement;
+        total_spatial_displacement+=displacement;
         purturbed_count++;
         lid++;
 
@@ -676,31 +676,34 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 
     }
   }
-  cout<<"Total Displacement : "<<(((total_displacement*EARTH_CIRCUMFERENCE) /360) ) <<" in km"<<endl;
-  cout<<"Average Displacement : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
+  cout<<"Total Displacement : "<<(((total_spatial_displacement*EARTH_CIRCUMFERENCE) /360) ) <<" in km"<<endl;
+  cout<<"Average Displacement : "<<(((total_spatial_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
 }
 
 void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   GPOs* gpos,
   map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality,
-  map< int, map<int,int>* >* _location_to_user_to_cooccurrences ,
-  double radius, bool isGaussainNoise, int type){
+  map< int, double >*  temporal_locality_map,
+  map< int, map<int,int>* >* _location_to_user_to_cooccurrences,
+  double radius,
+  bool add_spatial,
+  bool add_temporal){
 
   user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
   unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
   unordered_map<int, double>* HiJ_map = gpos->getHiJasMap();
 
-  int lid   = LOCATION_NOISE_BOUND;
-  int new_order = 0;
+  uint lid        = LOCATION_NOISE_BOUND;
+  int point_count = 0;
 
 
-  cout << "Running type ";
-  if(type == 0){
-    cout << "  0.5 * ( expHil + expHiJ ) * expHL * checkin_locality ";
-  } else {
-    cout << "  0.5 * ( expHil + expHiJ ) * expHL * CIL ";
-  }
-  cout << "\tIsGaussian : " << isGaussainNoise << endl;
+  if(add_spatial)
+    cout << "Adding Spatial noise function : 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality " << endl;
+
+  if(add_temporal)
+    cout << "Adding Temporal noise function : temporal_locality * checkin_locality " << endl;
+
+
 
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
@@ -748,6 +751,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
         }
       }
 
+      double temporal_locality_value = 0;
+      auto tl_it = temporal_locality_map->find(order);
+      if(tl_it != temporal_locality_map->end())
+        temporal_locality_value = tl_it->second;
+
+
       double expHil=0,expHiJ=0;
       if(hiL == 0){
         expHil = 0;
@@ -763,50 +772,73 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
       double expHL = exp(-entropy / HL_SCALE);
 
-      double noise;
-      if(type == 0){
-        noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
-        if(noise != 0)
-          noise = noise + 0.45;
-      } else{
-        noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
-      }
 
-      noise = noise * radius;
+      // Spatial Noise
+      double spatial_noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
+      if(spatial_noise != 0)
+        spatial_noise = spatial_noise + 0.45;
+      spatial_noise = spatial_noise * radius;
 
-
-      pair<double,double> coordinates_with_noise;
-      if(isGaussainNoise){
-        coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
-      } else {
-        coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
-      }
-
-      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-      total_displacement+=displacement;
-
+      // Spatial perturbation
+      pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), spatial_noise);
 
       // Temporal noise
+      double temporal_noise = temporal_locality_value * checkin_locality_value;
+
+      // Temporal perturbation
+      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), temporal_noise);
 
 
-      if(noise != 0){
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
-        purturbed_count++;
+      // Loading perturbed data
+      double final_x = p->getX(), final_y = p->getY();
+      boost::posix_time::ptime final_time = p->getTime();
+      int final_lid = p->getID();
+
+      if(add_spatial && spatial_noise != 0){
+        final_x = coordinates_with_noise.first;
+        final_y = coordinates_with_noise.second;
+        spatial_purturbed_count++;
+      }
+
+      if(add_temporal && temporal_noise != 0){
+        final_time = purtubed_time;
+        temporal_purturbed_count++;
+      }
+
+      if( (add_spatial && spatial_noise != 0) || (add_temporal && temporal_noise != 0) ){
+        final_lid = lid;
         lid++;
-      } else {
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
-      };
+        purturbed_count++;
+      }
 
-      new_order++;
+      loadPoint(final_x, final_y, final_lid, p->getUID(), final_time, p->getOrder());
+      point_count++;
+
+      // METRICS
+      total_spatial_displacement+=util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+
+      total_time_displacement+=abs((int)  ((p->getTime() - purtubed_time).total_milliseconds() / 1000.0));
 
     }
   }
-  total_displacement = total_displacement * EARTH_CIRCUMFERENCE / 360;
+  total_spatial_displacement = total_spatial_displacement * EARTH_CIRCUMFERENCE / 360;
 
   cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
-  cout<<"Total Displacemnt : "<<  total_displacement <<" in km"<<endl;
-  cout<<"Average Displacemnt : "<< (total_displacement / new_order) * 1000  <<" in meters"<<endl;
-  cout<<"Average Displacemnt based on purturbed_count : "<< (total_displacement / purturbed_count) * 1000 <<" in meters"<<endl;
+  cout<<"Number of checkins spatially purtubed : "<< spatial_purturbed_count   << endl;
+  cout<<"Number of checkins temporally purtubed : "<< temporal_purturbed_count << endl;
+
+  if(add_spatial){
+    cout<<"Total Spatial Displacemnt : "<<  total_spatial_displacement <<" in km"<<endl;
+    cout<<"Average Spatial Displacemnt : "<< (total_spatial_displacement / point_count) * 1000  <<" in meters"<<endl;
+    cout<<"Average Spatial Displacemnt based on spatial_purturbed_count : "<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<" in meters"<<endl;
+  }
+
+  if(add_temporal){
+    cout<<"Total Temporal Displacement : "<< total_time_displacement/3600.0 <<" hours"<<endl;
+    cout<<"Average Temporal Displacement : "<< total_time_displacement/3600.0  * (1/(float)point_count) <<" hours"<<endl;
+    cout<<"Average Temporal Displacement based on temporal_purturbed_count: "<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<" hours"<<endl;
+  }
+
   generateFrequencyCache();
 }
 

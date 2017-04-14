@@ -29,9 +29,9 @@ public:
     ~GPOs();
     vector<int> ids;
     vector<Point*> locations;
-    double total_displacement =0;
-    double total_time_displacement =0;
-    int purturbed_count = 0;
+    double total_spatial_displacement = 0;
+    double total_time_displacement    = 0;
+    int purturbed_count = 0, spatial_purturbed_count=0, temporal_purturbed_count=0;
 
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
@@ -118,7 +118,13 @@ public:
 
     void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
     void loadPurturbedLocationsBasedOnLocationEntropy(GPOs* gpos, double radius, double limit);
-    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos, map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality, map< int, map<int,int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
+    void loadPurturbedLocationsBasedOnCombinationFunction(GPOs* gpos,
+        map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality,
+        map< int, double >* order_to_temporal_locality,
+        map< int, map<int,int>* >* _location_to_user_to_cooccurrences,
+        double radius,
+        bool add_spatial,
+        bool add_temporal);
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
     virtual map< int, double >* computeTemporalLocality(int max_checkins, double max_radius);
