@@ -489,7 +489,7 @@ int main(int argc, char *argv[]){
     iteration_type = 90;
   else if (strcmp(argv[4], "compute-katz") == 0)
     iteration_type = 91;
-  else if (strcmp(argv[4], "compute-node-locality") == 0)
+  else if (strcmp(argv[4], "compute-locality") == 0)
     iteration_type = 92;
   else if (strcmp(argv[4], "compute-histograms") == 0)
     iteration_type = 93;
