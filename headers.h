@@ -125,7 +125,7 @@ extern double RENY_Q;
 
 // Number of friendships in gowalla dataset with more than one
 // occccurrences
-#define RECALL_BOUND 10505
+#define RECALL_BOUND 50932
 
 #define LOCATION_NOISE_BOUND 9999999
 
