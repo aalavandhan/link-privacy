@@ -274,8 +274,8 @@ unordered_set< pair<int,int>, PairHasher >* GPOs::getCoOccurredUserPairs(){
 bool GPOs::loadLocations(const char* fileName){
   ifstream fin(fileName);
 
+  int location_blacklist[] = { 9246,672270,671606,672473,671698,9247,671886,672328,681993,9313,7039899,6936696,6745159 };
 
-  int location_blacklist[] = { 9246,672270,671606,672473,671698,9247,671886,672328,681993,9313 };
   set<int> blacklist_set (location_blacklist, location_blacklist+10);
 
   if (!fin) {
