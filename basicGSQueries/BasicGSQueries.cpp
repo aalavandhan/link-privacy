@@ -303,12 +303,12 @@ void SimpleQueries::computeAccuracyOfSocialStrength(double precision_limit){
   int postitive, true_positive, gt, total_score, nFriends;
   double tresh;
 
+  gt = countCooccurredFriends();
+
   for(i = 0; i < 100; i = i + 0.05){
     tresh = i;
     postitive=0;
     true_positive=0;
-    // gt = countCooccurredFriends();
-    gt = RECALL_BOUND;
     total_score=0;
     nFriends=spos->getNumberOfFriends();
 

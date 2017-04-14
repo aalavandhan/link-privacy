@@ -133,7 +133,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
   // for(double i = 0; i < 25; i = i + 0.1){
   //   query->verifySocialStrength(i);
   // }
-  query->computeAccuracyOfSocialStrength(0.25);
+  query->computeAccuracyOfSocialStrength(0.80);
 }
 
 void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
