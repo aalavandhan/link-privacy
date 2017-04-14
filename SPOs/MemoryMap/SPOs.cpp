@@ -681,7 +681,8 @@ map< int, double >* SPOs::computeNodeLocality(GPOs* gpos){
   return node_locality_map;
 }
 
-
+// max radius = infinity => Unbounded spatial difference
+// Friends checked in within an 8 hour time difference
 pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_source, vector< Point* >* friend_checkins, double max_radius){
   double closestDistance = std::numeric_limits<double>::infinity();
   int location_id = -1;
@@ -703,6 +704,7 @@ pair<int,double> SPOs::computeMinimumdistanceToFriend(GPOs* gpos, Point* point_s
         closestDistance = distSq;
         location_id = friend_checkin->getID();
       }
+
     }
   }
   return make_pair(location_id,closestDistance);
@@ -772,7 +774,7 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
 
   int count=0;
 
-  cout << "Computing node locality" << endl;
+  cout << "Computing checkin locality" << endl;
 
   for(auto it = gpos->user_to_location.begin(); it != gpos->user_to_location.end(); it++){
     int source_user_id = it->first;
@@ -785,6 +787,9 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
       continue;
 
     unordered_set<int>* friends = f_it->second;
+
+    // Debug:
+    cout << source_user_id << " " << friends->size() << " " << location_vector->size() << endl;
 
     for(auto loc = location_vector->begin(); loc != location_vector->end(); loc++){
       Point* p = *loc;
@@ -808,11 +813,12 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
   return checkin_locality_map;
 }
 
+// Unbounded temporal difference
+// Friends checked in within an 1Km spatial difference ( max_radius, max_checkins )
 map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos){
   int counter=0;
-  map< int, double >* temporal_locality_map = new map< int, double >();
+  temporal_locality_map = new map< int, double >();
   double max_radius_geo_dist = (max_radius/1000) * 360 / EARTH_CIRCUMFERENCE;
-
   for(auto l_it=gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
     vector< Point* >* checkins_at_l = l_it->second;
     Point *p_sample = checkins_at_l->front();
@@ -836,11 +842,13 @@ map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_r
 
         if( areFriends(p->getUID(), (*c)->uid) ){
           auto ud_it = user_dist.find( (*c)->uid );
+
           if( ud_it == user_dist.end() ){
             user_dist.insert(make_pair((*c)->uid, diff));
           } else if(ud_it->second > diff){
-              ud_it->second = diff;
+            ud_it->second = diff;
           }
+
         }
       }
 
@@ -863,7 +871,6 @@ map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_r
     if(counter%10000 == 0)
       cout << counter << endl;
   }
-
   return temporal_locality_map;
 }
 
@@ -885,6 +892,21 @@ void SPOs::writeCheckinLocalityToFile(){
   output_file.close();
 }
 
+void SPOs::writeTemporalLocalityToFile(){
+  ofstream output_file;
+  output_file.open("temporal-locality.csv");
+  int counter = 0;
+  for (auto o_it = temporal_locality_map->begin(); o_it != temporal_locality_map->end(); o_it++){
+    double order_id = o_it->first;
+    double locality = o_it->second;
+    if(locality > 0){
+      output_file << order_id << "\t" << locality << endl;
+      counter++;
+    }
+  }
+  cout << "------- Wrote checkin locality to files " << counter << endl;
+  output_file.close();
+}
 
 map< int, map<int, pair<int,double> >* >* SPOs::getCheckinLocalityMap(){
   return checkin_locality_map;
@@ -907,18 +929,29 @@ map< int, double >* SPOs::loadNodeLocalityFromFile(){
   node_locality_map  = new map< int, double >();
   ifstream fin("node-locality.csv");
   if (!fin){
-    cout << "Cannot open node locality file node_locality.csv" << endl;
+    cout << "Cannot open node locality file node-locality.csv" << endl;
   }
   double user_id, locality;
-
   while(fin){
     fin >> user_id >> locality;
     node_locality_map->insert(make_pair(user_id, locality));
   }
-
   return node_locality_map;
 }
 
+map<int, double >* SPOs::loadTemporalLocalityFromFile(){
+  temporal_locality_map = new map< int, double >();
+  ifstream fin("temporal-locality.csv");
+  if (!fin){
+    cout << "Cannot open node locality file temporal-locality.csv" << endl;
+  }
+  double order_id, locality;
+  while(fin){
+    fin >> order_id >> locality;
+    temporal_locality_map->insert(make_pair(order_id, locality));
+  }
+  return temporal_locality_map;
+}
 
 map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(){
   int count=0;

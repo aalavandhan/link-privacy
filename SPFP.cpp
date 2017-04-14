@@ -641,18 +641,29 @@ int main(int argc, char *argv[]){
     }
 
     case 92:{
-      cout << "METRICS: Pre-Compute node_locality" << endl;
+      cout << "METRICS: node_locality and temporal_locality" << endl;
       bool preload_LE  = false;
       bool preload_OCC = true;
-
-      double max_radius            = std::numeric_limits<double>::infinity(); // max_radius 2km
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
+      social_strength_tresh = p1;
+      time_block            = p2;
+
+      int max_checkins          = 250;  // checkins in vicinity
+      double max_radius         = 1000; // max_radius 2km
+
       printParameters();
-      spos->computeCheckinLocalityMap(gpos, max_radius);
+      cout << "Data driven search Max checkins : " << max_checkins << endl;
+      cout << "Data driven search Max radius   : " << max_radius << endl;
+
+      spos->computeCheckinLocalityMap(gpos, std::numeric_limits<double>::infinity());
       spos->writeCheckinLocalityToFile();
+
+      spos->computeTemporalLocality(max_checkins, max_radius, gpos);
+      spos->writeTemporalLocalityToFile();
+
       // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
       // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
       // spos->computeNodeLocality(gpos);
@@ -665,13 +676,7 @@ int main(int argc, char *argv[]){
       social_strength_tresh = p1;
       time_block            = p2;
 
-
-      int max_checkins             = 250;  // checkins in vicinity
-      double max_radius            = 1000; // max_radius 2km
-
       printParameters();
-      cout << "Data driven search Max checkins : " << max_checkins << endl;
-      cout << "Data driven search Max radius   : " << max_radius << endl;
 
       bool preload_LE  = true;
       bool preload_OCC = true;
@@ -679,19 +684,14 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-
-      // Using all days of the week
-      // GPOs* reduced_gpos = new GPOs();
-      // reduced_gpos->loadLocationsByDayOfWeek(gpos, day_of_week);
-
       SimpleQueries* query = new SimpleQueries(gpos, spos);
       query->buildMatrices(RENY_Q);
       query->cacluateSocialStrength();
       cout << "Using Threshold" << social_strength_tresh << endl;
 
-      // map< int, double >* temoral_locality_map = spos->computeTemporalLocality(max_checkins, max_radius, gpos);
-      map< int, double >* temoral_locality_map = gpos->computeTemporalLocality(max_checkins, max_radius);
+      map< int, double >* temoral_locality_map = spos->loadTemporalLocalityFromFile();
       query->writeHistogramstoFile(social_strength_tresh, time_block, temoral_locality_map);
+
       spos->writeUserFriendsToFile();
       break;
     }

@@ -633,28 +633,6 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
 
   cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
 
-  // Plt map
-  // {
-  //   unordered_map< int, map< int, map<int, double >* >* >* Plt_map = gpos_on_specific_day->getPltMap(time_block, max_checkins, max_radius);
-  //   outfile.open("Plt.csv");
-
-  //   for(auto l_it = Plt_map->begin(); l_it !=Plt_map->end(); l_it++){
-  //     int location_id = l_it->first;
-  //     map< int, map<int, double >* >* day_time_prob_map = l_it->second;
-  //     for(auto d_it = day_time_prob_map->begin(); d_it !=day_time_prob_map->end(); d_it++){
-  //       int day = d_it->first;
-  //       map<int, double >* time_prob_map = d_it->second;
-  //       for(auto t_it = time_prob_map->begin(); t_it !=time_prob_map->end(); t_it++){
-  //         int time_block = t_it->first;
-  //         double prob = t_it->second;
-  //         outfile<< std::fixed << setprecision(10) << location_id << " " << day << " " << time_block << " " << prob <<"\n";
-  //       }
-  //     }
-  //   }
-  //   outfile.close();
-
-  //   cout<<"Printing PLT complete. size:"<<Plt_map->size()<<endl;
-  // }
 
   //-------------------------------------
   //-- for a given user how many friends ebm truly inferred
@@ -782,6 +760,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
     cout<<"Printing location_to_EMBinferred complete. size: "<<location_to_EMBinferred.size()<<endl;
 
   }
+
   {
     //-----------------------------------
     //-- locations to the number of true ebm freinds inferred at the location
@@ -889,9 +868,10 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
 
   }
 
+  //-----------------------------------
+  //-- user and location to the number of ebm freinds inferred at the location
   {
-    //-----------------------------------
-    //-- user and location to the number of ebm freinds inferred at the location
+
     map<int, map<int,int> *> location_user_to_trueEBMinferred;
     auto cooccurrence_matrix = gpos->getCooccurrenceMatrix();
     for(auto it = cooccurrence_matrix->begin(); it!= cooccurrence_matrix->end(); it++){
@@ -956,6 +936,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
 
   }
 
+  // Location Time Locality
   {
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
 

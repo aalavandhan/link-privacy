@@ -16,6 +16,7 @@ private:
     GPOs *gpos;
     bool isGposSet;
     map< int, double >* node_locality_map;
+    map< int, double >* temporal_locality_map;
     map< int, map<int, pair<int,double> >* >* checkin_locality_map;
 
     unordered_map<std::pair<int,int>, double, PairHasher> katzCache = unordered_map<std::pair<int,int>, double, PairHasher>();
@@ -73,10 +74,14 @@ public:
     map< int, map<int, pair<int,double> >* >* getCheckinLocalityMap();
     map< int, double >* loadNodeLocalityFromFile();
     map< int, map<int, pair<int,double> >* >* loadCheckinLocalityFromFile();
+    map< int, double >* loadTemporalLocalityFromFile();
 
     void writeNodeLocalityToFile();
     void writeCheckinLocalityToFile();
+    void writeTemporalLocalityToFile();
+
     void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
     void loadKatzScoreFromMemory();
+
     void writeUserFriendsToFile();
 };

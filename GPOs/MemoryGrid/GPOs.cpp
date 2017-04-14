@@ -160,27 +160,25 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
 
 
 vector<res_point*>* GPOs::getkNN(double x, double y, int k){
+  // cout << "getKNN start" << endl;
+  clock_t startC, endC;
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+  startC = clock();
 
-    //	cout << "getKNN start" << endl;
-    clock_t startC, endC;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-    startC = clock();
+  kNNExecutions++;
 
-    kNNExecutions++;
+ // cout << "----" << k << endl;
+  vector<res_point*>* res = grid->getkNN(x, y, k);
+ // cout << "size = " << res->size() << endl;
 
-//        cout << "----" << k << endl;
-    vector<res_point*>* res = grid->getkNN(x, y, k);
-//        cout << "size = " << res->size() << endl;
+  endC = clock();
+  totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
+  gettimeofday(&end, NULL);
+  totalTime += util.print_time(start, end);
+  //	cout << "getKNN end" << endl;
 
-
-    endC = clock();
-    totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
-    gettimeofday(&end, NULL);
-    totalTime += util.print_time(start, end);
-    //	cout << "getKNN end" << endl;
-
-    return res;
+  return res;
 }
 
 
@@ -191,86 +189,131 @@ vector<res_point*>* GPOs::getRangeAndDelete(double x, double y, double radius){
 }
 
 vector<res_point*>* GPOs::getRange(double x, double y, double radius){
-    clock_t startC, endC;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-    startC = clock();
+  clock_t startC, endC;
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+  startC = clock();
 
-    RangeExecutions++;
+  RangeExecutions++;
 
-    vector<res_point*>* res = grid->getRange(x, y, radius);
+  vector<res_point*>* res = grid->getRange(x, y, radius);
 
-    endC = clock();
-    totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
-    gettimeofday(&end, NULL);
-    totalTime += util.print_time(start, end);
+  endC = clock();
+  totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
+  gettimeofday(&end, NULL);
+  totalTime += util.print_time(start, end);
 
-    //    cout << "Num of users (GPOs) in radius = "<<radius<<" are =" << res->size() << endl;
-    return res;
+  //    cout << "Num of users (GPOs) in radius = "<<radius<<" are =" << res->size() << endl;
+  return res;
 }
 
 set<res_point*, res_point_ascending_id>* GPOs::getSetRange(double x, double y, double radius){
-    clock_t startC, endC;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-    startC = clock();
+  clock_t startC, endC;
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+  startC = clock();
 
-    RangeExecutions++;
+  RangeExecutions++;
 
-    set<res_point*, res_point_ascending_id>* res = grid->getSetRange(x, y, radius);
+  set<res_point*, res_point_ascending_id>* res = grid->getSetRange(x, y, radius);
 
-    endC = clock();
-    totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
-    gettimeofday(&end, NULL);
-    totalTime += util.print_time(start, end);
+  endC = clock();
+  totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
+  gettimeofday(&end, NULL);
+  totalTime += util.print_time(start, end);
 
-    //    cout << "Num of users (GPOs) in radius = "<<radius<<" are =" << res->size() << endl;
-    return res;
+  //    cout << "Num of users (GPOs) in radius = "<<radius<<" are =" << res->size() << endl;
+  return res;
 }
 
 
 vector<res_point*>* GPOs::getRangeSortedId(double x, double y, double radius){
-    clock_t startC, endC;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-    startC = clock();
+  clock_t startC, endC;
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+  startC = clock();
 
-    RangeExecutions++;
+  RangeExecutions++;
 
-    vector<res_point*>* res = grid->getRange(x, y, radius);
-    util.sortResPoint_AscendingId(res);
+  vector<res_point*>* res = grid->getRange(x, y, radius);
+  util.sortResPoint_AscendingId(res);
 
-    endC = clock();
-    totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
-    gettimeofday(&end, NULL);
-    totalTime += util.print_time(start, end);
-    return res;
+  endC = clock();
+  totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
+  gettimeofday(&end, NULL);
+  totalTime += util.print_time(start, end);
+  return res;
 }
 
 
 int GPOs::getkNNExecutions(){
-    return kNNExecutions;
+  return kNNExecutions;
 }
 
 int GPOs::getLocationExecutions(){
-    return LocationExecutions;
+  return LocationExecutions;
 }
 
 int GPOs::getNextNNExecutions(){
-    return NextNNExecutions;
+  return NextNNExecutions;
 }
 
 int GPOs::getRangeExecutions(){
-    return RangeExecutions;
+  return RangeExecutions;
 }
-
 
 // Only counting user pairs who've co-occurred more than once
 unordered_set< pair<int,int>, PairHasher >* GPOs::getCoOccurredUserPairs(){
   return &significantly_cooccured_user_pairs;
 }
 
+unordered_map<int, double>* GPOs::getLocationEntropy(){
+  return &location_to_H;
+}
 
+map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getCooccurrenceMatrix(){
+  return &cooccurrence_matrix;
+}
+
+map< int, map<int,int>* >* GPOs::getL2U2COOCC(){
+  return location_to_user_to_cooccurrences;
+}
+
+// Load Point
+void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order){
+  Point* l;
+
+  l = new Point(x, y, lid, uid, time, order);
+
+  locations.push_back(l);
+  auto lh_it = user_to_location.find(uid);
+
+  if( lh_it == user_to_location.end() ){
+    vector<Point* >* pts = new vector<Point*>();
+    pts->push_back(l);
+    user_to_location.insert( make_pair(uid, pts) );
+  } else {
+    vector<Point* >* pts = lh_it->second;
+    pts->push_back(l);
+  }
+
+  auto lu_it = location_to_user.find(lid);
+
+  if( lu_it == location_to_user.end() ){
+    vector<Point* >* pts = new vector<Point*>();
+    pts->push_back(l);
+    location_to_user.insert( make_pair(lid, pts) );
+  } else {
+    vector<Point* >* pts = lu_it->second;
+    pts->push_back(l);
+  }
+
+  grid->addCheckIn(l);
+
+  ids.push_back(lid);
+};
+
+// Load locations from file
 bool GPOs::loadLocations(const char* fileName){
   ifstream fin(fileName);
 
@@ -332,23 +375,7 @@ bool GPOs::loadLocations(const char* fileName){
   cout << " -------------------------------------- " << endl;
   return true;
 }
-/*  iterate through each location
-**      put each users frequency in a datavector
-**      call entropy function on the datavector to obtain the entropy
-**      insert entropy into hashmap
-*/
 
-unordered_map<int, double>* GPOs::getLocationEntropy(){
-  return &location_to_H;
-}
-
-map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getCooccurrenceMatrix(){
-  return &cooccurrence_matrix;
-}
-
-// map<int, map<int, vector<pair<int, int> >* >*>* GPOs::getInsignificantCooccurrenceMatrix(){
-//   return &cooccurrence_matrix_insignificant;
-// }
 
 unordered_map<int, double>* GPOs::calculateLocationEntropy(){
   for(auto it = location_to_user.begin(); it != location_to_user.end(); it++){
@@ -404,56 +431,19 @@ unordered_map<int, double>* GPOs::calculateLocationEntropy(){
   return &location_to_H;
 }
 
-
-void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order){
-  Point* l;
-
-  l = new Point(x, y, lid, uid, time, order);
-
-  locations.push_back(l);
-  auto lh_it = user_to_location.find(uid);
-
-  if( lh_it == user_to_location.end() ){
-    vector<Point* >* pts = new vector<Point*>();
-    pts->push_back(l);
-    user_to_location.insert( make_pair(uid, pts) );
-  } else {
-    vector<Point* >* pts = lh_it->second;
-    pts->push_back(l);
-  }
-
-  auto lu_it = location_to_user.find(lid);
-
-  if( lu_it == location_to_user.end() ){
-    vector<Point* >* pts = new vector<Point*>();
-    pts->push_back(l);
-    location_to_user.insert( make_pair(lid, pts) );
-  } else {
-    vector<Point* >* pts = lu_it->second;
-    pts->push_back(l);
-  }
-
-  grid->addCheckIn(l);
-
-  ids.push_back(lid);
-};
-
+// Range Queries
 map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double radius){
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE;
   vector<res_point*> *points = getRange(x, y, radius_geo_dist);
-
   map<int, res_point*> *result = new map<int, res_point*>();
-
   for(auto p_it = points->begin(); p_it != points->end(); p_it++){
     res_point *p = *p_it;
     result->insert(make_pair(p->oid, p));
   }
-
   return result;
 }
 
 // r1 -> Outer radius, r2 -> inner radius
-// TODO FIX this: NEEDS TO BE DIFFERENCE
 map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double r1, double r2){
   map<int, res_point*> *r1_points = getPointsInRange(x,y,r1);
   map<int, res_point*> *r2_points = getPointsInRange(x,y,r2);
@@ -557,7 +547,6 @@ vector<int>* GPOs::getUsersInRangeAndTimeBlock(double x, double y, double time_b
 vector<int>* GPOs::getUsersInRange(int source, double radius){
   vector<int> *users = new vector<int>();
   auto source_users_checkins_it = user_to_location.find(source);
-
   if(source_users_checkins_it != user_to_location.end()){
     vector< Point* >* source_users_checkins = source_users_checkins_it->second;
 
@@ -573,15 +562,11 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
     // Removing duplicates
     users->erase( unique( users->begin(), users->end() ), users->end() );
   }
-
-  // cout << "List of users in range : [ ";
-  // for (auto i = users->begin(); i != users->end(); ++i)
-  //   cout << *i << ',';
-  // cout << " ] " << endl;
-
   return users;
 }
 
+
+// Spatial Grouping
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int lid, count=0;
@@ -631,20 +616,7 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   generateFrequencyCache();
 }
 
-void GPOs::loadLocationsByDayOfWeek(GPOs* gpos, int day_of_week){
-  vector<Point*>* o_locations = gpos->getLocations();
-  for(auto l_it=o_locations->begin(); l_it != o_locations->end(); l_it++){
-    Point *p = (*l_it);
-    boost::posix_time::ptime l_time = p->getTime();
-
-    if(l_time.date().day_of_week() == day_of_week)
-      loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
-  }
-  cout << "Loaded checkins with day of the week " << day_of_week << endl;
-  cout << "Original data set : " << gpos->location_to_user.size() << endl;
-  cout << "Reduced data set : " << location_to_user.size() << endl;
-  cout << "-------------------------------------------------------" << endl;
-}
+// Perturbation
 
 // Time deviation in seconds
 void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
@@ -708,100 +680,138 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"Average Displacement : "<<(((total_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
 }
 
-//input:  grid cell distance in x direction (say, 100m grid). This value is independent of grid size in headers.h.
-//output: all checkins are snapped to the nearest cell corner.
-void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km){
-  //TODO: create a vistual grid from the input grid dimension = grid_distance_on_x_axis
-  //assign location id to each grid corner = n^2 location ids
-  double grid_distance_on_x_axis_in_geodist = grid_distance_on_x_axis_in_km * 360 / EARTH_CIRCUMFERENCE;
-  double max_x = MAX_X - 0.00001; double max_y = MAX_Y - 0.00001;
-  double min_x = MIN_X + 0.00001; double min_y = MIN_Y + 0.00001;
+void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
+  GPOs* gpos,
+  map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality,
+  map< int, map<int,int>* >* _location_to_user_to_cooccurrences ,
+  double radius, bool isGaussainNoise, int type){
+
+  user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
+  unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
+  unordered_map<int, double>* HiJ_map = gpos->getHiJasMap();
+
+  int lid   = LOCATION_NOISE_BOUND;
+  int new_order = 0;
 
 
-  // Changes the dimensions of the virtual grid to be a square
-  // Note: may cause some checkins to fail in the direction in which the grid is extended.
-  // this happens because the points may get assisgned to grid corners in the virtual grid
-  // that are outside the boundary of the actual grid. (tested on gowalla and found no failed checkins)
-  // if(MAX_X - MIN_X > MAX_Y - MIN_Y){  //adjust in y direction by moving the boundaries equally in the north and the south
-  //   double seperation = (MAX_X - MIN_X) - (MAX_Y - MIN_Y);
-  //   seperation = seperation/2;
-  //   min_y =  MIN_Y - seperation;
-  //   max_y =  MAX_Y + seperation;
+  cout << "Running type ";
+  if(type == 0){
+    cout << "  0.5 * ( expHil + expHiJ ) * expHL * checkin_locality ";
+  } else {
+    cout << "  0.5 * ( expHil + expHiJ ) * expHL * CIL ";
+  }
+  cout << "\tIsGaussian : " << isGaussainNoise << endl;
 
-  // }else if(MAX_X - MIN_X < MAX_Y - MIN_Y){  //vice versa
-  //   double seperation = (MAX_Y - MIN_Y) - (MAX_X - MIN_X);
-  //   seperation = seperation/2;
-  //   min_x =  MIN_X - seperation;
-  //   max_x =  MAX_X + seperation;
-  // }
-  //-----------------------------------------------------
+  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
+    int user_id = u_it->first;
+    vector< Point* > *checkins = u_it->second;
 
-  cout<<"Adjusted MIN_X: "<<min_x<<" MAX_X: "<<max_x<<endl;
-  cout<<"Adjusted MIN_Y: "<<min_y<<" MAX_Y: "<<max_y<<endl;
+    double hiL = 0, hiJ = 0;
 
-  int grid_size = ceil( (max_x - min_x) / grid_distance_on_x_axis_in_geodist ) + 1;
-  double delta_on_x = ((max_x - min_x)/ (grid_size));
-  double delta_on_y = ((max_y - min_y)/ (grid_size));
+    auto hil_it = HiL_map->find(user_id);
+    if(hil_it != HiL_map->end())
+      hiL = hil_it->second;
 
-  cout<<"Grid Size from input cell size: "<< grid_size<<" X "<<grid_size<<endl;
-  cout<<"Adjusted DELTA_X: "<<delta_on_x<<" DELTA_Y : "<<delta_on_y<<endl;
-  cout<<"Adjusted (in meters) DELTA_X: "<<delta_on_x*1000*EARTH_CIRCUMFERENCE/360<<" DELTA_Y : "<<delta_on_y*1000*EARTH_CIRCUMFERENCE/360<<endl;
+    auto hij_it = HiJ_map->find(user_id);
+    if(hij_it != HiJ_map->end())
+      hiL = hij_it->second;
 
-  // int asd = 100;
+    for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
+      Point *p = (*loc_it);
+      int order = p->getOrder();
 
-  //for each checkin do:
-  //  find which cell it belongs to
-  //  get the cell corner which is closest
-  //  load this point to this corner
-  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
-    for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
+      auto entropy_it = gpos->location_to_H.find(p->getID());
+      double entropy = 0;
 
-      // asd--;
-      // if(asd==0){
-      //   exit(-1);
-      // }
+      if(entropy_it != gpos->location_to_H.end())
+        entropy = entropy_it->second;
 
-      Point* p = *loc;
-      int q_x = (int)((p->getX() - min_x)/delta_on_x);
-      int q_y = (int)((p->getY() - min_y)/delta_on_y);
-
-
-      // cout<<"Point cell: "<<q_x<<" , " <<q_y<<endl;
-      // p->printDetails();
-
-      if(q_x >=0 && q_x < grid_size && q_y >=0 && q_y < grid_size){
-        double min_dist = 999;
-        double closest_x;
-        double closest_y;
-        int closest_corner_i,closest_corner_j;
-        for(int i = 0;i < 2;i++){
-          for(int j = 0;j < 2;j++){
-            double distance = util.computeMinimumDistance(p->getX(),p->getY(),min_x+((q_x+i)*delta_on_x), min_y+((q_y+j)*delta_on_y));
-            // cout<<"Corner : "<<i*2+j<<" Coordinate: ("<<min_x+((q_x+i)*delta_on_x)<<" , "<<min_y+((q_y+j)*delta_on_y)<<")"<<endl;
-            // cout<<"Distance: "<<distance*1000*EARTH_CIRCUMFERENCE/360<<" meters"<<endl;
-            if(distance < min_dist){
-              min_dist = distance;
-              closest_x = min_x+((q_x+i)*delta_on_x);
-              closest_y = min_y+((q_y+j)*delta_on_y);
-              closest_corner_i = i;
-              closest_corner_j = j;
-            }
-          }
+      double user_cooccurrenes = 0;
+      auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
+      if(iter_outer!= _location_to_user_to_cooccurrences->end()){
+        map<int,int>* user_to_cooccurrences_map = iter_outer->second;
+        auto iter_inner = user_to_cooccurrences_map->find(user_id);
+        if(iter_inner != user_to_cooccurrences_map->end()){
+          user_cooccurrenes = iter_inner->second;
         }
-        int location_id = ((closest_corner_i + q_x)*grid_size)+( closest_corner_j + q_y);
-        loadPoint(closest_x, closest_y, location_id, u->first, p->getTime(), p->getOrder());
       }
-      else{
-        cout<<"cell out of bounds...check grid size"<<endl;
+
+      double checkin_locality_value = 0;
+      auto iter = user_to_order_to_location_locality->find(user_id);
+      if(iter!=user_to_order_to_location_locality->end()){
+        map<int,pair<int,double > >* order_to_location_locality_map = iter->second;
+        auto iter_inner = order_to_location_locality_map->find(order);
+        if(iter_inner!= order_to_location_locality_map->end()){
+          pair<int,double> p = iter_inner->second;
+          checkin_locality_value = p.second;
+        }
       }
+
+      double expHil=0,expHiJ=0;
+      if(hiL == 0){
+        expHil = 0;
+      }else{
+        expHil = exp(-hiL / HIL_SCALE);
+      }
+
+      if(hiJ == 0){
+        expHiJ = 0;
+      }else{
+        expHiJ = exp(-hiJ / HIJ_SCALE);
+      }
+
+      double expHL = exp(-entropy / HL_SCALE);
+
+      double noise;
+      if(type == 0){
+        noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
+        if(noise != 0)
+          noise = noise + 0.45;
+      } else{
+        noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
+      }
+
+      noise = noise * radius;
+
+
+      pair<double,double> coordinates_with_noise;
+      if(isGaussainNoise){
+        coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
+      } else {
+        coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
+      }
+
+      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+      total_displacement+=displacement;
+
+
+      // Temporal noise
+
+
+      if(noise != 0){
+        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
+        purturbed_count++;
+        lid++;
+      } else {
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
+      };
+
+      new_order++;
+
     }
   }
+  total_displacement = total_displacement * EARTH_CIRCUMFERENCE / 360;
 
+  cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
+  cout<<"Total Displacemnt : "<<  total_displacement <<" in km"<<endl;
+  cout<<"Average Displacemnt : "<< (total_displacement / new_order) * 1000  <<" in meters"<<endl;
+  cout<<"Average Displacemnt based on purturbed_count : "<< (total_displacement / purturbed_count) * 1000 <<" in meters"<<endl;
   generateFrequencyCache();
 }
 
 
+// Compute CoOccurrences
 void GPOs::countU2UCoOccurrences(uint time_block){
   int total_cooccurrences=0;
 
@@ -833,7 +843,6 @@ void GPOs::countU2UCoOccurrences(uint time_block){
           u1Id = temp;
         }
 
-
         int intersection_count = util.countIntersectionWithinTimeBlock(u1_timestamps,u2_timestamps,time_block, false);
 
         if(intersection_count > 0){
@@ -843,7 +852,6 @@ void GPOs::countU2UCoOccurrences(uint time_block){
            cooccured_user_pairs.insert(make_pair( u1Id, u2Id ));
 
           total_cooccurrences += intersection_count;
-
           if(coV_it != cooccurrence_matrix.end()){ //u1 exist in matrix
             map<int, vector<pair<int, int> >*>* inner_map = coV_it->second;
             //fnd user 2 and update the location list with location_id -> intersection count
@@ -1003,85 +1011,6 @@ void GPOs::countU2UCoOccurrences(uint time_block){
   cout << "------ Total Cooccrrences ---------  " << total_cooccurrences << endl;
   cout << "------ User pairs who've co-occurred ---------  " << cooccured_user_pairs.size() << endl;
   cout << "------ User pairs who've co-occurred more than once ---------  " << significantly_cooccured_user_pairs.size() << endl;
-
-  // int count=0;
-
-  // for(auto u=cooccured_user_pairs.begin(); u !=cooccured_user_pairs.end(); u++){
-  //   count++;
-  //   if(count%100000==0)
-  //     cout << count << endl;
-
-  //   int u1Id = u->first;
-  //   int u2Id = u->second;
-
-  //   unordered_map<int, int> *u1Locations = users_locations_frequency_map.find(u1Id)->second;
-  //   unordered_map<int, int> *u2Locations = users_locations_frequency_map.find(u2Id)->second;
-
-  //   vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
-  //   for(auto l = u1Locations->begin(); l != u1Locations->end(); l++){
-  //     auto u2Match = u2Locations->find(l->first);
-  //     if( u2Match != u2Locations->end()){
-  //       int coocc_count = min(u2Match->second, l->second);
-  //       location_freqeuncy_list->push_back(make_pair(l->first, coocc_count));
-  //     }
-  //   }
-
-  //   if(location_freqeuncy_list->size() > 0){
-  //     auto coV_it = cooccurrence_matrix.find(u1Id);
-
-  //     if(coV_it != cooccurrence_matrix.end()){
-  //       map<int, vector<pair<int, int> >*>* inner_map = coV_it->second;
-  //       inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
-  //     }else{
-  //       map<int, vector<pair<int, int> >* >* inner_map = new map<int, vector<pair<int, int> >* >();
-  //       inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
-  //       cooccurrence_matrix.insert(make_pair(u1Id,inner_map));
-  //     }
-  //   }
-  // }
-}
-
-
-map< int, map<int,int>* >* GPOs::getL2U2COOCC(){
-  return location_to_user_to_cooccurrences;
-}
-
-void GPOs::clearNextNN(){
-
-    //	cout << "clearNextNN nextNNList size = " << nextNNList->size() << endl;
-
-    while(!nextNNList->empty()) {
-        delete nextNNList->back();
-        nextNNList->pop_back();
-        //		objects--;
-    }
-
-    //	cout << "clearNextNN nextNNList size = " << nextNNList->size() << " objects = " << objects << endl;
-
-    delete nextNNList;
-
-    //        nextNNList->clear();
-    //        delete nextNNList;
-    nextNNList = new vector<res_point*>();
-    computedNN = returnedNN = finalNextNN = objects = 0;
-    flagNextNN = true;
-
-	pureNNexec = 0;
-}
-
-double GPOs::estimateNearestDistance(double x, double y, int k, double max_radius){
-    return grid->estimateNearestDistance(x,y,k,max_radius);
-}
-
-double GPOs::distanceBetween(Point *a, Point *b){
-  double lat1r, lon1r, lat2r, lon2r, u, v;
-  lat1r = DEG_TO_RAD * a->getY();
-  lon1r = DEG_TO_RAD * a->getX();
-  lat2r = DEG_TO_RAD * b->getY();
-  lon2r = DEG_TO_RAD * b->getX();
-  u = sin((lat2r - lat1r)/2);
-  v = sin((lon2r - lon1r)/2);
-  return 2.0 * EARTH_RADIUS_IN_KILOMETERS * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
 
 int GPOs::getUserCooccurrences(int user_id){
@@ -1099,6 +1028,37 @@ int GPOs::getUserCooccurrences(int user_id){
   return number_of_cooccurrences;
 }
 
+
+// HISTOGRAMS
+void GPOs::printCooccurrenceMatrix(){
+
+  ofstream outfile;
+  outfile.open("cooccurrence_matrix.csv");
+
+  //for each user user compute his total cooccurrences at all locations and users
+  //then iterate again to produce probabilities
+  //then compute shanon entropy
+  for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
+
+    int user_id_1 = it->first;
+    auto map_of_vectors = it->second;
+
+    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
+      int user_id_2 = it_map->first;
+      auto vector_of_locations = it_map->second;
+
+      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
+        // number_of_cooccurrences += it_vector->second;
+        int location_id = it_vector->first;
+
+        outfile << user_id_1 << " " << user_id_2<<" "<<location_id <<" "<< it_vector->second << endl;
+
+      }
+    }
+
+  }
+  outfile.close();
+}
 
 map< int, double >* GPOs::computeTemporalLocality(int max_checkins, double max_radius){
   int counter=0;
@@ -1228,38 +1188,6 @@ unordered_map<int, double>* GPOs::getHiJasMap(){
   return HiJ_histogram;
 }
 
-
-void GPOs::printCooccurrenceMatrix(){
-
-  ofstream outfile;
-  outfile.open("cooccurrence_matrix.csv");
-
-  //for each user user compute his total cooccurrences at all locations and users
-  //then iterate again to produce probabilities
-  //then compute shanon entropy
-  for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
-
-    int user_id_1 = it->first;
-    auto map_of_vectors = it->second;
-
-    for(auto it_map = map_of_vectors->begin(); it_map != map_of_vectors->end(); it_map++){
-      int user_id_2 = it_map->first;
-      auto vector_of_locations = it_map->second;
-
-      for(auto it_vector = vector_of_locations->begin(); it_vector!= vector_of_locations->end();it_vector++){
-        // number_of_cooccurrences += it_vector->second;
-        int location_id = it_vector->first;
-
-        outfile << user_id_1 << " " << user_id_2<<" "<<location_id <<" "<< it_vector->second << endl;
-
-      }
-    }
-
-  }
-  outfile.close();
-}
-
-
 unordered_map< int, map< int, map<int, double >* >* >* GPOs::getPltMap(double time_block, int max_checkins, double max_radius){
   unordered_map< int, map< int, map<int, double >* >* >* Plt_histogram = new unordered_map< int, map< int, map<int, double >* >* >();
 
@@ -1345,7 +1273,6 @@ unordered_map< int, map< int, map<int, double >* >* >* GPOs::getPltMap(double ti
   return Plt_histogram;
 }
 
-
 unordered_map<int, double>* GPOs::getHlLasMap(){
   map<int, map<int,int>* > location_to_user_coocc_map;
   unordered_map<int, double>* HlL_histogram = new unordered_map<int, double>();
@@ -1426,136 +1353,145 @@ unordered_map<int, double>* GPOs::getHlLasMap(){
 }
 
 
-void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
-  GPOs* gpos,
-  map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality,
-  map< int, map<int,int>* >* _location_to_user_to_cooccurrences ,
-  double radius, bool isGaussainNoise, int type){
+// UNUSED
+void GPOs::loadLocationsByDayOfWeek(GPOs* gpos, int day_of_week){
+  vector<Point*>* o_locations = gpos->getLocations();
+  for(auto l_it=o_locations->begin(); l_it != o_locations->end(); l_it++){
+    Point *p = (*l_it);
+    boost::posix_time::ptime l_time = p->getTime();
 
-  user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
-  unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
-  unordered_map<int, double>* HiJ_map = gpos->getHiJasMap();
-
-  int lid   = LOCATION_NOISE_BOUND;
-  int new_order = 0;
-
-
-  cout << "Running type ";
-  if(type == 0){
-    cout << "  0.5 * ( expHil + expHiJ ) * expHL * checkin_locality ";
-  } else {
-    cout << "  0.5 * ( expHil + expHiJ ) * expHL * CIL ";
+    if(l_time.date().day_of_week() == day_of_week)
+      loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
   }
-  cout << "\tIsGaussian : " << isGaussainNoise << endl;
+  cout << "Loaded checkins with day of the week " << day_of_week << endl;
+  cout << "Original data set : " << gpos->location_to_user.size() << endl;
+  cout << "Reduced data set : " << location_to_user.size() << endl;
+  cout << "-------------------------------------------------------" << endl;
+}
 
-  for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
+//input:  grid cell distance in x direction (say, 100m grid). This value is independent of grid size in headers.h.
+//output: all checkins are snapped to the nearest cell corner.
+void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km){
+  //TODO: create a vistual grid from the input grid dimension = grid_distance_on_x_axis
+  //assign location id to each grid corner = n^2 location ids
+  double grid_distance_on_x_axis_in_geodist = grid_distance_on_x_axis_in_km * 360 / EARTH_CIRCUMFERENCE;
+  double max_x = MAX_X - 0.00001; double max_y = MAX_Y - 0.00001;
+  double min_x = MIN_X + 0.00001; double min_y = MIN_Y + 0.00001;
 
-    int user_id = u_it->first;
-    vector< Point* > *checkins = u_it->second;
 
-    double hiL = 0, hiJ = 0;
+  // Changes the dimensions of the virtual grid to be a square
+  // Note: may cause some checkins to fail in the direction in which the grid is extended.
+  // this happens because the points may get assisgned to grid corners in the virtual grid
+  // that are outside the boundary of the actual grid. (tested on gowalla and found no failed checkins)
+  // if(MAX_X - MIN_X > MAX_Y - MIN_Y){  //adjust in y direction by moving the boundaries equally in the north and the south
+  //   double seperation = (MAX_X - MIN_X) - (MAX_Y - MIN_Y);
+  //   seperation = seperation/2;
+  //   min_y =  MIN_Y - seperation;
+  //   max_y =  MAX_Y + seperation;
 
-    auto hil_it = HiL_map->find(user_id);
-    if(hil_it != HiL_map->end())
-      hiL = hil_it->second;
+  // }else if(MAX_X - MIN_X < MAX_Y - MIN_Y){  //vice versa
+  //   double seperation = (MAX_Y - MIN_Y) - (MAX_X - MIN_X);
+  //   seperation = seperation/2;
+  //   min_x =  MIN_X - seperation;
+  //   max_x =  MAX_X + seperation;
+  // }
+  //-----------------------------------------------------
 
-    auto hij_it = HiJ_map->find(user_id);
-    if(hij_it != HiJ_map->end())
-      hiL = hij_it->second;
 
-    for(auto loc_it = checkins->begin(); loc_it != checkins->end(); loc_it++){
-      Point *p = (*loc_it);
-      int order = p->getOrder();
+  cout<<"Adjusted MIN_X: "<<min_x<<" MAX_X: "<<max_x<<endl;
+  cout<<"Adjusted MIN_Y: "<<min_y<<" MAX_Y: "<<max_y<<endl;
 
-      auto entropy_it = gpos->location_to_H.find(p->getID());
-      double entropy = 0;
+  int grid_size = ceil( (max_x - min_x) / grid_distance_on_x_axis_in_geodist ) + 1;
+  double delta_on_x = ((max_x - min_x)/ (grid_size));
+  double delta_on_y = ((max_y - min_y)/ (grid_size));
 
-      if(entropy_it != gpos->location_to_H.end())
-        entropy = entropy_it->second;
+  cout<<"Grid Size from input cell size: "<< grid_size<<" X "<<grid_size<<endl;
+  cout<<"Adjusted DELTA_X: "<<delta_on_x<<" DELTA_Y : "<<delta_on_y<<endl;
+  cout<<"Adjusted (in meters) DELTA_X: "<<delta_on_x*1000*EARTH_CIRCUMFERENCE/360<<" DELTA_Y : "<<delta_on_y*1000*EARTH_CIRCUMFERENCE/360<<endl;
 
-      double user_cooccurrenes = 0;
-      auto iter_outer = _location_to_user_to_cooccurrences->find(p->getID());
-      if(iter_outer!= _location_to_user_to_cooccurrences->end()){
-        map<int,int>* user_to_cooccurrences_map = iter_outer->second;
-        auto iter_inner = user_to_cooccurrences_map->find(user_id);
-        if(iter_inner != user_to_cooccurrences_map->end()){
-          user_cooccurrenes = iter_inner->second;
+  // int asd = 100;
+
+  //for each checkin do:
+  //  find which cell it belongs to
+  //  get the cell corner which is closest
+  //  load this point to this corner
+  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
+    for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
+
+      // asd--;
+      // if(asd==0){
+      //   exit(-1);
+      // }
+
+      Point* p = *loc;
+      int q_x = (int)((p->getX() - min_x)/delta_on_x);
+      int q_y = (int)((p->getY() - min_y)/delta_on_y);
+
+
+      // cout<<"Point cell: "<<q_x<<" , " <<q_y<<endl;
+      // p->printDetails();
+
+      if(q_x >=0 && q_x < grid_size && q_y >=0 && q_y < grid_size){
+        double min_dist = 999;
+        double closest_x;
+        double closest_y;
+        int closest_corner_i,closest_corner_j;
+        for(int i = 0;i < 2;i++){
+          for(int j = 0;j < 2;j++){
+            double distance = util.computeMinimumDistance(p->getX(),p->getY(),min_x+((q_x+i)*delta_on_x), min_y+((q_y+j)*delta_on_y));
+            // cout<<"Corner : "<<i*2+j<<" Coordinate: ("<<min_x+((q_x+i)*delta_on_x)<<" , "<<min_y+((q_y+j)*delta_on_y)<<")"<<endl;
+            // cout<<"Distance: "<<distance*1000*EARTH_CIRCUMFERENCE/360<<" meters"<<endl;
+            if(distance < min_dist){
+              min_dist = distance;
+              closest_x = min_x+((q_x+i)*delta_on_x);
+              closest_y = min_y+((q_y+j)*delta_on_y);
+              closest_corner_i = i;
+              closest_corner_j = j;
+            }
+          }
         }
+        int location_id = ((closest_corner_i + q_x)*grid_size)+( closest_corner_j + q_y);
+        loadPoint(closest_x, closest_y, location_id, u->first, p->getTime(), p->getOrder());
       }
-
-      double checkin_locality_value = 0;
-      auto iter = user_to_order_to_location_locality->find(user_id);
-      if(iter!=user_to_order_to_location_locality->end()){
-        map<int,pair<int,double > >* order_to_location_locality_map = iter->second;
-        auto iter_inner = order_to_location_locality_map->find(order);
-        if(iter_inner!= order_to_location_locality_map->end()){
-          pair<int,double> p = iter_inner->second;
-          checkin_locality_value = p.second;
-        }
+      else{
+        cout<<"cell out of bounds...check grid size"<<endl;
       }
-
-      double expHil=0,expHiJ=0;
-      if(hiL == 0){
-        expHil = 0;
-      }else{
-        expHil = exp(-hiL / HIL_SCALE);
-      }
-
-      if(hiJ == 0){
-        expHiJ = 0;
-      }else{
-        expHiJ = exp(-hiJ / HIJ_SCALE);
-      }
-
-      double expHL = exp(-entropy / HL_SCALE);
-
-      double noise;
-      if(type == 0){
-        noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
-        // Offset
-        if(noise != 0)
-          noise = noise + 0.45;
-      } else{
-        noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
-        // Offset
-        // if(noise != 0)
-        //   noise = noise + 0.25;
-      }
-
-      noise = noise * radius;
-
-
-      pair<double,double> coordinates_with_noise;
-      if(isGaussainNoise){
-        coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise);
-      } else {
-        coordinates_with_noise = util.addNoise(p->getX(), p->getY(), noise);
-      }
-
-      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-      total_displacement+=displacement;
-
-
-      // Temporal noise
-
-
-      if(noise != 0){
-        loadPoint(coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder());
-        purturbed_count++;
-        lid++;
-      } else {
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
-      };
-
-      new_order++;
-
     }
   }
-  total_displacement = total_displacement * EARTH_CIRCUMFERENCE / 360;
 
-  cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
-  cout<<"Total Displacemnt : "<<  total_displacement <<" in km"<<endl;
-  cout<<"Average Displacemnt : "<< (total_displacement / new_order) * 1000  <<" in meters"<<endl;
-  cout<<"Average Displacemnt based on purturbed_count : "<< (total_displacement / purturbed_count) * 1000 <<" in meters"<<endl;
   generateFrequencyCache();
 }
+
+void GPOs::clearNextNN(){
+  //  cout << "clearNextNN nextNNList size = " << nextNNList->size() << endl;
+  while(!nextNNList->empty()) {
+    delete nextNNList->back();
+    nextNNList->pop_back();
+    //    objects--;
+  }
+  //  cout << "clearNextNN nextNNList size = " << nextNNList->size() << " objects = " << objects << endl;
+  delete nextNNList;
+  //        nextNNList->clear();
+  //        delete nextNNList;
+  nextNNList = new vector<res_point*>();
+  computedNN = returnedNN = finalNextNN = objects = 0;
+  flagNextNN = true;
+ pureNNexec = 0;
+}
+
+double GPOs::estimateNearestDistance(double x, double y, int k, double max_radius){
+  return grid->estimateNearestDistance(x,y,k,max_radius);
+}
+
+double GPOs::distanceBetween(Point *a, Point *b){
+  double lat1r, lon1r, lat2r, lon2r, u, v;
+  lat1r = DEG_TO_RAD * a->getY();
+  lon1r = DEG_TO_RAD * a->getX();
+  lat2r = DEG_TO_RAD * b->getY();
+  lon2r = DEG_TO_RAD * b->getX();
+  u = sin((lat2r - lat1r)/2);
+  v = sin((lon2r - lon1r)/2);
+  return 2.0 * EARTH_RADIUS_IN_KILOMETERS * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+
+
