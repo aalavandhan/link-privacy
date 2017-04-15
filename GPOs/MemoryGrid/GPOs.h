@@ -123,6 +123,7 @@ public:
         map< int, double >* order_to_temporal_locality,
         map< int, map<int,int>* >* _location_to_user_to_cooccurrences,
         double radius,
+        uint time_deviation,
         bool add_spatial,
         bool add_temporal);
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);

@@ -241,8 +241,20 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
       // user_to_precision_recall.insert(make_pair(user,make_pair(0,0)));
     }
   }
+  double res_precision = precision/(double)sum_of_weights_precision;
+  double res_recall    = recall/(double)sum_of_weights_recall;
+  double f1 = 2 * res_precision * res_recall / (res_precision + res_recall);
 
-  cout << "areFriends : " << areFriends <<" Cooccurrence Basic Weighted Mean Precision: "<<precision/(double)sum_of_weights_precision <<" Recall: "<<recall/(double)sum_of_weights_recall<<endl;
+  if(areFriends){
+    cout << "are_freinds_basic_metric_precision{{" << res_precision << "}}" << endl;
+    cout << "are_freinds_basic_metric_recall{{" << res_recall << "}}" << endl;
+    cout << "are_freinds_basic_metric_f1{{" << f1 << "}}" << endl;
+  } else {
+    cout << "basic_metric_precision{{" << res_precision << "}}" << endl;
+    cout << "basic_metric_recall{{" << res_recall << "}}" << endl;
+    cout << "basic_metric_f1{{" << f1 << "}}" << endl;
+  }
+
 
   // for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
   //   auto precision_recall_pair = it->second;
@@ -320,7 +332,7 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
 }
 
-void CombinationNoiseVsEBM(double noise_radius, bool add_spatial, bool add_temporal){
+void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -338,7 +350,9 @@ void CombinationNoiseVsEBM(double noise_radius, bool add_spatial, bool add_tempo
     tmp_spos->loadCheckinLocalityFromFile(),
     tmp_spos->loadTemporalLocalityFromFile(),
     baseGPOs->getL2U2COOCC(),
-    noise_radius, add_spatial, add_temporal);
+    noise_radius,
+    (uint) time_deviation,
+    add_spatial, add_temporal);
   cout << "------------- Locations perturbed -------------------" << endl;
 
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
@@ -587,7 +601,7 @@ int main(int argc, char *argv[]){
       } else {
         cout << "Invalid option" << endl;
       }
-      CombinationNoiseVsEBM(noise_radius, add_spatial, add_temporal);
+      CombinationNoiseVsEBM(noise_radius, time_deviation, add_spatial, add_temporal);
       break;
     }
 

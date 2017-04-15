@@ -342,15 +342,15 @@ void SimpleQueries::computeAccuracyOfSocialStrength(double precision_limit){
   }
 
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Number of correct friendships inferred " << true_positive << endl;
-  cout << "Number of  friendships inferred " << postitive << endl;
-  cout << "Number of friendships with more than one cooccrrences " << gt << endl;
-  cout << "Number of friendships " << nFriends << endl;
-  cout << "Threshold : " << i << endl;
-  cout << "Precision : " << precision << endl;
-  cout << "Recall : " << recall << endl;
-  cout << "F1 Score  :" << f1   << endl;
-  cout << "Mean Score : " << mean_score << endl;
+  cout << "number_of_correct_friendships_inferred{{" << true_positive << "}}" << endl;
+  cout << "number_of_friendships_inferred{{" << postitive << "}}" << endl;
+  cout << "number_of_friendships_with_2_or_more_cooccurrences{{" << gt << "}}" << endl;
+  cout << "number_of_friendships{{" << nFriends << "}}" << endl;
+  cout << "threshold{{" << i << "}}" << endl;
+  cout << "precision{{" << precision << "}}" << endl;
+  cout << "recall{{" << recall << "}}" << endl;
+  cout << "f1{{" << f1   << "}}" << endl;
+  cout << "mean_f1{{" << mean_score << "}}" << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
