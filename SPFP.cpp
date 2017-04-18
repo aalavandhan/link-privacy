@@ -130,9 +130,9 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  // for(double i = 0; i < 25; i = i + 0.1){
-  //   query->verifySocialStrength(i);
-  // }
+  //for(double i = 0; i < 25; i = i + 0.1){
+  //  query->verifySocialStrength(i);
+  //}
   query->computeAccuracyOfSocialStrength(0.80);
 }
 
