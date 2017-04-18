@@ -21,11 +21,16 @@ int MAXSC = 0;                // maximum number of friends plus one
 double MAXDIST = 50;        // maximum distance between to points
 int MAXT = 0;
 
-
-// EBM CONSTANTS
-double ALPHA = 0.480;
+// EBM CONSTANTS FOR GOWALLA FULL
+double ALPHA = 0.55;
 double GAMMA = 0;
-double BETA = 0.520;
+double BETA  = 0.45;
+
+// EBM CONSTANTS FOR GOWALLA
+// double ALPHA = 0.480;
+// double GAMMA = 0;
+// double BETA  = 0.520;
+
 double RENY_Q=0.1; // Order of diversity
 // int TIME_RANGE_IN_SECONDS = 1200;
 
@@ -120,6 +125,29 @@ void runUtilities(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
   // runRangeUtility(purturbedGPOs, baseGPOs, spos);
   // runProximityUtility(purturbedGPOs, baseGPOs, spos);
 }
+
+
+void runEBMWithoutGroundTruth(){
+  bool preload_LE  = true;
+  bool preload_OCC = true;
+
+  GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = new SPOs(); // Dummy spos
+
+  SimpleQueries* query = new SimpleQueries(gpos, spos);
+
+  cout << "----- Precomputing matrices --- " << endl;
+  query->buildMatrices(RENY_Q);
+
+  cout << "----- Calculating Social Strength --- " << endl;
+  query->cacluateSocialStrength();
+
+  // Compute stats: Number of Friendships inferred vs Threshold
+  for(double i = 0; i < 5; i = i + 0.25){
+    query->countEBMInferredFriendships(i);
+  }
+}
+
 
 void runEBM(GPOs *gpos, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(gpos, spos);
@@ -241,8 +269,20 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *
       // user_to_precision_recall.insert(make_pair(user,make_pair(0,0)));
     }
   }
+  double res_precision = precision/(double)sum_of_weights_precision;
+  double res_recall    = recall/(double)sum_of_weights_recall;
+  double f1 = 2 * res_precision * res_recall / (res_precision + res_recall);
 
-  cout << "areFriends : " << areFriends <<" Cooccurrence Basic Weighted Mean Precision: "<<precision/(double)sum_of_weights_precision <<" Recall: "<<recall/(double)sum_of_weights_recall<<endl;
+  if(areFriends){
+    cout << "are_freinds_basic_metric_precision{{" << res_precision << "}}" << endl;
+    cout << "are_freinds_basic_metric_recall{{" << res_recall << "}}" << endl;
+    cout << "are_freinds_basic_metric_f1{{" << f1 << "}}" << endl;
+  } else {
+    cout << "basic_metric_precision{{" << res_precision << "}}" << endl;
+    cout << "basic_metric_recall{{" << res_recall << "}}" << endl;
+    cout << "basic_metric_f1{{" << f1 << "}}" << endl;
+  }
+
 
   // for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
   //   auto precision_recall_pair = it->second;
@@ -264,7 +304,6 @@ void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *sp
     runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, true);
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
-
 }
 
 void plainEBM(){
@@ -320,7 +359,7 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
 }
 
-void CombinationNoiseVsEBM(double noise_radius, bool add_spatial, bool add_temporal){
+void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -338,7 +377,9 @@ void CombinationNoiseVsEBM(double noise_radius, bool add_spatial, bool add_tempo
     tmp_spos->loadCheckinLocalityFromFile(),
     tmp_spos->loadTemporalLocalityFromFile(),
     baseGPOs->getL2U2COOCC(),
-    noise_radius, add_spatial, add_temporal);
+    noise_radius,
+    (uint) time_deviation,
+    add_spatial, add_temporal);
   cout << "------------- Locations perturbed -------------------" << endl;
 
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
@@ -463,7 +504,7 @@ int main(int argc, char *argv[]){
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
 
   if (argc != 12){
-    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
+    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz|ebm-without-gt] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
     return -1;
   }
 
@@ -479,6 +520,9 @@ int main(int argc, char *argv[]){
     iteration_type = 3;
   else if (strcmp(argv[4], "comb-v-ebm") == 0)
     iteration_type = 4;
+
+  else if (strcmp(argv[4], "ebm-without-gt") == 0)
+    iteration_type = 5;
 
   else if (strcmp(argv[4], "occ-hist") == 0)
     iteration_type = 90;
@@ -587,7 +631,18 @@ int main(int argc, char *argv[]){
       } else {
         cout << "Invalid option" << endl;
       }
-      CombinationNoiseVsEBM(noise_radius, add_spatial, add_temporal);
+      CombinationNoiseVsEBM(noise_radius, time_deviation, add_spatial, add_temporal);
+      break;
+    }
+
+    case 5:{
+      cout << "ITRATION: Running EBM without ground truth" << endl;
+      noise_radius            = 0;
+      time_deviation          = 0;
+      group_radius            = 0;
+      time_range_in_seconds   = p4;
+      printParameters();
+      runEBMWithoutGroundTruth();
       break;
     }
 

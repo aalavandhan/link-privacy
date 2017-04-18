@@ -14,6 +14,7 @@ public:
     ~SimpleQueries();
 
     map<int, map<int, double>*> cacluateSocialStrength();
+    void countEBMInferredFriendships(double tresh);
     void verifySocialStrength(double tresh);
     void buildMatrices(double q);
     int countCooccurredFriends();

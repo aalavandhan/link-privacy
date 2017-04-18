@@ -789,7 +789,7 @@ map< int, map<int, pair<int,double>>* >* SPOs::computeCheckinLocalityMap(GPOs* g
     unordered_set<int>* friends = f_it->second;
 
     // Debug:
-    cout << source_user_id << " " << friends->size() << " " << location_vector->size() << endl;
+    // cout << source_user_id << " " << friends->size() << " " << location_vector->size() << endl;
 
     for(auto loc = location_vector->begin(); loc != location_vector->end(); loc++){
       Point* p = *loc;

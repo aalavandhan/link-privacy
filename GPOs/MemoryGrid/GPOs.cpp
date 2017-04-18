@@ -686,6 +686,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   map< int, double >*  temporal_locality_map,
   map< int, map<int,int>* >* _location_to_user_to_cooccurrences,
   double radius,
+  uint time_deviation,
   bool add_spatial,
   bool add_temporal){
 
@@ -756,7 +757,6 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
       if(tl_it != temporal_locality_map->end())
         temporal_locality_value = tl_it->second;
 
-
       double expHil=0,expHiJ=0;
       if(hiL == 0){
         expHil = 0;
@@ -783,7 +783,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), spatial_noise);
 
       // Temporal noise
-      double temporal_noise = temporal_locality_value * checkin_locality_value;
+      double temporal_noise = (temporal_locality_value * checkin_locality_value) * (double) time_deviation;
 
       // Temporal perturbation
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), temporal_noise);
@@ -823,20 +823,20 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   }
   total_spatial_displacement = total_spatial_displacement * EARTH_CIRCUMFERENCE / 360;
 
-  cout<<"Number of checkins purtubed : "<< purturbed_count << endl;
-  cout<<"Number of checkins spatially purtubed : "<< spatial_purturbed_count   << endl;
-  cout<<"Number of checkins temporally purtubed : "<< temporal_purturbed_count << endl;
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
+  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
 
   if(add_spatial){
-    cout<<"Total Spatial Displacemnt : "<<  total_spatial_displacement <<" in km"<<endl;
-    cout<<"Average Spatial Displacemnt : "<< (total_spatial_displacement / point_count) * 1000  <<" in meters"<<endl;
-    cout<<"Average Spatial Displacemnt based on spatial_purturbed_count : "<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<" in meters"<<endl;
+    cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
+    cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
+    cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
   }
 
   if(add_temporal){
-    cout<<"Total Temporal Displacement : "<< total_time_displacement/3600.0 <<" hours"<<endl;
-    cout<<"Average Temporal Displacement : "<< total_time_displacement/3600.0  * (1/(float)point_count) <<" hours"<<endl;
-    cout<<"Average Temporal Displacement based on temporal_purturbed_count: "<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<" hours"<<endl;
+    cout<<"total_temporal_displacement{{"<< total_time_displacement/3600.0 <<"}} hours"<<endl;
+    cout<<"average_temporal_displacement{{"<< total_time_displacement/3600.0  * (1/(float)point_count) <<"}} hours"<<endl;
+    cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
   }
 
   generateFrequencyCache();
@@ -1038,11 +1038,10 @@ void GPOs::countU2UCoOccurrences(uint time_block){
       }
     }
   }
-
-  cout << "Number of users with alteast once cooccurrence : " << cooccurrence_matrix.size() << endl;
-  cout << "------ Total Cooccrrences ---------  " << total_cooccurrences << endl;
-  cout << "------ User pairs who've co-occurred ---------  " << cooccured_user_pairs.size() << endl;
-  cout << "------ User pairs who've co-occurred more than once ---------  " << significantly_cooccured_user_pairs.size() << endl;
+  cout << "users_with_atleast_one_cooccurrence{{" << cooccurrence_matrix.size() << "}}" << endl;
+  cout << "total_cooccurrence{{" << total_cooccurrences << "}}" << endl;
+  cout << "cooccurred_user_paris{{" << cooccured_user_pairs.size() << "}}" << endl;
+  cout << "significantly_cooccurred_user_paris{{" << significantly_cooccured_user_pairs.size() << "}}" << endl;
 }
 
 int GPOs::getUserCooccurrences(int user_id){
