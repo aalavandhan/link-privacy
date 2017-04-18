@@ -29,14 +29,14 @@
 # Only spatial noise function
 for spatial_noise in 100 200 300 400 500 600 700; do
   for spatial_grouping in 0 0.5 1 1.5 2 2.5 3; do
-    ./SPFP data_GowallaFull/socialGraph.txt data_GowallaFull/checkins.txt queries.txt comb-v-ebm 1 $spatial_noise 0 $(( $spatial_noise * $spatial_grouping )) 1200 0 0 > gowalla-full-experiments/comb-spatial-$spatial_noise-$spatial_grouping
+    ./SPFP data_GowallaFull/socialGraph.txt data_GowallaFull/checkins.txt queries.txt comb-v-ebm 1 $spatial_noise 0 $(( $spatial_noise * $spatial_grouping )) 1200 1 0 > gowalla-full-experiments/comb-spatial-$spatial_noise-$spatial_grouping
   done
 done
 
 # Only temporal noise function ( Minutes )
 for temporal_noise in 0 20 40 60 80 100 120 140 160; do
   for time_grouping in 0 0.5 1 1.5 2 2.5 3; do
-    ./SPFP data_GowallaFull/socialGraph.txt data_GowallaFull/checkins.txt queries.txt comb-v-ebm 2 0 $(( $temporal_noise * 60 )) 0 $(( $temporal_noise * $time_grouping * 60 )) 0 0 > gowalla-full-experiments/comb-temporal-$temporal_noise-$time_grouping
+    ./SPFP data_GowallaFull/socialGraph.txt data_GowallaFull/checkins.txt queries.txt comb-v-ebm 1 0 $(( $temporal_noise * 60 )) 0 $(( $temporal_noise * $time_grouping * 60 )) 2 0 > gowalla-full-experiments/comb-temporal-$temporal_noise-$time_grouping
   done
 done
 

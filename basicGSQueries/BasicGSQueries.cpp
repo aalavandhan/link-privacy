@@ -300,8 +300,8 @@ bool SimpleQueries::areTrueEBMFriends(int source, int target, double tresh){
 void SimpleQueries::computeAccuracyOfSocialStrength(double precision_limit){
 
   double prev_precision = 0, precision, recall, mean_score, f1, i;
-  int postitive, true_positive, gt, total_score, nFriends;
-  double tresh;
+  int postitive, true_positive, gt, nFriends;
+  double tresh, total_score;
 
   // gt = countCooccurredFriends();
   gt = RECALL_BOUND;
@@ -350,13 +350,37 @@ void SimpleQueries::computeAccuracyOfSocialStrength(double precision_limit){
   cout << "precision{{" << precision << "}}" << endl;
   cout << "recall{{" << recall << "}}" << endl;
   cout << "f1{{" << f1   << "}}" << endl;
-  cout << "mean_f1{{" << mean_score << "}}" << endl;
+  cout << "mean_score{{" << mean_score << "}}" << endl;
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
+void SimpleQueries::countEBMInferredFriendships(double tresh){
+  int postitive=0;
+  double total_score=0;
+
+  for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
+    auto user_ss_list = s_it->second;
+    for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
+      if(ss_it->second >= tresh){
+        postitive++;
+        total_score += ss_it->second;
+      }
+    }
+  }
+
+  double mean_score    = total_score / (double) postitive;
+
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "number_of_friendships_inferred{{" << postitive << "}}" << endl;
+  cout << "threshold{{" << tresh << "}}" << endl;
+  cout << "mean_score{{" << mean_score << "}}" << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
 void SimpleQueries::verifySocialStrength(double tresh){
 
-  int postitive=0, true_positive=0, gt = countCooccurredFriends(), total_score=0, nFriends=spos->getNumberOfFriends();
+  int postitive=0, true_positive=0, gt = countCooccurredFriends(), nFriends=spos->getNumberOfFriends();
+  double total_score=0;
 
   for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
     int user_1 = s_it->first;
