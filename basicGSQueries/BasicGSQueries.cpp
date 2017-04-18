@@ -408,6 +408,7 @@ void SimpleQueries::verifySocialStrength(double tresh){
   double recall    = true_positive / (double) RECALL_BOUND;
   double mean_score    = total_score / (double) postitive;
   double f1 = 2 * precision * recall / ( precision + recall );
+  cout << "Treshold :" << tresh << endl;
   cout << "Precision : " << precision << endl;
   cout << "Recall : " << recall << endl;
   cout << "F1 Score  :" << f1   << endl;
