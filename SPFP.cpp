@@ -14,6 +14,11 @@ double MAX_X = -66.885444;
 double MIN_Y = 24.396308;
 double MAX_Y = 49.384358;
 
+// double MIN_X = 120.711564;
+// double MAX_X = 122.222184;
+// double MIN_Y = 30.343011;
+// double MAX_Y = 32.417996;
+
 double DATASET_SIZE = 3661488;
 double DELTA_X = 0;
 double DELTA_Y = 0;
@@ -22,14 +27,14 @@ double MAXDIST = 50;        // maximum distance between to points
 int MAXT = 0;
 
 // EBM CONSTANTS FOR GOWALLA FULL
-double ALPHA = 0.55;
-double GAMMA = 0;
-double BETA  = 0.45;
+// double ALPHA = 0.55;
+// double GAMMA = 0;
+// double BETA  = 0.45;
 
 // EBM CONSTANTS FOR GOWALLA
-// double ALPHA = 0.480;
-// double GAMMA = 0;
-// double BETA  = 0.520;
+double ALPHA = 0.480;
+double GAMMA = 0;
+double BETA  = 0.520;
 
 double RENY_Q=0.1; // Order of diversity
 // int TIME_RANGE_IN_SECONDS = 1200;
@@ -143,7 +148,7 @@ void runEBMWithoutGroundTruth(){
   query->cacluateSocialStrength();
 
   // Compute stats: Number of Friendships inferred vs Threshold
-  for(double i = 0; i < 5; i = i + 0.25){
+  for(double i = 0; i < 10; i = i + 0.1){
     query->countEBMInferredFriendships(i);
   }
 }
@@ -158,11 +163,9 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  for(double i = 0; i < 5; i = i + 0.1){
+  for(double i = 0; i < 10; i = i + 0.1){
    query->verifySocialStrength(i);
   }
-
-
   query->computeAccuracyOfSocialStrength(0.80);
 }
 
@@ -506,7 +509,7 @@ int main(int argc, char *argv[]){
   DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
 
   if (argc != 12){
-    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz|ebm-without-gt] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
+    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz|ebm-without-gt|compute-social-graph] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
     return -1;
   }
 
@@ -536,6 +539,9 @@ int main(int argc, char *argv[]){
     iteration_type = 93;
   else if (strcmp(argv[4], "query-metrics") == 0)
     iteration_type = 94;
+
+  else if (strcmp(argv[4], "compute-social-graph") == 0)
+    iteration_type = 95;
 
   else
     iteration_type = -1;
@@ -746,6 +752,31 @@ int main(int argc, char *argv[]){
     case 94:{
       printParameters();
       checkQueryFileStats();
+    }
+
+    case 95:{
+      cout << "Additional: Generate Social Graph" << endl;
+
+      social_strength_tresh = p1;
+
+      bool preload_LE  = true;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = new SPOs(); // Dummy spos
+
+      SimpleQueries* query = new SimpleQueries(gpos, spos);
+
+      cout << "----- Precomputing matrices --- " << endl;
+      query->buildMatrices(RENY_Q);
+
+      cout << "----- Calculating Social Strength --- " << endl;
+      query->cacluateSocialStrength();
+
+      cout << "--- Computing social graph -- " << endl;
+      query->generateSocialGraph(social_strength_tresh);
+
+      break;
     }
 
     default:

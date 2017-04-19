@@ -342,15 +342,15 @@ void SimpleQueries::computeAccuracyOfSocialStrength(double precision_limit){
   }
 
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "number_of_correct_friendships_inferred{{" << true_positive << "}}" << endl;
-  cout << "number_of_friendships_inferred{{" << postitive << "}}" << endl;
-  cout << "number_of_friendships_with_2_or_more_cooccurrences{{" << gt << "}}" << endl;
-  cout << "number_of_friendships{{" << nFriends << "}}" << endl;
-  cout << "threshold{{" << i << "}}" << endl;
-  cout << "precision{{" << precision << "}}" << endl;
-  cout << "recall{{" << recall << "}}" << endl;
-  cout << "f1{{" << f1   << "}}" << endl;
-  cout << "mean_score{{" << mean_score << "}}" << endl;
+  cout << "final_number_of_correct_friendships_inferred{{" << true_positive << "}}" << endl;
+  cout << "final_number_of_friendships_inferred{{" << postitive << "}}" << endl;
+  cout << "final_number_of_friendships_with_2_or_more_cooccurrences{{" << gt << "}}" << endl;
+  cout << "final_number_of_friendships{{" << nFriends << "}}" << endl;
+  cout << "final_threshold{{" << i << "}}" << endl;
+  cout << "final_precision{{" << precision << "}}" << endl;
+  cout << "final_recall{{" << recall << "}}" << endl;
+  cout << "final_f1{{" << f1   << "}}" << endl;
+  cout << "final_mean_score{{" << mean_score << "}}" << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
@@ -377,6 +377,38 @@ void SimpleQueries::countEBMInferredFriendships(double tresh){
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
+void SimpleQueries::generateSocialGraph(double tresh){
+  ofstream outfile;
+  outfile.open("generatedSocailGraph.txt");
+  for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
+    int user_1 = s_it->first;
+    auto user_ss_list = s_it->second;
+
+
+    vector<int> friends;
+
+    for(auto ss_it = user_ss_list->begin(); ss_it!= user_ss_list->end();ss_it++){
+      int user_2 = ss_it->first;
+      if(ss_it->second >= tresh){
+        friends.push_back(user_2);
+      }
+    }
+
+    if(friends.size() == 0)
+      continue;
+
+    outfile << user_1 << " ";
+    outfile << friends.size();
+
+    for(auto u_it = friends.begin(); u_it != friends.end(); ++u_it) {
+      outfile << " " << *u_it;
+    }
+
+    outfile << endl;
+  }
+  outfile.close();
+}
+
 void SimpleQueries::verifySocialStrength(double tresh){
 
   int postitive=0, true_positive=0, gt = countCooccurredFriends(), nFriends=spos->getNumberOfFriends();
@@ -399,20 +431,21 @@ void SimpleQueries::verifySocialStrength(double tresh){
     }
   }
 
-  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Number of correct friendships inferred " << true_positive << endl;
-  cout << "Number of  friendships inferred " << postitive << endl;
-  cout << "Number of friendships with more than one cooccrrences " << gt << endl;
-  cout << "Number of friendships " << nFriends << endl;
   double precision = true_positive / (double) postitive;
-  double recall    = true_positive / (double) RECALL_BOUND;
+  double recall    = true_positive / (double) gt;
   double mean_score    = total_score / (double) postitive;
   double f1 = 2 * precision * recall / ( precision + recall );
-  cout << "Treshold :" << tresh << endl;
-  cout << "Precision : " << precision << endl;
-  cout << "Recall : " << recall << endl;
-  cout << "F1 Score  :" << f1   << endl;
-  cout << "Mean Score : " << mean_score << endl;
+
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "number_of_correct_friendships_inferred{{" << true_positive << "}}" << endl;
+  cout << "number_of_friendships_inferred{{" << postitive << "}}" << endl;
+  cout << "number_of_friendships_with_2_or_more_cooccurrences{{" << gt << "}}" << endl;
+  cout << "number_of_friendships{{" << nFriends << "}}" << endl;
+  cout << "threshold{{" << tresh << "}}" << endl;
+  cout << "precision{{" << precision << "}}" << endl;
+  cout << "recall{{" << recall << "}}" << endl;
+  cout << "f1{{" << f1   << "}}" << endl;
+  cout << "mean_score{{" << mean_score << "}}" << endl;
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 

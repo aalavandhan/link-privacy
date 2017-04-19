@@ -117,6 +117,20 @@ boost::posix_time::ptime Utilities::addTemporalGaussianNoise(boost::posix_time::
   return ( time + boost::posix_time::seconds(noise_in_seconds) );
 }
 
+boost::posix_time::ptime Utilities::addTemporalNoise(boost::posix_time::ptime time, int deviation_in_seconds){
+  static unsigned int seed = rand() % 10000;
+  ++seed;
+
+  int direction = getRandom<int>(0, 1, seed);
+
+  if(direction == 0){
+    return ( time + boost::posix_time::seconds(deviation_in_seconds) );
+  } else {
+    return ( time - boost::posix_time::seconds(deviation_in_seconds) );
+  }
+}
+
+
 //change
 //for Diversity between topk results
 double Utilities::getDistanceBetween(int friendsO[], int friendsK[], int friendsSizeO, int friendsSizeK, string f){

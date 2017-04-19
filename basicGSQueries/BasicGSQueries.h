@@ -35,5 +35,6 @@ public:
     void printPartialDiversityAndWeightedFrequencyValues(double alpha);
 
     void computeAccuracyOfSocialStrength(double precision_limit);
+    void generateSocialGraph(double tresh);
 };
 

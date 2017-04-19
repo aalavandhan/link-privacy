@@ -44,4 +44,5 @@ public:
     double distanceBetween(double lat1, double lon1, double lat2, double lon2);
     double angleFromCoordinate(double lat1, double long1, double lat2, double long2);
     boost::posix_time::ptime addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds);
+    boost::posix_time::ptime addTemporalNoise(boost::posix_time::ptime time, int deviation_in_seconds);
 };

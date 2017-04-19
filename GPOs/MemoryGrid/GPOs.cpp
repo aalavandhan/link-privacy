@@ -725,7 +725,6 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
     cout << "Adding Temporal noise function : temporal_locality * checkin_locality " << endl;
 
 
-
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
 
     int user_id = u_it->first;
@@ -806,8 +805,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
       double temporal_noise = (temporal_locality_value * checkin_locality_value) * (double) time_deviation;
 
       // Temporal perturbation
-      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), temporal_noise);
-
+      boost::posix_time::ptime purtubed_time = util.addTemporalNoise(p->getTime(), (int) temporal_noise);
 
       // Loading perturbed data
       double final_x = p->getX(), final_y = p->getY();
@@ -836,9 +834,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
       // METRICS
       total_spatial_displacement+=util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-
       total_time_displacement+=abs((int)  ((p->getTime() - purtubed_time).total_milliseconds() / 1000.0));
-
     }
   }
   total_spatial_displacement = total_spatial_displacement * EARTH_CIRCUMFERENCE / 360;
@@ -855,8 +851,8 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
   if(add_temporal){
     cout<<"total_temporal_displacement{{"<< total_time_displacement/3600.0 <<"}} hours"<<endl;
-    cout<<"average_temporal_displacement{{"<< total_time_displacement/3600.0  * (1/(float)point_count) <<"}} hours"<<endl;
-    cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+    cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) <<"}} seconds"<<endl;
+    cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement  * (1/(float)temporal_purturbed_count) <<"}} seconds"<<endl;
   }
 
   generateFrequencyCache();
