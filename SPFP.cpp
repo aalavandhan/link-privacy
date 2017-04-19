@@ -1,5 +1,4 @@
 #include "headersMemory.h"
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -9,12 +8,14 @@
 #ifndef GLOBALS
 #define GLOBALS
 
+int DATA_SET = 0;
 double MIN_X = -124.848974;
 double MAX_X = -66.885444;
 double MIN_Y = 24.396308;
 double MAX_Y = 49.384358;
-
 double DATASET_SIZE = 3661488;
+char *DATASET_PATH;
+
 double DELTA_X = 0;
 double DELTA_Y = 0;
 int MAXSC = 0;                // maximum number of friends plus one
@@ -509,8 +510,9 @@ int main(int argc, char *argv[]){
 
   if(data_set == 0){
     cout << "Using dataset GOWALLA_SMALL" << endl;
-    checkins_file    = "data_Gowalla/reduced_checkins.txt";
-    graph_file       = "data_Gowalla/reduced_socialGraph.txt";
+
+    checkins_file    = "data_Gowalla/checkins.txt";
+    graph_file       = "data_Gowalla/socialGraph.txt";
     query_file       = "data_Gowalla/queries.txt";
 
     MIN_X = -124.848974;
@@ -518,27 +520,41 @@ int main(int argc, char *argv[]){
     MIN_Y = 24.396308;
     MAX_Y = 49.384358;
 
+    DATA_SET = 0;
+    DATASET_SIZE = 3669249;
+    DATASET_PATH = "data_Gowalla/";
+
   } else if(data_set == 1){
     cout << "Using dataset GOWALLA_LARGE" << endl;
+
     checkins_file    = "data_GowallaFull/checkins.txt";
     graph_file       = "data_GowallaFull/socialGraph.txt";
     query_file       = "data_GowallaFull/queries.txt";
+    DATASET_PATH     = "data_GowallaFull/";
 
     MIN_X = -124.848974;
     MAX_X = -66.885444;
     MIN_Y = 24.396308;
     MAX_Y = 49.384358;
 
+    DATA_SET = 1;
+    DATASET_SIZE = 18290199;
+
   } else if(data_set == 2){
     cout << "Using dataset SHANGHAI"      << endl;
+
     checkins_file    = "data_Shanghai/checkins.txt";
     graph_file       = "data_Shanghai/socialGraph.txt";
     query_file       = "data_Shanghai/queries.txt";
+    DATASET_PATH     = "data_Shanghai/";
 
     MIN_X = 120.711564;
     MAX_X = 122.222184;
     MIN_Y = 30.343011;
     MAX_Y = 32.417996;
+
+    DATA_SET = 2;
+    DATASET_SIZE = 7858442;
 
   } else {
     cout << "Invalid data_set"            << endl;
@@ -767,7 +783,7 @@ int main(int argc, char *argv[]){
       cout << "Using Threshold" << social_strength_tresh << endl;
 
       map< int, double >* temoral_locality_map = spos->loadTemporalLocalityFromFile();
-      query->writeHistogramstoFile(social_strength_tresh, time_block, temoral_locality_map);
+      query->writeHistogramstoFile(DATASET_PATH, social_strength_tresh, time_block, temoral_locality_map);
 
       spos->writeUserFriendsToFile();
       break;
@@ -798,7 +814,7 @@ int main(int argc, char *argv[]){
       query->cacluateSocialStrength();
 
       cout << "--- Computing social graph -- " << endl;
-      query->generateSocialGraph(social_strength_tresh);
+      query->generateSocialGraph(DATASET_PATH, social_strength_tresh);
 
       break;
     }

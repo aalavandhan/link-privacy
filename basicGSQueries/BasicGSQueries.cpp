@@ -377,9 +377,9 @@ void SimpleQueries::countEBMInferredFriendships(double tresh){
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::generateSocialGraph(double tresh){
+void SimpleQueries::generateSocialGraph(char *DATASET_PATH, double tresh){
   ofstream outfile;
-  outfile.open("generatedSocailGraph.txt");
+  outfile.open(strcat(DATASET_PATH, "generatedSocailGraph.txt"));
   for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
     int user_1 = s_it->first;
     auto user_ss_list = s_it->second;
@@ -645,20 +645,20 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< int, double >* temoral_locality_map){
+void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, double time_block, map< int, double >* temoral_locality_map){
   gpos->printCooccurrenceMatrix();
-  printPartialDiversityAndWeightedFrequencyValues(RENY_Q);
+  printPartialDiversityAndWeightedFrequencyValues(DATASET_PATH, RENY_Q);
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 
   ofstream outfile;
   cout << "Writing location entropy to file : " << endl;
-  outfile.open("locationEntropy.txt");
+  outfile.open(strcat(DATASET_PATH, "locationEntropy.txt"));
   for(auto it = location_to_H->begin();it!=location_to_H->end();it++){
     outfile<<it->first<<" "<<it->second<<endl;
   }
   outfile.close();
 
-  outfile.open("HiL.csv");
+  outfile.open(strcat(DATASET_PATH, "HiL.csv"));
   unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
   for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
     int user_id = it->first;
@@ -669,7 +669,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
 
   cout<<"Printing HiL complete. size:"<<HiL_map->size()<<endl;
 
-  outfile.open("HiJ.csv");
+  outfile.open(strcat(DATASET_PATH, "HiJ.csv"));
   unordered_map<int, double>* HiJ_map =gpos->getHiJasMap();
   for(auto it = HiJ_map->begin(); it !=HiJ_map->end(); it++){
     int user_id = it->first;
@@ -680,7 +680,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
 
   cout<<"Printing HiJ complete.size:"<<HiJ_map->size()<<endl;
 
-  outfile.open("HlL.csv");
+  outfile.open(strcat(DATASET_PATH, "HlL.csv"));
   unordered_map<int, double>* HlL_map =gpos->getHlLasMap();
   for(auto it = HlL_map->begin(); it !=HlL_map->end(); it++){
     int location_id = it->first;
@@ -726,7 +726,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
       }
     }
 
-    outfile.open("user_to_trueEBMinferred.csv");
+    outfile.open(strcat(DATASET_PATH, "user_to_trueEBMinferred.csv"));
     for(auto it = user_to_trueEBMinferred.begin(); it !=user_to_trueEBMinferred.end(); it++){
       int user_id = it->first;
       int frequency = it->second;
@@ -767,7 +767,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
         }
       }
 
-      outfile.open("user_to_EBMinferred.csv");
+      outfile.open(strcat(DATASET_PATH, "user_to_EBMinferred.csv"));
       for(auto it = user_to_EBMinferred.begin(); it !=user_to_EBMinferred.end(); it++){
         int user_id = it->first;
         int frequency = it->second;
@@ -807,7 +807,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
       }
     }
 
-    outfile.open("location_to_EMBinferred.csv");
+    outfile.open(strcat(DATASET_PATH, "location_to_EMBinferred.csv"));
     for(auto it = location_to_EMBinferred.begin(); it !=location_to_EMBinferred.end(); it++){
       int user_id = it->first;
       int frequency = it->second;
@@ -848,7 +848,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
       }
     }
 
-    outfile.open("location_to_trueEBMinferred.csv");
+    outfile.open(strcat(DATASET_PATH, "location_to_trueEBMinferred.csv"));
     for(auto it = location_to_trueEBMinferred.begin(); it !=location_to_trueEBMinferred.end(); it++){
       int user_id = it->first;
       int frequency = it->second;
@@ -907,7 +907,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
       }
     }
 
-    outfile.open("location_user_to_EBMinferred.csv");
+    outfile.open(strcat(DATASET_PATH, "location_user_to_EBMinferred.csv"));
     for(auto it = location_user_to_EBMinferred.begin(); it !=location_user_to_EBMinferred.end(); it++){
       int location_id = it->first;
       map<int,int>* user_toEBMinferred = it->second;
@@ -975,7 +975,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
       }
     }
 
-    outfile.open("location_user_to_trueEBMinferred.csv");
+    outfile.open(strcat(DATASET_PATH, "location_user_to_trueEBMinferred.csv"));
     for(auto it = location_user_to_trueEBMinferred.begin(); it !=location_user_to_trueEBMinferred.end(); it++){
       int location_id = it->first;
       map<int,int>* user_totrueEBMinferred = it->second;
@@ -998,7 +998,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
   {
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
 
-    outfile.open("locationTime_Locality.csv");
+    outfile.open(strcat(DATASET_PATH, "locationTime_Locality.csv"));
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
       int location_id = l_it->first;
@@ -1030,7 +1030,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
   {
 
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
-    outfile.open("locationTime_EBM.csv");
+    outfile.open(strcat(DATASET_PATH, "locationTime_EBM.csv"));
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
       int location_id = l_it->first;
@@ -1115,7 +1115,7 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
   {
 
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
-    outfile.open("locationTime_CoOcc.csv");
+    outfile.open(strcat(DATASET_PATH, "locationTime_CoOcc.csv"));
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
       int location_id = l_it->first;
@@ -1168,8 +1168,6 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
           int l_time_block = t_it->first;
           vector<int> *u_list = t_it->second;
 
-          int trueEbmFriends=0,ebmFriends=0, actualFriends=0;
-
           for(auto u1_it = u_list->begin(); u1_it != u_list->end(); u1_it++){
             for(auto u2_it = u1_it; u2_it != u_list->end(); u2_it++){
               if(u1_it != u2_it){
@@ -1192,12 +1190,12 @@ void SimpleQueries::writeHistogramstoFile(double tresh, double time_block, map< 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(double alpha){
+void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(char * DATASET_PATH,double alpha){
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
   map<int, map<int, vector<pair<int, int> >* >*>* cooccurrence_matrix = gpos->getCooccurrenceMatrix();
 
   ofstream outfile;
-  outfile.open("partialDWFmatrix");
+  outfile.open(strcat(DATASET_PATH, "partialDWFmatrix"));
 
   for(auto c_it = cooccurrence_matrix->begin(); c_it != cooccurrence_matrix->end(); c_it++){
     int user_1 = c_it->first;

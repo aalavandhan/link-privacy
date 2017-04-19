@@ -318,8 +318,11 @@ bool GPOs::loadLocations(const char* fileName){
   cout << "Loading checkins from " << fileName << endl;
   ifstream fin(fileName);
 
-  if( strcmp(fileName, "data_Gowalla/reduced_checkins.txt") || strcmp(fileName, "data_GowallaFull/checkins.txt") ){
-    int location_blacklist[] = { 672270,    9246,  672328,  672473, 6936696,  671698, 7039899,
+  set<int> *blacklist_set;
+
+  if(DATA_SET == 0 || DATA_SET == 1){
+    int location_blacklist[] = {
+          672270,    9246,  672328,  672473, 6936696,  671698, 7039899,
           671606, 6886742, 6886818, 6886783,    9247, 6745159, 6886788,
           681993, 6890222,  672035,  702472,  671276, 6887071, 7072522,
             9260,  672401,  672499,    9313,    9326,  671640, 6890228,
@@ -355,12 +358,12 @@ bool GPOs::loadLocations(const char* fileName){
          7227399,  672115,  671542,  671197, 6362954, 6829871, 7192395,
          6886938,  682460,  672185,  316637,  671672, 6396141,  671729,
           427712, 6887368,  671322, 7039857};
-  }
-  else{
-    int location_blacklist[] = { };
-  }
 
-  set<int> blacklist_set (location_blacklist, location_blacklist+10);
+    blacklist_set = new set<int>(location_blacklist, location_blacklist+249);
+  } else {
+    int location_blacklist[] = { };
+    blacklist_set = new set<int>(location_blacklist, location_blacklist+1);
+  }
 
   if (!fin) {
     std::cerr << "Cannot open checkins file " << fileName << std::endl;
@@ -380,7 +383,7 @@ bool GPOs::loadLocations(const char* fileName){
     // skip newlines
     if (!fin.good()) continue;
 
-    if(blacklist_set.find(lid) == blacklist_set.end()){
+    if(blacklist_set->find(lid) == blacklist_set->end()){
       loadPoint(x, y, lid, uid, dtm, count);
       count ++;
     }
@@ -391,6 +394,9 @@ bool GPOs::loadLocations(const char* fileName){
   }
 
   fin.close();
+
+
+  delete blacklist_set;
 
 
   cout << "------- LOADED GPOS from FILE --------- " << endl;

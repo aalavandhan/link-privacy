@@ -76,6 +76,7 @@ extern double ALPHA;
 extern double BETA;
 extern double GAMMA;
 extern double RENY_Q;
+extern int DATA_SET;
 
 //scallability
 

@@ -30,11 +30,11 @@ public:
     double getSocialStrength(int source, int target);
     bool areEBMFriends(int source, int target, double tresh);
     bool areTrueEBMFriends(int source, int target, double tresh);
-    void writeHistogramstoFile(double tresh, double time_block, map< int, double >* temoral_locality_map);
+    void writeHistogramstoFile(char *DATASET_PATH, double tresh, double time_block, map< int, double >* temoral_locality_map);
 
-    void printPartialDiversityAndWeightedFrequencyValues(double alpha);
+    void printPartialDiversityAndWeightedFrequencyValues(char *DATASET_PATH, double alpha);
 
     void computeAccuracyOfSocialStrength(double precision_limit);
-    void generateSocialGraph(double tresh);
+    void generateSocialGraph(char *DATASET_PATH, double tresh);
 };
 
