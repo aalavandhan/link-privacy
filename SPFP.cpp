@@ -14,11 +14,6 @@ double MAX_X = -66.885444;
 double MIN_Y = 24.396308;
 double MAX_Y = 49.384358;
 
-// double MIN_X = 120.711564;
-// double MAX_X = 122.222184;
-// double MIN_Y = 30.343011;
-// double MAX_Y = 32.417996;
-
 double DATASET_SIZE = 3661488;
 double DELTA_X = 0;
 double DELTA_Y = 0;
@@ -44,7 +39,7 @@ char *checkins_file, *graph_file, *query_file;
 int iteration_type = 1;
 bool run_utilties = false;
 bool is_noise_method = false;
-
+int data_set = 0;
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
          total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
          function_type, p1, p2, p3, p4, p5, p6,
@@ -505,62 +500,91 @@ int main(int argc, char *argv[]){
 
   // testpTools();
 
-  DELTA_X = ((MAX_X - MIN_X)/ (X-1));
-  DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
-
-  if (argc != 12){
-    cout << "Usage: " << argv[0] << " graph_file checkins_file query_file [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz|ebm-without-gt|compute-social-graph] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
+  if (argc != 10){
+    cout << "Usage: data_set [ebm|grouped-ebm|gaussian-v-ebm|snapping-v-ebm|nl-v-ebm|le-v-ebm|occ-hist|compute-katz|ebm-without-gt|compute-social-graph] run_utilties p1 p2 p3 p4 p5 p6 " << endl;
     return -1;
   }
 
-  graph_file    = argv[1];
-  checkins_file = argv[2];
-  query_file    = argv[3];
+  data_set = atoi(argv[1]);
 
-  if (strcmp(argv[4], "ebm") == 0)
+  if(data_set == 0){
+    cout << "Using dataset GOWALLA_SMALL" << endl;
+    checkins_file    = "data_Gowalla/reduced_checkins.txt";
+    graph_file       = "data_Gowalla/reduced_socialGraph.txt";
+    query_file       = "data_Gowalla/queries.txt";
+
+    MIN_X = -124.848974;
+    MAX_X = -66.885444;
+    MIN_Y = 24.396308;
+    MAX_Y = 49.384358;
+
+  } else if(data_set == 1){
+    cout << "Using dataset GOWALLA_LARGE" << endl;
+    checkins_file    = "data_GowallaFull/checkins.txt";
+    graph_file       = "data_GowallaFull/socialGraph.txt";
+    query_file       = "data_GowallaFull/queries.txt";
+
+    MIN_X = -124.848974;
+    MAX_X = -66.885444;
+    MIN_Y = 24.396308;
+    MAX_Y = 49.384358;
+
+  } else if(data_set == 2){
+    cout << "Using dataset SHANGHAI"      << endl;
+    checkins_file    = "data_Shanghai/checkins.txt";
+    graph_file       = "data_Shanghai/socialGraph.txt";
+    query_file       = "data_Shanghai/queries.txt";
+
+    MIN_X = 120.711564;
+    MAX_X = 122.222184;
+    MIN_Y = 30.343011;
+    MAX_Y = 32.417996;
+
+  } else {
+    cout << "Invalid data_set"            << endl;
+    exit(-1);
+  }
+
+  DELTA_X = ((MAX_X - MIN_X)/ (X-1));
+  DELTA_Y = ((MAX_Y - MIN_Y)/ (Y-1));
+
+  if (strcmp(argv[2], "ebm") == 0)
     iteration_type = 1;
-  else if (strcmp(argv[4], "grouped-ebm") == 0)
+  else if (strcmp(argv[2], "grouped-ebm") == 0)
     iteration_type = 2;
-  else if (strcmp(argv[4], "gaussian-v-ebm") == 0)
+  else if (strcmp(argv[2], "gaussian-v-ebm") == 0)
     iteration_type = 3;
-  else if (strcmp(argv[4], "comb-v-ebm") == 0)
+  else if (strcmp(argv[2], "comb-v-ebm") == 0)
     iteration_type = 4;
 
-  else if (strcmp(argv[4], "ebm-without-gt") == 0)
+  else if (strcmp(argv[2], "ebm-without-gt") == 0)
     iteration_type = 5;
 
-  else if (strcmp(argv[4], "occ-hist") == 0)
+  else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
-  else if (strcmp(argv[4], "compute-katz") == 0)
+  else if (strcmp(argv[2], "compute-katz") == 0)
     iteration_type = 91;
-  else if (strcmp(argv[4], "compute-locality") == 0)
+  else if (strcmp(argv[2], "compute-locality") == 0)
     iteration_type = 92;
-  else if (strcmp(argv[4], "compute-histograms") == 0)
+  else if (strcmp(argv[2], "compute-histograms") == 0)
     iteration_type = 93;
-  else if (strcmp(argv[4], "query-metrics") == 0)
+  else if (strcmp(argv[2], "query-metrics") == 0)
     iteration_type = 94;
 
-  else if (strcmp(argv[4], "compute-social-graph") == 0)
+  else if (strcmp(argv[2], "compute-social-graph") == 0)
     iteration_type = 95;
 
   else
     iteration_type = -1;
 
-  // else if (strcmp(argv[4], "snapping-v-ebm") == 0)
-  //   iteration_type = 4;
-  // else if (strcmp(argv[4], "nl-v-ebm") == 0)
-  //   iteration_type = 5;
-  // else if (strcmp(argv[4], "le-v-ebm") == 0)
-  //   iteration_type = 6;
+  run_utilties       = atoi(argv[3]); // [ 0 / 1]
 
-  run_utilties       = atoi(argv[5]); // [ 0 / 1]
-
-  p1 = atof(argv[6]); // ( Parameter 1 )
-  p2 = atof(argv[7]); // ( Parameter 2 )
-  p3 = atof(argv[8]); // ( Parameter 3 )
-  p4 = atof(argv[9]); // ( Parameter 4 )
-  p5 = atof(argv[10]); // ( Parameter 5 )
-  p6 = atof(argv[11]); // ( Parameter 6 )
+  p1 = atof(argv[4]); // ( Parameter 1 )
+  p2 = atof(argv[5]); // ( Parameter 2 )
+  p3 = atof(argv[6]); // ( Parameter 3 )
+  p4 = atof(argv[7]); // ( Parameter 4 )
+  p5 = atof(argv[8]); // ( Parameter 5 )
+  p6 = atof(argv[9]); // ( Parameter 6 )
 
 
   switch(iteration_type){
@@ -852,16 +876,16 @@ int main(int argc, char *argv[]){
   // // Loading social network and checkins
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs();
-  // spos->load(argv[1]);
+  // spos->load(argv[2]);
 
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs(g);
-  // spos->load(argv[1]);
+  // spos->load(argv[2]);
 
 
   // cout << "------------- Loading SocialGraph ---------------" << endl;
   // SPOs* spos = new SPOs(gpos);
-  // spos->load(argv[1]);
+  // spos->load(argv[2]);
 
   // spos->loadKatzScoreFromMemory();
 
