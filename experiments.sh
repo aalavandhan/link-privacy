@@ -2,7 +2,6 @@ data_set=0
 
 # Running locality generation
 ./SPFP $data_set compute-locality 0 0 0 0 0 0 0 > results-$data_set/locality-generation
-
 # Running histograms
 ./SPFP $data_set compute-histograms 0 2.9 20 0 0 0 0 > results-$data_set/histogram-generation
 
