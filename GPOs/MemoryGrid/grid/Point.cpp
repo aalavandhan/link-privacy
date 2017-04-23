@@ -17,6 +17,16 @@ Point::Point (double x, double y, int id, int uid, boost::posix_time::ptime time
     p_order = order;
 }
 
+Point::Point (res_point *p){
+    p_x = p->x;
+    p_y = p->y;
+    p_id = p->id;
+    p_uid = p->uid;
+    p_order = p->oid;
+    p_time = p->time;
+}
+
+
 Point::~Point (){
     // delete p_x;
     // delete p_y;
@@ -89,5 +99,10 @@ bool Point::operator> (const Point& p) const
 
 int Point::getTimeBlock(int time_block_duration){
     int p_time_block = (int)( (double)( p_time.time_of_day().hours() * 60 + p_time.time_of_day().minutes() ) / time_block_duration );
+    return p_time_block;
+}
+
+int Point::getWeekTimeBlock(){
+    int p_time_block = p_time.date().day_of_week() * 24 + p_time.time_of_day().hours();
     return p_time_block;
 }

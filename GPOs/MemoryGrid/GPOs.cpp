@@ -517,6 +517,55 @@ map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double r1, doub
   return result;
 }
 
+unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByTimeBlock(double x, double y, double r1, double r2){
+  unordered_map< int, vector<int>* >* r1_list = getUsersInRangeByTimeBlock(x, y, r1);
+  unordered_map< int, vector<int>* >* r2_list = getUsersInRangeByTimeBlock(x, y, r2);
+
+  unordered_map< int, vector<int>* >* user_list = new unordered_map< int, vector<int>* >();
+
+  for(int i=0; i<24*7;i++){
+    vector<int> *u1_list = r1_list->find(i)->second;
+    vector<int> *u2_list = r2_list->find(i)->second;
+    vector<int> result_list, *result;
+    std::set_difference(u1_list->begin(), u1_list->end(), u2_list->begin(), u2_list->end(), std::inserter(result_list, result_list.begin()));
+    result = new vector<int>(result_list.begin(), result_list.end());
+    user_list->insert(make_pair(i, result));
+  }
+
+  return user_list;
+}
+
+unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByTimeBlock(double x, double y, double r){
+  double radius_geo_dist = (r/1000) * 360 / EARTH_CIRCUMFERENCE;
+  vector<res_point*>* checkins = getRange(x, y, radius_geo_dist);
+
+  unordered_map< int, vector<int>* >* user_list = new unordered_map< int, vector<int>* >();
+
+  for(int i=0; i<24*7;i++){
+    vector<int> *users = new vector<int>();
+
+    for(auto c = checkins->begin(); c != checkins->end(); c++){
+      Point p = Point(*c);
+      if(p.getWeekTimeBlock() == i)
+        users->push_back( p.getUID() );
+    }
+
+    // Sorting user list
+    sort(users->begin(), users->end());
+    // Removing duplicates
+    users->erase( unique( users->begin(), users->end() ), users->end() );
+
+    user_list->insert(make_pair(i, users));
+  }
+
+  for(auto c = checkins->begin(); c != checkins->end(); c++){
+    delete (*c);
+  }
+  delete checkins;
+
+  return user_list;
+}
+
 // r1 -> Outer radius, r2 -> inner radius
 vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
   vector<int> *u1_list = getUsersInRange(x, y, r1);
@@ -526,7 +575,6 @@ vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
   result = new vector<int>(result_list.begin(), result_list.end());
   return result;
 }
-
 
 vector<int>* GPOs::getUsersInRange(double x, double y, double radius){
   vector<int> *users = new vector<int>();

@@ -81,7 +81,6 @@
 
 // dataset scalability
 extern double DATASET_SIZE;
-extern char* DATASET_PATH;
 #define X 15000 // table[X][Y]
 #define Y 15000
 extern double MIN_X;

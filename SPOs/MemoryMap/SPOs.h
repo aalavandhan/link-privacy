@@ -73,12 +73,12 @@ public:
     map< int, double >* computeTemporalLocality(int max_checkins, double max_radius, GPOs *gpos);
     map< int, map<int, pair<int,double> >* >* getCheckinLocalityMap();
     map< int, double >* loadNodeLocalityFromFile();
-    map< int, map<int, pair<int,double> >* >* loadCheckinLocalityFromFile();
-    map< int, double >* loadTemporalLocalityFromFile();
+    map< int, map<int, pair<int,double> >* >* loadCheckinLocalityFromFile(char* DATASET_PATH);
+    map< int, double >* loadTemporalLocalityFromFile(char* DATASET_PATH);
 
     void writeNodeLocalityToFile();
-    void writeCheckinLocalityToFile();
-    void writeTemporalLocalityToFile();
+    void writeCheckinLocalityToFile(char* DATASET_PATH);
+    void writeTemporalLocalityToFile(char* DATASET_PATH);
 
     void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
     void loadKatzScoreFromMemory();

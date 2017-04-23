@@ -66,8 +66,12 @@ public:
     // virtual map<int, map<int, vector<pair<int, int> >* >*>* getInsignificantCooccurrenceMatrix();
     virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs();
     virtual vector<int>* getUsersInRange(double x, double y, double r1, double r2);
+
     virtual vector<int>* getUsersInRange(double x, double y, double radius);
     virtual vector<int>* getUsersInRange(int source, double radius);
+
+    virtual unordered_map< int, vector<int>* >* getUsersInRangeByTimeBlock(double x, double y, double r1, double r2);
+    virtual unordered_map< int, vector<int>* >* getUsersInRangeByTimeBlock(double x, double y, double radius);
 
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double radius);
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);

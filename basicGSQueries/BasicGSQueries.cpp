@@ -33,28 +33,27 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
 
-  vector<int> *u_set;
-
   while (fin){
     fin >> y >> x;
-    u_set = gpos->getUsersInRange(x, y, radius, noise_distance);
-
-    if(u_set->size() > 0)
-      locations_with_users++;
-
-    total_users += u_set->size();
+    unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByTimeBlock(x,y,radius,radius-noise_distance);
+    for(int i=0; i<24*7;i++){
+      vector<int> *u_set = user_list->find(i)->second;
+      if(u_set->size() > 0){
+        locations_with_users++;
+        total_users += u_set->size();
+      }
+    }
+    delete user_list;
     count++;
   }
 
   avg_users = (double) total_users / (double) count;
 
-
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Number of locations " << count << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance << endl;
-  cout << "Locations with users :" << locations_with_users << endl;
-  cout << "Locations without users :" << count - locations_with_users << endl;
-  cout << "Mean users around a location :" << avg_users << endl;
-  cout << "Total users across all locations :" << total_users << endl;
+  cout << "Location time blocks with users : " << locations_with_users << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance << endl;
+  cout << "Total location time_blocks : " << count * 24 * 7 << endl;
+  cout << "Mean users around a location at an 1 hour interval : " << avg_users << endl;
+  cout << "Total users across all location time_blocks :" << total_users << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
@@ -69,34 +68,40 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
 
-  vector<int> *u1_set, *u2_set;
-
   while (fin){
     fin >> y >> x;
-    u1_set = base_gpos->getUsersInRange(x, y, radius, radius-noise_distance);
-    u2_set = gpos->getUsersInRange(x, y, radius, radius-noise_distance);
+    unordered_map< int, vector<int>* >* user1_set = base_gpos->getUsersInRangeByTimeBlock(x,y,radius,radius-noise_distance);
+    unordered_map< int, vector<int>* >* user2_set = gpos->getUsersInRangeByTimeBlock(x,y,radius,radius-noise_distance);
 
-    // cout << x << "\t" << y <<"\t" << u1_set->size() << "\t" <<  u2_set->size() << endl;
+    for(int i=0; i<24*7;i++){
+      vector<int> *u1_set, *u2_set;
 
-    std::vector<int> v_intersection;
+      u1_set = user1_set->find(i)->second;
+      u2_set = user2_set->find(i)->second;
 
-    std::set_intersection(u1_set->begin(), u1_set->end(),
-                          u2_set->begin(), u2_set->end(),
-                          std::back_inserter(v_intersection));
+      std::vector<int> v_intersection;
 
-    if(u2_set->size() != 0){
-      precision = (double) v_intersection.size() / (double) u2_set->size();
+      std::set_intersection(u1_set->begin(), u1_set->end(),
+                            u2_set->begin(), u2_set->end(),
+                            std::back_inserter(v_intersection));
 
-      if(v_intersection.size() != 0)
-        recall    = (double) v_intersection.size() / (double) u1_set->size();
-      else
-        recall    = 0;
+      if(u1_set->size() > 0){
+        precision = (double) v_intersection.size() / (double) u2_set->size();
 
-      avg_precision += precision;
-      avg_recall    += recall;
+        if(v_intersection.size() != 0)
+          recall    = (double) v_intersection.size() / (double) u1_set->size();
+        else
+          recall    = 0;
 
-      count++;
+        avg_precision += precision;
+        avg_recall    += recall;
+
+        count++;
+      }
     }
+
+    delete user1_set;
+    delete user2_set;
   }
 
   avg_precision /= count;
@@ -106,7 +111,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
-  cout << "Number of locations " << count << " | Range " << radius << "m " << endl;
+  cout << "Number of locations time blocks" << count << " | Range " << radius << "m " << endl;
   cout << "Precision :" << avg_precision << endl;
   cout << "Recall    :" << avg_recall    << endl;
   cout << "F1 Score  :" << f1            << endl;

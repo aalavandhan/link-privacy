@@ -20,16 +20,22 @@ for d in datasets_parameters.keys():
   params = datasets_parameters[d]
 
   locations = pd.read_csv(d + "/checkins.txt", sep=" ", header=None, index_col=None, names=[ "user_id", "lat", "lon", "location_id", "date", "time"])
-  clusters = DBSCAN(eps=params['eps'], min_samples=params['min_samples'], metric='euclidean', algorithm='auto', leaf_size=30, p=None, n_jobs=1).fit(locations[[ "lat", "lon" ]])
+
+  coordinates = locations.groupby(['location_id']).max()[[ "lat", "lon" ]]
+
+  print "{0}\tNumber of locations : {1}".format(d, len(coordinates))
+
+  clusters = DBSCAN(eps=params['eps'], min_samples=params['min_samples'], metric='cityblock', algorithm='balltree', leaf_size=30).fit(coordinates)
 
   lat = [ ]
   lon = [ ]
+
   labels = pd.Series(clusters.labels_)
 
   for l in labels.unique():
       cluster_locations = labels[ labels == l ]
       e = np.random.choice( cluster_locations.index )
-      r = locations.ix[e]
+      r = coordinates.ix[e]
       lat.append(    r['lat']    )
       lon.append(    r['lon']    )
 

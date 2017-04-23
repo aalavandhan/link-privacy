@@ -874,9 +874,19 @@ map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_r
   return temporal_locality_map;
 }
 
-void SPOs::writeCheckinLocalityToFile(){
+void SPOs::writeCheckinLocalityToFile(char* DATASET_PATH){
   ofstream output_file;
-  output_file.open(strcat(DATASET_PATH, "checkin-locality.csv"));
+  cout << "HERE" << " " << DATASET_PATH << endl;
+  char fileName[] = "checkin-locality.csv";
+  cout << fileName;
+  char* filePath;
+  filePath = static_cast<char*>(malloc( (strlen(DATASET_PATH)+ strlen(fileName)+ 1)*sizeof(char*)));
+  strcpy(filePath, DATASET_PATH);
+  strcat(filePath, fileName);
+  cout << filePath;
+  output_file.open(filePath);
+
+
   int counter = 0;
   for (auto u_it = checkin_locality_map->begin(); u_it != checkin_locality_map->end(); u_it++){
     double user_id = u_it->first;
@@ -888,11 +898,12 @@ void SPOs::writeCheckinLocalityToFile(){
       counter++;
     }
   }
+
   cout << "------- Wrote checkin locality to files " << counter << endl;
   output_file.close();
 }
 
-void SPOs::writeTemporalLocalityToFile(){
+void SPOs::writeTemporalLocalityToFile(char* DATASET_PATH){
   ofstream output_file;
   output_file.open(strcat(DATASET_PATH, "temporal-locality.csv"));
   int counter = 0;
@@ -914,7 +925,7 @@ map< int, map<int, pair<int,double> >* >* SPOs::getCheckinLocalityMap(){
 
 void SPOs::writeNodeLocalityToFile(){
   ofstream output_file;
-  output_file.open(strcat(DATASET_PATH, "node-locality.csv"));
+  output_file.open("node-locality.csv");
   for (auto u_it = node_locality_map->begin(); u_it != node_locality_map->end(); u_it++){
     double uid = u_it->first;
     double locality = u_it->second;
@@ -927,7 +938,7 @@ void SPOs::writeNodeLocalityToFile(){
 
 map< int, double >* SPOs::loadNodeLocalityFromFile(){
   node_locality_map  = new map< int, double >();
-  ifstream fin(strcat(DATASET_PATH, "node-locality.csv"));
+  ifstream fin("node-locality.csv");
   if (!fin){
     cout << "Cannot open node locality file node-locality.csv" << endl;
   }
@@ -939,7 +950,7 @@ map< int, double >* SPOs::loadNodeLocalityFromFile(){
   return node_locality_map;
 }
 
-map<int, double >* SPOs::loadTemporalLocalityFromFile(){
+map<int, double >* SPOs::loadTemporalLocalityFromFile(char* DATASET_PATH){
   temporal_locality_map = new map< int, double >();
   ifstream fin(strcat(DATASET_PATH, "temporal-locality.csv"));
   if (!fin){
@@ -953,7 +964,7 @@ map<int, double >* SPOs::loadTemporalLocalityFromFile(){
   return temporal_locality_map;
 }
 
-map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(){
+map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(char* DATASET_PATH){
   int count=0;
   map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality  = new map<int, map<int, pair<int,double> >*>();
   ifstream fin(strcat(DATASET_PATH, "checkin-locality.csv"));

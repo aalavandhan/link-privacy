@@ -2,6 +2,7 @@ class Point {
 
 public:
     Point ();
+    Point (res_point *p);
     Point (double x, double y, int id);
     Point (double x, double y, int id, int uid, boost::posix_time::ptime time, int order);
     virtual ~Point ();
@@ -17,6 +18,7 @@ public:
     virtual void printDetails();
     virtual double getMinDist();
     virtual int getTimeBlock(int time_block_duration);
+    virtual int getWeekTimeBlock();
 
     //Overload the < operator.
     bool operator< (const Point& p) const;

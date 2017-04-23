@@ -36,7 +36,7 @@ double RENY_Q=0.1; // Order of diversity
 // int TIME_RANGE_IN_SECONDS = 1200;
 
 // Global parameters
-char *checkins_file, *graph_file, *query_file;
+char *checkins_file, *graph_file, *query_file, *query_test_file;
 int iteration_type = 1;
 bool run_utilties = false;
 bool is_noise_method = false;
@@ -375,8 +375,8 @@ void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_
 
   purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
     baseGPOs,
-    tmp_spos->loadCheckinLocalityFromFile(),
-    tmp_spos->loadTemporalLocalityFromFile(),
+    tmp_spos->loadCheckinLocalityFromFile(DATASET_PATH),
+    tmp_spos->loadTemporalLocalityFromFile(DATASET_PATH),
     baseGPOs->getL2U2COOCC(),
     noise_radius,
     (uint) time_deviation,
@@ -398,14 +398,14 @@ void checkQueryFileStats(){
 
   SimpleQueries* query = new SimpleQueries(baseGPOs, spos);
 
-  query->checkUtilityStats(query_file, 10, 5);
-  query->checkUtilityStats(query_file, 25, 12.5);
-  query->checkUtilityStats(query_file, 50, 25);
-  query->checkUtilityStats(query_file, 100, 50);
-  query->checkUtilityStats(query_file, 200, 100);
-  query->checkUtilityStats(query_file, 400, 200);
-  query->checkUtilityStats(query_file, 800, 400);
-  query->checkUtilityStats(query_file, 1600, 800);
+  query->checkUtilityStats(query_test_file, 100, 50);
+  query->checkUtilityStats(query_test_file, 200, 100);
+  query->checkUtilityStats(query_test_file, 300, 150);
+  query->checkUtilityStats(query_test_file, 400, 200);
+  query->checkUtilityStats(query_test_file, 500, 250);
+  query->checkUtilityStats(query_test_file, 600, 300);
+  query->checkUtilityStats(query_test_file, 700, 350);
+  query->checkUtilityStats(query_test_file, 800, 400);
 }
 
 void testpTools(){
@@ -514,6 +514,7 @@ int main(int argc, char *argv[]){
     checkins_file    = "data_Gowalla/checkins.txt";
     graph_file       = "data_Gowalla/socialGraph.txt";
     query_file       = "data_Gowalla/queries.txt";
+    query_test_file  = "data_Gowalla/queries-initial.txt";
 
     MIN_X = -124.848974;
     MAX_X = -66.885444;
@@ -524,13 +525,16 @@ int main(int argc, char *argv[]){
     DATASET_SIZE = 3669249;
     DATASET_PATH = "data_Gowalla/";
 
+    cout << "Using path: " << DATASET_PATH << endl;
+
   } else if(data_set == 1){
     cout << "Using dataset GOWALLA_LARGE" << endl;
 
     checkins_file    = "data_GowallaFull/checkins.txt";
     graph_file       = "data_GowallaFull/socialGraph.txt";
     query_file       = "data_GowallaFull/queries.txt";
-    DATASET_PATH     = "data_GowallaFull/";
+    query_test_file  = "data_GowallaFull/queries-initial.txt";
+
 
     MIN_X = -124.848974;
     MAX_X = -66.885444;
@@ -539,6 +543,9 @@ int main(int argc, char *argv[]){
 
     DATA_SET = 1;
     DATASET_SIZE = 18290199;
+    DATASET_PATH     = "data_GowallaFull/";
+
+    cout << "Using path: " << DATASET_PATH << endl;
 
   } else if(data_set == 2){
     cout << "Using dataset SHANGHAI"      << endl;
@@ -546,7 +553,8 @@ int main(int argc, char *argv[]){
     checkins_file    = "data_Shanghai/checkins.txt";
     graph_file       = "data_Shanghai/socialGraph.txt";
     query_file       = "data_Shanghai/queries.txt";
-    DATASET_PATH     = "data_Shanghai/";
+    query_test_file  = "data_Shanghai/queries-initial.txt";
+
 
     MIN_X = 120.711564;
     MAX_X = 122.222184;
@@ -555,6 +563,9 @@ int main(int argc, char *argv[]){
 
     DATA_SET = 2;
     DATASET_SIZE = 7858442;
+    DATASET_PATH     = "data_Shanghai/";
+
+    cout << "Using path: " << DATASET_PATH << endl;
 
   } else {
     cout << "Invalid data_set"            << endl;
@@ -751,11 +762,11 @@ int main(int argc, char *argv[]){
       cout << "Data driven search Max checkins : " << max_checkins << endl;
       cout << "Data driven search Max radius   : " << max_radius << endl;
 
-      spos->computeCheckinLocalityMap(gpos, std::numeric_limits<double>::infinity());
-      spos->writeCheckinLocalityToFile();
+      // spos->computeCheckinLocalityMap(gpos, std::numeric_limits<double>::infinity());
+      spos->writeCheckinLocalityToFile(DATASET_PATH);
 
       spos->computeTemporalLocality(max_checkins, max_radius, gpos);
-      spos->writeTemporalLocalityToFile();
+      spos->writeTemporalLocalityToFile(DATASET_PATH);
 
       // cout << "------------- Computing mean distance between friend pairs ---------------" << endl;
       // cout << "Mean distance between all pairs of friends :" << spos->computeMeanDistanceBetweenAllFriends(gpos) << endl;
@@ -782,7 +793,7 @@ int main(int argc, char *argv[]){
       query->cacluateSocialStrength();
       cout << "Using Threshold" << social_strength_tresh << endl;
 
-      map< int, double >* temoral_locality_map = spos->loadTemporalLocalityFromFile();
+      map< int, double >* temoral_locality_map = spos->loadTemporalLocalityFromFile(DATASET_PATH);
       query->writeHistogramstoFile(DATASET_PATH, social_strength_tresh, time_block, temoral_locality_map);
 
       spos->writeUserFriendsToFile();
