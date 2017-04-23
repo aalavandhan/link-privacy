@@ -890,12 +890,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
         spatial_purturbed_count++;
       }
 
-      if(to_add_spatial_noise){
+      if(to_add_temporal_noise){
         final_time = purtubed_time;
         temporal_purturbed_count++;
       }
 
-      if(to_add_spatial_noise || to_add_spatial_noise){
+      if(to_add_spatial_noise || to_add_temporal_noise){
         final_lid = lid;
         lid++;
         purturbed_count++;
