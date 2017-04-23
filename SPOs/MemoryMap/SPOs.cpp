@@ -876,10 +876,17 @@ map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_r
 
 void SPOs::writeCheckinLocalityToFile(char* DATASET_PATH){
   ofstream output_file;
-  std::string fileName = "checkin-locality.csv";
-  std::string datasetPath = std::string(DATASET_PATH);
-  std::string filePath = datasetPath + fileName;
-  output_file.open(filePath.c_str());
+
+  cout << DATASET_PATH << endl;
+
+  stringstream ss;
+  ss << DATASET_PATH << "checkin-locality.csv";
+  cout << ss.str() << endl;
+  const std::string filePath = ss.str();
+  cout << filePath << endl;
+
+  output_file.open( filePath.c_str() );
+
   int counter = 0;
   for (auto u_it = checkin_locality_map->begin(); u_it != checkin_locality_map->end(); u_it++){
     double user_id = u_it->first;
@@ -898,9 +905,8 @@ void SPOs::writeCheckinLocalityToFile(char* DATASET_PATH){
 
 void SPOs::writeTemporalLocalityToFile(char* DATASET_PATH){
   ofstream output_file;
-  std::string fileName = "temporal-locality.csv";
-  std::string datasetPath = std::string(DATASET_PATH);
-  std::string filePath = datasetPath + fileName;
+  const char* fileName = "temporal-locality.csv";
+  std::string filePath = std::string(DATASET_PATH) + std::string(fileName);
   output_file.open(filePath.c_str());
   int counter = 0;
   for (auto o_it = temporal_locality_map->begin(); o_it != temporal_locality_map->end(); o_it++){
@@ -948,9 +954,8 @@ map< int, double >* SPOs::loadNodeLocalityFromFile(){
 
 map<int, double >* SPOs::loadTemporalLocalityFromFile(char* DATASET_PATH){
   temporal_locality_map = new map< int, double >();
-  std::string fileName = "temporal-locality.csv";
-  std::string datasetPath = std::string(DATASET_PATH);
-  std::string filePath = datasetPath + fileName;
+  const char* fileName = "temporal-locality.csv";
+  std::string filePath = std::string(DATASET_PATH) + std::string(fileName);
   ifstream fin(filePath.c_str());
   if (!fin){
     cout << "Cannot open node locality file temporal-locality.csv" << endl;
@@ -967,9 +972,9 @@ map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(char
   int count=0;
   map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality  = new map<int, map<int, pair<int,double> >*>();
 
-  std::string fileName = "checkin-locality.csv";
-  std::string datasetPath = std::string(DATASET_PATH);
-  std::string filePath = datasetPath + fileName;
+  const char* fileName = "checkin-locality.csv";
+  std::string filePath = std::string(DATASET_PATH) + std::string(fileName);
+
   ifstream fin(filePath.c_str());
   if (!fin){
     cout << "Cannot open checkin locality file checkin-locality.csv" << endl;

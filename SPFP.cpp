@@ -398,7 +398,7 @@ void checkQueryFileStats(){
 
   SimpleQueries* query = new SimpleQueries(baseGPOs, spos);
 
-  query->getInterestingQueryPoints(query_test_file, 800, 100, query_file);
+  query->getInterestingQueryPoints(query_test_file, 800, 100, query_file, DATA_SET);
 
   query->checkUtilityStats(query_file, 800, 100);
   query->checkUtilityStats(query_file, 800, 200);

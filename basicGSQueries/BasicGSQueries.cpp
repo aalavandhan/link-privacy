@@ -24,7 +24,7 @@ int SimpleQueries::countCooccurredFriends(){
 }
 
 
-void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radius, double noise_distance, const char* query_file){
+void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radius, double noise_distance, const char* query_file, int DATA_SET){
   ifstream fin(fileName);
 
   ofstream outfile;
@@ -37,6 +37,17 @@ void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radiu
   if (!fin) {
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
+  int limit = 25;
+
+  if(DATA_SET == 0){
+    limit = 25;
+  } else if(DATA_SET == 1){
+    limit = 100;
+  } else if(DATA_SET == 2){
+    limit = 50;
+  }
+
+  cout << "User limit :" << limit << endl;
 
   while (fin){
     fin >> y >> x >> day;
@@ -92,7 +103,7 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
 // between base_gpos and this->gpos
 void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius, double noise_distance){
   ifstream fin(fileName);
-  double x,y, precision, recall, avg_precision=0, avg_recall=0;
+  double x,y, precision, recall, avg_precision=0, avg_recall=0, day;
   int count=-1;
 
   if (!fin) {
@@ -100,16 +111,14 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
   }
 
   while (fin){
-    fin >> y >> x;
+    fin >> y >> x >> day;
     unordered_map< int, vector<int>* >* user1_set = base_gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
     unordered_map< int, vector<int>* >* user2_set = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
 
-    int i = 23;
-
     vector<int> *u1_set, *u2_set;
 
-    u1_set = user1_set->find(i)->second;
-    u2_set = user2_set->find(i)->second;
+    u1_set = user1_set->find(day)->second;
+    u2_set = user2_set->find(day)->second;
 
     std::vector<int> v_intersection;
 
