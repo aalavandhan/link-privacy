@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
 
 datasets_parameters = {
   "data_Gowalla" : {
@@ -26,7 +27,8 @@ for d in ["data_Shanghai"]:
   coordinates = locations[['location_id', 'lat', 'lon']].groupby(['location_id']).mean()[[ "lat", "lon" ]].reset_index()
   print "{0}\tNumber of locations : {1}".format(d, len(coordinates))
 
-  clusters = DBSCAN(eps=params['eps'], min_samples=params['min_samples'], leaf_size=10, algorithm="kd_tree").fit(coordinates.as_matrix())
+  # clusters = DBSCAN(eps=params['eps'], min_samples=params['min_samples'], leaf_size=10, algorithm="kd_tree").fit(coordinates.as_matrix())
+  clusters = KMeans(n_clusters=1200).fit(coordinates.as_matrix())
 
   lat = [ ]
   lon = [ ]

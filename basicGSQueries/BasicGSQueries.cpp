@@ -60,7 +60,7 @@ void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radiu
   }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Keeping top Location time blocks with atleast  " << limit << " : " << count << endl;
+  cout << "Keeping top Location time blocks with at least  " << limit << " : " << count << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
@@ -148,7 +148,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
-  cout << "Number of locations time blocks" << count << " | Range " << radius << "m " << endl;
+  cout << "Number of locations time blocks" << count << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance  << "m " << endl;
   cout << "Precision :" << avg_precision << endl;
   cout << "Recall    :" << avg_recall    << endl;
   cout << "F1 Score  :" << f1            << endl;

@@ -27,19 +27,38 @@ data_set=0
 ./SPFP $data_set grouped-ebm 0 0 0 0 14400 0 0  > results-$data_set/ideal-grouping-tm-14400
 ./SPFP $data_set grouped-ebm 0 0 0 0 28800 0 0  > results-$data_set/ideal-grouping-tm-28800
 
+
+# Gaussian spatial Noise
+for spatial_noise in 100 200 300 400 500 600 700; do
+  for spatial_grouping in 0.33; do
+    ./SPFP $data_set gaussian-v-ebm 1 $spatial_noise 0 $(( $spatial_noise * $spatial_grouping )) 1200 1 0 > results-$data_set/gaussian-spatial-$spatial_noise-$spatial_grouping
+  done
+done
+
+
+# Gaussian temporal Noise
+for temporal_noise in 0 20 40 60 80 100 120 140 160 180; do
+  for time_grouping in 0 0.25 0.5 1 1.5; do
+    ./SPFP $data_set gaussian-v-ebm 1 0 $(( $temporal_noise * 60 )) 0 $(( $temporal_noise * $time_grouping * 60 )) 2 0 > results-$data_set/gaussian-temporal-$temporal_noise-$time_grouping
+  done
+done
+
+# Both Spatial and temporal gaussian noise functions ( 1/3 grouping )
+./SPFP $data_set gaussian-v-ebm 1 400 36000 133 12000 0 0 > results-$data_set/gaussian-both-400-36000-133-12000
+
 # Only spatial noise function
 for spatial_noise in 100 200 300 400 500 600 700; do
-  for spatial_grouping in 0 0.5 1 1.5 2 2.5 3; do
+  for spatial_grouping in 0 0.33 0.5 1 1.5; do
     ./SPFP $data_set comb-v-ebm 1 $spatial_noise 0 $(( $spatial_noise * $spatial_grouping )) 1200 1 0 > results-$data_set/comb-spatial-$spatial_noise-$spatial_grouping
   done
 done
 
 # Only temporal noise function ( Minutes )
-for temporal_noise in 0 20 40 60 80 100 120 140 160; do
-  for time_grouping in 0 0.5 1 1.5 2 2.5 3; do
+for temporal_noise in 0 20 40 60 80 100 120 140 160 180; do
+  for time_grouping in 0 0.25 0.5 1 1.5; do
     ./SPFP $data_set comb-v-ebm 1 0 $(( $temporal_noise * 60 )) 0 $(( $temporal_noise * $time_grouping * 60 )) 2 0 > results-$data_set/comb-temporal-$temporal_noise-$time_grouping
   done
 done
 
 # Both Spatial and temporal noise functions ( 1/3 grouping )
-./SPFP $data_set comb-v-ebm 1 400 36000 133 12000 0 0 > results-$data_set/comb-both-400-36000-133-12000
+./SPFP $data_set comb-v-ebm 1 400 3600 133 3600 0 0 > results-$data_set/comb-both-400-3600-133-1200

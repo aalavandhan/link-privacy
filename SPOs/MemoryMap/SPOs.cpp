@@ -907,7 +907,7 @@ void SPOs::writeTemporalLocalityToFile(char* DATASET_PATH){
 
   int counter = 0;
   for (auto o_it = temporal_locality_map->begin(); o_it != temporal_locality_map->end(); o_it++){
-    double order_id = o_it->first;
+    int order_id = o_it->first;
     double locality = o_it->second;
     if(locality > 0){
       output_file << order_id << "\t" << locality << endl;

@@ -46,7 +46,7 @@ double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_t
          function_type, p1, p2, p3, p4, p5, p6,
          time_deviation,
          time_range_in_seconds = TIME_RANGE_IN_SECONDS,
-         day_of_week, time_block, noise_type;
+         day_of_week, time_block, noise_type, noise_function;
 #endif
 
 void printParameters(){
@@ -360,7 +360,7 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   runEBMOnNoised(baseGPOs, spatiallyAndTemporallyPurturbedGPOs, cmpGPOs, spos);
 }
 
-void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_spatial, bool add_temporal){
+void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_spatial, bool add_temporal, int noise_function){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -380,7 +380,9 @@ void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_
     baseGPOs->getL2U2COOCC(),
     noise_radius,
     (uint) time_deviation,
-    add_spatial, add_temporal);
+    add_spatial,
+    add_temporal,
+    noise_function);
   cout << "------------- Locations perturbed -------------------" << endl;
 
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
@@ -672,7 +674,13 @@ int main(int argc, char *argv[]){
       group_radius            = p3;
       time_range_in_seconds   = p4;
       noise_type              = p5;
+      noise_function          = p6;
       bool add_temporal=false, add_spatial=false;
+
+      if(noise_function == 0)
+        cout << "Using Noise function HIj and HiL" << endl;
+      else
+        cout << "Using Noise function Cij" << endl;
 
       printParameters();
       if( noise_type == 0 ){
@@ -690,7 +698,7 @@ int main(int argc, char *argv[]){
       } else {
         cout << "Invalid option" << endl;
       }
-      CombinationNoiseVsEBM(noise_radius, time_deviation, add_spatial, add_temporal);
+      CombinationNoiseVsEBM(noise_radius, time_deviation, add_spatial, add_temporal, noise_function);
       break;
     }
 

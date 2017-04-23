@@ -766,7 +766,8 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   double radius,
   uint time_deviation,
   bool add_spatial,
-  bool add_temporal){
+  bool add_temporal,
+  int noise_function){
 
   user_to_order_to_location_displacment = new map< int, map<int, pair<int,double> >* >();
   unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
@@ -776,8 +777,12 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   int point_count = 0;
 
 
-  if(add_spatial)
-    cout << "Adding Spatial noise function : 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality " << endl;
+  if(add_spatial){
+    if(noise_function == 0)
+      cout << "Adding Spatial noise function : 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality " << endl;
+    else
+      cout << "Adding Spatial noise function : log(1+Cij) * expHL * checkin_locality " << endl;
+  }
 
   if(add_temporal)
     cout << "Adding Temporal noise function : temporal_locality * checkin_locality " << endl;
@@ -849,12 +854,18 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
       double expHL = exp(-entropy / HL_SCALE);
 
-
       // Spatial Noise
-      double spatial_noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
-      if(spatial_noise != 0)
-        spatial_noise = spatial_noise + 0.45;
-      spatial_noise = spatial_noise * radius;
+      double spatial_noise;
+
+      if(noise_function == 0){
+        spatial_noise = 0.5 * ( expHil + expHiJ ) * expHL * checkin_locality_value;
+        if(spatial_noise != 0)
+          spatial_noise = spatial_noise + 0.45;
+        spatial_noise = spatial_noise * radius;
+      } else {
+        spatial_noise = log( 1 + user_cooccurrenes ) * expHL * checkin_locality_value;
+        spatial_noise = spatial_noise * radius;
+      }
 
       // Spatial perturbation
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), spatial_noise);
@@ -870,18 +881,21 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
       boost::posix_time::ptime final_time = p->getTime();
       int final_lid = p->getID();
 
-      if(add_spatial && spatial_noise != 0){
+      bool to_add_spatial_noise = (add_spatial && spatial_noise > 0);
+      bool to_add_temporal_noise = (add_temporal && temporal_noise > 0);
+
+      if(to_add_spatial_noise){
         final_x = coordinates_with_noise.first;
         final_y = coordinates_with_noise.second;
         spatial_purturbed_count++;
       }
 
-      if(add_temporal && temporal_noise != 0){
+      if(to_add_spatial_noise){
         final_time = purtubed_time;
         temporal_purturbed_count++;
       }
 
-      if( (add_spatial && spatial_noise != 0) || (add_temporal && temporal_noise != 0) ){
+      if(to_add_spatial_noise || to_add_spatial_noise){
         final_lid = lid;
         lid++;
         purturbed_count++;

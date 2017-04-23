@@ -129,7 +129,8 @@ public:
         double radius,
         uint time_deviation,
         bool add_spatial,
-        bool add_temporal);
+        bool add_temporal,
+        int noise_function);
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
     virtual map< int, double >* computeTemporalLocality(int max_checkins, double max_radius);
