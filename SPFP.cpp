@@ -762,7 +762,7 @@ int main(int argc, char *argv[]){
       cout << "Data driven search Max checkins : " << max_checkins << endl;
       cout << "Data driven search Max radius   : " << max_radius << endl;
 
-      // spos->computeCheckinLocalityMap(gpos, std::numeric_limits<double>::infinity());
+      spos->computeCheckinLocalityMap(gpos, std::numeric_limits<double>::infinity());
       spos->writeCheckinLocalityToFile(DATASET_PATH);
 
       spos->computeTemporalLocality(max_checkins, max_radius, gpos);

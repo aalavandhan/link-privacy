@@ -29,9 +29,11 @@ void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radiu
 
   ofstream outfile;
 
-  outfile.open(query_file);
 
-  double x,y;
+  stringstream ss;
+    ss << DATASET_PATH << outfile.open(query_file);
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );  double x,y;
   int day, count=0;
 
   if (!fin) {
@@ -424,7 +426,11 @@ void SimpleQueries::countEBMInferredFriendships(double tresh){
 
 void SimpleQueries::generateSocialGraph(char *DATASET_PATH, double tresh){
   ofstream outfile;
-  outfile.open(strcat(DATASET_PATH, "generatedSocailGraph.txt"));
+
+  stringstream ss;
+    ss << DATASET_PATH << "generatedSocailGraph.txt";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
   for (auto s_it = social_strength_matrix.begin(); s_it != social_strength_matrix.end(); s_it++){
     int user_1 = s_it->first;
     auto user_ss_list = s_it->second;
@@ -697,13 +703,21 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
 
   ofstream outfile;
   cout << "Writing location entropy to file : " << endl;
-  outfile.open(strcat(DATASET_PATH, "locationEntropy.txt"));
+
+  stringstream ss;
+    ss << DATASET_PATH << "locationEntropy.txt";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
   for(auto it = location_to_H->begin();it!=location_to_H->end();it++){
     outfile<<it->first<<" "<<it->second<<endl;
   }
   outfile.close();
 
-  outfile.open(strcat(DATASET_PATH, "HiL.csv"));
+
+  stringstream ss;
+    ss << DATASET_PATH << "HiL.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
   unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
   for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
     int user_id = it->first;
@@ -714,7 +728,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
 
   cout<<"Printing HiL complete. size:"<<HiL_map->size()<<endl;
 
-  outfile.open(strcat(DATASET_PATH, "HiJ.csv"));
+
+  stringstream ss;
+    ss << DATASET_PATH << "HiJ.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
   unordered_map<int, double>* HiJ_map =gpos->getHiJasMap();
   for(auto it = HiJ_map->begin(); it !=HiJ_map->end(); it++){
     int user_id = it->first;
@@ -725,7 +743,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
 
   cout<<"Printing HiJ complete.size:"<<HiJ_map->size()<<endl;
 
-  outfile.open(strcat(DATASET_PATH, "HlL.csv"));
+
+  stringstream ss;
+    ss << DATASET_PATH << "HlL.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
   unordered_map<int, double>* HlL_map =gpos->getHlLasMap();
   for(auto it = HlL_map->begin(); it !=HlL_map->end(); it++){
     int location_id = it->first;
@@ -771,7 +793,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
       }
     }
 
-    outfile.open(strcat(DATASET_PATH, "user_to_trueEBMinferred.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "user_to_trueEBMinferred.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
     for(auto it = user_to_trueEBMinferred.begin(); it !=user_to_trueEBMinferred.end(); it++){
       int user_id = it->first;
       int frequency = it->second;
@@ -812,7 +838,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
         }
       }
 
-      outfile.open(strcat(DATASET_PATH, "user_to_EBMinferred.csv"));
+
+      stringstream ss;
+    ss << DATASET_PATH << "user_to_EBMinferred.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
       for(auto it = user_to_EBMinferred.begin(); it !=user_to_EBMinferred.end(); it++){
         int user_id = it->first;
         int frequency = it->second;
@@ -852,7 +882,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
       }
     }
 
-    outfile.open(strcat(DATASET_PATH, "location_to_EMBinferred.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "location_to_EMBinferred.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
     for(auto it = location_to_EMBinferred.begin(); it !=location_to_EMBinferred.end(); it++){
       int user_id = it->first;
       int frequency = it->second;
@@ -893,7 +927,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
       }
     }
 
-    outfile.open(strcat(DATASET_PATH, "location_to_trueEBMinferred.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "location_to_trueEBMinferred.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
     for(auto it = location_to_trueEBMinferred.begin(); it !=location_to_trueEBMinferred.end(); it++){
       int user_id = it->first;
       int frequency = it->second;
@@ -952,7 +990,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
       }
     }
 
-    outfile.open(strcat(DATASET_PATH, "location_user_to_EBMinferred.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "location_user_to_EBMinferred.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
     for(auto it = location_user_to_EBMinferred.begin(); it !=location_user_to_EBMinferred.end(); it++){
       int location_id = it->first;
       map<int,int>* user_toEBMinferred = it->second;
@@ -1020,7 +1062,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
       }
     }
 
-    outfile.open(strcat(DATASET_PATH, "location_user_to_trueEBMinferred.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "location_user_to_trueEBMinferred.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
     for(auto it = location_user_to_trueEBMinferred.begin(); it !=location_user_to_trueEBMinferred.end(); it++){
       int location_id = it->first;
       map<int,int>* user_totrueEBMinferred = it->second;
@@ -1043,7 +1089,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
   {
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
 
-    outfile.open(strcat(DATASET_PATH, "locationTime_Locality.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "locationTime_Locality.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
       int location_id = l_it->first;
@@ -1075,7 +1125,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
   {
 
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
-    outfile.open(strcat(DATASET_PATH, "locationTime_EBM.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "locationTime_EBM.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
       int location_id = l_it->first;
@@ -1160,7 +1214,11 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
   {
 
     map<int , vector< Point* >*>* location_to_user = gpos->getLocationToUser();
-    outfile.open(strcat(DATASET_PATH, "locationTime_CoOcc.csv"));
+
+    stringstream ss;
+    ss << DATASET_PATH << "locationTime_CoOcc.csv";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
 
     for(auto l_it=location_to_user->begin(); l_it != location_to_user->end(); l_it++){
       int location_id = l_it->first;
@@ -1240,7 +1298,11 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(char * DATAS
   map<int, map<int, vector<pair<int, int> >* >*>* cooccurrence_matrix = gpos->getCooccurrenceMatrix();
 
   ofstream outfile;
-  outfile.open(strcat(DATASET_PATH, "partialDWFmatrix"));
+
+  stringstream ss;
+    ss << DATASET_PATH << "partialDWFmatrix";
+    const std::string filePath = ss.str();
+    output_file.open( filePath.c_str() );
 
   for(auto c_it = cooccurrence_matrix->begin(); c_it != cooccurrence_matrix->end(); c_it++){
     int user_1 = c_it->first;

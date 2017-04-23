@@ -877,14 +877,9 @@ map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_r
 void SPOs::writeCheckinLocalityToFile(char* DATASET_PATH){
   ofstream output_file;
 
-  cout << DATASET_PATH << endl;
-
   stringstream ss;
   ss << DATASET_PATH << "checkin-locality.csv";
-  cout << ss.str() << endl;
   const std::string filePath = ss.str();
-  cout << filePath << endl;
-
   output_file.open( filePath.c_str() );
 
   int counter = 0;
@@ -905,9 +900,11 @@ void SPOs::writeCheckinLocalityToFile(char* DATASET_PATH){
 
 void SPOs::writeTemporalLocalityToFile(char* DATASET_PATH){
   ofstream output_file;
-  const char* fileName = "temporal-locality.csv";
-  std::string filePath = std::string(DATASET_PATH) + std::string(fileName);
-  output_file.open(filePath.c_str());
+  stringstream ss;
+  ss << DATASET_PATH << "temporal-locality.csv";
+  const std::string filePath = ss.str();
+  output_file.open( filePath.c_str() );
+
   int counter = 0;
   for (auto o_it = temporal_locality_map->begin(); o_it != temporal_locality_map->end(); o_it++){
     double order_id = o_it->first;
@@ -954,8 +951,9 @@ map< int, double >* SPOs::loadNodeLocalityFromFile(){
 
 map<int, double >* SPOs::loadTemporalLocalityFromFile(char* DATASET_PATH){
   temporal_locality_map = new map< int, double >();
-  const char* fileName = "temporal-locality.csv";
-  std::string filePath = std::string(DATASET_PATH) + std::string(fileName);
+  stringstream ss;
+  ss << DATASET_PATH << "temporal-locality.csv";
+  const std::string filePath = ss.str();
   ifstream fin(filePath.c_str());
   if (!fin){
     cout << "Cannot open node locality file temporal-locality.csv" << endl;
@@ -972,9 +970,9 @@ map< int, map<int, pair<int,double> >* >* SPOs::loadCheckinLocalityFromFile(char
   int count=0;
   map< int, map<int, pair<int,double> >* >* user_to_order_to_location_locality  = new map<int, map<int, pair<int,double> >*>();
 
-  const char* fileName = "checkin-locality.csv";
-  std::string filePath = std::string(DATASET_PATH) + std::string(fileName);
-
+  stringstream ss;
+  ss << DATASET_PATH << "checkin-locality.csv";
+  const std::string filePath = ss.str();
   ifstream fin(filePath.c_str());
   if (!fin){
     cout << "Cannot open checkin locality file checkin-locality.csv" << endl;
