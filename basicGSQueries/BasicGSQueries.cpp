@@ -56,7 +56,7 @@ void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radiu
     unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
     for(int i=0; i<7; i++){
       vector<int> *u_set = user_list->find(i)->second;
-      if(u_set->size() > 25){
+      if(u_set->size() > limit){
         outfile << y << " " << x << " " << i << endl;
         count++;
       }
@@ -65,7 +65,7 @@ void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radiu
   }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Keeping top Location time blocks with atleast 50 : " << count << endl;
+  cout << "Keeping top Location time blocks with atleast  " << limit << " : " << count << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
