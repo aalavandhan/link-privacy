@@ -123,7 +123,7 @@ void runProximityUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
 }
 
 void runUtilities(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
-  // runRangeUtility(purturbedGPOs, baseGPOs, spos);
+  runRangeUtility(purturbedGPOs, baseGPOs, spos);
   // runProximityUtility(purturbedGPOs, baseGPOs, spos);
 }
 
