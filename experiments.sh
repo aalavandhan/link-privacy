@@ -27,7 +27,6 @@ data_set=0
 ./SPFP $data_set grouped-ebm 0 0 0 0 14400 0 0  > results-$data_set/ideal-grouping-tm-14400
 ./SPFP $data_set grouped-ebm 0 0 0 0 28800 0 0  > results-$data_set/ideal-grouping-tm-28800
 
-
 # Gaussian spatial Noise
 for spatial_noise in 100 200 300 400 500 600 700; do
   for spatial_grouping in 0.33; do
@@ -44,7 +43,7 @@ for temporal_noise in 0 20 40 60 80 100 120 140 160 180; do
 done
 
 # Both Spatial and temporal gaussian noise functions ( 1/3 grouping )
-./SPFP $data_set gaussian-v-ebm 1 400 36000 133 12000 0 0 > results-$data_set/gaussian-both-400-36000-133-12000
+./SPFP $data_set gaussian-v-ebm 1 400 3600 133 1200 0 0 > results-$data_set/gaussian-both-400-3600-133-1200
 
 # Only spatial noise function
 for spatial_noise in 100 200 300 400 500 600 700; do
@@ -62,3 +61,8 @@ done
 
 # Both Spatial and temporal noise functions ( 1/3 grouping )
 ./SPFP $data_set comb-v-ebm 1 400 3600 133 3600 0 0 > results-$data_set/comb-both-400-3600-133-1200
+
+
+# CIJ Both Spatial and temporal noise functions ( 1/3 grouping )
+./SPFP $data_set comb-v-ebm 1 400 3600 133 3600 0 1 > results-$data_set/comb-cij-both-400-3600-133-1200
+

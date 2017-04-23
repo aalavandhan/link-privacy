@@ -28,7 +28,7 @@ for d in ["data_Shanghai"]:
   print "{0}\tNumber of locations : {1}".format(d, len(coordinates))
 
   # clusters = DBSCAN(eps=params['eps'], min_samples=params['min_samples'], leaf_size=10, algorithm="kd_tree").fit(coordinates.as_matrix())
-  clusters = KMeans(n_clusters=1200).fit(coordinates.as_matrix())
+  clusters = KMeans(n_clusters=100).fit(coordinates.as_matrix())
 
   lat = [ ]
   lon = [ ]
