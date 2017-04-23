@@ -23,35 +23,66 @@ int SimpleQueries::countCooccurredFriends(){
   return friends;
 }
 
-void SimpleQueries::checkUtilityStats(const char* fileName, double radius, double noise_distance){
+
+void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radius, double noise_distance, const char* query_file){
   ifstream fin(fileName);
-  double x,y, avg_users;
-  int total_users=0, locations_with_users=0;
-  int count=0;
+
+  ofstream outfile;
+
+  outfile.open(query_file);
+
+  double x,y;
+  int day, count=0;
 
   if (!fin) {
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
 
   while (fin){
-    fin >> y >> x;
-    unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByTimeBlock(x,y,radius,radius-noise_distance);
-    for(int i=0; i<24*7;i++){
+    fin >> y >> x >> day;
+    unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
+    for(int i=0; i<7; i++){
       vector<int> *u_set = user_list->find(i)->second;
-      if(u_set->size() > 0){
-        locations_with_users++;
-        total_users += u_set->size();
+      if(u_set->size() > 25){
+        outfile << y << " " << x << " " << i << endl;
+        count++;
       }
     }
     delete user_list;
-    count++;
   }
 
-  avg_users = (double) total_users / (double) count;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Keeping top Location time blocks with atleast 50 : " << count << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
+void SimpleQueries::checkUtilityStats(const char* fileName, double radius, double noise_distance){
+  ifstream fin(fileName);
+
+  double x,y, avg_users;
+  int total_users=0, locations_with_users=0;
+  int count=0;
+  int day;
+
+  if (!fin) {
+    std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
+  }
+
+  while (fin){
+    fin >> y >> x >> day;
+    unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
+    vector<int> *u_set = user_list->find(day)->second;
+    locations_with_users++;
+    total_users += u_set->size();
+    count++;
+    delete user_list;
+  }
+
+  avg_users = (double) total_users / (double) locations_with_users;
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Location time blocks with users : " << locations_with_users << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance << endl;
-  cout << "Total location time_blocks : " << count * 24 * 7 << endl;
+  cout << "Total location time_blocks : " << count << endl;
   cout << "Mean users around a location at an 1 hour interval : " << avg_users << endl;
   cout << "Total users across all location time_blocks :" << total_users << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -70,34 +101,34 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 
   while (fin){
     fin >> y >> x;
-    unordered_map< int, vector<int>* >* user1_set = base_gpos->getUsersInRangeByTimeBlock(x,y,radius,radius-noise_distance);
-    unordered_map< int, vector<int>* >* user2_set = gpos->getUsersInRangeByTimeBlock(x,y,radius,radius-noise_distance);
+    unordered_map< int, vector<int>* >* user1_set = base_gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
+    unordered_map< int, vector<int>* >* user2_set = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
 
-    for(int i=0; i<24*7;i++){
-      vector<int> *u1_set, *u2_set;
+    int i = 23;
 
-      u1_set = user1_set->find(i)->second;
-      u2_set = user2_set->find(i)->second;
+    vector<int> *u1_set, *u2_set;
 
-      std::vector<int> v_intersection;
+    u1_set = user1_set->find(i)->second;
+    u2_set = user2_set->find(i)->second;
 
-      std::set_intersection(u1_set->begin(), u1_set->end(),
-                            u2_set->begin(), u2_set->end(),
-                            std::back_inserter(v_intersection));
+    std::vector<int> v_intersection;
 
-      if(u1_set->size() > 0){
-        precision = (double) v_intersection.size() / (double) u2_set->size();
+    std::set_intersection(u1_set->begin(), u1_set->end(),
+                          u2_set->begin(), u2_set->end(),
+                          std::back_inserter(v_intersection));
 
-        if(v_intersection.size() != 0)
-          recall    = (double) v_intersection.size() / (double) u1_set->size();
-        else
-          recall    = 0;
+    if(u1_set->size() > 0){
+      precision = (double) v_intersection.size() / (double) u2_set->size();
 
-        avg_precision += precision;
-        avg_recall    += recall;
+      if(v_intersection.size() != 0)
+        recall    = (double) v_intersection.size() / (double) u1_set->size();
+      else
+        recall    = 0;
 
-        count++;
-      }
+      avg_precision += precision;
+      avg_recall    += recall;
+
+      count++;
     }
 
     delete user1_set;

@@ -19,6 +19,8 @@ public:
     virtual double getMinDist();
     virtual int getTimeBlock(int time_block_duration);
     virtual int getWeekTimeBlock();
+    virtual int getCheckinHour();
+    virtual int getCheckinDay();
 
     //Overload the < operator.
     bool operator< (const Point& p) const;

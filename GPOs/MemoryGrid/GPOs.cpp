@@ -517,13 +517,13 @@ map<int, res_point*>* GPOs::getPointsInRange(double x, double y, double r1, doub
   return result;
 }
 
-unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByTimeBlock(double x, double y, double r1, double r2){
-  unordered_map< int, vector<int>* >* r1_list = getUsersInRangeByTimeBlock(x, y, r1);
-  unordered_map< int, vector<int>* >* r2_list = getUsersInRangeByTimeBlock(x, y, r2);
+unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByHourBlock(double x, double y, double r1, double r2){
+  unordered_map< int, vector<int>* >* r1_list = getUsersInRangeByHourBlock(x, y, r1);
+  unordered_map< int, vector<int>* >* r2_list = getUsersInRangeByHourBlock(x, y, r2);
 
   unordered_map< int, vector<int>* >* user_list = new unordered_map< int, vector<int>* >();
 
-  for(int i=0; i<24*7;i++){
+  for(int i=0; i<7;i++){
     vector<int> *u1_list = r1_list->find(i)->second;
     vector<int> *u2_list = r2_list->find(i)->second;
     vector<int> result_list, *result;
@@ -535,18 +535,19 @@ unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByTimeBlock(double x, d
   return user_list;
 }
 
-unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByTimeBlock(double x, double y, double r){
+unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByHourBlock(double x, double y, double r){
   double radius_geo_dist = (r/1000) * 360 / EARTH_CIRCUMFERENCE;
   vector<res_point*>* checkins = getRange(x, y, radius_geo_dist);
 
   unordered_map< int, vector<int>* >* user_list = new unordered_map< int, vector<int>* >();
 
-  for(int i=0; i<24*7;i++){
+  for(int i=0; i<7;i++){
     vector<int> *users = new vector<int>();
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       Point p = Point(*c);
-      if(p.getWeekTimeBlock() == i)
+      // Most checked in hour on any day
+      if(p.getCheckinHour() == 23 && p.getCheckinDay() == i)
         users->push_back( p.getUID() );
     }
 

@@ -398,18 +398,18 @@ void checkQueryFileStats(){
 
   SimpleQueries* query = new SimpleQueries(baseGPOs, spos);
 
-  query->checkUtilityStats(query_test_file, 100, 50);
-  query->checkUtilityStats(query_test_file, 200, 100);
-  query->checkUtilityStats(query_test_file, 300, 150);
-  query->checkUtilityStats(query_test_file, 400, 200);
-  query->checkUtilityStats(query_test_file, 500, 250);
-  query->checkUtilityStats(query_test_file, 600, 300);
-  query->checkUtilityStats(query_test_file, 700, 350);
-  query->checkUtilityStats(query_test_file, 800, 400);
+  query->getInterestingQueryPoints(query_test_file, 800, 100, query_file);
+
+  query->checkUtilityStats(query_file, 800, 100);
+  query->checkUtilityStats(query_file, 800, 200);
+  query->checkUtilityStats(query_file, 800, 300);
+  query->checkUtilityStats(query_file, 800, 400);
+  query->checkUtilityStats(query_file, 800, 500);
+  query->checkUtilityStats(query_file, 800, 600);
+  query->checkUtilityStats(query_file, 800, 700);
 }
 
 void testpTools(){
-
   // int i;
   // double length, entropyTarget;
   double firstEntropy, secondEntropy, thirdEntropy, targetEntropy;
@@ -803,6 +803,7 @@ int main(int argc, char *argv[]){
     case 94:{
       printParameters();
       checkQueryFileStats();
+      break;
     }
 
     case 95:{

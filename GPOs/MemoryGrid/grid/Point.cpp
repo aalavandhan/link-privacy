@@ -106,3 +106,11 @@ int Point::getWeekTimeBlock(){
     int p_time_block = p_time.date().day_of_week() * 24 + p_time.time_of_day().hours();
     return p_time_block;
 }
+
+int Point::getCheckinHour(){
+    return p_time.time_of_day().hours();
+}
+
+int Point::getCheckinDay(){
+    return p_time.date().day_of_week();
+}

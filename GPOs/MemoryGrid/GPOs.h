@@ -70,8 +70,8 @@ public:
     virtual vector<int>* getUsersInRange(double x, double y, double radius);
     virtual vector<int>* getUsersInRange(int source, double radius);
 
-    virtual unordered_map< int, vector<int>* >* getUsersInRangeByTimeBlock(double x, double y, double r1, double r2);
-    virtual unordered_map< int, vector<int>* >* getUsersInRangeByTimeBlock(double x, double y, double radius);
+    virtual unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double r1, double r2);
+    virtual unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double radius);
 
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double radius);
     virtual map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);
