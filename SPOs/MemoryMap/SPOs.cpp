@@ -396,12 +396,15 @@ void SPOs::getFriends(int id, int*& friends, unsigned int &numOfFriends){
 
 unordered_set<int>* SPOs::getFriends(int id){
 	auto it = socialgraph_map->find(id);
-	if(it!=socialgraph_map->end())
+	if(it!=socialgraph_map->end()){
 		return it->second;
-	else
-		return NULL;
+  }
+	else{
+    unordered_set<int>* fset = new unordered_set<int>();
+    socialgraph_map->insert(make_pair(id, fset));
+		return fset;
+  }
 }
-
 
 /*
 iterates through the list of friends of user1 to find
@@ -842,13 +845,11 @@ map< int, double >* SPOs::computeTemporalLocality(int max_checkins, double max_r
 
         if( areFriends(p->getUID(), (*c)->uid) ){
           auto ud_it = user_dist.find( (*c)->uid );
-
           if( ud_it == user_dist.end() ){
             user_dist.insert(make_pair((*c)->uid, diff));
           } else if(ud_it->second > diff){
             ud_it->second = diff;
           }
-
         }
       }
 

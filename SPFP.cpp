@@ -635,7 +635,7 @@ int main(int argc, char *argv[]){
       group_radius            = p3;
       time_range_in_seconds   = p4;
       printParameters();
-      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, false, false);
+      gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, true, true);
       break;
     }
 
