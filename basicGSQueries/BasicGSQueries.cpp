@@ -692,7 +692,6 @@ void SimpleQueries::cacluateCooccurrenceDistribution(vector <int> *users){
 }
 
 void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, double time_block, map< int, double >* temoral_locality_map){
-  gpos->printCooccurrenceMatrix();
   printPartialDiversityAndWeightedFrequencyValues(DATASET_PATH, RENY_Q);
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 

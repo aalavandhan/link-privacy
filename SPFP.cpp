@@ -801,10 +801,12 @@ int main(int argc, char *argv[]){
       query->cacluateSocialStrength();
       cout << "Using Threshold" << social_strength_tresh << endl;
 
+      gpos->printCooccurrenceMatrix(DATASET_PATH);
+
       map< int, double >* temoral_locality_map = spos->loadTemporalLocalityFromFile(DATASET_PATH);
       query->writeHistogramstoFile(DATASET_PATH, social_strength_tresh, time_block, temoral_locality_map);
 
-      spos->writeUserFriendsToFile();
+      spos->writeUserFriendsToFile(DATASET_PATH);
       break;
     }
 

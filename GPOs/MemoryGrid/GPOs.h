@@ -80,7 +80,7 @@ public:
 
     unordered_map<int, double>* calculateLocationEntropy();
 
-    void printCooccurrenceMatrix();
+    void printCooccurrenceMatrix(char *DATA_SET);
 
     virtual vector<Point*>* getLocations();
     virtual unordered_map<int, double>* getHiLasMap();

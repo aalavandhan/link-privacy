@@ -35,7 +35,7 @@ public:
     virtual vector<int>* getUsersInRangeAndTimeBlock(double x, double y, double time_block, int max_checkins, double max_radius)=0;
 
     virtual map< int, map<int,int>* >* getL2U2COOCC() = 0;
-    virtual void printCooccurrenceMatrix() = 0;
+    virtual void printCooccurrenceMatrix(char *DATASET_PATH) = 0;
     virtual vector<Point*>* getLocations() = 0;
 };
 

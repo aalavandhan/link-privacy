@@ -134,9 +134,13 @@ void SPOs::precomputeKatzScore(GPOs *gpos, int parts, int part, double dTresh){
   output_file.close();
 }
 
-void SPOs::writeUserFriendsToFile(){
+void SPOs::writeUserFriendsToFile(char * DATASET_PATH){
   ofstream output_file;
-  output_file.open("user-friendships.csv");
+
+  stringstream ss;
+  ss << DATASET_PATH << "user-friendships.csv";
+  const std::string filePath = ss.str();
+  output_file.open( filePath.c_str() );
 
   for(auto it=socialgraph_map->begin(); it != socialgraph_map->end(); it++){
     int user = it->first;

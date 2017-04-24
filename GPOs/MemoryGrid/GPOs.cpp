@@ -1149,10 +1149,14 @@ int GPOs::getUserCooccurrences(int user_id){
 
 
 // HISTOGRAMS
-void GPOs::printCooccurrenceMatrix(){
+void GPOs::printCooccurrenceMatrix(char *DATASET_PATH){
 
   ofstream outfile;
-  outfile.open("cooccurrence_matrix.csv");
+
+  stringstream ss;
+  ss << DATASET_PATH << "cooccurrence_matrix.csv";
+  const std::string filePath = ss.str();
+  outfile.open( filePath.c_str() );
 
   //for each user user compute his total cooccurrences at all locations and users
   //then iterate again to produce probabilities

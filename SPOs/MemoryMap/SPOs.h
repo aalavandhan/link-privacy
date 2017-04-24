@@ -83,5 +83,5 @@ public:
     void precomputeKatzScore(GPOs* gpos, int parts, int part, double dTresh);
     void loadKatzScoreFromMemory();
 
-    void writeUserFriendsToFile();
+    void writeUserFriendsToFile(char* DATASET_PATH);
 };
