@@ -696,59 +696,71 @@ void SimpleQueries::writeHistogramstoFile(char *DATASET_PATH, double tresh, doub
   unordered_map<int, double>* location_to_H =  gpos->getLocationEntropy();
 
   ofstream outfile;
-  stringstream ss;
-  std::string filePath;
   cout << "Writing location entropy to file : " << endl;
 
-  ss << DATASET_PATH << "locationEntropy.txt";
-  filePath = ss.str();
-  outfile.open( filePath.c_str() );
-  for(auto it = location_to_H->begin();it!=location_to_H->end();it++){
-    outfile<<it->first<<" "<<it->second<<endl;
+  {
+    ofstream outfile;
+    stringstream ss;
+    std::string filePath;
+    ss << DATASET_PATH << "locationEntropy.txt";
+    filePath = ss.str();
+    outfile.open( filePath.c_str() );
+    for(auto it = location_to_H->begin();it!=location_to_H->end();it++){
+      outfile<<it->first<<" "<<it->second<<endl;
+    }
+    outfile.close();
   }
-  outfile.close();
 
-
-  ss << DATASET_PATH << "HiL.csv";
-  filePath = ss.str();
-  outfile.open( filePath.c_str() );
-  unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
-  for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
-    int user_id = it->first;
-    double H = it->second;
-    outfile<< std::fixed << setprecision(10) << user_id << " "<<H<<endl;
+  {
+    ofstream outfile;
+    stringstream ss;
+    std::string filePath;
+    ss << DATASET_PATH << "HiL.csv";
+    filePath = ss.str();
+    outfile.open( filePath.c_str() );
+    unordered_map<int, double>* HiL_map = gpos->getHiLasMap();
+    for(auto it = HiL_map->begin(); it !=HiL_map->end(); it++){
+      int user_id = it->first;
+      double H = it->second;
+      outfile<< std::fixed << setprecision(10) << user_id << " "<<H<<endl;
+    }
+    outfile.close();
+    cout<<"Printing HiL complete. size:"<<HiL_map->size()<<endl;
   }
-  outfile.close();
 
-  cout<<"Printing HiL complete. size:"<<HiL_map->size()<<endl;
-
-
-  ss << DATASET_PATH << "HiJ.csv";
-  filePath = ss.str();
-  outfile.open( filePath.c_str() );
-  unordered_map<int, double>* HiJ_map =gpos->getHiJasMap();
-  for(auto it = HiJ_map->begin(); it !=HiJ_map->end(); it++){
-    int user_id = it->first;
-    double H = it->second;
-    outfile<< std::fixed << setprecision(10) << user_id << " "<<H<<"\n";
+  {
+    ofstream outfile;
+    stringstream ss;
+    std::string filePath;
+    ss << DATASET_PATH << "HiJ.csv";
+    filePath = ss.str();
+    outfile.open( filePath.c_str() );
+    unordered_map<int, double>* HiJ_map =gpos->getHiJasMap();
+    for(auto it = HiJ_map->begin(); it !=HiJ_map->end(); it++){
+      int user_id = it->first;
+      double H = it->second;
+      outfile<< std::fixed << setprecision(10) << user_id << " "<<H<<"\n";
+    }
+    outfile.close();
+    cout<<"Printing HiJ complete.size:"<<HiJ_map->size()<<endl;
   }
-  outfile.close();
 
-  cout<<"Printing HiJ complete.size:"<<HiJ_map->size()<<endl;
-
-
-  ss << DATASET_PATH << "HlL.csv";
-  filePath = ss.str();
-  outfile.open( filePath.c_str() );
-  unordered_map<int, double>* HlL_map =gpos->getHlLasMap();
-  for(auto it = HlL_map->begin(); it !=HlL_map->end(); it++){
-    int location_id = it->first;
-    double H = it->second;
-    outfile<< std::fixed << setprecision(10) << location_id << " "<<H<<"\n";
+  {
+    ofstream outfile;
+    stringstream ss;
+    std::string filePath;
+    ss << DATASET_PATH << "HlL.csv";
+    filePath = ss.str();
+    outfile.open( filePath.c_str() );
+    unordered_map<int, double>* HlL_map =gpos->getHlLasMap();
+    for(auto it = HlL_map->begin(); it !=HlL_map->end(); it++){
+      int location_id = it->first;
+      double H = it->second;
+      outfile<< std::fixed << setprecision(10) << location_id << " "<<H<<"\n";
+    }
+    outfile.close();
+    cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
   }
-  outfile.close();
-
-  cout<<"Printing HlL complete. size:"<<HlL_map->size()<<endl;
 
 
   //-------------------------------------
