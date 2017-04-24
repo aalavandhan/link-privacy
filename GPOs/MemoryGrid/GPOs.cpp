@@ -706,7 +706,7 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
 
 // Time deviation in seconds
 void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
-  unsigned int lid = 0;
+  unsigned int lid = LOCATION_NOISE_BOUND, point_count =0;
 
   purturbed_count = 0;
   total_time_displacement=0;
@@ -720,14 +720,23 @@ void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
         double displacement = abs((int)  ((p->getTime() - purtubed_time).total_milliseconds() / 1000.0));
         total_time_displacement+=displacement;
         purturbed_count++;
+        temporal_purturbed_count++;
         lid++;
       } else {
         Point *p = (*loc);
-        loadPoint( p->getX(), p->getY(), lid, u->first, p->getTime(), p->getOrder() );
-        lid++;
+        loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
       }
+      point_count++;
     }
   }
+
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
+  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
+
+  cout<<"total_temporal_displacement{{"<< total_time_displacement/3600.0 <<"}} hours"<<endl;
+  cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) <<"}} seconds"<<endl;
+  cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
 
   cout<<"Total Displacement : "<< total_time_displacement/3600.0 <<" hours"<<endl;
   cout<<"Average Displacement : "<< total_time_displacement/3600.0  * (1/(float)purturbed_count) <<" hours"<<endl;
@@ -735,7 +744,7 @@ void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
 
 // Radius in meters Adding Gaussian noise
 void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
-  unsigned int lid = 0;
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
 
   purturbed_count = 0;
   total_spatial_displacement = 0;
@@ -749,19 +758,27 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
         double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
         total_spatial_displacement+=displacement;
         purturbed_count++;
-        lid++;
-
+        spatial_purturbed_count++;
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
+        lid++;
       } else {
         Point *p = (*loc);
-        loadPoint( p->getX(), p->getY(), lid, u->first, p->getTime(), p->getOrder() );
-        lid++;
-      }
+        loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
 
+      }
+      point_count++;
     }
   }
-  cout<<"Total Displacement : "<<(((total_spatial_displacement*EARTH_CIRCUMFERENCE) /360) ) <<" in km"<<endl;
-  cout<<"Average Displacement : "<<(((total_spatial_displacement *EARTH_CIRCUMFERENCE)/360)/purturbed_count)*1000 <<" in meters"<<endl;
+
+ total_spatial_displacement * EARTH_CIRCUMFERENCE / 360;
+
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
+  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
+
+  cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
+  cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
+  cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 }
 
 void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
