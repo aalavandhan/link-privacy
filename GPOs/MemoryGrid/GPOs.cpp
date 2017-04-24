@@ -737,9 +737,6 @@ void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
   cout<<"total_temporal_displacement{{"<< total_time_displacement/3600.0 <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
-
-  cout<<"Total Displacement : "<< total_time_displacement/3600.0 <<" hours"<<endl;
-  cout<<"Average Displacement : "<< total_time_displacement/3600.0  * (1/(float)purturbed_count) <<" hours"<<endl;
 }
 
 // Radius in meters Adding Gaussian noise

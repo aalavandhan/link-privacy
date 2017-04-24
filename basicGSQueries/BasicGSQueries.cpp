@@ -107,6 +107,10 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
 
+  if(noise_distance == 0){
+    noise_distance = radius;
+  }
+
   while (fin){
     fin >> y >> x >> day;
     unordered_map< int, vector<int>* >* user1_set = base_gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
