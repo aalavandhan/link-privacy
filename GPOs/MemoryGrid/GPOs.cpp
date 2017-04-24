@@ -361,8 +361,14 @@ bool GPOs::loadLocations(const char* fileName){
 
     blacklist_set = new set<int>(location_blacklist, location_blacklist+249);
   } else {
-    int location_blacklist[] = { };
-    blacklist_set = new set<int>(location_blacklist, location_blacklist+1);
+    int location_blacklist[] = {
+      8361,  4079, 13794, 10270, 25065, 20548, 14486, 12174, 11918,
+      8298, 33867, 16173, 11279, 14319,  9451,  8442, 25379,  9952,
+      8294, 25256, 12120, 11363, 30519, 25608, 17462,  8742, 24384,
+      4837, 14034, 10281,  3496,  3682, 27579,  9303, 10024, 19991,
+      8338, 17861, 18955,  8137, 19982, 19930, 12561,   488, 11075
+    };
+    blacklist_set = new set<int>(location_blacklist, location_blacklist+35);
   }
 
   if (!fin) {

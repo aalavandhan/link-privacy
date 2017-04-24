@@ -1365,7 +1365,13 @@ void SimpleQueries::printPartialDiversityAndWeightedFrequencyValues(char * DATAS
           location_entropy = 0;
         }
 
-        double partial_weighted_frequency = u_it->second * exp(-1 * location_entropy);
+        double partial_weighted_frequency;
+        if(DATA_SET == 2){
+          partial_weighted_frequency = u_it->second * exp(-1 * location_entropy / 2.5);
+        } else {
+          partial_weighted_frequency = u_it->second * exp(-1 * location_entropy);
+        }
+
         outfile<<user_1<<" "<<user_2 <<" "<< location_id<<" "<<temporary_entropy_value_vector.at(i)<< " " <<partial_weighted_frequency<<endl;
         i++;
       }
