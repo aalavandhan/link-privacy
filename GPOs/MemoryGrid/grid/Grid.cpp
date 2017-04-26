@@ -105,7 +105,7 @@ bool Grid::addCheckIn(Point* user){
         return true;
     }
     else{
-        cout << "checkin failed! (" << user->getX() <<", " << user->getY() << endl;
+        // cout << "checkin failed! (" << user->getX() <<", " << user->getY() << endl;
         num_failed++;
         return false;
     }

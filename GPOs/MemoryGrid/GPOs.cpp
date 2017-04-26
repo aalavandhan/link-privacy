@@ -767,7 +767,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
     }
   }
 
- total_spatial_displacement * EARTH_CIRCUMFERENCE / 360;
+  total_spatial_displacement = total_spatial_displacement * EARTH_CIRCUMFERENCE / 360;
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
@@ -805,7 +805,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
   }
 
   if(add_temporal)
-    cout << "Adding Temporal noise function : temporal_locality * checkin_locality " << endl;
+    cout << "Adding Temporal noise function : temporal_locality * log(1+Cij) " << endl;
 
 
   for(auto u_it = gpos->user_to_location.begin(); u_it != gpos->user_to_location.end(); u_it++){
@@ -883,7 +883,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
           spatial_noise = spatial_noise + 0.45;
         spatial_noise = spatial_noise * radius;
       } else {
-        spatial_noise = log( 1 + user_cooccurrenes ) * expHL * checkin_locality_value;
+        spatial_noise = 0.5 * ( expHil + expHiJ ) * expHL * log( 1 + user_cooccurrenes );
         spatial_noise = spatial_noise * radius;
       }
 
@@ -891,7 +891,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), spatial_noise);
 
       // Temporal noise
-      double temporal_noise = (temporal_locality_value * checkin_locality_value) * (double) time_deviation;
+      double temporal_noise = (temporal_locality_value * log( 1 + user_cooccurrenes )) * (double) time_deviation;
 
       // Temporal perturbation
       boost::posix_time::ptime purtubed_time = util.addTemporalNoise(p->getTime(), (int) temporal_noise);

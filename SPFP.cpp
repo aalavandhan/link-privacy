@@ -569,6 +569,26 @@ int main(int argc, char *argv[]){
 
     cout << "Using path: " << DATASET_PATH << endl;
 
+  } else if(data_set == 3){
+    cout << "Using dataset SIMULATED"      << endl;
+
+    checkins_file    = "data_Simulated/checkins.txt";
+    graph_file       = "data_Simulated/socialGraph.txt";
+    query_file       = "data_Simulated/queries.txt";
+    query_test_file  = "data_Simulated/queries-initial.txt";
+
+
+    MIN_X = -98.15;
+    MAX_X = -97;
+    MIN_Y = 30.02;
+    MAX_Y = 30.70;
+
+    DATA_SET = 2;
+    DATASET_SIZE = 7858442;
+    DATASET_PATH     = "data_Simulated/";
+
+    cout << "Using path: " << DATASET_PATH << endl;
+
   } else {
     cout << "Invalid data_set"            << endl;
     exit(-1);
