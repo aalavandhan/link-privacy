@@ -342,16 +342,28 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* spatiallyPurturbedGPOs = new GPOs();
-  GPOs* cmpGPOs  = new GPOs();
+  double radi[] = {5, 10, 25, 50, 100, 250, 500, 1000, 2000};
 
-  spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(baseGPOs, spatial_k, spatial_std_radio);
-  cout << "------------- Locations spatially perturbed -------------------" << endl;
+  for( int i=0; i<=8; i++){
+    cout << "Using group Radius : " << i << endl;
+    double radius = radi[i];
 
-  cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
-  cout << "------------- Locations Grouped -------------------" << endl;
+    GPOs* spatiallyPurturbedGPOs = new GPOs();
+    GPOs* cmpGPOs  = new GPOs();
 
-  runUtilities(cmpGPOs, baseGPOs, spos);
+    spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(baseGPOs, spatial_k, spatial_std_radio);
+    cout << "------------- Locations spatially perturbed -------------------" << endl;
+
+    // cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
+    cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
+    cout << "------------- Locations Grouped -------------------" << endl;
+
+    runBasicOnNoised(baseGPOs, spatiallyPurturbedGPOs, cmpGPOs, spos, false);
+    runBasicOnNoised(baseGPOs, spatiallyPurturbedGPOs, cmpGPOs, spos, true);
+
+    delete spatiallyPurturbedGPOs;
+    delete cmpGPOs;
+  }
 }
 
 
@@ -763,6 +775,7 @@ int main(int argc, char *argv[]){
       cout << "ITRATION: Selective Gaussian Noise based on KNN" << endl;
       spatial_k                 = p1;
       spatial_std_radio         = p2;
+
       bool add_spatial          = p5;
       bool add_temporal         = p6;
 

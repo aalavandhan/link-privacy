@@ -52,7 +52,8 @@ GPOs::GPOs(GPOs *_gpos){
 
 GPOs::~GPOs(){
   delete grid;
-
+  delete location_to_user_to_cooccurrences;
+  delete user_to_order_to_location_displacment;
 }
 
 
@@ -154,6 +155,8 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
         totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
         gettimeofday(&end, NULL);
         totalTime += util.print_time(start, end);
+
+        // cout << "KNN Time : "<< util.print_time(start, end) << " ms" << endl;
         return NULL;
     }
 }
@@ -859,11 +862,16 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio)
   purturbed_count = 0;
   total_spatial_displacement = 0;
 
-  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
-    for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
-      Point *p = (*loc);
-      Point *neighbor = gpos->getKNN(p, k);
+  ofstream outfile;
+  outfile.open( "kdd-noise.csv" );
 
+  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
+    vector<Point *> *checkins = u->second;
+    Point *first_point = checkins->at(0);
+    Point *neighbor = gpos->getKNN(first_point, k);
+
+    for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
+      Point *p = (*loc);
       // converting noise_radius in meters
       double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
@@ -877,14 +885,18 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio)
       // cout << "Noise Distance : "<< noise_radius << endl;
       // cout << "Distance : " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
       lid++;
-      delete neighbor;
 
       point_count++;
 
-      if(point_count % 1000 == 0)
+      outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
+
+      if(point_count % 10000 == 0)
         cout << point_count << endl;
     }
+    delete neighbor;
   }
+
+  outfile.close();
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
