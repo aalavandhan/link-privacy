@@ -52,10 +52,9 @@ GPOs::GPOs(GPOs *_gpos){
 
 GPOs::~GPOs(){
   delete grid;
-  if(location_to_user_to_cooccurrences != NULL)
+  if(cooccurrences_created)
     delete location_to_user_to_cooccurrences;
-  if(user_to_order_to_location_displacment != NULL)
-    delete user_to_order_to_location_displacment;
+
 }
 
 
@@ -1180,6 +1179,7 @@ void GPOs::countU2UCoOccurrences(uint time_block){
   }
 
   //instantiating map for use with combination function based on CiL
+  cooccurrences_created = true;
   location_to_user_to_cooccurrences = new map< int, map<int,int>* >();
 
   for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){

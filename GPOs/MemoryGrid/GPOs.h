@@ -37,6 +37,7 @@ public:
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
 
+    bool cooccurrences_created=false;
     map< int, map<int,int>* >* location_to_user_to_cooccurrences;
     map< int, map<int, pair<int,double> >* >* user_to_order_to_location_displacment;
 
