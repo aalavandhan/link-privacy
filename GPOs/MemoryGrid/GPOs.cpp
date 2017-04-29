@@ -52,8 +52,10 @@ GPOs::GPOs(GPOs *_gpos){
 
 GPOs::~GPOs(){
   delete grid;
-  delete location_to_user_to_cooccurrences;
-  delete user_to_order_to_location_displacment;
+  if(location_to_user_to_cooccurrences != NULL)
+    delete location_to_user_to_cooccurrences;
+  if(user_to_order_to_location_displacment != NULL)
+    delete user_to_order_to_location_displacment;
 }
 
 
