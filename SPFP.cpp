@@ -782,6 +782,7 @@ int main(int argc, char *argv[]){
 
       printParameters();
       selectiveGaussianNoise(spatial_k, spatial_std_radio, add_spatial, add_temporal);
+      break;
     }
 
     // case 4:
