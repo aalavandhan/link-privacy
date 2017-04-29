@@ -167,7 +167,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
   query->computeAccuracyOfSocialStrength(0.80);
 }
 
-void runBasicOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
+void runBasicOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
   // cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
   // cmpGPOs->calculateLocationEntropy();
   // runEBM(cmpGPOs, spos);
@@ -303,8 +303,8 @@ void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *sp
   runEBM(cmpGPOs, spos);
 
   if(run_utilties){
-    runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, false);
-    runBasicOnNoised(baseGPOs, purturbedGPOs, cmpGPOs, spos, true);
+    runBasicOnNoised(baseGPOs, cmpGPOs, spos, false);
+    runBasicOnNoised(baseGPOs, cmpGPOs, spos, true);
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
 }
@@ -359,8 +359,10 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
     cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
     cout << "------------- Locations Grouped -------------------" << endl;
 
-    runBasicOnNoised(baseGPOs, spatiallyPurturbedGPOs, cmpGPOs, spos, false);
-    runBasicOnNoised(baseGPOs, spatiallyPurturbedGPOs, cmpGPOs, spos, true);
+    cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+
+    runBasicOnNoised(baseGPOs, cmpGPOs, spos, false);
+    runBasicOnNoised(baseGPOs, cmpGPOs, spos, true);
 
     delete spatiallyPurturbedGPOs;
     delete cmpGPOs;
