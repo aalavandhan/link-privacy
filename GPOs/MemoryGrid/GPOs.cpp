@@ -888,7 +888,7 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio)
 
       point_count++;
 
-      outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
+      outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << noise_radius << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
 
       if(point_count % 10000 == 0)
         cout << point_count << endl;
