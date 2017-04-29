@@ -857,7 +857,7 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 }
 
-void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio){
+void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
   purturbed_count = 0;
   total_spatial_displacement = 0;
@@ -872,23 +872,27 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio)
 
     for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
       Point *p = (*loc);
-      // converting noise_radius in meters
-      double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
-      pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
 
-      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
-      total_spatial_displacement+=displacement;
-      purturbed_count++;
-      spatial_purturbed_count++;
-      loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
-      // cout << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << p->getX() << " " << p->getY() << " " << displacement << endl;
-      // cout << "Noise Distance : "<< noise_radius << endl;
-      // cout << "Distance : " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
-      lid++;
+      if(_location_to_user_to_cooccurrences->find(p->getID()) != _location_to_user_to_cooccurrences->end()){
+        // converting noise_radius in meters
+        double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
+        double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+        total_spatial_displacement+=displacement;
+        purturbed_count++;
+        spatial_purturbed_count++;
+
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
+        lid++;
+
+        outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << noise_radius << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
+
+      } else {
+        Point *p = (*loc);
+        loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+      }
 
       point_count++;
-
-      outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << noise_radius << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
 
       if(point_count % 10000 == 0)
         cout << point_count << endl;

@@ -345,13 +345,14 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   double radi[] = {5, 10, 25, 50, 100, 250, 500, 1000, 2000};
 
   for( int i=0; i<=8; i++){
-    cout << "Using group Radius : " << i << endl;
+    cout << "Using group Radius : " << radi[i] << endl;
     double radius = radi[i];
 
     GPOs* spatiallyPurturbedGPOs = new GPOs();
     GPOs* cmpGPOs  = new GPOs();
 
-    spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(baseGPOs, spatial_k, spatial_std_radio);
+    spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(baseGPOs, spatial_k, spatial_std_radio,
+      baseGPOs->getL2U2COOCC());
     cout << "------------- Locations spatially perturbed -------------------" << endl;
 
     // cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
