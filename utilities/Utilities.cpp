@@ -73,6 +73,7 @@ pair<double,double> Utilities::addNoise(double x, double y, double radius){
   return make_pair(nLon, nLat);
 }
 
+// Noise radius in meters
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
   boost::mt19937 rng;
   static unsigned int seed = rand() % 10000;
@@ -602,6 +603,8 @@ res_point* Utilities::copy(res_point* toBeCopied){
     rp->id = toBeCopied->id;
     rp->x = toBeCopied->x;
     rp->y = toBeCopied->y;
+    rp->oid = toBeCopied->oid;
+    rp->uid = toBeCopied->uid;
     rp->dist = toBeCopied->dist;
 
     return rp;

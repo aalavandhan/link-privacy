@@ -109,9 +109,27 @@ void Cell::setID(int id){
     c_id = id;
 }
 
+void Cell::setUID(int id){
+    c_uid = id;
+}
+
+void Cell::setOrder(int id){
+    c_order = id;
+}
+
+
 int Cell::getID(){
     return c_id;
 }
+
+int Cell::getUID(){
+    return c_uid;
+}
+
+int Cell::getOrder(){
+    return c_order;
+}
+
 
 
 //---------------------------------

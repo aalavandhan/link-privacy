@@ -54,7 +54,7 @@ double Point::computeMinDist(double x, double y){
 }
 
 // Distance in Meters
-double Point::computeMinDistInMeters(double x, double y){
+double Point::computeMinDistInKiloMeters(double x, double y){
     double lat1r, lon1r, lat2r, lon2r, u, v;
     lat1r = DEG_TO_RAD * y;
     lon1r = DEG_TO_RAD * x;

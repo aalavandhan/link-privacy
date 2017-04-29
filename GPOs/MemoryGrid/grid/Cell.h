@@ -18,6 +18,8 @@ public:
 
     virtual void setDimensions(double x_1, double y_1, double x_2, double y_2);
     virtual void setID(int id);
+    virtual void setUID(int id);
+    virtual void setOrder(int id);
     virtual void setType(int type);
     virtual void setDirection(int direction);
     virtual void setMinDist(double dist);
@@ -29,6 +31,8 @@ public:
     virtual double getX2();
     virtual double getY2();
     virtual int getID();
+    virtual int getUID();
+    virtual int getOrder();
     virtual int getType();
     virtual int getDirection();
     virtual double getMinDist();
@@ -42,7 +46,7 @@ private:
     double *x1, *x2, *y1, *y2;
     list<Point*>* checkIns=NULL;
     int cell_type;
-    int c_id;
+    int c_id, c_uid, c_order;
     int c_direction;
     double c_minDist;
     // int numOfPoints;

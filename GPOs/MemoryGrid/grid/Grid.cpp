@@ -261,7 +261,7 @@ vector<res_point*>* Grid::getkNN(double x, double y, int k){
         v.finished == true;
         return;
     }
-*/
+    */
     //cout<<"query location cell: (" << x << ", " << y <<")"<< endl;
     Cell* cq = getCell(x, y);
     cq->setMinDist(0.0);
@@ -281,9 +281,7 @@ vector<res_point*>* Grid::getkNN(double x, double y, int k){
     int count = 0;
 
     while ( !heap->empty() &&  tmp->getMinDist() < best_dist && count < k) {
-
         heap->pop();
-
         if (tmp->getType() == CELL){                               //it is a cell
             list<Point*>* L = tmp->getCheckIns();
             list<Point*>::iterator it;
@@ -293,6 +291,8 @@ vector<res_point*>* Grid::getkNN(double x, double y, int k){
                 Cell * c = new Cell;
                 c->setType(POINT);
                 c->setID(p->getID());
+                c->setUID(p->getUID());
+                c->setOrder(p->getOrder());
                 c->setDimensions(p->getX(), p->getY(), p->getX(), p->getY());
                 c->computeMinDist(x, y);
                 heap->push(c);
@@ -338,6 +338,8 @@ vector<res_point*>* Grid::getkNN(double x, double y, int k){
 
             rp = new res_point();
             rp->id = tmp->getID();
+            rp->uid = tmp->getUID();
+            rp->oid = tmp->getOrder();
             rp->x = tmp->getX1();
             rp->y = tmp->getY1();
             rp->dist = tmp->getMinDist();
