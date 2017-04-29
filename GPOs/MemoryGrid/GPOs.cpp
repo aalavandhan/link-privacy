@@ -158,6 +158,36 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
     }
 }
 
+// Returns median distance of point from neighbors
+double GPOs::getKNNDistance(Point *p, int k){
+  Point *neighbor = getKNN(p, k);
+  double distance =  p->computeMinDistInMeters(neighbor->getX(), neighbor->getY());
+  delete neighbor;
+  return distance;
+}
+
+// Get's the next nearest checkins discounting the current location
+Point* GPOs::getKNN(Point *p, int k){
+  int count = 0, incr=0;
+  Point* neighbor;
+
+  while(-1){
+    res_point* next_neighbor = getNextNN(p->getX(), p->getY(), ++incr);
+    if(next_neighbor->uid != p->getUID() && next_neighbor->id != p->getID()){
+
+      if(++count == k){
+        neighbor = new Point(next_neighbor);
+        delete next_neighbor;
+        break;
+      }
+
+      delete next_neighbor;
+    }
+  }
+  cout << "Nearest neighbor to " << p->getX() << " " << p->getY() << " is " << neighbor->getX() << " " << neighbor->getY() << endl;
+  cout << "Distance : " << neighbor->computeMinDistInMeters(p->getX(), p->getY()) << endl;
+  return neighbor;
+};
 
 vector<res_point*>* GPOs::getkNN(double x, double y, int k){
   // cout << "getKNN start" << endl;
@@ -165,23 +195,17 @@ vector<res_point*>* GPOs::getkNN(double x, double y, int k){
   struct timeval start, end;
   gettimeofday(&start, NULL);
   startC = clock();
-
   kNNExecutions++;
-
- // cout << "----" << k << endl;
+  // cout << "----" << k << endl;
   vector<res_point*>* res = grid->getkNN(x, y, k);
- // cout << "size = " << res->size() << endl;
-
+  // cout << "size = " << res->size() << endl;
   endC = clock();
   totalCPUTime += (((double)(endC-startC)*1000.0)/(CLOCKS_PER_SEC));
   gettimeofday(&end, NULL);
   totalTime += util.print_time(start, end);
   //	cout << "getKNN end" << endl;
-
   return res;
 }
-
-
 
 vector<res_point*>* GPOs::getRangeAndDelete(double x, double y, double radius){
   vector<res_point*>* res = grid->getRangeAndDelete(x, y, radius);
@@ -653,6 +677,50 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 
 
 // Spatial Grouping
+void GPOs::groupLocationsByKNNDistance(GPOs* gpos, int k, double std_radio){
+  double x=0, y=0;
+  unsigned int lid, count=0;
+  long unsigned int iterations=0;
+  unordered_set<int>* seenLocations = new unordered_set<int>();
+  boost::posix_time::ptime time;
+
+  GPOs *_duplicate_gpos = new GPOs(gpos);
+
+  // Shuffling the locations
+  std::random_shuffle( gpos->locations.begin(), gpos->locations.end() );
+
+  for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
+    Point *p = *l;
+    x   = p->getX();
+    y   = p->getY();
+    lid = p->getID();
+
+    double neighbor_distance = gpos->getKNNDistance(p, k);
+
+    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, neighbor_distance * std_radio);
+
+    for(auto c = checkins->begin(); c != checkins->end(); c++){
+      if( seenLocations->find( (*c)->oid ) == seenLocations->end() ){
+        loadPoint(x, y, lid, (*c)->uid, (*c)->time, (*c)->oid);
+        seenLocations->insert( (*c)->oid );
+        count++;
+      }
+      iterations++;
+      delete (*c);
+    }
+    delete checkins;
+
+    if(count % 100000==0)
+      cout << count << " " << endl;
+
+  };
+
+  delete seenLocations;
+  delete _duplicate_gpos;
+
+  generateFrequencyCache();
+};
+
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int lid, count=0;
@@ -776,6 +844,31 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+}
+
+void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio){
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
+  purturbed_count = 0;
+  total_spatial_displacement = 0;
+
+  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
+    for(auto loc = u->second->begin(); loc != u->second->end(); loc++){
+      Point *p = (*loc);
+      Point *neighbor = getKNN(p, k);
+      double noise_radius = neighbor->computeMinDist(p->getX(), p->getY());
+      pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
+      double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+      total_spatial_displacement+=displacement;
+      purturbed_count++;
+      spatial_purturbed_count++;
+      loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
+
+      cout << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << p->getX() << " " << p->getY() << " " << displacement << endl;
+      cout << "Distance : " << p->computeMinDistInMeters(coordinates_with_noise.first, coordinates_with_noise.second) << endl;
+      lid++;
+      delete neighbor;
+    }
+  }
 }
 
 void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(

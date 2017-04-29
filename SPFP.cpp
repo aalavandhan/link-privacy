@@ -40,13 +40,13 @@ char *checkins_file, *graph_file, *query_file, *query_test_file;
 int iteration_type = 1;
 bool run_utilties = false;
 bool is_noise_method = false;
-int data_set = 0;
+int data_set = 0, spatial_k;
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
          total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
          function_type, p1, p2, p3, p4, p5, p6,
          time_deviation,
          time_range_in_seconds = TIME_RANGE_IN_SECONDS,
-         day_of_week, time_block, noise_type, noise_function;
+         day_of_week, time_block, noise_type, noise_function, spatial_std_radio;
 #endif
 
 void printParameters(){
@@ -67,6 +67,8 @@ void printParameters(){
   cout << "day_of_week          : " << day_of_week << endl;
   cout << "time_block           : " << time_block << endl;
   cout << "noise_type           : " << noise_type << endl;
+  cout << "spatial_k            : " << spatial_k << endl;
+  cout << "spatial_std_radio    : " << spatial_std_radio << endl;
   cout << "------------------------------------------" << endl;
 }
 
@@ -332,6 +334,26 @@ void plainEBM(){
 
 //   runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 // }
+
+void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_spatial, bool add_temporal){
+  bool preload_LE  = false;
+  bool preload_OCC = true;
+
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+  GPOs* spatiallyPurturbedGPOs = new GPOs();
+  GPOs* cmpGPOs  = new GPOs();
+
+  spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(baseGPOs, spatial_k, spatial_std_radio);
+  cout << "------------- Locations spatially perturbed -------------------" << endl;
+
+  cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
+  cout << "------------- Locations Grouped -------------------" << endl;
+
+  runUtilities(cmpGPOs, baseGPOs, spos);
+}
+
 
 void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;
@@ -609,6 +631,10 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "ebm-without-gt") == 0)
     iteration_type = 5;
 
+  else if (strcmp(argv[2], "knn-noise") == 0)
+    iteration_type = 6;
+
+
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
   else if (strcmp(argv[2], "compute-katz") == 0)
@@ -731,6 +757,17 @@ int main(int argc, char *argv[]){
       printParameters();
       runEBMWithoutGroundTruth();
       break;
+    }
+
+    case 6:{
+      cout << "ITRATION: Selective Gaussian Noise based on KNN" << endl;
+      spatial_k                 = p1;
+      spatial_std_radio         = p2;
+      bool add_spatial          = p5;
+      bool add_temporal         = p6;
+
+      printParameters();
+      selectiveGaussianNoise(spatial_k, spatial_std_radio, add_spatial, add_temporal);
     }
 
     // case 4:

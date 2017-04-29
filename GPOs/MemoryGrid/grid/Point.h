@@ -15,6 +15,7 @@ public:
     virtual boost::posix_time::ptime getTime();
     virtual int getOrder();
     virtual double computeMinDist(double x, double y);
+    virtual double computeMinDistInMeters(double x, double y);
     virtual void printDetails();
     virtual double getMinDist();
     virtual int getTimeBlock(int time_block_duration);

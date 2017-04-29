@@ -114,6 +114,7 @@ public:
 
     void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order);
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
+    void groupLocationsByKNNDistance(GPOs* gpos, int k, double std_radio);
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation);
     void verifyRange(double radius);
@@ -134,4 +135,8 @@ public:
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
     virtual map< int, double >* computeTemporalLocality(int max_checkins, double max_radius);
+
+    Point* getKNN(Point *p, int k);
+    double getKNNDistance(Point *p, int k);
+    void loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio);
 };

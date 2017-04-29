@@ -73,7 +73,6 @@ pair<double,double> Utilities::addNoise(double x, double y, double radius){
   return make_pair(nLon, nLat);
 }
 
-
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
   boost::mt19937 rng;
   static unsigned int seed = rand() % 10000;
