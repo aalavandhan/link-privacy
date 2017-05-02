@@ -996,9 +996,10 @@ void GPOs::loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double s
     Point *first_point = checkins->at(0);
     Point *neighbor = gpos->getKNN(first_point, k);
 
-    auto loc_coocc_it = locations_users_frequency_map_with_order.find( first_point->getID() );
+    auto loc_coocc_it = gpos->locations_users_frequency_map_with_order.find( first_point->getID() );
 
     bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
+    location_has_cooccurrences = location_has_cooccurrences & (loc_coocc_it != locations_users_frequency_map_with_order.end());
 
     set<int> checkins_to_be_purturbed;
 

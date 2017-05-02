@@ -343,9 +343,9 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000};
+  double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000};
 
-  for( int i=0; i<=8; i++){
+  for( int i=0; i<=12; i++){
     cout << "Using group Radius : " << radi[i] << endl;
     double radius = radi[i];
 
