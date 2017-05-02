@@ -665,7 +665,7 @@ int main(int argc, char *argv[]){
     iteration_type = 95;
 
   else if (strcmp(argv[2], "compute-knn-metrics") == 0)
-    iteration_type = 95;
+    iteration_type = 96;
 
   else
     iteration_type = -1;
