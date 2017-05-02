@@ -140,4 +140,6 @@ public:
     Point* getKNN(Point *p, int k);
     double getKNNDistance(Point *p, int k);
     void loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+
+    void computeKNNDistances(int k);
 };

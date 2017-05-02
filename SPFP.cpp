@@ -342,7 +342,7 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double radi[] = {5, 10, 25, 50, 100, 250, 500, 1000, 2000};
+  double radi[] = {5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 1000};
 
   for( int i=0; i<=8; i++){
     cout << "Using group Radius : " << radi[i] << endl;
@@ -664,6 +664,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "compute-social-graph") == 0)
     iteration_type = 95;
 
+  else if (strcmp(argv[2], "compute-knn-metrics") == 0)
+    iteration_type = 95;
+
   else
     iteration_type = -1;
 
@@ -911,6 +914,25 @@ int main(int argc, char *argv[]){
 
       cout << "--- Computing social graph -- " << endl;
       query->generateSocialGraph(DATASET_PATH, social_strength_tresh);
+
+      break;
+    }
+
+    case 96:{
+      cout << "METRICS: Compute KNN Metrics" << endl;
+
+      printParameters();
+
+      bool preload_LE  = false;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, gpos);
+
+      for(int i = 1; i <= 10; i++){
+        cout << "Computing KNN for " << i << endl;
+        gpos->computeKNNDistances(i);
+      }
 
       break;
     }

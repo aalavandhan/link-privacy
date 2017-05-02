@@ -858,6 +858,33 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 }
 
+void GPOs::computeKNNDistances(int k){
+  ofstream outfile;
+  stringstream ss;
+  std::string filePath;
+  ss << "knn-noise-" << k << ".csv";
+
+  filePath = ss.str();
+  outfile.open( filePath.c_str() );
+
+  int location_count = 0;
+
+  for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+    vector<Point *> *checkins = l_it->second;
+    Point *first_point = checkins->at(0);
+    Point *neighbor = getKNN(first_point, k);
+
+    outfile << neighbor->computeMinDistInKiloMeters(first_point->getX(), first_point->getY()) * 1000 << endl;
+
+    location_count++;
+
+    if(location_count % 10000 == 0)
+      cout << location_count << endl;
+  }
+
+  outfile.close();
+}
+
 void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
   purturbed_count = 0;
@@ -866,8 +893,8 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
   ofstream outfile;
   outfile.open( "kdd-noise.csv" );
 
-  for(auto u = gpos->user_to_location.begin(); u != gpos->user_to_location.end(); u++){
-    vector<Point *> *checkins = u->second;
+  for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
+    vector<Point *> *checkins = l_it->second;
     Point *first_point = checkins->at(0);
     Point *neighbor = gpos->getKNN(first_point, k);
 
@@ -883,7 +910,7 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
         purturbed_count++;
         spatial_purturbed_count++;
 
-        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, u->first, p->getTime(), p->getOrder() );
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder() );
         lid++;
 
         outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << noise_radius << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
