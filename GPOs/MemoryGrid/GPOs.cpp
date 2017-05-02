@@ -902,9 +902,6 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
   purturbed_count = 0;
   total_spatial_displacement = 0;
 
-  ofstream outfile;
-  outfile.open( "kdd-noise.csv" );
-
   for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
     vector<Point *> *checkins = l_it->second;
     Point *first_point = checkins->at(0);
@@ -925,7 +922,6 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder() );
         lid++;
 
-        outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << displacement << " " << noise_radius << " " << p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second) * 1000 << endl;
 
       } else {
         Point *p = (*loc);
@@ -939,8 +935,6 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
     }
     delete neighbor;
   }
-
-  outfile.close();
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
