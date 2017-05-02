@@ -897,7 +897,7 @@ void GPOs::computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int
   outfile.close();
 }
 
-void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
+void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
   purturbed_count = 0;
   total_spatial_displacement = 0;
@@ -910,7 +910,9 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
     for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
       Point *p = (*loc);
 
-      if(_location_to_user_to_cooccurrences->find(p->getID()) != _location_to_user_to_cooccurrences->end()){
+      bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
+
+      if(!only_cooccurrences || (only_cooccurrences && location_has_cooccurrences)){
         // converting noise_radius in meters
         double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
@@ -918,13 +920,11 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, int k, double std_radio,
         total_spatial_displacement+=displacement;
         purturbed_count++;
         spatial_purturbed_count++;
-
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder() );
         lid++;
+      }
 
-
-      } else {
-        Point *p = (*loc);
+      else{
         loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
       }
 
