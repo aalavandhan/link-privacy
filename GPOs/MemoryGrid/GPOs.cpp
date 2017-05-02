@@ -858,11 +858,16 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 }
 
-void GPOs::computeKNNDistances(int k){
+void GPOs::computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
   ofstream outfile;
   stringstream ss;
   std::string filePath;
-  ss << "knn-noise-" << k << ".csv";
+
+  if(!only_cooccurrences){
+    ss << "knn-noise-" << k << ".csv";
+  } else {
+    ss << "knn-noise-" << k << "-coocc" << ".csv";
+  }
 
   filePath = ss.str();
   outfile.open( filePath.c_str() );
@@ -873,6 +878,13 @@ void GPOs::computeKNNDistances(int k){
     vector<Point *> *checkins = l_it->second;
     Point *first_point = checkins->at(0);
     Point *neighbor = getKNN(first_point, k);
+
+    if(only_cooccurrences){
+      bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
+
+      if(!location_has_cooccurrences)
+        continue;
+    }
 
     outfile << neighbor->computeMinDistInKiloMeters(first_point->getX(), first_point->getY()) * 1000 << endl;
 

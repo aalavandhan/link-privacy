@@ -342,7 +342,7 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double radi[] = {5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 1000};
+  double radi[] = {5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000};
 
   for( int i=0; i<=8; i++){
     cout << "Using group Radius : " << radi[i] << endl;
@@ -921,6 +921,17 @@ int main(int argc, char *argv[]){
     case 96:{
       cout << "METRICS: Compute KNN Metrics" << endl;
 
+
+      bool only_cooccurrences;
+
+      if(p1 == 0){
+        cout << "KNN for all locations "         << endl;
+        only_cooccurrences = false;
+      } else {
+        cout << "KNN for co_occurred locations " << endl;
+        only_cooccurrences = true;
+      }
+
       printParameters();
 
       bool preload_LE  = false;
@@ -931,7 +942,7 @@ int main(int argc, char *argv[]){
 
       for(int i = 1; i <= 10; i++){
         cout << "Computing KNN for " << i << endl;
-        gpos->computeKNNDistances(i);
+        gpos->computeKNNDistances(i, only_cooccurrences, gpos->getL2U2COOCC());
       }
 
       break;
