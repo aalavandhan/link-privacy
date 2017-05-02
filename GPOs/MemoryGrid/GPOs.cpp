@@ -104,9 +104,48 @@ void GPOs::generateFrequencyCache(){
       vector<uint> *time_stamps = it->second;
       sort(time_stamps->begin(), time_stamps->end());
     }
+
     locations_users_frequency_map.insert(make_pair(lid, user_frequencies));
   }
 }
+
+void GPOs::generateCooccurrenceCache(){
+  cout << "---- GENERATING CACHE ----" << endl;
+  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+
+  for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+    map<int, vector< pair<uint, int> >* > * user_frequencies = new map<int, vector< pair<uint, int> >* >();
+
+    int lid = l_it->first;
+    auto location_checkins_vector = l_it->second;
+
+    for(auto c_it = location_checkins_vector->begin(); c_it!= location_checkins_vector->end(); c_it++){
+      auto point = (*c_it);
+      int uid = point->getUID();
+      auto user_it = user_frequencies->find(uid);
+      boost::posix_time::time_duration time_difference = point->getTime() - time_t_epoch;
+      int time = abs(time_difference.total_seconds());
+
+      if(user_it == user_frequencies->end()){
+        vector<pair<uint, int>> *time_stamps = new vector<pair<uint, int>>();
+        time_stamps->push_back( make_pair( time, point->getOrder() ) );
+        user_frequencies->insert(make_pair(uid, time_stamps));
+      } else {
+        user_it->second->push_back( make_pair( time, point->getOrder() ) );
+      }
+    }
+
+    for(auto it = user_frequencies->begin(); it!=user_frequencies->end();it++){
+      vector<pair<uint, int>> *time_stamps = it->second;
+      sort(time_stamps->begin(), time_stamps->end());
+    }
+
+    locations_users_frequency_map_with_order.insert(make_pair(lid, user_frequencies));
+  }
+
+  cout << "Cache Co-occurrence Generated " << locations_users_frequency_map_with_order.size() << endl;
+}
+
 
 vector< Point* >* GPOs::getLocations(int user_id){
   auto l = user_to_location.find(user_id);
@@ -934,6 +973,76 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences,
         cout << point_count << endl;
     }
     delete neighbor;
+  }
+
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
+  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
+  cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
+  cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
+  cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+}
+
+
+void GPOs::loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, uint time_range_in_seconds, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
+  gpos->generateCooccurrenceCache();
+
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
+  purturbed_count = 0;
+  total_spatial_displacement = 0;
+
+  for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
+    vector<Point *> *checkins = l_it->second;
+    Point *first_point = checkins->at(0);
+    Point *neighbor = gpos->getKNN(first_point, k);
+
+    auto loc_coocc_it = locations_users_frequency_map_with_order.find( first_point->getID() );
+
+    bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
+
+    set<int> checkins_to_be_purturbed;
+
+    if(location_has_cooccurrences){
+      map<int, vector< pair<uint, int> >* >* loc_coocc = loc_coocc_it->second;
+      for(auto u1_it = loc_coocc->begin(); u1_it != loc_coocc->end(); u1_it++){
+        int user1 = u1_it->first;
+        vector< pair<uint, int> >* u1_timestamps = u1_it->second;
+        for(auto u2_it = loc_coocc->begin(); u2_it != loc_coocc->end(); u2_it++){
+          int user2 = u2_it->first;
+          vector< pair<uint, int> >* u2_timestamps = u2_it->second;
+
+          if(user1 < user2){
+            util.getCooccurrencesWithinTimeBlock(u1_timestamps, u2_timestamps, time_range_in_seconds, &checkins_to_be_purturbed);
+          }
+        }
+      }
+    }
+
+    // Coorccurrences to be purturbed
+    for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
+      Point *p = (*loc);
+
+      if(location_has_cooccurrences){
+
+        double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
+        double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+        total_spatial_displacement+=displacement;
+        purturbed_count++;
+        spatial_purturbed_count++;
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder() );
+        lid++;
+
+      } else{
+        loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+      }
+
+      point_count++;
+
+      if(point_count % 10000 == 0)
+        cout << point_count << endl;
+
+    }
   }
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;

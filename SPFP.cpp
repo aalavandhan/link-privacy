@@ -335,6 +335,44 @@ void plainEBM(){
 //   runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
 // }
 
+// KNN Noise on only one checkin in cooccurrence
+void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_spatial, bool add_temporal){
+  bool preload_LE  = false;
+  bool preload_OCC = true;
+
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+  double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000};
+
+  for( int i=0; i<=8; i++){
+    cout << "Using group Radius : " << radi[i] << endl;
+    double radius = radi[i];
+
+    GPOs* spatiallyPurturbedGPOs = new GPOs();
+    GPOs* cmpGPOs  = new GPOs();
+
+    spatiallyPurturbedGPOs->loadPurturbedLocationSelectiveKNNDistance(baseGPOs,
+      spatial_k,
+      spatial_std_radio,
+      (uint) time_range_in_seconds,
+      baseGPOs->getL2U2COOCC());
+    cout << "------------- Locations spatially perturbed -------------------" << endl;
+
+    // cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
+    cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
+    cout << "------------- Locations Grouped -------------------" << endl;
+
+    cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+
+    runBasicOnNoised(baseGPOs, cmpGPOs, spos, false);
+    runBasicOnNoised(baseGPOs, cmpGPOs, spos, true);
+
+    delete spatiallyPurturbedGPOs;
+    delete cmpGPOs;
+  }
+}
+
 void selectiveGaussianNoise(bool only_cooccurrences, int spatial_k, double spatial_std_radio, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;
   bool preload_OCC = true;
@@ -652,6 +690,8 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "knn-noise") == 0)
     iteration_type = 6;
 
+  else if (strcmp(argv[2], "knn-selective-noise") == 0)
+    iteration_type = 7;
 
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
@@ -800,6 +840,23 @@ int main(int argc, char *argv[]){
 
       printParameters();
       selectiveGaussianNoise(only_cooccurrences, spatial_k, spatial_std_radio, add_spatial, add_temporal);
+      break;
+    }
+
+    case 7:{
+      cout << "ITRATION: Selective Gaussian Noise based on KNN only one cooccurence" << endl;
+
+      cout << "KNN for co_occurred locations " << endl;
+
+      spatial_k                 = p2;
+      spatial_std_radio         = 1;
+
+      bool add_spatial          = p5;
+      bool add_temporal         = p6;
+
+      printParameters();
+      selectiveGaussianNoise(spatial_k, spatial_std_radio, add_spatial, add_temporal);
+
       break;
     }
 

@@ -43,6 +43,7 @@ public:
 
     // map<int, unordered_map<int, vector<uint>* >*> users_locations_frequency_map;
     map<int, map<int, vector<uint>* >*> locations_users_frequency_map;
+    map<int, map<int, vector< pair<uint, int> >* >*> locations_users_frequency_map_with_order;
 
     unordered_set< pair<int,int>, PairHasher > cooccured_user_pairs;
     unordered_set< pair<int,int>, PairHasher > insignificantly_cooccured_user_pairs;
@@ -94,6 +95,7 @@ public:
     virtual map< int, map<int,int>* >* getL2U2COOCC();
 
     void generateFrequencyCache();
+    void generateCooccurrenceCache();
 
 
     // nextNN without the incremental approach of NN
@@ -140,6 +142,8 @@ public:
     Point* getKNN(Point *p, int k);
     double getKNNDistance(Point *p, int k);
     void loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, uint time_range_in_seconds, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
     void computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+
 };
