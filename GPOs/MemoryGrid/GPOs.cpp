@@ -52,9 +52,57 @@ GPOs::GPOs(GPOs *_gpos){
 
 GPOs::~GPOs(){
   delete grid;
-  if(cooccurrences_created)
-    delete location_to_user_to_cooccurrences;
 
+
+  for(auto it = user_to_location.begin(); it!= user_to_location.end(); it++){
+    delete it->second;
+  }
+
+  for(auto it = location_to_user.begin(); it!= location_to_user.end(); it++){
+    delete it->second;
+  }
+  // map< int, map<int,int>* >* location_to_user_to_cooccurrences;
+  if(cooccurrences_created){
+    for(auto it = location_to_user_to_cooccurrences->begin(); it!= location_to_user_to_cooccurrences->end(); it++){
+      delete it->second;
+    }
+    delete location_to_user_to_cooccurrences;
+  }
+    //map< int, map<int, pair<int,double> >* >* user_to_order_to_location_displacment;
+    if(user_to_order_to_location_displacment != NULL) {
+      for(auto it = user_to_order_to_location_displacment->begin(); it!= user_to_order_to_location_displacment->end(); it++){
+        delete it->second;
+      }
+      delete user_to_order_to_location_displacment;
+    }
+
+    //map<int, map<int, vector<uint>* >*> locations_users_frequency_map;
+    for(auto it = locations_users_frequency_map.begin(); it!= locations_users_frequency_map.end(); it++){
+      auto innerMap = it->second;
+      for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
+        delete it->second;
+      }
+      delete innerMap;
+    }
+
+    //map<int, map<int, vector< pair<uint, int> >* >*> locations_users_frequency_map_with_order;
+    for(auto it = locations_users_frequency_map_with_order.begin(); it!= locations_users_frequency_map_with_order.end(); it++){
+      auto innerMap = it->second;
+      for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
+        delete it->second;
+      }
+      delete innerMap;
+    }
+
+    // map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
+
+    for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
+      auto innerMap = it->second;
+      for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
+        delete it->second;
+      }
+      delete innerMap;
+    }
 }
 
 
@@ -1023,7 +1071,9 @@ void GPOs::loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double s
     for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
       Point *p = (*loc);
 
-      if(location_has_cooccurrences){
+      bool need_to_purturb = checkins_to_be_purturbed.find(p->getOrder()) != checkins_to_be_purturbed.end();
+
+      if(location_has_cooccurrences && need_to_purturb){
 
         double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
