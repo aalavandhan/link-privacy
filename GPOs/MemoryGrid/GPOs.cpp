@@ -61,6 +61,11 @@ GPOs::~GPOs(){
   for(auto it = location_to_user.begin(); it!= location_to_user.end(); it++){
     delete it->second;
   }
+
+  for(auto it = time_to_checkins.begin(); it!= time_to_checkins.end(); it++){
+    delete it->second;
+  }
+
   // map< int, map<int,int>* >* location_to_user_to_cooccurrences;
   if(cooccurrences_created){
     for(auto it = location_to_user_to_cooccurrences->begin(); it!= location_to_user_to_cooccurrences->end(); it++){
@@ -255,7 +260,80 @@ double GPOs::getKNNDistance(Point *p, int k){
   Point *neighbor = getKNN(p, k);
   double distance =  p->computeMinDistInKiloMeters(neighbor->getX(), neighbor->getY());
   delete neighbor;
-  return distance;
+
+  if(distance * 1000 <= SPATIAL_HARD_BOUND){
+    return distance;
+  }
+
+  return std::numeric_limits<double>::infinity();
+}
+
+// Returns knn distance in seconds
+double GPOs::getTemporalKNNDistance(Point *p, int k){
+  map< int, Point* > temporalKNNs;
+
+  getTemporalKNN(p, k, &temporalKNNs);
+
+  if(temporalKNNs.size() > 0){
+    auto it = temporalKNNs.rbegin();
+    return (double) it->first;
+  }
+
+  return std::numeric_limits<double>::infinity();
+}
+
+// Returns knn temporal points
+void GPOs::getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs){
+  map< int, Point* > temporalKNNShortList;
+
+  Point *neighbor = getKNN(p, k);
+  int time_block = p->getTimeIndex();
+
+  int left_size = 0;
+
+  for(int i=0; i<=TEMPORAL_HARD_BOUND; i++){
+    int cur_time_block = time_block + i;
+    auto t_it = time_to_checkins.find(cur_time_block);
+
+    if(t_it != time_to_checkins.end()){
+      vector <Point*> *checkins = t_it->second;
+      for(auto c_it = checkins->begin(); c_it != checkins->end(); c_it++){
+        Point *chk = *c_it;
+        if( p->getID() != chk->getID() ){
+          temporalKNNShortList.insert( make_pair(p->getTimeDifference(chk), chk) );
+        }
+      }
+    }
+
+    if(temporalKNNShortList.size() >= k)
+      break;
+  }
+
+  left_size = temporalKNNShortList.size();
+
+  for(int i=1; i<=TEMPORAL_HARD_BOUND; i++){
+    int cur_time_block = time_block - i;
+    auto t_it = time_to_checkins.find(cur_time_block);
+
+    if(t_it != time_to_checkins.end()){
+      vector <Point*> *checkins = t_it->second;
+      for(auto c_it = checkins->begin(); c_it != checkins->end(); c_it++){
+        Point *chk = *c_it;
+        if( p->getID() != chk->getID() ){
+          temporalKNNShortList.insert( make_pair(p->getTimeDifference(chk), chk) );
+        }
+      }
+    }
+
+    if(temporalKNNShortList.size() >= k + left_size)
+      break;
+  }
+
+  for(auto c_it = temporalKNNShortList.begin(); c_it != temporalKNNShortList.end() && temporalKNNs->size() < k; c_it++){
+    cout << c_it->first << " " << c_it->second->getTime() << endl;
+    temporalKNNs->insert(make_pair(c_it->first, c_it->second));
+  }
+
 }
 
 // Get's the next nearest checkins discounting the current location
@@ -422,13 +500,23 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
   }
 
   auto lu_it = location_to_user.find(lid);
-
   if( lu_it == location_to_user.end() ){
     vector<Point* >* pts = new vector<Point*>();
     pts->push_back(l);
     location_to_user.insert( make_pair(lid, pts) );
   } else {
     vector<Point* >* pts = lu_it->second;
+    pts->push_back(l);
+  }
+
+  int time_block = l->getTimeIndex();
+  auto tu_it = time_to_checkins.find(time_block);
+  if( tu_it == time_to_checkins.end() ){
+    vector<Point* >* pts = new vector<Point*>();
+    pts->push_back(l);
+    time_to_checkins.insert( make_pair(time_block, pts) );
+  } else {
+    vector<Point* >* pts = tu_it->second;
     pts->push_back(l);
   }
 
@@ -946,43 +1034,74 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 }
 
-void GPOs::computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
-  ofstream outfile;
-  stringstream ss;
-  std::string filePath;
-
-  if(!only_cooccurrences){
-    ss << "knn-noise-" << k << ".csv";
-  } else {
-    ss << "knn-noise-" << k << "-coocc" << ".csv";
-  }
-
-  filePath = ss.str();
-  outfile.open( filePath.c_str() );
-
-  int location_count = 0;
-
-  for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
-    vector<Point *> *checkins = l_it->second;
-    Point *first_point = checkins->at(0);
-    Point *neighbor = getKNN(first_point, k);
-
-    if(only_cooccurrences){
-      bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
-
-      if(!location_has_cooccurrences)
-        continue;
+void GPOs::computeKNNDistances(int k, bool only_cooccurrences, bool compute_spatial, bool compute_temporal, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
+  if(compute_spatial){
+    ofstream outfile;
+    stringstream ss;
+    std::string filePath;
+    if(!only_cooccurrences){
+      ss << "knn-noise-" << k << ".csv";
+    } else {
+      ss << "knn-noise-" << k << "-coocc" << ".csv";
     }
+    filePath = ss.str();
+    outfile.open( filePath.c_str() );
+    int location_count = 0;
+    for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+      vector<Point *> *checkins = l_it->second;
+      Point *first_point = checkins->at(0);
+      double distance = getKNNDistance(first_point, k);
 
-    outfile << neighbor->computeMinDistInKiloMeters(first_point->getX(), first_point->getY()) * 1000 << endl;
+      if(only_cooccurrences){
+        bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
 
-    location_count++;
+        if(!location_has_cooccurrences)
+          continue;
+      }
 
-    if(location_count % 100000 == 0)
-      cout << location_count << endl;
+      outfile << distance * 1000 << endl;
+
+      location_count++;
+
+      if(location_count % 100000 == 0)
+        cout << location_count << endl;
+    }
+    outfile.close();
   }
 
-  outfile.close();
+  if(compute_temporal){
+    ofstream outfile;
+    stringstream ss;
+    std::string filePath;
+    if(!only_cooccurrences){
+      ss << "knn-noise-temporal-" << k << ".csv";
+    } else {
+      ss << "knn-noise-temporal-" << k << "-coocc" << ".csv";
+    }
+    filePath = ss.str();
+    outfile.open( filePath.c_str() );
+    int location_count = 0;
+    for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+      vector<Point *> *checkins = l_it->second;
+      Point *first_point = checkins->at(0);
+      double distance = getTemporalKNNDistance(first_point,  k);
+
+      if(only_cooccurrences){
+        bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
+
+        if(!location_has_cooccurrences)
+          continue;
+      }
+
+      outfile << distance * 1000 << endl;
+
+      location_count++;
+
+      if(location_count % 100000 == 0)
+        cout << location_count << endl;
+    }
+    outfile.close();
+  }
 }
 
 void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){

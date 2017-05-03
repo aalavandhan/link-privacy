@@ -22,6 +22,8 @@ public:
     virtual int getWeekTimeBlock();
     virtual int getCheckinHour();
     virtual int getCheckinDay();
+    virtual int getTimeIndex();
+    virtual int getTimeDifference(Point *q);
 
     //Overload the < operator.
     bool operator< (const Point& p) const;

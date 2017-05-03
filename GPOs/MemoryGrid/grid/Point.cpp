@@ -114,6 +114,16 @@ int Point::getTimeBlock(int time_block_duration){
     return p_time_block;
 }
 
+int Point::getTimeIndex(){
+    boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+    boost::posix_time::time_duration time_difference = p_time - time_t_epoch;
+    return (int)( (double) time_difference.total_seconds() / (double) (60 * 60) );
+}
+
+int Point::getTimeDifference(Point *q){
+    return abs( (p_time - q->getTime()).total_seconds() );
+}
+
 int Point::getWeekTimeBlock(){
     int p_time_block = p_time.date().day_of_week() * 24 + p_time.time_of_day().hours();
     return p_time_block;

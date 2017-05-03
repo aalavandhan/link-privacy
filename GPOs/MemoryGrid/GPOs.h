@@ -36,6 +36,7 @@ public:
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
+    map<int , vector< Point* >*> time_to_checkins;
 
     bool cooccurrences_created=false;
     map< int, map<int,int>* >* location_to_user_to_cooccurrences;
@@ -144,6 +145,9 @@ public:
     void loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, uint time_range_in_seconds, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
-    void computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void computeKNNDistances(int k, bool only_cooccurrences, bool compute_spatial, bool compute_temporal, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+
+    double getTemporalKNNDistance(Point *p, int k);
+    void getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs);
 
 };
