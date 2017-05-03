@@ -1048,10 +1048,10 @@ int main(int argc, char *argv[]){
       bool only_cooccurrences;
 
       if(p1 == 0){
-        cout << "KNN for all locations "         << endl;
+        cout << "Skyline for all locations "         << endl;
         only_cooccurrences = false;
       } else {
-        cout << "KNN for co_occurred locations " << endl;
+        cout << "Skyline for co_occurred locations " << endl;
         only_cooccurrences = true;
       }
       printParameters();

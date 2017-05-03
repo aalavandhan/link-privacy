@@ -274,7 +274,10 @@ void GPOs::getSkylinePoints(Point *p, unordered_set< Point* > *skylines){
   for(auto it=points_of_interest.begin(); it != points_of_interest.end(); it++){
     Point *chk = *it;
 
-    if(chk->getID() == p->getID() && chk->getUID() != p->getUID())
+    if(chk->getID() == p->getID())
+      continue;
+
+    if(chk->getUID() == p->getUID())
       continue;
 
     if(skylines->size() == 0){
