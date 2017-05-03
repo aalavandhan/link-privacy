@@ -153,5 +153,5 @@ public:
     void getRangeSpatioTemporalBound(Point *p, vector< Point* >* results);
     void getSkylinePoints(Point *p, unordered_set< Point* > *skylines);
 
-    void computeSkylineMetrics(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 };

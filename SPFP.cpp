@@ -1066,10 +1066,7 @@ int main(int argc, char *argv[]){
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
       fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
 
-      for(int i = 1; i <= 10; i++){
-        cout << "Computing KNN for " << i << endl;
-        fixedGpos->computeSkylineMetrics(i, only_cooccurrences, fixedGpos->getL2U2COOCC());
-      }
+      fixedGpos->computeSkylineMetrics(only_cooccurrences, fixedGpos->getL2U2COOCC());
 
       break;
     }

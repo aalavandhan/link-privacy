@@ -1079,14 +1079,14 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 }
 
-void GPOs::computeSkylineMetrics(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
+void GPOs::computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
   ofstream outfile;
   stringstream ss;
   std::string filePath;
   if(!only_cooccurrences){
-    ss << "skyline-" << k << ".csv";
+    ss << "skyline.csv";
   } else {
-    ss << "skyline-" << k << "-coocc" << ".csv";
+    ss << "skyline-coocc.csv";
   }
   filePath = ss.str();
   outfile.open( filePath.c_str() );
@@ -1096,8 +1096,6 @@ void GPOs::computeSkylineMetrics(int k, bool only_cooccurrences, map< int, map<i
     Point *first_point = checkins->at(0);
     unordered_set< Point* > skylines;
     getSkylinePoints(first_point, &skylines);
-
-    double distance = getKNNDistance(first_point, k);
 
     if(only_cooccurrences){
       bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
