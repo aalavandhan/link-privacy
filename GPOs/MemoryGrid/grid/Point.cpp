@@ -114,6 +114,16 @@ int Point::getTimeBlock(int time_block_duration){
     return p_time_block;
 }
 
+bool Point::doesSkylineDominate(Point *skyline, Point *other){
+    int sk_del_t    = getTimeDifference(skyline);
+    double sk_del_s = computeMinDistInKiloMeters(skyline->getX(), skyline->getY());
+
+    int ot_del_t    = getTimeDifference(other);
+    double ot_del_s = computeMinDistInKiloMeters(other->getX(), other->getY());
+
+    return (sk_del_s <= ot_del_s || sk_del_t <= ot_del_t);
+}
+
 int Point::getTimeIndex(){
     boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
     boost::posix_time::time_duration time_difference = p_time - time_t_epoch;

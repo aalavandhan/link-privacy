@@ -200,7 +200,6 @@ void GPOs::generateCooccurrenceCache(){
   cout << "Cache Co-occurrence Generated " << locations_users_frequency_map_with_order.size() << endl;
 }
 
-
 vector< Point* >* GPOs::getLocations(int user_id){
   auto l = user_to_location.find(user_id);
   return l->second;
@@ -253,6 +252,53 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
         // cout << "KNN Time : "<< util.print_time(start, end) << " ms" << endl;
         return NULL;
     }
+}
+
+void GPOs::getRangeSpatioTemporalBound(Point *p, vector< Point* >* results){
+  double radius_geo_dist = (SPATIAL_HARD_BOUND/1000) * 360 / EARTH_CIRCUMFERENCE;
+  vector <res_point*> *spatial_candidates = getRange(p->getX(), p->getY(), radius_geo_dist);
+
+  for(auto sc_it=spatial_candidates->begin(); sc_it != spatial_candidates->end(); sc_it++){
+    Point *cand = new Point(*sc_it);
+    if(p->getTimeDifference(cand) <= TEMPORAL_HARD_BOUND * 3600){
+      results->push_back(cand);
+    } else
+      delete cand;
+  }
+}
+
+void GPOs::getSkylinePoints(Point *p, unordered_set< Point* > *skylines){
+  vector <Point*> points_of_interest;
+  getRangeSpatioTemporalBound(p, &points_of_interest);
+
+  for(auto it=points_of_interest.begin(); it != points_of_interest.end(); it++){
+    Point *chk = *it;
+
+    if(chk->getID() == p->getID())
+      continue;
+
+    if(skylines->size() == 0){
+      skylines->insert( chk );
+      continue;
+    }
+
+    bool isDominated = false;
+    for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
+      Point *skyline = (*sk_it);
+      if( !p->doesSkylineDominate(skyline, chk) ){
+        isDominated = true;
+        auto pt_to_delete = sk_it;
+        sk_it++;
+        skylines->erase(pt_to_delete);
+      } else {
+        sk_it++;
+      }
+    }
+
+    if(isDominated){
+      skylines->insert( chk );
+    }
+  }
 }
 
 // Returns knn distance in kilometers
@@ -1031,6 +1077,46 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+}
+
+void GPOs::computeSkylineMetrics(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
+  ofstream outfile;
+  stringstream ss;
+  std::string filePath;
+  if(!only_cooccurrences){
+    ss << "skyline-" << k << ".csv";
+  } else {
+    ss << "skyline-" << k << "-coocc" << ".csv";
+  }
+  filePath = ss.str();
+  outfile.open( filePath.c_str() );
+  int location_count = 0;
+  for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+    vector<Point *> *checkins = l_it->second;
+    Point *first_point = checkins->at(0);
+    unordered_set< Point* > skylines;
+    getSkylinePoints(first_point, &skylines);
+
+    double distance = getKNNDistance(first_point, k);
+
+    if(only_cooccurrences){
+      bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
+
+      if(!location_has_cooccurrences)
+        continue;
+    }
+
+    for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
+      Point *skyline = (*sk_it);
+      outfile << first_point->getID() << " " << skyline->getID() << " " << first_point->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) * 1000 << endl;
+    }
+
+    location_count++;
+
+    if(location_count % 100000 == 0)
+      cout << location_count << endl;
+  }
+  outfile.close();
 }
 
 void GPOs::computeKNNDistances(int k, bool only_cooccurrences, bool compute_spatial, bool compute_temporal, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
