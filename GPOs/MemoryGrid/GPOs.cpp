@@ -274,7 +274,7 @@ void GPOs::getSkylinePoints(Point *p, unordered_set< Point* > *skylines){
   for(auto it=points_of_interest.begin(); it != points_of_interest.end(); it++){
     Point *chk = *it;
 
-    if(chk->getID() == p->getID())
+    if(chk->getID() == p->getID() && chk->getUID() != p->getUID())
       continue;
 
     if(skylines->size() == 0){
@@ -282,11 +282,11 @@ void GPOs::getSkylinePoints(Point *p, unordered_set< Point* > *skylines){
       continue;
     }
 
-    bool isDominated = false;
+    bool chkDominates = false;
     for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
       Point *skyline = (*sk_it);
       if( !p->doesSkylineDominate(skyline, chk) ){
-        isDominated = true;
+        chkDominates = true;
         auto pt_to_delete = sk_it;
         sk_it++;
         skylines->erase(pt_to_delete);
@@ -295,7 +295,7 @@ void GPOs::getSkylinePoints(Point *p, unordered_set< Point* > *skylines){
       }
     }
 
-    if(isDominated){
+    if(chkDominates){
       skylines->insert( chk );
     }
   }
@@ -394,7 +394,7 @@ Point* GPOs::getKNN(Point *p, int k){
 
     // cout << incr << " " << next_neighbor->x << " " << next_neighbor->y << " " << next_neighbor->id << " " << next_neighbor->uid << endl;
 
-    if( next_neighbor->id != p->getID() ){
+    if( next_neighbor->id != p->getID() && next_neighbor->uid != p->getUID() ){
       // cout << "Found KNN " << endl;
       count++;
       if(count == k){
@@ -406,8 +406,7 @@ Point* GPOs::getKNN(Point *p, int k){
   }
   // cout << "Nearest neighbor to " << p->getX() << " " << p->getY() << " is " << neighbor->getX() << " " << neighbor->getY() << endl;
   // cout << "Distance : " << neighbor->computeMinDistInMeters(p->getX(), p->getY()) << endl;
-
-  vector<Point *> *checkins = location_to_user.find(p->getID())->second;
+  // vector<Point *> *checkins = location_to_user.find(p->getID())->second;
 
   return neighbor;
 };
@@ -1090,12 +1089,10 @@ void GPOs::computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>
   }
   filePath = ss.str();
   outfile.open( filePath.c_str() );
-  int location_count = 0;
+  int checkin_count = 0;
   for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
     vector<Point *> *checkins = l_it->second;
     Point *first_point = checkins->at(0);
-    unordered_set< Point* > skylines;
-    getSkylinePoints(first_point, &skylines);
 
     if(only_cooccurrences){
       bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
@@ -1104,15 +1101,25 @@ void GPOs::computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>
         continue;
     }
 
-    for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
-      Point *skyline = (*sk_it);
-      outfile << first_point->getID() << " " << skyline->getID() << " " << first_point->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) * 1000 << endl;
+    for(auto c_it = checkins->begin(); c_it != checkins->end(); c_it++){
+      Point *checkin = (*c_it);
+
+      unordered_set< Point* > skylines;
+      getSkylinePoints(checkin, &skylines);
+
+      for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
+        Point *skyline = (*sk_it);
+        outfile << checkin->getOrder() << " " << skyline->getOrder() << " " << checkin->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) * 1000 << " " << checkin->getTimeDifference(skyline) << endl;
+      }
+
+      checkin_count++;
+
+      if(checkin_count % 10000 == 0)
+        cout << checkin_count << endl;
+
     }
 
-    location_count++;
 
-    if(location_count % 100000 == 0)
-      cout << location_count << endl;
   }
   outfile.close();
 }
@@ -1133,7 +1140,6 @@ void GPOs::computeKNNDistances(int k, bool only_cooccurrences, bool compute_spat
     for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
       vector<Point *> *checkins = l_it->second;
       Point *first_point = checkins->at(0);
-      double distance = getKNNDistance(first_point, k);
 
       if(only_cooccurrences){
         bool location_has_cooccurrences = _location_to_user_to_cooccurrences->find(first_point->getID()) != _location_to_user_to_cooccurrences->end();
@@ -1142,6 +1148,7 @@ void GPOs::computeKNNDistances(int k, bool only_cooccurrences, bool compute_spat
           continue;
       }
 
+      double distance = getKNNDistance(first_point, k);
       outfile << distance * 1000 << endl;
 
       location_count++;
