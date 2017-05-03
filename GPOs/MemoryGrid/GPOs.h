@@ -39,7 +39,7 @@ public:
 
     bool cooccurrences_created=false;
     map< int, map<int,int>* >* location_to_user_to_cooccurrences;
-    map< int, map<int, pair<int,double> >* >* user_to_order_to_location_displacment;
+    map< int, map<int, pair<int,double> >* >* user_to_order_to_location_displacment = NULL;
 
     // map<int, unordered_map<int, vector<uint>* >*> users_locations_frequency_map;
     map<int, map<int, vector<uint>* >*> locations_users_frequency_map;

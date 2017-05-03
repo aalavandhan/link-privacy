@@ -80,7 +80,7 @@ GPOs::~GPOs(){
     for(auto it = locations_users_frequency_map.begin(); it!= locations_users_frequency_map.end(); it++){
       auto innerMap = it->second;
       for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
-        delete it->second;
+        delete iter->second;
       }
       delete innerMap;
     }
@@ -89,7 +89,7 @@ GPOs::~GPOs(){
     for(auto it = locations_users_frequency_map_with_order.begin(); it!= locations_users_frequency_map_with_order.end(); it++){
       auto innerMap = it->second;
       for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
-        delete it->second;
+        delete iter->second;
       }
       delete innerMap;
     }
@@ -99,7 +99,7 @@ GPOs::~GPOs(){
     for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
       auto innerMap = it->second;
       for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
-        delete it->second;
+        delete iter->second;
       }
       delete innerMap;
     }
@@ -135,10 +135,11 @@ void GPOs::generateFrequencyCache(){
     for(auto c_it = location_checkins_vector->begin(); c_it!= location_checkins_vector->end(); c_it++){
       auto point = (*c_it);
       int uid = point->getUID();
-      auto user_it = user_frequencies->find(uid);
+
       boost::posix_time::time_duration time_difference = point->getTime() - time_t_epoch;
       int time = abs(time_difference.total_seconds());
 
+      auto user_it = user_frequencies->find(uid);
       if(user_it == user_frequencies->end()){
         vector<uint> *time_stamps = new vector<uint>();
         time_stamps->push_back( time );
