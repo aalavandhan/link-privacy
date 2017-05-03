@@ -330,7 +330,6 @@ void GPOs::getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs){
   }
 
   for(auto c_it = temporalKNNShortList.begin(); c_it != temporalKNNShortList.end() && temporalKNNs->size() < k; c_it++){
-    cout << c_it->first << " " << c_it->second->getTime() << endl;
     temporalKNNs->insert(make_pair(c_it->first, c_it->second));
   }
 
