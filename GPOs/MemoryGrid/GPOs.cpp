@@ -264,7 +264,11 @@ void GPOs::getRangeSpatioTemporalBound(Point *p, vector< Point* >* results){
       results->push_back(cand);
     } else
       delete cand;
+
+    delete *sc_it;
   }
+
+  delete spatial_candidates;
 }
 
 void GPOs::getSkylinePoints(Point *p, unordered_set< Point* > *skylines){
