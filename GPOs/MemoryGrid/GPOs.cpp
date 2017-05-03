@@ -978,7 +978,7 @@ void GPOs::computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int
 
     location_count++;
 
-    if(location_count % 100x000 == 0)
+    if(location_count % 100000 == 0)
       cout << location_count << endl;
   }
 
