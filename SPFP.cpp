@@ -1027,14 +1027,14 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      // GPOs* fixedGpos = new GPOs();
-      // fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      // fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+      GPOs* fixedGpos = new GPOs();
+      fixedGpos->groupLocationsByRange(gpos, 3.3, false);
+      fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
 
       for(int i = 1; i <= 10; i++){
         cout << "Computing KNN for " << i << endl;
-        // fixedGpos->computeKNNDistances(i, only_cooccurrences, compute_spatial, compute_temporal, fixedGpos->getL2U2COOCC());
-        gpos->computeKNNDistances(i, only_cooccurrences, compute_spatial, compute_temporal, gpos->getL2U2COOCC());
+        fixedGpos->computeKNNDistances(i, only_cooccurrences, compute_spatial, compute_temporal, fixedGpos->getL2U2COOCC());
+        // gpos->computeKNNDistances(i, only_cooccurrences, compute_spatial, compute_temporal, gpos->getL2U2COOCC());
       }
 
       break;
