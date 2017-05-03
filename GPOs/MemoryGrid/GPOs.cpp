@@ -978,7 +978,7 @@ void GPOs::computeKNNDistances(int k, bool only_cooccurrences, map< int, map<int
 
     location_count++;
 
-    if(location_count % 10000 == 0)
+    if(location_count % 100x000 == 0)
       cout << location_count << endl;
   }
 
@@ -1004,7 +1004,7 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences,
         // converting noise_radius in meters
         double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
-        double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+        double displacement = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
         total_spatial_displacement+=displacement;
         purturbed_count++;
         spatial_purturbed_count++;
@@ -1018,7 +1018,7 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences,
 
       point_count++;
 
-      if(point_count % 10000 == 0)
+      if(point_count % 100000 == 0)
         cout << point_count << endl;
     }
     delete neighbor;
@@ -1035,6 +1035,9 @@ void GPOs::loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences,
 
 void GPOs::loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, uint time_range_in_seconds, map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
   gpos->generateCooccurrenceCache();
+
+  ofstream outfile;
+  outfile.open( "selective-knn-noise.csv" );
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
   purturbed_count = 0;
@@ -1075,15 +1078,16 @@ void GPOs::loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double s
       bool need_to_purturb = checkins_to_be_purturbed.find(p->getOrder()) != checkins_to_be_purturbed.end();
 
       if(location_has_cooccurrences && need_to_purturb){
-
         double noise_radius = neighbor->computeMinDistInKiloMeters(p->getX(), p->getY()) * 1000;
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->getX(), neighbor->getY(), noise_radius * std_radio);
-        double displacement = util.computeMinimumDistance(p->getX(), p->getY(), coordinates_with_noise.first, coordinates_with_noise.second);
+        double displacement = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
         total_spatial_displacement+=displacement;
         purturbed_count++;
         spatial_purturbed_count++;
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), p->getTime(), p->getOrder() );
         lid++;
+
+        outfile << p->getX() << " " << p->getY() << " " << coordinates_with_noise.first << " " << coordinates_with_noise.second << " " << noise_radius << " " << displacement << endl;
 
       } else{
         loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
@@ -1091,11 +1095,13 @@ void GPOs::loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double s
 
       point_count++;
 
-      if(point_count % 10000 == 0)
+      if(point_count % 100000 == 0)
         cout << point_count << endl;
 
     }
   }
+
+  outfile.close();
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
