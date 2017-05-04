@@ -151,7 +151,11 @@ public:
     void getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs);
 
     void getRangeSpatioTemporalBound(Point *p, vector< Point* >* results);
-    void getSkylinePoints(Point *p, vector <Point*> points_of_interest, unordered_set< Point* > *skylines);
+
+    void getSkylinePoints(Point *p,
+            multiset<Point, point_checkin_time_comparator_ascending>::iterator lb_it,
+            multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
+            unordered_set< Point* > *skylines);
 
     void computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 };

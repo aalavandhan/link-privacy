@@ -26,6 +26,16 @@ Point::Point (res_point *p){
     p_time = p->time;
 }
 
+Point::Point (int time){
+    p_x = -1;
+    p_y = -1;
+    p_id = -1;
+    p_uid = -1;
+    p_order = -1;
+    boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+    p_time = time_t_epoch + boost::posix_time::seconds(time);
+}
+
 
 Point::~Point (){
     // delete p_x;
@@ -121,6 +131,10 @@ bool Point::doesSkylineDominatePoint(Point *skyline, Point *other){
     int ot_del_t    = getTimeDifference(other);
     double ot_del_s = computeMinDistInKiloMeters(other->getX(), other->getY());
 
+    // cout << "Skyline : " << skyline->getOrder() << " "<< sk_del_s << " " << sk_del_t << endl;
+    // cout << "Point   : " << other->getOrder() << " " << ot_del_s << " " << ot_del_t << endl;
+    // cout << "Domination : " << (sk_del_s <= ot_del_s && sk_del_t <= ot_del_t) << endl;
+
     return (sk_del_s <= ot_del_s && sk_del_t <= ot_del_t);
 }
 
@@ -134,14 +148,19 @@ bool Point::doesPointDominateSkyline(Point *skyline, Point *other){
     return (ot_del_s < sk_del_s && ot_del_t < sk_del_t);
 }
 
-int Point::getTimeIndex(){
+int Point::getTimeInSeconds() const{
     boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
     boost::posix_time::time_duration time_difference = p_time - time_t_epoch;
-    return (int)( (double) time_difference.total_seconds() / (double) (60 * 60) );
+    return (int)( time_difference.total_seconds() );
+}
+
+// 1 Hour time blocks
+int Point::getTimeIndex(){
+    return (int)( (double) getTimeInSeconds() / (double) (60 * 60) );
 }
 
 int Point::getTimeDifference(Point *q){
-    return abs( (p_time - q->getTime()).total_seconds() );
+    return abs( getTimeInSeconds() - q->getTimeInSeconds() );
 }
 
 int Point::getWeekTimeBlock(){

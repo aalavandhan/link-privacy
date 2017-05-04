@@ -3,6 +3,7 @@ class Point {
 public:
     Point ();
     Point (res_point *p);
+    Point (int time);
     Point (double x, double y, int id);
     Point (double x, double y, int id, int uid, boost::posix_time::ptime time, int order);
     virtual ~Point ();
@@ -19,6 +20,7 @@ public:
     virtual void printDetails();
     virtual double getMinDist();
     virtual int getTimeBlock(int time_block_duration);
+    virtual int getTimeInSeconds() const;
     virtual int getWeekTimeBlock();
     virtual int getCheckinHour();
     virtual int getCheckinDay();
@@ -44,4 +46,10 @@ private:
     boost::posix_time::ptime p_time;
 };
 
+struct point_checkin_time_comparator_ascending : public binary_function<Point, Point, bool> {
 
+    bool operator()(const Point  &x, const Point  &y) const {
+        return y.getTimeInSeconds() > x.getTimeInSeconds();
+    }
+
+};
