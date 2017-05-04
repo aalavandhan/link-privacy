@@ -24,7 +24,8 @@ public:
     virtual int getCheckinDay();
     virtual int getTimeIndex();
     virtual int getTimeDifference(Point *q);
-    virtual bool doesSkylineDominate(Point *skyline, Point *other);
+    virtual bool doesSkylineDominatePoint(Point *skyline, Point *other);
+    virtual bool doesPointDominateSkyline(Point *skyline, Point *other);
 
     //Overload the < operator.
     bool operator< (const Point& p) const;

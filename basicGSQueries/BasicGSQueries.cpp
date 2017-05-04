@@ -96,6 +96,9 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
+// void SimpleQueries::checkUtilityBasic(IGPOs *base_gpos){
+// }
+
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
 // between base_gpos and this->gpos
 void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius, double noise_distance){

@@ -39,6 +39,7 @@ public:
 
     int countIntersectionWithinTimeBlock(vector<uint>* arr1, vector<uint>* arr2, uint time_block, bool debug);
     void getCooccurrencesWithinTimeBlock(vector<pair<uint, int>>* arr1, vector<pair<uint, int>>* arr2, uint time_block, set<int>* orders);
+    void getCooccurrencesWithinTimeBlock(vector<pair<uint, int>>* arr1, vector<pair<uint, int>>* arr2, uint time_block, set< pair<int,int> >* orders);
 
     pair<double,double> addGaussianNoise(double x, double y, double radius);
     pair<double,double> addNoise(double x, double y, double radius);
