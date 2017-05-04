@@ -356,6 +356,7 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
         newSkyline = true;
         auto pt_to_delete = sk_it;
         sk_it++;
+        delete *pt_to_delete;
         skylines->erase(pt_to_delete);
       } else {
         // cout << "New Skyline " << endl;
