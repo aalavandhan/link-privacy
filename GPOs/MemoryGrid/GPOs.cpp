@@ -426,7 +426,7 @@ void GPOs::getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs){
       vector <Point*> *checkins = t_it->second;
       for(auto c_it = checkins->begin(); c_it != checkins->end(); c_it++){
         Point *chk = *c_it;
-        if( p->getID() != chk->getID() ){
+        if( p->getID() != chk->getID() && p->getUID() != chk->getUID() ){
           temporalKNNShortList.insert( make_pair(p->getTimeDifference(chk), chk) );
         }
       }
@@ -446,7 +446,7 @@ void GPOs::getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs){
       vector <Point*> *checkins = t_it->second;
       for(auto c_it = checkins->begin(); c_it != checkins->end(); c_it++){
         Point *chk = *c_it;
-        if( p->getID() != chk->getID() ){
+        if( p->getID() != chk->getID() && p->getUID() != chk->getUID() ){
           temporalKNNShortList.insert( make_pair(p->getTimeDifference(chk), chk) );
         }
       }
@@ -467,16 +467,11 @@ Point* GPOs::getKNN(Point *p, int k){
   int count = 0, incr=0;
   Point* neighbor;
 
-  // cout << "Computing KNN : " << k  << " For " << p->getX() << " " << p->getY() << " " << p->getID() << " " << p->getUID() << endl;
-
   while(-1){
     res_point* next_neighbor = getNextNN(p->getX(), p->getY(), 25);
     incr++;
 
-    // cout << incr << " " << next_neighbor->x << " " << next_neighbor->y << " " << next_neighbor->id << " " << next_neighbor->uid << endl;
-
     if( next_neighbor->id != p->getID() && next_neighbor->uid != p->getUID() ){
-      // cout << "Found KNN " << endl;
       count++;
       if(count == k){
         neighbor = new Point(next_neighbor);
@@ -485,9 +480,6 @@ Point* GPOs::getKNN(Point *p, int k){
       }
     }
   }
-  // cout << "Nearest neighbor to " << p->getX() << " " << p->getY() << " is " << neighbor->getX() << " " << neighbor->getY() << endl;
-  // cout << "Distance : " << neighbor->computeMinDistInMeters(p->getX(), p->getY()) << endl;
-  // vector<Point *> *checkins = location_to_user.find(p->getID())->second;
 
   return neighbor;
 };
