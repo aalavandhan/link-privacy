@@ -321,11 +321,11 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
   multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
   unordered_set< Point* > *skylines){
 
-  // cout << "Checkin : " << p->getOrder() << " " << p->getTime() << endl;
+  cout << "Checkin : " << p->getOrder() << " " << p->getTime() << endl;
 
   for(auto it=lb_it; it != ub_it; it++){
     Point chk = *it;
-    // cout << "Candidate : " << chk.getOrder() << " " << (double) p->getTimeDifference(&chk) / 3600.0 << " "  << p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) << endl;
+    cout << "Candidate : " << chk.getOrder() << " " << (double) p->getTimeDifference(&chk) / 3600.0 << " "  << p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) << endl;
 
     if(chk.getID() == p->getID())
       continue;
@@ -334,51 +334,52 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
       continue;
 
     if(skylines->size() == 0){
-      // cout << "Initial Skyline set " << endl;
+      cout << "Initial Skyline set " << endl;
       Point *pt = new Point(chk.getX(), chk.getY(), chk.getID(), chk.getUID(), chk.getTime(), chk.getOrder());
       skylines->insert( pt );
       continue;
     }
 
-    bool newSkyline = false;
-    for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
+    bool checkinIsDominated = false;
+    for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
       Point *skyline = (*sk_it);
-
       if(p->doesSkylineDominatePoint(skyline, &chk)){
-        // cout << "Skyline dominates, Skipping " << chk.getOrder() << endl;
-        newSkyline = false;
+        cout << "Skyline dominates, Skipping " << chk.getOrder() << endl;
+        checkinIsDominated = true;
         sk_it++;
         continue;
       }
-
-      if(p->doesPointDominateSkyline(skyline, &chk)){
-        // cout << "Point dominates, Removing " << skyline->getOrder() << endl;
-        newSkyline = true;
-        auto pt_to_delete = sk_it;
-        sk_it++;
-        delete *pt_to_delete;
-        skylines->erase(pt_to_delete);
-      } else {
-        // cout << "New Skyline " << endl;
-        newSkyline = true;
-        sk_it++;
-      }
-
     }
 
-    if(newSkyline){
+    // Check is not dominated by any of the skylines
+    if(!checkinIsDominated){
+      for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
+        Point *skyline = (*sk_it);
+        // Remove all skylines dominated by checkin
+        if(p->doesPointDominateSkyline(skyline, &chk)){
+          cout << "Point dominates, Removing " << skyline->getOrder() << endl;
+          auto pt_to_delete = sk_it;
+          sk_it++;
+          delete *pt_to_delete;
+          skylines->erase(pt_to_delete);
+        } else {
+          sk_it++;
+        }
+      }
+
+      // Insert skyline
       Point *pt = new Point(chk.getX(), chk.getY(), chk.getID(), chk.getUID(), chk.getTime(), chk.getOrder());
       skylines->insert( pt );
-      // cout << "Skyline added : " << pt->getOrder() << endl;
-      // cout << "Skyline size  : " << skylines->size() << endl;
+      cout << "Skyline added : " << pt->getOrder() << endl;
+      cout << "Skyline size  : " << skylines->size() << endl;
     }
   }
 
-  // cout << "Skylines " << skylines->size() << endl;
+  cout << "Skylines " << skylines->size() << endl;
 
   for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
     Point *skyline = (*sk_it);
-    // cout << "Candidate : " << skyline->getUID() << " " << skyline->getID() << " " << (double) p->getTimeDifference(skyline) / 3600.0 << " "  << p->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) << endl;
+    cout << "Candidate : " << skyline->getUID() << " " << skyline->getID() << " " << (double) p->getTimeDifference(skyline) / 3600.0 << " "  << p->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) << endl;
   }
 }
 
@@ -1205,6 +1206,9 @@ void GPOs::computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>
 
         delete *sk_it;
       }
+
+      if(checkin_count == 2)
+        exit(-1);
 
       checkin_count++;
 

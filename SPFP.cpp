@@ -1062,11 +1062,11 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      GPOs* fixedGpos = new GPOs();
-      fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
-      fixedGpos->computeSkylineMetrics(only_cooccurrences, fixedGpos->getL2U2COOCC());
-      // gpos->computeSkylineMetrics(only_cooccurrences, gpos->getL2U2COOCC());
+      // GPOs* fixedGpos = new GPOs();
+      // fixedGpos->groupLocationsByRange(gpos, 3.3, false);
+      // fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+      // fixedGpos->computeSkylineMetrics(only_cooccurrences, fixedGpos->getL2U2COOCC());
+      gpos->computeSkylineMetrics(only_cooccurrences, gpos->getL2U2COOCC());
 
       break;
     }
