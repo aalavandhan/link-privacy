@@ -1099,7 +1099,7 @@ int main(int argc, char *argv[]){
       fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
       for(int i = 1; i <= 10; i++){
         cout << "Computing ST KNN for " << i << endl;
-        fixedGpos->computeSTKNNDistances(only_cooccurrences, i, fixedGpos->getL2U2COOCC());
+        fixedGpos->computeSTKNNDistances(i, only_cooccurrences, fixedGpos->getL2U2COOCC());
       }
       break;
     }
