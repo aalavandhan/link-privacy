@@ -443,8 +443,11 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k, map< double, Point* > *spatioTe
 
   for(auto it=lb_it; it != ub_it; it++){
     Point chk = *it;
-    double distance = (double) p->getTimeDifference(&chk) / (TEMPORAL_SOFT_BOUND * 3600) + p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) / (SPATIAL_SOFT_BOUND/1000);
-    neighbour_short_list.insert(make_pair(distance, &chk));
+
+    if( p->getID() != chk.getID() && p->getUID() != chk.getUID() ){
+      double distance = (double) p->getTimeDifference(&chk) / (TEMPORAL_SOFT_BOUND * 3600) + p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) / (SPATIAL_SOFT_BOUND/1000);
+      neighbour_short_list.insert(make_pair(distance, &chk));
+    }
   }
 
   for(auto c_it = neighbour_short_list.begin(); c_it != neighbour_short_list.end() && spatioTemporalKNNs->size() < k; c_it++){
