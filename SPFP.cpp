@@ -722,7 +722,7 @@ int main(int argc, char *argv[]){
     iteration_type = 97;
 
   else if (strcmp(argv[2], "compute-stknn-metrics") == 0)
-    iteration_type = 97;
+    iteration_type = 98;
 
   else
     iteration_type = -1;
