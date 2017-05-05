@@ -380,8 +380,6 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
     Point *skyline = (*sk_it);
     // cout << "Candidate : " << skyline->getUID() << " " << skyline->getID() << " " << (double) p->getTimeDifference(skyline) / 3600.0 << " "  << p->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) << endl;
   }
-
-  exit(-1);
 }
 
 // Returns knn distance in kilometers
