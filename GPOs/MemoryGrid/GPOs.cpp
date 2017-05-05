@@ -321,11 +321,11 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
   multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
   unordered_set< Point* > *skylines){
 
-  // cout << "Checkin : " << p->getUID() << " " << p->getID() << " " << p->getTime() << endl;
+  // cout << "Checkin : " << p->getOrder() << " " << p->getTime() << endl;
 
   for(auto it=lb_it; it != ub_it; it++){
     Point chk = *it;
-    // cout << "Candidate : " << chk.getUID() << " " << chk.getID() << " " << p->getTimeDifference(&chk) << " "  << p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) << endl;
+    // cout << "Candidate : " << chk.getOrder() << " " << (double) p->getTimeDifference(&chk) / 3600.0 << " "  << p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) << endl;
 
     if(chk.getID() == p->getID())
       continue;
@@ -344,15 +344,15 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
     for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
       Point *skyline = (*sk_it);
 
-      // cout << "Checking domination between : " << skyline->getID() << " " << chk.getID();
       if(p->doesSkylineDominatePoint(skyline, &chk)){
-        // cout << "Skyline dominates " << endl;
+        // cout << "Skyline dominates, Skipping " << chk.getOrder() << endl;
+        newSkyline = false;
         sk_it++;
         continue;
       }
 
       if(p->doesPointDominateSkyline(skyline, &chk)){
-        // cout << "Point dominates " << endl;
+        // cout << "Point dominates, Removing " << skyline->getOrder() << endl;
         newSkyline = true;
         auto pt_to_delete = sk_it;
         sk_it++;
@@ -369,10 +369,19 @@ void GPOs::getSkylinePoints(Point *p, multiset<Point,
     if(newSkyline){
       Point *pt = new Point(chk.getX(), chk.getY(), chk.getID(), chk.getUID(), chk.getTime(), chk.getOrder());
       skylines->insert( pt );
+      // cout << "Skyline added : " << pt->getOrder() << endl;
+      // cout << "Skyline size  : " << skylines->size() << endl;
     }
   }
 
   // cout << "Skylines " << skylines->size() << endl;
+
+  for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
+    Point *skyline = (*sk_it);
+    // cout << "Candidate : " << skyline->getUID() << " " << skyline->getID() << " " << (double) p->getTimeDifference(skyline) / 3600.0 << " "  << p->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) << endl;
+  }
+
+  exit(-1);
 }
 
 // Returns knn distance in kilometers
@@ -1209,7 +1218,7 @@ void GPOs::computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>
 
       checkin_count++;
 
-      if(checkin_count % 10000 == 0)
+      if(checkin_count % 1000 == 0)
         cout << checkin_count << endl;
     }
 

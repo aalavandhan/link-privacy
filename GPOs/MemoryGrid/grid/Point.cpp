@@ -135,7 +135,7 @@ bool Point::doesSkylineDominatePoint(Point *skyline, Point *other){
     // cout << "Point   : " << other->getOrder() << " " << ot_del_s << " " << ot_del_t << endl;
     // cout << "Domination : " << (sk_del_s <= ot_del_s && sk_del_t <= ot_del_t) << endl;
 
-    return (sk_del_s <= ot_del_s && sk_del_t <= ot_del_t);
+    return (sk_del_s < ot_del_s + BOUNDARY_ERROR && sk_del_t <= ot_del_t);
 }
 
 bool Point::doesPointDominateSkyline(Point *skyline, Point *other){
@@ -145,7 +145,7 @@ bool Point::doesPointDominateSkyline(Point *skyline, Point *other){
     int ot_del_t    = getTimeDifference(other);
     double ot_del_s = computeMinDistInKiloMeters(other->getX(), other->getY());
 
-    return (ot_del_s < sk_del_s && ot_del_t < sk_del_t);
+    return (ot_del_s < sk_del_s + BOUNDARY_ERROR && ot_del_t < sk_del_t);
 }
 
 int Point::getTimeInSeconds() const{
