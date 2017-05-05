@@ -158,4 +158,7 @@ public:
             unordered_set< Point* > *skylines);
 
     void computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void getSpatioTemporalKNN(Point *p, int k, map< double, Point* > *spatioTemporalKNNs);
+    double getSTKNNDistance(Point *p, int k);
+    void computeSTKNNDistances(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 };
