@@ -100,8 +100,8 @@ extern double MAX_Y;
 extern double DELTA_X ;
 extern double DELTA_Y ;
 
-#define SPATIAL_HARD_BOUND 20000
-#define TEMPORAL_HARD_BOUND 72 // hours
+#define SPATIAL_HARD_BOUND 5000
+#define TEMPORAL_HARD_BOUND 24 // hours
 
 #define SPATIAL_SOFT_BOUND 5000
 #define TEMPORAL_SOFT_BOUND 24 // hours
