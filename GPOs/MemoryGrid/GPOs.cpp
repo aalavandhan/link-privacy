@@ -319,7 +319,6 @@ void GPOs::getRangeSpatioTemporalBound(Point *p, vector< Point* >* results){
 
 
 void GPOs::getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines){
-
   res_point rp;
   res_point_checkin_time_comparator_ascending comporator;
   boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
@@ -361,7 +360,6 @@ void GPOs::getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, u
         if(p->doesPointDominateSkyline(skyline, chk)){
           auto pt_to_delete = sk_it;
           sk_it++;
-          delete *pt_to_delete;
           skylines->erase(pt_to_delete);
         } else {
           sk_it++;
@@ -1146,7 +1144,9 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
   outfile.open( filePath.c_str() );
 
   int checkin_count = 0;
+
   for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
+
     vector<Point *> *checkins = l_it->second;
     Point *first_point = checkins->at(0);
 
@@ -1181,6 +1181,7 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
       if(checkin_count % 10000 == 0)
         cout << checkin_count << endl;
     }
+
     for(auto sc_it=spatial_candidates->begin(); sc_it != spatial_candidates->end(); sc_it++){
       delete *sc_it;
     }
