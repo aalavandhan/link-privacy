@@ -1,3 +1,10 @@
+// struct priority_queue_pair_ascending_comparator : public binary_function< pair<double, Point*>, pair<double, Point*>, bool >
+// {
+//     bool operator()(const pair<double, Point*> x, const pair<double, Point*> y) const {
+//       return x.first > y.first;
+//     }
+// };
+
 class GPOs : public IGPOs
 {
 
@@ -23,8 +30,8 @@ private:
 
 public:
     Grid *grid;
-    GPOs(char* gridFileName);
-    GPOs();
+    GPOs(char* gridFileName, uint time_range_in_seconds);
+    GPOs(uint time_range);
     GPOs(GPOs *gpos);
     ~GPOs();
     vector<int> ids;
@@ -32,6 +39,7 @@ public:
     double total_spatial_displacement = 0;
     double total_time_displacement    = 0;
     int purturbed_count = 0, spatial_purturbed_count=0, temporal_purturbed_count=0;
+    uint time_range_in_seconds;
 
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
@@ -60,6 +68,7 @@ public:
     virtual vector<res_point*>* getkNN(double x, double y, int k);
     virtual vector<res_point*>* getRange(double x, double y, double radius);
     virtual vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
+    virtual vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
     virtual set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
     virtual double estimateNearestDistance(double x, double y, int k, double max_radius);
@@ -122,7 +131,7 @@ public:
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation);
     void verifyRange(double radius);
-    void countU2UCoOccurrences(uint time_block);
+    void countU2UCoOccurrences();
     double distanceBetween(Point *a, Point *b);
 
     void loadPurturbedLocationsBasedOnNodeLocality(GPOs* gpos, map<int, double>* node_locality, double radius, double limit);
@@ -143,9 +152,9 @@ public:
     Point* getKNN(Point *p, int k);
     double getKNNDistance(Point *p, int k);
     void loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, uint time_range_in_seconds, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
-    void computeKNNDistances(int k, bool only_cooccurrences, bool compute_spatial, bool compute_temporal, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+
 
     double getTemporalKNNDistance(Point *p, int k);
     void getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs);
@@ -157,8 +166,16 @@ public:
             multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
             unordered_set< Point* > *skylines);
 
-    void computeSkylineMetrics(bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void getSpatioTemporalKNN(Point *p, int k, map< double, Point* > *spatioTemporalKNNs);
-    double getSTKNNDistance(Point *p, int k);
-    void computeSTKNNDistances(int k, bool only_cooccurrences, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void computeKNNDistances(int k, bool compute_spatial, bool compute_temporal, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+
+    void pickSingleCheckinFromCooccurrences(Point* candidate_point, set<int> *checkins_of_interest);
+
+    void getSpatioTemporalKNN(Point *p, int k,
+        priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > *spatioTemporalKNNs,
+        vector<res_point*> *spatial_candidates);
+
+    double getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates);
+
 };

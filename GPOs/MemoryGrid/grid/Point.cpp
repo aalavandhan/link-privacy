@@ -163,6 +163,10 @@ int Point::getTimeDifference(Point *q){
     return abs( getTimeInSeconds() - q->getTimeInSeconds() );
 }
 
+int Point::getTimeDifference(res_point *q){
+    return abs( getTimeInSeconds() - q->getTimeInSeconds() );
+}
+
 int Point::getWeekTimeBlock(){
     int p_time_block = p_time.date().day_of_week() * 24 + p_time.time_of_day().hours();
     return p_time_block;

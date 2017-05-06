@@ -26,6 +26,7 @@ public:
     virtual int getCheckinDay();
     virtual int getTimeIndex();
     virtual int getTimeDifference(Point *q);
+    virtual int getTimeDifference(res_point *q);
     virtual bool doesSkylineDominatePoint(Point *skyline, Point *other);
     virtual bool doesPointDominateSkyline(Point *skyline, Point *other);
 

@@ -74,7 +74,7 @@ void printParameters(){
 
 GPOs* loadCheckins(char* checkins_file){
   cout << "------------- Loading checkins ---------------" << endl;
-  GPOs* gpos = new GPOs(checkins_file);
+  GPOs* gpos = new GPOs(checkins_file, time_range_in_seconds);
   return gpos;
 }
 
@@ -85,7 +85,7 @@ GPOs* loadCheckins(char* checkins_file, bool preload_LE, bool preload_OCC){
     gpos->calculateLocationEntropy();
 
   if(preload_OCC)
-    gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+    gpos->countU2UCoOccurrences();
 
   return gpos;
 }
@@ -168,7 +168,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
 }
 
 void runBasicOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
-  // cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // cmpGPOs->countU2UCoOccurrences();
   // cmpGPOs->calculateLocationEntropy();
   // runEBM(cmpGPOs, spos);
 
@@ -298,7 +298,7 @@ void runBasicOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends
 }
 
 void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
-  cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+  cmpGPOs->countU2UCoOccurrences();
   cmpGPOs->calculateLocationEntropy();
   runEBM(cmpGPOs, spos);
 
@@ -327,7 +327,7 @@ void plainEBM(){
 //   GPOs* baseGPOs   = loadCheckins(checkins_file, preload_LE, preload_OCC);
 //   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-//   GPOs* cmpGPOs    = new GPOs();
+//   GPOs* cmpGPOs    = new GPOs(time_range_in_seconds);
 //   cmpGPOs->createNewGPOsbyGridSnapping(baseGPOs, grid_size_in_km);
 //   cout << "Number of locations loaded " << cmpGPOs->locations.size() << endl;
 //   cout << "------------- Noise added -------------------" << endl;
@@ -343,9 +343,9 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* fixedGpos = new GPOs();
+  GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
-  fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  fixedGpos->countU2UCoOccurrences();
 
   double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000};
 
@@ -353,13 +353,12 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
     cout << "Using group Radius : " << radi[i] << endl;
     double radius = radi[i];
 
-    GPOs* spatiallyPurturbedGPOs = new GPOs();
-    GPOs* cmpGPOs  = new GPOs();
+    GPOs* spatiallyPurturbedGPOs = new GPOs(time_range_in_seconds);
+    GPOs* cmpGPOs  = new GPOs(time_range_in_seconds);
 
     spatiallyPurturbedGPOs->loadPurturbedLocationSelectiveKNNDistance(fixedGpos,
       spatial_k,
       spatial_std_radio,
-      (uint) time_range_in_seconds,
       fixedGpos->getL2U2COOCC());
     cout << "------------- Locations spatially perturbed -------------------" << endl;
 
@@ -367,7 +366,7 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
     cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
     cout << "------------- Locations Grouped -------------------" << endl;
 
-    cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+    cmpGPOs->countU2UCoOccurrences();
 
     runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
     runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
@@ -384,9 +383,9 @@ void selectiveGaussianNoise(bool only_cooccurrences, int spatial_k, double spati
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* fixedGpos = new GPOs();
-fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
-  fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+  fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
+  fixedGpos->countU2UCoOccurrences();
 
   double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000};
 
@@ -394,8 +393,8 @@ fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
     cout << "Using group Radius : " << radi[i] << endl;
     double radius = radi[i];
 
-    GPOs* spatiallyPurturbedGPOs = new GPOs();
-    GPOs* cmpGPOs  = new GPOs();
+    GPOs* spatiallyPurturbedGPOs = new GPOs(time_range_in_seconds);
+    GPOs* cmpGPOs  = new GPOs(time_range_in_seconds);
 
     spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(fixedGpos,
       only_cooccurrences,
@@ -408,7 +407,7 @@ fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
     cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
     cout << "------------- Locations Grouped -------------------" << endl;
 
-    cmpGPOs->countU2UCoOccurrences((uint) time_range_in_seconds);
+    cmpGPOs->countU2UCoOccurrences();
 
     runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
     runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
@@ -426,9 +425,9 @@ void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_de
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* spatiallyPurturbedGPOs = new GPOs();
-  GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs();
-  GPOs* cmpGPOs  = new GPOs();
+  GPOs* spatiallyPurturbedGPOs = new GPOs(time_range_in_seconds);
+  GPOs* spatiallyAndTemporallyPurturbedGPOs = new GPOs(time_range_in_seconds);
+  GPOs* cmpGPOs  = new GPOs(time_range_in_seconds);
 
   if( add_spatial ){
     spatiallyPurturbedGPOs->loadPurturbedLocations(baseGPOs, noise_radius);
@@ -456,8 +455,8 @@ void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_
   cout << "------------- Load computed checkin locality ---------------" << endl;
   SPOs *tmp_spos = new SPOs();
 
-  GPOs* purturbedGPOs = new GPOs();
-  GPOs* cmpGPOs       = new GPOs();
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
+  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
 
   purturbedGPOs->loadPurturbedLocationsBasedOnCombinationFunction(
     baseGPOs,
@@ -1004,20 +1003,10 @@ int main(int argc, char *argv[]){
 
     case 96:{
       cout << "METRICS: Compute KNN Metrics" << endl;
+      cout << "KNN for co_occurred locations " << endl;
 
-
-      bool only_cooccurrences;
-
-      if(p1 == 0){
-        cout << "KNN for all locations "         << endl;
-        only_cooccurrences = false;
-      } else {
-        cout << "KNN for co_occurred locations " << endl;
-        only_cooccurrences = true;
-      }
-
-      bool compute_spatial  = (p2 == 1);
-      bool compute_temporal = (p3 == 1);
+      bool compute_spatial  = (p1 == 1);
+      bool compute_temporal = (p2 == 1);
 
       if(compute_spatial)
         cout << "Computing spatial KNN " << endl;
@@ -1033,13 +1022,13 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      GPOs* fixedGpos = new GPOs();
+      GPOs* fixedGpos = new GPOs(time_range_in_seconds);
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+      fixedGpos->countU2UCoOccurrences();
 
       for(int i = 1; i <= 10; i++){
         cout << "Computing KNN for " << i << endl;
-        fixedGpos->computeKNNDistances(i, only_cooccurrences, compute_spatial, compute_temporal, fixedGpos->getL2U2COOCC());
+        fixedGpos->computeKNNDistances(i, compute_spatial, compute_temporal, fixedGpos->getL2U2COOCC());
       }
 
       break;
@@ -1047,16 +1036,8 @@ int main(int argc, char *argv[]){
 
     case 97:{
       cout << "METRICS: Compute Skyline Metrics" << endl;
+      cout << "Skyline for co_occurred locations " << endl;
 
-      bool only_cooccurrences;
-
-      if(p1 == 0){
-        cout << "Skyline for all locations "         << endl;
-        only_cooccurrences = false;
-      } else {
-        cout << "Skyline for co_occurred locations " << endl;
-        only_cooccurrences = true;
-      }
       printParameters();
 
       bool preload_LE  = false;
@@ -1065,10 +1046,10 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      GPOs* fixedGpos = new GPOs();
+      GPOs* fixedGpos = new GPOs(time_range_in_seconds);
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
-      fixedGpos->computeSkylineMetrics(only_cooccurrences, fixedGpos->getL2U2COOCC());
+      fixedGpos->countU2UCoOccurrences();
+      fixedGpos->computeSkylineMetrics(fixedGpos->getL2U2COOCC());
       // gpos->computeSkylineMetrics(only_cooccurrences, gpos->getL2U2COOCC());
 
       break;
@@ -1076,16 +1057,7 @@ int main(int argc, char *argv[]){
 
     case 98:{
       cout << "METRICS: Compute ST KNN Metrics" << endl;
-
-      bool only_cooccurrences;
-
-      if(p1 == 0){
-        cout << "ST KNN for all locations "         << endl;
-        only_cooccurrences = false;
-      } else {
-        cout << "ST KNN for co_occurred locations " << endl;
-        only_cooccurrences = true;
-      }
+      cout << "ST KNN for co_occurred locations " << endl;
       printParameters();
 
       bool preload_LE  = false;
@@ -1094,12 +1066,13 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      GPOs* fixedGpos = new GPOs();
+      GPOs* fixedGpos = new GPOs(time_range_in_seconds);
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      fixedGpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+      fixedGpos->countU2UCoOccurrences();
+
       for(int i = 1; i <= 10; i++){
         cout << "Computing ST KNN for " << i << endl;
-        fixedGpos->computeSTKNNDistances(i, only_cooccurrences, fixedGpos->getL2U2COOCC());
+        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC());
       }
       break;
     }
@@ -1117,27 +1090,27 @@ int main(int argc, char *argv[]){
 
   // cout << "------------- Loading checkins ---------------" << endl;
   // GPOs* g = new GPOs(argv[2]);
-  // g->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // g->countU2UCoOccurrences();
   // GPOs* gpos = new GPOs(argv[2]);
   // gpos->groupLocationsByRange(g, r2, isOptimistic);
   // cout << "------------- Loading complete ---------------" << endl;
 
   // cout << "------------- Loading checkins ---------------" << endl;
   // GPOs* g = new GPOs(argv[2]);
-  // g->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // g->countU2UCoOccurrences();
   // cout << "------------- Loading complete ---------------" << endl;
 
 
   // testing grid snapping
-  // GPOs* gpos = new GPOs();
+  // GPOs* gpos = new GPOs(time_range_in_seconds);
   // gpos->createNewGPOsbyGridSnapping(g, r1); //second var is the x distance of a cell is km
   // cout << "Number of locations loaded " << gpos->locations.size() << endl;
   // cout << "------------- Noise added -------------------" << endl;
 
 
   // test Gaussian noise with grouping
-  // GPOs* gg = new GPOs();
-  // GPOs* gpos = new GPOs();
+  // GPOs* gg = new GPOs(time_range_in_seconds);
+  // GPOs* gpos = new GPOs(time_range_in_seconds);
   // gg->loadPurturbedLocations(g, r1);
   // cout << "------------- Locations perturbed -------------------" << endl;
   // gpos->groupLocationsByRange(gg, r2, isOptimistic);
@@ -1147,13 +1120,13 @@ int main(int argc, char *argv[]){
   // cout << "------------- Load computed node locality ---------------" << endl;
   // SPOs* tmp_spos = new SPOs();
   // map< int, double >* node_locality = tmp_spos->loadNodeLocalityFromFile();
-  // GPOs* gpos = new GPOs();
+  // GPOs* gpos = new GPOs(time_range_in_seconds);
   // gpos->loadPurturbedLocationsBasedOnNodeLocality(g, node_locality, r1, 0.75);
   // gpos->generateFrequencyCache();
   // cout << "------------- Locations perturbed Based on  Node locality -------------------" << endl;
 
   // test Gaussian for high location entropy noise without grouping
-  // GPOs* gpos = new GPOs();
+  // GPOs* gpos = new GPOs(time_range_in_seconds);
   // g->calculateLocationEntropy();
   // gpos->loadPurturbedLocationsBasedOnLocationEntropy(g, r1, 1);
   // gpos->generateFrequencyCache();
@@ -1161,12 +1134,12 @@ int main(int argc, char *argv[]){
 
 
   // test gaussian noise without grouping
-  // GPOs* gpos = new GPOs();
+  // GPOs* gpos = new GPOs(time_range_in_seconds);
   // gpos->loadPurturbedLocations(g, r1);
   // cout << "------------- Locations perturbed -------------------" << endl;
 
   // cout << "----- Loading Cooccurrence Matrix --- " << endl;
-  // gpos->countU2UCoOccurrences((uint) time_range_in_seconds);
+  // gpos->countU2UCoOccurrences();
   // cout << "----- Completed Loading Cooccurrence Matrix --- " << endl;
 
 
@@ -1271,7 +1244,7 @@ int main(int argc, char *argv[]){
   // if(r1 == 0){
   //   count_cooccurences(spos, gpos, r2, tR, isOptimistic);
   // } else {
-  //   GPOs* purturbedGPOs = new GPOs();
+  //   GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
   //   purturbedGPOs->loadPurturbedLocations(gpos, r1);
   //   cout << "------------- Noise added -------------------" << endl;
 

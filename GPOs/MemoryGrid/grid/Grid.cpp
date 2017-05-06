@@ -514,7 +514,6 @@ vector<res_point*>* Grid::getRange(double x, double y, double radius){
 }
 
 
-
 set<res_point*, res_point_ascending_id>* Grid::getSetRange(double x, double y, double radius){
 
     //    Cell* qPoint = NULL;
