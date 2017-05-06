@@ -1028,7 +1028,8 @@ int main(int argc, char *argv[]){
 
       for(int i = 1; i <= 10; i++){
         cout << "Computing KNN for " << i << endl;
-        fixedGpos->computeKNNDistances(i, compute_spatial, compute_temporal, fixedGpos->getL2U2COOCC());
+        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC(), 1);
+        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC(), 2);
       }
 
       break;
@@ -1072,7 +1073,7 @@ int main(int argc, char *argv[]){
 
       for(int i = 1; i <= 10; i++){
         cout << "Computing ST KNN for " << i << endl;
-        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC());
+        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC(), 0);
       }
       break;
     }

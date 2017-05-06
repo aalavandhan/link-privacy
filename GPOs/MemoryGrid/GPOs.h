@@ -154,28 +154,21 @@ public:
     void loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
-
-
-    double getTemporalKNNDistance(Point *p, int k);
-    void getTemporalKNN(Point *p, int k, map< int, Point* > *temporalKNNs);
+    void pickSingleCheckinFromCooccurrences(Point* candidate_point, set<int> *checkins_of_interest);
 
     void getRangeSpatioTemporalBound(Point *p, vector< Point* >* results);
 
+    void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void getSkylinePoints(Point *p,
             multiset<Point, point_checkin_time_comparator_ascending>::iterator lb_it,
             multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
             unordered_set< Point* > *skylines);
 
-    void computeKNNDistances(int k, bool compute_spatial, bool compute_temporal, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-
-    void pickSingleCheckinFromCooccurrences(Point* candidate_point, set<int> *checkins_of_interest);
-
+    void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type);
+    double getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates, int type);
     void getSpatioTemporalKNN(Point *p, int k,
         priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > *spatioTemporalKNNs,
-        vector<res_point*> *spatial_candidates);
-
-    double getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates);
+        vector<res_point*> *spatial_candidates,
+        int type);
 
 };
