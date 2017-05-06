@@ -159,10 +159,7 @@ public:
     void getRangeSpatioTemporalBound(Point *p, vector< Point* >* results);
 
     void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void getSkylinePoints(Point *p,
-            multiset<Point, point_checkin_time_comparator_ascending>::iterator lb_it,
-            multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
-            unordered_set< Point* > *skylines);
+    void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines);
 
     void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type);
     double getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates, int type);

@@ -318,48 +318,47 @@ void GPOs::getRangeSpatioTemporalBound(Point *p, vector< Point* >* results){
 }
 
 
-void GPOs::getSkylinePoints(Point *p,
-  multiset<Point, point_checkin_time_comparator_ascending>::iterator lb_it,
-  multiset<Point, point_checkin_time_comparator_ascending>::iterator ub_it,
-  unordered_set< Point* > *skylines){
+void GPOs::getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines){
 
-  // cout << "Checkin : " << p->getOrder() << " " << p->getTime() << endl;
+  res_point rp;
+  res_point_checkin_time_comparator_ascending comporator;
+  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+
+  rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() - TEMPORAL_SOFT_BOUND * 3600);
+  auto lb_it = lower_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
+
+  rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() + TEMPORAL_SOFT_BOUND * 3600);
+  auto ub_it = upper_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
+
 
   for(auto it=lb_it; it != ub_it; it++){
-    Point chk = *it;
-    // cout << "Candidate : " << chk.getOrder() << " " << (double) p->getTimeDifference(&chk) / 3600.0 << " "  << p->computeMinDistInKiloMeters(chk.getX(), chk.getY()) << endl;
+    res_point *chk = *it;
 
-    if(chk.getID() == p->getID())
+    if(chk->id == p->getID())
       continue;
 
-    if(chk.getUID() == p->getUID())
+    if(chk->id == p->getUID())
       continue;
 
     if(skylines->size() == 0){
-      // cout << "Initial Skyline set " << endl;
-      Point *pt = new Point(chk.getX(), chk.getY(), chk.getID(), chk.getUID(), chk.getTime(), chk.getOrder());
-      skylines->insert( pt );
+      skylines->insert( chk );
       continue;
     }
 
     bool checkinIsDominated = false;
 
     for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
-      Point *skyline = (*sk_it);
-      if(p->doesSkylineDominatePoint(skyline, &chk)){
-        // cout << "Skyline dominates, Skipping " << chk.getOrder() << endl;
+      res_point *skyline = (*sk_it);
+      if(p->doesSkylineDominatePoint(skyline, chk)){
         checkinIsDominated = true;
         continue;
       }
     }
 
-    // Check is not dominated by any of the skylines
     if(!checkinIsDominated){
       for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
-        Point *skyline = (*sk_it);
-        // Remove all skylines dominated by checkin
-        if(p->doesPointDominateSkyline(skyline, &chk)){
-          // cout << "Point dominates, Removing " << skyline->getOrder() << endl;
+        res_point *skyline = (*sk_it);
+        if(p->doesPointDominateSkyline(skyline, chk)){
           auto pt_to_delete = sk_it;
           sk_it++;
           delete *pt_to_delete;
@@ -368,21 +367,9 @@ void GPOs::getSkylinePoints(Point *p,
           sk_it++;
         }
       }
-
-      // Insert skyline
-      Point *pt = new Point(chk.getX(), chk.getY(), chk.getID(), chk.getUID(), chk.getTime(), chk.getOrder());
-      skylines->insert( pt );
-      // cout << "Skyline added : " << pt->getOrder() << endl;
-      // cout << "Skyline size  : " << skylines->size() << endl;
+      skylines->insert( chk );
     }
   }
-
-  // cout << "Skylines " << skylines->size() << endl;
-
-  // for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
-    // Point *skyline = (*sk_it);
-    // cout << "Candidate : " << skyline->getUID() << " " << skyline->getID() << " " << (double) p->getTimeDifference(skyline) / 3600.0 << " "  << p->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) << endl;
-  // }
 }
 
 double GPOs::getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates, int metric_type){
@@ -1168,18 +1155,10 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
       continue;
 
     double radius_geo_dist = (SPATIAL_HARD_BOUND/1000) * 360 / EARTH_CIRCUMFERENCE;
-    vector <res_point*> *spatial_candidates = getRange(first_point->getX(), first_point->getY(), radius_geo_dist);
+    vector <res_point*> *spatial_candidates = getRangeSortedByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
 
     set<int> checkins_of_interest;
     pickSingleCheckinFromCooccurrences(first_point, &checkins_of_interest);
-
-    multiset<Point, point_checkin_time_comparator_ascending> spatial_candidate_set;
-
-    for(auto sc_it=spatial_candidates->begin(); sc_it != spatial_candidates->end(); sc_it++){
-      spatial_candidate_set.insert(Point(*sc_it));
-      delete *sc_it;
-    }
-    delete spatial_candidates;
 
     for(auto c_it = checkins->begin(); c_it != checkins->end(); c_it++){
       Point *checkin = (*c_it);
@@ -1188,29 +1167,24 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
       if(!is_checkin_of_interest)
         continue;
 
-      auto lb_it = spatial_candidate_set.lower_bound( Point(checkin->getTimeInSeconds() - TEMPORAL_HARD_BOUND * 3600) );
-      auto ub_it = spatial_candidate_set.upper_bound( Point(checkin->getTimeInSeconds() + TEMPORAL_HARD_BOUND * 3600) );
-
-      unordered_set< Point* > skylines;
-      getSkylinePoints(checkin, lb_it, ub_it, &skylines);
+      unordered_set< res_point* > skylines;
+      getSkylinePoints(checkin, spatial_candidates, &skylines);
 
       for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
-        Point *skyline = (*sk_it);
-
-        outfile << checkin->getOrder() << " " << skyline->getOrder() << " ";
-        outfile << checkin->getID() << " " << skyline->getID() << " ";
-        outfile << checkin->getUID() << " " << skyline->getUID() << " ";
-        outfile << checkin->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) * 1000 << " ";
-        outfile << checkin->getTimeDifference(skyline) << endl;
-
-        delete *sk_it;
+        res_point *skyline = (*sk_it);
+        outfile << checkin->getOrder() << " " << skyline->oid << " ";
+        outfile << checkin->computeMinDistInKiloMeters(skyline->x, skyline->y) << " ";
+        outfile << (double) checkin->getTimeDifference(skyline) / 3600.0 << endl;
       }
 
       checkin_count++;
-
-      if(checkin_count % 1000 == 0)
+      if(checkin_count % 10000 == 0)
         cout << checkin_count << endl;
     }
+    for(auto sc_it=spatial_candidates->begin(); sc_it != spatial_candidates->end(); sc_it++){
+      delete *sc_it;
+    }
+    delete spatial_candidates;
 
   }
   outfile.close();

@@ -126,12 +126,12 @@ int Point::getTimeBlock(int time_block_duration){
     return p_time_block;
 }
 
-bool Point::doesSkylineDominatePoint(Point *skyline, Point *other){
+bool Point::doesSkylineDominatePoint(res_point *skyline, res_point *other){
     int sk_del_t    = getTimeDifference(skyline);
-    double sk_del_s = computeMinDistInKiloMeters(skyline->getX(), skyline->getY());
+    double sk_del_s = computeMinDistInKiloMeters(skyline->x, skyline->y);
 
     int ot_del_t    = getTimeDifference(other);
-    double ot_del_s = computeMinDistInKiloMeters(other->getX(), other->getY());
+    double ot_del_s = computeMinDistInKiloMeters(other->x, other->y);
 
     // cout << "Skyline : " << skyline->getOrder() << " "<< sk_del_s << " " << sk_del_t << endl;
     // cout << "Point   : " << other->getOrder() << " " << ot_del_s << " " << ot_del_t << endl;
@@ -140,12 +140,12 @@ bool Point::doesSkylineDominatePoint(Point *skyline, Point *other){
     return (sk_del_s < ot_del_s + BOUNDARY_ERROR && sk_del_t <= ot_del_t);
 }
 
-bool Point::doesPointDominateSkyline(Point *skyline, Point *other){
+bool Point::doesPointDominateSkyline(res_point *skyline, res_point *other){
     int sk_del_t    = getTimeDifference(skyline);
-    double sk_del_s = computeMinDistInKiloMeters(skyline->getX(), skyline->getY());
+    double sk_del_s = computeMinDistInKiloMeters(skyline->x, skyline->y);
 
     int ot_del_t    = getTimeDifference(other);
-    double ot_del_s = computeMinDistInKiloMeters(other->getX(), other->getY());
+    double ot_del_s = computeMinDistInKiloMeters(other->x, other->y);
 
     return (ot_del_s < sk_del_s + BOUNDARY_ERROR && ot_del_t < sk_del_t);
 }
