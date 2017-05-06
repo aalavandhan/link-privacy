@@ -1248,14 +1248,13 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     if(!location_has_cooccurrences)
       continue;
 
-
     // gettimeofday(&A_start, NULL);
     double radius_geo_dist = (SPATIAL_SOFT_BOUND/1000) * 360 / EARTH_CIRCUMFERENCE;
     vector <res_point*> *spatial_candidates = getRangeSortedByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
     // gettimeofday(&A_end, NULL);
 
     // gettimeofday(&D_start, NULL);
-    grid->getSetRangeByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
+    // grid->getSetRangeByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
     // gettimeofday(&D_end, NULL);
 
 
