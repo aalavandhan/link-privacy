@@ -36,12 +36,14 @@ Point::Point (int time){
     p_time = time_t_epoch + boost::posix_time::seconds(time);
 }
 
-
 Point::~Point (){
     // delete p_x;
     // delete p_y;
     // delete p_id;
 }
+
+boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+boost::posix_time::ptime Point::START_DATE_TIME = time_t_epoch;
 
 
 double Point::getX(){return p_x;}
@@ -149,8 +151,7 @@ bool Point::doesPointDominateSkyline(Point *skyline, Point *other){
 }
 
 int Point::getTimeInSeconds() const{
-    boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
-    boost::posix_time::time_duration time_difference = p_time - time_t_epoch;
+    boost::posix_time::time_duration time_difference = p_time - START_DATE_TIME;
     return (int)( time_difference.total_seconds() );
 }
 

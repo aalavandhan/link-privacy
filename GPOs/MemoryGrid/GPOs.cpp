@@ -390,9 +390,8 @@ double GPOs::getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candi
 
   getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, spatial_candidates, metric_type);
 
-  if(spatioTemporalKNNs.size() > 0){
-    auto it = spatioTemporalKNNs.top();
-    return (double) it.first;
+  if(spatioTemporalKNNs.size() == k){
+    return spatioTemporalKNNs.top().first;
   }
 
   return std::numeric_limits<double>::infinity();
@@ -421,22 +420,27 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
 
     // Discount the current location and current user
     if( p->getID() != chk->id && p->getUID() != chk->uid ){
-      double spatial_distance  = p->computeMinDistInKiloMeters(chk->x, chk->y) / ( (double)SPATIAL_SOFT_BOUND / 1000.0 );
-      double temporal_distance = (double) p->getTimeDifference(chk) / ( (double)TEMPORAL_SOFT_BOUND * 3600.0 );
-      double distance;
+      // double spatial_distance  = p->computeMinDistInKiloMeters(chk->x, chk->y) / ( (double)SPATIAL_SOFT_BOUND / 1000.0 );
+      double distance = 0.0;
 
-      if(distance == 0)
+      if(metric_type == 0){
+        double spatial_distance  = (chk->dist * EARTH_CIRCUMFERENCE / 360.0) / ( (double)SPATIAL_SOFT_BOUND / 1000.0 );
+        double temporal_distance = (double) p->getTimeDifference(chk) / ( (double)TEMPORAL_SOFT_BOUND * 3600.0 );
         distance = 0.5 * (spatial_distance + temporal_distance);
-      else if(distance == 1)
+      }
+      else if(metric_type == 1){
+        double spatial_distance  = (chk->dist * EARTH_CIRCUMFERENCE / 360.0) / ( (double)SPATIAL_SOFT_BOUND / 1000.0 );
         distance = spatial_distance;
-      else if(distance == 2)
+      }
+      else if(metric_type == 2){
+        double temporal_distance = (double) p->getTimeDifference(chk) / ( (double)TEMPORAL_SOFT_BOUND * 3600.0 );
         distance = temporal_distance;
+      }
 
       if(spatioTemporalKNNs->size() < k){
         spatioTemporalKNNs->push(make_pair(distance, chk));
       }else{
-        auto closest_point = spatioTemporalKNNs->top();
-        if(distance < closest_point.first){
+        if(distance < spatioTemporalKNNs->top().first){
           spatioTemporalKNNs->push(make_pair(distance, chk));
           spatioTemporalKNNs->pop();
         }

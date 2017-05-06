@@ -40,6 +40,8 @@ public:
         bool operator()(const Point* __x, const Point* __y) const { return __x->p_minDist > __y->p_minDist; }
     };
 
+    static boost::posix_time::ptime START_DATE_TIME;
+
 private:
     int p_id, p_uid, p_order;
     double p_minDist;
