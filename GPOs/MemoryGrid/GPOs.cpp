@@ -389,6 +389,9 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
   vector<res_point*> *spatial_candidates,
   int metric_type){
 
+  // timeval start_metric,end_metric, start_bound, end_bound;
+  // gettimeofday(&start_bound, NULL);
+
   res_point rp;
   res_point_checkin_time_comparator_ascending comporator;
   boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
@@ -398,6 +401,10 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
 
   rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() + TEMPORAL_SOFT_BOUND * 3600);
   auto ub_it = upper_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
+
+  // gettimeofday(&end_bound, NULL);
+  // bound_computation_time+=util.print_time(start_bound, end_bound);
+  // gettimeofday(&start_metric, NULL);
 
   for(auto it=lb_it; it != ub_it; it++){
     res_point *chk = *it;
@@ -433,6 +440,8 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
     }
   }
 
+  // gettimeofday(&end_metric, NULL);
+  // metric_computation_time+=util.print_time(start_metric, end_metric);
 }
 
 // Get's the next nearest checkins discounting the current location
@@ -1194,24 +1203,27 @@ void GPOs::pickSingleCheckinFromCooccurrences(Point *candidate_point, set<int> *
   auto loc_coocc_it = locations_users_frequency_map_with_order.find( candidate_point->getID() );
   map<int, vector< pair<uint, int> >* >* loc_coocc = loc_coocc_it->second;
 
+
   for(auto u1_it = loc_coocc->begin(); u1_it != loc_coocc->end(); u1_it++){
     int user1 = u1_it->first;
     vector< pair<uint, int> >* u1_timestamps = u1_it->second;
-    for(auto u2_it = loc_coocc->begin(); u2_it != loc_coocc->end(); u2_it++){
+    for(auto u2_it = u1_it; u2_it != loc_coocc->end(); u2_it++){
       int user2 = u2_it->first;
-      vector< pair<uint, int> >* u2_timestamps = u2_it->second;
-
-      if(user1 < user2){
+      if(user1 != user2){
+        vector< pair<uint, int> >* u2_timestamps = u2_it->second;
         util.getCooccurrencesWithinTimeBlock(u1_timestamps, u2_timestamps, time_range_in_seconds, checkins_of_interest);
       }
     }
   }
+
 }
 
 void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type){
   ofstream outfile;
   stringstream ss;
   std::string filePath;
+
+  timeval A_start,A_end,B_start,B_end,C_start,C_end,D_start,D_end;
 
   if(type == 0)
     ss << "knn-noise-combined-" << k << "-coocc" << ".csv";
@@ -1236,12 +1248,26 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     if(!location_has_cooccurrences)
       continue;
 
+
+    // gettimeofday(&A_start, NULL);
     double radius_geo_dist = (SPATIAL_SOFT_BOUND/1000) * 360 / EARTH_CIRCUMFERENCE;
     vector <res_point*> *spatial_candidates = getRangeSortedByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
+    // gettimeofday(&A_end, NULL);
 
+    // gettimeofday(&D_start, NULL);
+    grid->getSetRangeByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
+    // gettimeofday(&D_end, NULL);
+
+
+    // gettimeofday(&B_start, NULL);
     // Selectively pick one check-in for each co-occurrence
     set<int> checkins_of_interest;
     pickSingleCheckinFromCooccurrences(first_point, &checkins_of_interest);
+    // gettimeofday(&B_end, NULL);
+
+
+    // gettimeofday(&C_start, NULL);
+    bound_computation_time = 0;metric_computation_time=0;
 
     for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
       Point *p = (*loc);
@@ -1281,7 +1307,19 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     }
     delete spatial_candidates;
 
+    // gettimeofday(&C_end, NULL);
+    // util.print_time(A_start, A_end);
+    // cout<<"time for range query: "<<util.print_time(A_start , A_end)/1000.0<<endl;
+    // cout<<"time for range query: "<<util.print_time(D_start , D_end)/1000.0<<endl;
+    // cout<<"Time for cooccurrence selection "<<util.print_time(B_start , B_end)/1000.0<<endl;
+    // cout<<"Total time for ST checkins loop: "<<util.print_time(C_start , C_end)/1000.0<<endl;
+    // cout<<"Time for bound computation: "<<bound_computation_time/1000.0<<endl;
+    // cout<<"Time for metric computation: "<<metric_computation_time/1000.0<<endl;
+    // cout<<"Checkins size: "<<checkins->size()<<endl;
+
   }
+
+
 
   outfile.close();
 }

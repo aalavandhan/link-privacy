@@ -19,6 +19,7 @@ public:
     vector<res_point*>* getRange(double x, double y, double radius);
     vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
     set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
+    multiset<res_point*, res_point_checkin_time_comparator_ascending>* getSetRangeByTime(double x, double y, double radius);
 
     void getRectangle(int direction, int level, double x, double y, Cell& c);
 

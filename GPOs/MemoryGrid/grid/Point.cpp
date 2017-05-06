@@ -161,11 +161,11 @@ int Point::getTimeIndex(){
 }
 
 int Point::getTimeDifference(Point *q){
-    return abs( getTimeInSeconds() - q->getTimeInSeconds() );
+    return abs((p_time - q->getTime()).total_seconds());
 }
 
 int Point::getTimeDifference(res_point *q){
-    return abs( getTimeInSeconds() - q->getTimeInSeconds() );
+    return abs((p_time - q->time).total_seconds());
 }
 
 int Point::getWeekTimeBlock(){

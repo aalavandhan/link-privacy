@@ -5,6 +5,7 @@ struct res_point{
     double x;
     double y;
     double dist;
+    int cached_time;
     boost::posix_time::ptime time;
 
     int getTimeInSeconds() const{
@@ -41,5 +42,5 @@ struct res_point_descending_id : public binary_function<res_point*, res_point*, 
 
 struct res_point_checkin_time_comparator_ascending : public binary_function<res_point*, res_point*, bool>
 {
-    bool operator()(const res_point* __x, const res_point* __y) const { return __x->getTimeInSeconds() < __y->getTimeInSeconds(); }
+    bool operator()(const res_point* __x, const res_point* __y) const { return __x->cached_time < __y->cached_time; }
 };

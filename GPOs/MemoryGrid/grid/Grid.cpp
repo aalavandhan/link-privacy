@@ -342,6 +342,8 @@ vector<res_point*>* Grid::getkNN(double x, double y, int k){
             rp->oid = tmp->getOrder();
             rp->x = tmp->getX1();
             rp->y = tmp->getY1();
+            // rp->time = tmp->getTime();
+            // rp->cached_time = tmp->getTimeInSeconds();
             rp->dist = tmp->getMinDist();
 
             //			cout << "new result = " << rp->id << endl;
@@ -417,6 +419,7 @@ vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius){
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
                         rp->oid = p->getOrder();
+                        rp->cached_time = p->getTimeInSeconds();
                         result->push_back(rp);
                         auto del_iter = it;
                         ++it;
@@ -495,6 +498,7 @@ vector<res_point*>* Grid::getRange(double x, double y, double radius){
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
                         rp->oid = p->getOrder();
+                        rp->cached_time = p->getTimeInSeconds();
                         result->push_back(rp);
                     }
                 }
@@ -553,21 +557,102 @@ set<res_point*, res_point_ascending_id>* Grid::getSetRange(double x, double y, d
         for(int j = y_start; j <= y_end; j++){
             totalcells++;
             c = getCell(i, j);
-            count+=c->getCheckIns()->size();
-            if(c != NULL && c->intersectsWithCircle(x, y, radius)){
+
+            if(c != NULL && c->getCheckIns() != NULL && c->intersectsWithCircle(x, y, radius)){
                 //cout<<"cell: "<<"("<<i<<","<<j<<")"<<endl;
                 visits++;
                 list<Point*>* L = c->getCheckIns();
                 list<Point*>::iterator it;
+                // count+=c->getCheckIns()->size();
                 for(it=L->begin(); it != L->end(); ++it){
                     p = *it;
                     //count++;
                     if(p->computeMinDist(x, y) <= radius){
                         res_point* rp = new res_point();
                         rp->id = p->getID();
+                        rp->uid = p->getUID();
                         rp->x = p->getX();
                         rp->y = p->getY();
                         rp->dist = p->getMinDist();
+                        rp->time = p->getTime();
+                        rp->oid = p->getOrder();
+                        rp->cached_time = p->getTimeInSeconds();
+                        result->insert(rp);
+                    }
+                }
+            }
+
+        }
+    }
+
+    //    v.setStatistics(visits, count);
+    //    cout << "total users = " << count << endl;
+    //    cout << "total cells = " << totalcells << endl;
+    //    cout << "result Size = " << result->size() << endl;
+    //    cout << "intersected cells = " << visits << endl;
+
+    return result;
+}
+
+multiset<res_point*, res_point_checkin_time_comparator_ascending>* Grid::getSetRangeByTime(double x, double y, double radius){
+
+    //    Cell* qPoint = NULL;
+    //    qPoint=getCell(x,y);
+    //    cout<<"query point is in cell: ("<<qPoint->getIndexI()<<" , "<<qPoint->getIndexJ()<<")"<<endl;
+
+    Point* p = NULL;
+    Cell* c = NULL;
+
+    multiset<res_point*, res_point_checkin_time_comparator_ascending>* result = new multiset<res_point*, res_point_checkin_time_comparator_ascending>();
+
+    int x_start = (int)(((x-radius) - MIN_X)/DELTA_X);
+    int x_end = (int)(((x+radius) - MIN_X)/DELTA_X);
+    int y_start = (int)(((y-radius) - MIN_Y)/DELTA_Y);
+    int y_end = (int)(((y+radius) - MIN_Y)/DELTA_Y);
+
+    if(x_end >= X)
+        x_end = X-1;
+
+    if(y_end >= Y)
+        y_end = Y-1;
+
+    if(x_start < 0)
+        x_start = 0;
+
+    if(y_start < 0)
+        y_start = 0;
+
+    int count = 0;
+    int visits = 0;
+    int totalcells=0;
+
+    //    cout<<"xstart ="<<x_start<<"  ,  "<<"xend ="<<x_end<<endl;
+    //    cout<<"ystart ="<<y_start<<"  ,  "<<"yend ="<<y_end<<endl;
+
+    for(int i = x_start; i <= x_end; i++){
+        for(int j = y_start; j <= y_end; j++){
+            totalcells++;
+            c = getCell(i, j);
+
+            if(c != NULL && c->getCheckIns() != NULL && c->intersectsWithCircle(x, y, radius)){
+                //cout<<"cell: "<<"("<<i<<","<<j<<")"<<endl;
+                visits++;
+                list<Point*>* L = c->getCheckIns();
+                list<Point*>::iterator it;
+                // count+=c->getCheckIns()->size();
+                for(it=L->begin(); it != L->end(); ++it){
+                    p = *it;
+                    //count++;
+                    if(p->computeMinDist(x, y) <= radius){
+                        res_point* rp = new res_point();
+                        rp->id = p->getID();
+                        rp->uid = p->getUID();
+                        rp->x = p->getX();
+                        rp->y = p->getY();
+                        rp->dist = p->getMinDist();
+                        rp->time = p->getTime();
+                        rp->oid = p->getOrder();
+                        rp->cached_time = p->getTimeInSeconds();
                         result->insert(rp);
                     }
                 }
