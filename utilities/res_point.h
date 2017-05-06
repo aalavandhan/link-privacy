@@ -42,5 +42,5 @@ struct res_point_descending_id : public binary_function<res_point*, res_point*, 
 
 struct res_point_checkin_time_comparator_ascending : public binary_function<res_point*, res_point*, bool>
 {
-    bool operator()(const res_point* __x, const res_point* __y) const { return __x->cached_time < __y->cached_time; }
+    bool operator()(const res_point* __x, const res_point* __y) const { return __x->time < __y->time; }
 };

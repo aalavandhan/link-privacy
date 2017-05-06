@@ -436,7 +436,6 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
           spatioTemporalKNNs->pop();
         }
       }
-
     }
   }
 
@@ -1207,15 +1206,23 @@ void GPOs::pickSingleCheckinFromCooccurrences(Point *candidate_point, set<int> *
   for(auto u1_it = loc_coocc->begin(); u1_it != loc_coocc->end(); u1_it++){
     int user1 = u1_it->first;
     vector< pair<uint, int> >* u1_timestamps = u1_it->second;
+    auto u1_co_it = cooccurrence_matrix.find(user1);
+    if(u1_co_it == cooccurrence_matrix.end())
+      continue;
+    map<int, vector<pair<int, int> >*> *user1_cooccurrences = u1_co_it->second;
     for(auto u2_it = u1_it; u2_it != loc_coocc->end(); u2_it++){
       int user2 = u2_it->first;
-      if(user1 != user2){
+
+      if(user1 < user2){
+        auto u2_co_it = user1_cooccurrences->find(user2);
+        if(u2_co_it == user1_cooccurrences->end())
+          continue;
+
         vector< pair<uint, int> >* u2_timestamps = u2_it->second;
         util.getCooccurrencesWithinTimeBlock(u1_timestamps, u2_timestamps, time_range_in_seconds, checkins_of_interest);
       }
     }
   }
-
 }
 
 void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type){
@@ -1257,16 +1264,14 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     // grid->getSetRangeByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
     // gettimeofday(&D_end, NULL);
 
-
     // gettimeofday(&B_start, NULL);
     // Selectively pick one check-in for each co-occurrence
     set<int> checkins_of_interest;
     pickSingleCheckinFromCooccurrences(first_point, &checkins_of_interest);
     // gettimeofday(&B_end, NULL);
 
-
     // gettimeofday(&C_start, NULL);
-    bound_computation_time = 0;metric_computation_time=0;
+    // bound_computation_time = 0;metric_computation_time=0;
 
     for(auto loc = checkins->begin(); loc != checkins->end(); loc++){
       Point *p = (*loc);
