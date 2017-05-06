@@ -345,12 +345,11 @@ void GPOs::getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, u
     }
 
     bool checkinIsDominated = false;
-
     for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
       res_point *skyline = (*sk_it);
       if(p->doesSkylineDominatePoint(skyline, chk)){
         checkinIsDominated = true;
-        continue;
+        break;
       }
     }
 
