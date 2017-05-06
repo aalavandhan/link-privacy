@@ -1025,13 +1025,8 @@ int main(int argc, char *argv[]){
       GPOs* fixedGpos = new GPOs(time_range_in_seconds);
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
       fixedGpos->countU2UCoOccurrences();
-
-      for(int i = 1; i <= 10; i++){
-        cout << "Computing KNN for " << i << endl;
-        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC(), 1);
-        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC(), 2);
-      }
-
+      fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 1);
+      fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 2);
       break;
     }
 
@@ -1070,11 +1065,8 @@ int main(int argc, char *argv[]){
       GPOs* fixedGpos = new GPOs(time_range_in_seconds);
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
       fixedGpos->countU2UCoOccurrences();
-
-      for(int i = 1; i <= 10; i++){
-        cout << "Computing ST KNN for " << i << endl;
-        fixedGpos->computeSTKNNDistances(i, fixedGpos->getL2U2COOCC(), 0);
-      }
+      fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 0);
+      // gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 0);
       break;
     }
 

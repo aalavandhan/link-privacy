@@ -1276,8 +1276,25 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
       if(!is_checkin_of_interest)
         continue;
 
-      double distance = getSTKNNDistance(p, k, spatial_candidates, type);
-      outfile << distance << endl;
+      priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
+      getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, spatial_candidates, type);
+
+      int result_size = spatioTemporalKNNs.size();
+
+      while( !spatioTemporalKNNs.empty() ){
+        outfile << spatioTemporalKNNs.top().first << " ";
+        res_point* candidate = spatioTemporalKNNs.top().second;
+        outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
+        outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
+        spatioTemporalKNNs.pop();
+      }
+
+      for(int i=result_size; i < k; i++ ){
+        outfile << std::numeric_limits<double>::infinity() << " ";
+        outfile << std::numeric_limits<double>::infinity() << " ";
+        outfile << std::numeric_limits<double>::infinity() << " ";
+      }
+      outfile << endl;
 
       // Progress Tracker
       checkin_count++;
