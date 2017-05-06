@@ -1239,7 +1239,7 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     ss << "knn-noise-spatial-" << k << "-coocc" << ".csv";
 
   if(type == 2)
-    ss << "knn-temporal-spatial-" << k << "-coocc" << ".csv";
+    ss << "knn-noise-temporal-" << k << "-coocc" << ".csv";
 
   filePath = ss.str();
   outfile.open( filePath.c_str() );
@@ -1255,10 +1255,10 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     if(!location_has_cooccurrences)
       continue;
 
-    // gettimeofday(&A_start, NULL);
+    gettimeofday(&A_start, NULL);
     double radius_geo_dist = (SPATIAL_SOFT_BOUND/1000) * 360 / EARTH_CIRCUMFERENCE;
     vector <res_point*> *spatial_candidates = getRangeSortedByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
-    // gettimeofday(&A_end, NULL);
+    gettimeofday(&A_end, NULL);
 
     // gettimeofday(&D_start, NULL);
     // grid->getSetRangeByTime(first_point->getX(), first_point->getY(), radius_geo_dist);
@@ -1313,13 +1313,13 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
 
     // gettimeofday(&C_end, NULL);
     // util.print_time(A_start, A_end);
-    // cout<<"time for range query: "<<util.print_time(A_start , A_end)/1000.0<<endl;
+    cout<<"time for range query: "<<util.print_time(A_start , A_end)/1000.0<<endl;
     // cout<<"time for range query: "<<util.print_time(D_start , D_end)/1000.0<<endl;
     // cout<<"Time for cooccurrence selection "<<util.print_time(B_start , B_end)/1000.0<<endl;
     // cout<<"Total time for ST checkins loop: "<<util.print_time(C_start , C_end)/1000.0<<endl;
     // cout<<"Time for bound computation: "<<bound_computation_time/1000.0<<endl;
     // cout<<"Time for metric computation: "<<metric_computation_time/1000.0<<endl;
-    // cout<<"Checkins size: "<<checkins->size()<<endl;
+    cout<<"Checkins size: "<<checkins->size()<<endl;
 
   }
 

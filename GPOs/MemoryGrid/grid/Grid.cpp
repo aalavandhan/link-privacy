@@ -343,7 +343,7 @@ vector<res_point*>* Grid::getkNN(double x, double y, int k){
             rp->x = tmp->getX1();
             rp->y = tmp->getY1();
             // rp->time = tmp->getTime();
-            // rp->cached_time = tmp->getTimeInSeconds();
+            // rp->cached_time = rp->getTimeInSeconds();
             rp->dist = tmp->getMinDist();
 
             //			cout << "new result = " << rp->id << endl;
@@ -419,7 +419,7 @@ vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius){
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
                         rp->oid = p->getOrder();
-                        rp->cached_time = p->getTimeInSeconds();
+                        rp->cached_time = rp->getTimeInSeconds();
                         result->push_back(rp);
                         auto del_iter = it;
                         ++it;
@@ -498,7 +498,7 @@ vector<res_point*>* Grid::getRange(double x, double y, double radius){
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
                         rp->oid = p->getOrder();
-                        rp->cached_time = p->getTimeInSeconds();
+                        rp->cached_time = rp->getTimeInSeconds();
                         result->push_back(rp);
                     }
                 }
@@ -576,7 +576,7 @@ set<res_point*, res_point_ascending_id>* Grid::getSetRange(double x, double y, d
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
                         rp->oid = p->getOrder();
-                        rp->cached_time = p->getTimeInSeconds();
+                        rp->cached_time = rp->getTimeInSeconds();
                         result->insert(rp);
                     }
                 }
@@ -652,7 +652,7 @@ multiset<res_point*, res_point_checkin_time_comparator_ascending>* Grid::getSetR
                         rp->dist = p->getMinDist();
                         rp->time = p->getTime();
                         rp->oid = p->getOrder();
-                        rp->cached_time = p->getTimeInSeconds();
+                        rp->cached_time = rp->getTimeInSeconds();
                         result->insert(rp);
                     }
                 }

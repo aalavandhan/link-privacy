@@ -1025,8 +1025,13 @@ int main(int argc, char *argv[]){
       GPOs* fixedGpos = new GPOs(time_range_in_seconds);
       fixedGpos->groupLocationsByRange(gpos, 3.3, false);
       fixedGpos->countU2UCoOccurrences();
-      fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 1);
+
+      if(compute_spatial)
+        fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 1);
+
+      if(compute_temporal)
       fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 2);
+
       break;
     }
 
