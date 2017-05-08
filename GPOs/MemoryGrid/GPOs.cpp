@@ -202,50 +202,6 @@ void GPOs::generateCooccurrenceCache(){
   cout << "Cache Co-occurrence Generated " << locations_users_frequency_map_with_order.size() << endl;
 }
 
-// void GPOs::generateU2U2OrderMap(int time_range_in_seconds, map<int, map<int, set<pair<int,int>>* >* > *u2u2order_map){
-
-//   for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
-//     vector<Point *> *checkins = l_it->second;
-//     Point *first_point = checkins->at(0);
-//     Point *neighbor = gpos->getKNN(first_point, k);
-
-//     auto loc_coocc_it = gpos->locations_users_frequency_map_with_order.find( first_point->getID() );
-
-//     bool location_has_cooccurrences = location_to_user_to_cooccurrences->find(first_point->getID()) != location_to_user_to_cooccurrences->end();
-//     location_has_cooccurrences = location_has_cooccurrences & (loc_coocc_it != locations_users_frequency_map_with_order.end());
-
-//     set< pair<int,int> > orders_at_l;
-
-//     if(location_has_cooccurrences){
-//       map<int, vector< pair<uint, int> >* >* loc_coocc = loc_coocc_it->second;
-//       for(auto u1_it = loc_coocc->begin(); u1_it != loc_coocc->end(); u1_it++){
-//         int user1 = u1_it->first;
-//         vector< pair<uint, int> >* u1_timestamps = u1_it->second;
-//         for(auto u2_it = loc_coocc->begin(); u2_it != loc_coocc->end(); u2_it++){
-//           int user2 = u2_it->first;
-
-//           auto u1_coocc_list_it = u2u2order_map->find(user1);
-//           if(u1_coocc_list_it == u2u2order_map->end()){
-//             // Do something
-//           }
-
-//           auto u2_coocc_list_it = coocc_list_it->find(user2);
-//           if(u2_coocc_list_it == coocc_list_it->end()){
-//             // Do something
-//           }
-//           set<pair<int,int>> *co_occ_list = u2_coocc_list_it->second;
-
-//           vector< pair<uint, int> >* u2_timestamps = u2_it->second;
-//           if(user1 < user2){
-//             util.getCooccurrencesWithinTimeBlock(u1_timestamps, u2_timestamps, time_range_in_seconds, co_occ_list);
-//           }
-//         }
-//       }
-//     }
-
-//   }
-// }
-
 vector< Point* >* GPOs::getLocations(int user_id){
   auto l = user_to_location.find(user_id);
   return l->second;
@@ -1219,7 +1175,7 @@ void GPOs::pickSingleCheckinFromCooccurrences(Point *candidate_point, set<int> *
           continue;
 
         vector< pair<uint, int> >* u2_timestamps = u2_it->second;
-        util.getCooccurrencesWithinTimeBlock(u1_timestamps, u2_timestamps, time_range_in_seconds, checkins_of_interest);
+        util.pickRandomCooccurrencesWithinTimeBlock(u1_timestamps, u2_timestamps, time_range_in_seconds, checkins_of_interest);
       }
     }
   }
@@ -1614,11 +1570,11 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 void GPOs::countU2UCoOccurrences(){
   int total_cooccurrences=0;
 
-  cout<<"Number of locations: "<<locations_users_frequency_map.size()<<endl;
+  cout<<"Number of locations: "<<locations_users_frequency_map_with_order.size()<<endl;
 
-  for(auto l_it=locations_users_frequency_map.begin(); l_it != locations_users_frequency_map.end(); l_it++){
+  for(auto l_it=locations_users_frequency_map_with_order.begin(); l_it != locations_users_frequency_map_with_order.end(); l_it++){
     int location_id = l_it->first;
-    map<int, vector<uint>* > *user_checkin_times = l_it->second;
+    map<int, vector< pair<uint, int> >* > *user_checkin_times = l_it->second;
 
     if(user_checkin_times->size() == 1){
       continue;
@@ -1642,7 +1598,7 @@ void GPOs::countU2UCoOccurrences(){
           u1Id = temp;
         }
 
-        int intersection_count = util.countIntersectionWithinTimeBlock(u1_timestamps,u2_timestamps,time_range_in_seconds, false);
+        int intersection_count = util.getCooccurrencesWithinTimeBlock(u1_timestamps,u2_timestamps,time_range_in_seconds, &cooccurred_checkins);
 
         if(intersection_count > 0){
           auto coV_it = cooccurrence_matrix.find(u1Id);
@@ -1672,6 +1628,7 @@ void GPOs::countU2UCoOccurrences(){
           }
         }
       }
+
     }
   }
 

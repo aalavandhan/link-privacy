@@ -107,12 +107,10 @@ public:
     void generateFrequencyCache();
     void generateCooccurrenceCache();
 
+    vector< pair<int,int> > cooccurred_checkins;
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);
-
-
-
 
     double bound_computation_time =0 , metric_computation_time=0;
     double range_query_computation = 0, cooccurence_selection_computation = 0;
