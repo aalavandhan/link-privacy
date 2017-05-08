@@ -45,7 +45,7 @@ public:
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
     map<int , vector< Point* >*> time_to_checkins;
-    vector< Point* > checkin_list;
+    map< int, Point* > checkin_list;
 
     bool cooccurrences_created=false;
     map< int, map<int,int>* >* location_to_user_to_cooccurrences;
@@ -160,12 +160,11 @@ public:
     void loadPurturbedLocationKNNDistance(GPOs* gpos, bool only_cooccurrences, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
-    void pickSingleCheckinFromCooccurrences(Point* candidate_point, set<int> *checkins_of_interest);
+    void pickSingleCheckinFromCooccurrences(set<int> *checkins_of_interest);
 
-    void getRangeSpatioTemporalBound(Point *p, vector< Point* >* results);
+    vector <res_point*>* getRangeSpatioTemporalBound(Point *p);
 
     void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void computeSkylineMetricsOptimized(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines);
 
     void computeSTKNNDistancesOptimized(int k, int type);
