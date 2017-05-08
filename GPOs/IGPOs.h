@@ -37,5 +37,6 @@ public:
     virtual map< int, map<int,int>* >* getL2U2COOCC() = 0;
     virtual void printCooccurrenceMatrix(char *DATASET_PATH) = 0;
     virtual vector<Point*>* getLocations() = 0;
+    virtual vector< pair<int,int> >* getCooccurredCheckins() = 0;
 };
 

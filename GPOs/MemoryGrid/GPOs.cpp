@@ -129,6 +129,10 @@ vector<Point*>* GPOs::getLocations(){
   return &locations;
 }
 
+vector< pair<int,int> >* GPOs::getCooccurredCheckins(){
+  return &cooccurred_checkins;
+}
+
 void GPOs::generateFrequencyCache(){
   cout << "---- GENERATING CACHE ----" << endl;
   boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
@@ -394,10 +398,10 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
       }
     }
   }
-
   // gettimeofday(&end_metric, NULL);
   // metric_computation_time+=util.print_time(start_metric, end_metric);
 }
+
 
 // Get's the next nearest checkins discounting the current location
 Point* GPOs::getKNN(Point *p, int k){
@@ -461,6 +465,16 @@ vector<res_point*>* GPOs::getRange(double x, double y, double radius){
 
   //    cout << "Num of users (GPOs) in radius = "<<radius<<" are =" << res->size() << endl;
   return res;
+}
+
+void GPOs::getRangeByTime(int time_start, int time_end, vector<Point*>* results){
+  for(int i= time_start; i<=time_end; i++){
+    auto t_it = time_to_checkins.find(i);
+    if(t_it != time_to_checkins.end()){
+      vector <Point*> *checkins_at_i = t_it->second;
+      results->insert(results->end(), checkins_at_i->begin(), checkins_at_i->end());
+    }
+  }
 }
 
 vector<res_point*>* GPOs::getRangeSortedByTime(double x, double y, double radius){
@@ -580,6 +594,8 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
     vector<Point* >* pts = tu_it->second;
     pts->push_back(l);
   }
+
+  checkin_list.push_back(l);
 
   grid->addCheckIn(l);
 
@@ -1051,9 +1067,7 @@ void GPOs::loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation){
   }
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
-  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
   cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
-
   cout<<"total_temporal_displacement{{"<< total_time_displacement/3600.0 <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
@@ -1091,10 +1105,48 @@ void GPOs::loadPurturbedLocations(GPOs* gpos, double radius){
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
-  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+}
+
+void GPOs::computeSTKNNDistancesOptimized(int k, int type){
+  int checkin_count = 0;
+
+  for(auto c_it = checkin_list.begin(); c_it != checkin_list.end(); c_it++){
+    Point *p = *c_it;
+    vector <Point*> temporal_candidates;
+    vector <res_point*> candidates;
+
+    getRangeByTime(p->getTimeIndex() - ( (TEMPORAL_SOFT_BOUND/3) - 1), p->getTimeIndex() + ( (TEMPORAL_SOFT_BOUND/3) + 1), &temporal_candidates);
+
+    for(auto cd_it = temporal_candidates.begin(); cd_it != temporal_candidates.end(); cd_it++){
+      Point *q = (*cd_it);
+      if(p->getUID() != q->getUID() && p->getID() != q->getID()){
+        double dist = p->computeMinDist(q->getX(), q->getY());
+        if(dist * EARTH_CIRCUMFERENCE/360 <= SPATIAL_SOFT_BOUND){
+          res_point *rp = new res_point();
+          rp->id = q->getID();
+          rp->uid = q->getUID();
+          rp->oid = q->getOrder();
+          rp->x = q->getX();
+          rp->y = q->getY();
+          rp->time = q->getTime();
+          rp->dist = dist;
+          candidates.push_back(rp);
+        }
+      }
+    }
+    getSTKNNDistance(p, k, &candidates, type);
+
+    for(auto cd_it = candidates.begin(); cd_it != candidates.end(); cd_it++){
+      delete(*cd_it);
+    }
+
+    checkin_count++;
+    if(checkin_count % 10000 == 0)
+      cout << checkin_count << endl;
+  }
 }
 
 void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences){
@@ -1109,7 +1161,6 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
   int checkin_count = 0;
 
   for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
-
     vector<Point *> *checkins = l_it->second;
     Point *first_point = checkins->at(0);
 

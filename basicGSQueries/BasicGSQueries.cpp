@@ -96,8 +96,57 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-// void SimpleQueries::checkUtilityBasic(IGPOs *base_gpos){
-// }
+void SimpleQueries::checkUtilityBasic(IGPOs *base_gpos){
+  unordered_set< pair<int,int>, PairHasher > original_cooccurrences;
+
+  vector< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
+  vector< pair<int,int> >* purturbed_cooccurrences = gpos->getCooccurredCheckins();
+
+  for(auto c_it = base_cooccurrences->begin(); c_it != base_cooccurrences->end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+
+    if(o1 > o2){
+      int temp = o2;
+      o2 = o1;
+      o1 = temp;
+    }
+
+    original_cooccurrences.insert(make_pair(o1, o2));
+  }
+
+  int true_positive = 0, gt = original_cooccurrences.size(), positive = 0;
+
+  for(auto c_it = purturbed_cooccurrences->begin(); c_it != purturbed_cooccurrences->end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+
+    if(o1 > o2){
+      int temp = o2;
+      o2 = o1;
+      o1 = temp;
+    }
+
+    if(original_cooccurrences.find(make_pair(o1, o2)) != original_cooccurrences.end()){
+      true_positive++;
+    }
+
+    positive++;
+  }
+
+  double precision = (double) true_positive / (double) gt;
+  double recall    = (double) positive / (double) gt;
+  double f1        = 2 * precision * recall / ( precision + recall );
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Utility [ BASIC METRIC ]" << endl;
+  cout << "Number of co-occurrences before" << gt << endl;
+  cout << "Number of after                " << purturbed_cooccurrences->size() << endl;
+  cout << "utility_basic_precision{{" << precision  << "}}" << endl;
+  cout << "utility_basic_recall{{" << recall  << "}}" << endl;
+  cout << "utility_basic_f1{{" << f1  << "}}" << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
 // between base_gpos and this->gpos

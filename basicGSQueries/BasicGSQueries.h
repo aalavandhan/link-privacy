@@ -38,5 +38,7 @@ public:
 
     void computeAccuracyOfSocialStrength(double precision_limit);
     void generateSocialGraph(char *DATASET_PATH, double tresh);
+
+    void checkUtilityBasic(IGPOs *base_gpos);
 };
 

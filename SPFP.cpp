@@ -124,11 +124,19 @@ void runProximityUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
   query->checkUtilityProximity(query_file, baseGPOs, base_radius, 100, noise_radius);
 }
 
+void runBasicUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
+  SimpleQueries* query = new SimpleQueries(purturbedGPOs, spos);
+
+  cout << "------------- Evaluating basic utility ---------------" << endl;
+
+  double base_radius = (double) max((int)noise_radius, (int)800);
+  query->checkUtilityBasic(baseGPOs);
+}
+
 void runUtilities(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
   runRangeUtility(purturbedGPOs, baseGPOs, spos);
   // runProximityUtility(purturbedGPOs, baseGPOs, spos);
 }
-
 
 void runEBMWithoutGroundTruth(){
   bool preload_LE  = true;
@@ -151,7 +159,6 @@ void runEBMWithoutGroundTruth(){
   }
 }
 
-
 void runEBM(GPOs *gpos, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
@@ -161,141 +168,142 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  for(double i = 0; i < 10; i = i + 0.1){
-   query->verifySocialStrength(i);
-  }
+  // for(double i = 0; i < 10; i = i + 0.1){
+  //  query->verifySocialStrength(i);
+  // }
   query->computeAccuracyOfSocialStrength(0.80);
 }
 
-void runBasicOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
-  // cmpGPOs->countU2UCoOccurrences();
-  // cmpGPOs->calculateLocationEntropy();
-  // runEBM(cmpGPOs, spos);
+// void runBasicOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
+//   // cmpGPOs->countU2UCoOccurrences();
+//   // cmpGPOs->calculateLocationEntropy();
+//   // runEBM(cmpGPOs, spos);
 
-  //grab cooccurence Matrix from baseGPOs
-  //grab cooccurence matrix from cmpGPOs
-  //compare them both.
-  map<int, pair<double,double>> user_to_precision_recall;
+//   //grab cooccurence Matrix from baseGPOs
+//   //grab cooccurence matrix from cmpGPOs
+//   //compare them both.
+//   map<int, pair<double,double>> user_to_precision_recall;
 
-  auto cooccurence_matrix_base = baseGPOs->getCooccurrenceMatrix();
-  auto cooccurence_matrix_cmp = cmpGPOs->getCooccurrenceMatrix();
+//   auto cooccurence_matrix_base = baseGPOs->getCooccurrenceMatrix();
+//   auto cooccurence_matrix_cmp = cmpGPOs->getCooccurrenceMatrix();
 
-  unordered_set<int> seen_users_in_base;
-
-
-  //printing--------
-  ofstream outfile;
-  ostringstream ss;
-  ss<<"RES_Basic" << p1<<"_"<<p2<<"_"<<p3<<"_"<<p4;
-  outfile.open(ss.str());
-
-  double precision=0,recall=0,precision_in_friends=0,recall_in_friends=0;
-  int sum_of_weights_precision=0;
-  int sum_of_weights_recall=0;
-
-  for(auto c_it = cooccurence_matrix_base->begin(); c_it != cooccurence_matrix_base->end(); c_it++){
-    int user_1 = c_it->first;
-    seen_users_in_base.insert(user_1);
-    auto users_location_frequency_map_base = c_it->second;
-    map<int, vector<pair<int, int> >* >* users_location_frequency_map_cmp = NULL;
+//   unordered_set<int> seen_users_in_base;
 
 
-    auto iter_outer = cooccurence_matrix_cmp->find(user_1);
-    if(iter_outer != cooccurence_matrix_cmp->end()){
-      users_location_frequency_map_cmp = iter_outer->second;
-      int cooccurrences_across_users_base = 0;
-      int cooccurrences_across_users_cmp = 0;
-      int cooccurrences_across_users_min = 0;
-      for(auto ulh_it = users_location_frequency_map_base->begin(); ulh_it != users_location_frequency_map_base->end(); ulh_it++){
-        int user_2 = ulh_it->first;
+//   //printing--------
+//   ofstream outfile;
+//   ostringstream ss;
+//   ss<<"RES_Basic" << p1<<"_"<<p2<<"_"<<p3<<"_"<<p4;
+//   outfile.open(ss.str());
 
-        if(areFriends && !spos->areFriends(user_1, user_2)){
-          continue;
-        }
+//   double precision=0,recall=0,precision_in_friends=0,recall_in_friends=0;
+//   int sum_of_weights_precision=0;
+//   int sum_of_weights_recall=0;
 
-        vector<pair<int, int>>* cooccurrence_counts_vector_base = ulh_it->second;
-        vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
-
-        int cooccurrence_count_cmp = 0;
-        int cooccurrence_count_base = 0;
-        auto iter_inner = users_location_frequency_map_cmp->find(user_2);
-        if(iter_inner != users_location_frequency_map_cmp->end()){
-          cooccurrence_counts_vector_cmp = iter_inner->second;
-          for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
-            int cooccrences_at_l = l_it->second;
-            cooccurrence_count_cmp += cooccrences_at_l;
-          }
-        }else{
-          // do nothing because cooccurences are zero
-          // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurrence_counts_vector"<<endl;
-        }
-
-        for(auto l_it=cooccurrence_counts_vector_base->begin(); l_it != cooccurrence_counts_vector_base->end(); l_it++){
-          int cooccrences_at_l = l_it->second;
-          cooccurrence_count_base += cooccrences_at_l;
-        }
-
-        cooccurrences_across_users_base += cooccurrence_count_base;
-        cooccurrences_across_users_cmp += cooccurrence_count_cmp;
-        cooccurrences_across_users_min += min(cooccurrence_count_cmp,cooccurrence_count_base);
-      }
-
-      if(cooccurrences_across_users_cmp != 0){
-        double temp_precision = cooccurrences_across_users_min/(double)cooccurrences_across_users_cmp;
-        double temp_recall = cooccurrences_across_users_min/(double)cooccurrences_across_users_base;
-        if(temp_recall > 1) {temp_recall=1;}
-        precision += temp_precision * users_location_frequency_map_base->size();
-        recall += temp_recall * users_location_frequency_map_base->size();
-        sum_of_weights_precision += users_location_frequency_map_base->size();
-        sum_of_weights_recall += users_location_frequency_map_base->size();
-      }
-      else{
-        sum_of_weights_precision += users_location_frequency_map_base->size();
-        sum_of_weights_recall += users_location_frequency_map_base->size();
-      }
-      // outfile<<it->first<< " "<<precision<<" "<<recall<<" "<<cooccurrence_counts_vector_base->size()<<endl;
-      // user_to_precision_recall.insert(make_pair(user_1,make_pair(precision,recall)));
-    }else{
-      //case when user is not there in cmp cooccurrence matrix
-      sum_of_weights_precision += users_location_frequency_map_base->size();
-      sum_of_weights_recall += users_location_frequency_map_base->size();
-      // user_to_precision_recall.insert(make_pair(user_1,make_pair(0,0)));
-      // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurence matrices"<<endl;
-    }
-  }
-
-  for(auto c_it = cooccurence_matrix_cmp->begin(); c_it != cooccurence_matrix_cmp->end(); c_it++){
-    int user = c_it->first;
-    auto users_location_frequency_map_base = c_it->second;
-    if(seen_users_in_base.find(user) == seen_users_in_base.end()){
-      sum_of_weights_precision += users_location_frequency_map_base->size();
-      // user_to_precision_recall.insert(make_pair(user,make_pair(0,0)));
-    }
-  }
-  double res_precision = precision/(double)sum_of_weights_precision;
-  double res_recall    = recall/(double)sum_of_weights_recall;
-  double f1 = 2 * res_precision * res_recall / (res_precision + res_recall);
-
-  if(areFriends){
-    cout << "are_freinds_basic_metric_precision{{" << res_precision << "}}" << endl;
-    cout << "are_freinds_basic_metric_recall{{" << res_recall << "}}" << endl;
-    cout << "are_freinds_basic_metric_f1{{" << f1 << "}}" << endl;
-  } else {
-    cout << "basic_metric_precision{{" << res_precision << "}}" << endl;
-    cout << "basic_metric_recall{{" << res_recall << "}}" << endl;
-    cout << "basic_metric_f1{{" << f1 << "}}" << endl;
-  }
+//   for(auto c_it = cooccurence_matrix_base->begin(); c_it != cooccurence_matrix_base->end(); c_it++){
+//     int user_1 = c_it->first;
+//     seen_users_in_base.insert(user_1);
+//     auto users_location_frequency_map_base = c_it->second;
+//     map<int, vector<pair<int, int> >* >* users_location_frequency_map_cmp = NULL;
 
 
-  // for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
-  //   auto precision_recall_pair = it->second;
-  //   double precision = precision_recall_pair.first;
-  //   double recall = precision_recall_pair.second;
-  //   outfile<<it->first<< " "<<precision<<" "<<recall<<endl;
-  // }
-  // outfile.close();
-  //------------------
-}
+//     auto iter_outer = cooccurence_matrix_cmp->find(user_1);
+//     if(iter_outer != cooccurence_matrix_cmp->end()){
+//       users_location_frequency_map_cmp = iter_outer->second;
+//       int cooccurrences_across_users_base = 0;
+//       int cooccurrences_across_users_cmp = 0;
+//       int cooccurrences_across_users_min = 0;
+//       for(auto ulh_it = users_location_frequency_map_base->begin(); ulh_it != users_location_frequency_map_base->end(); ulh_it++){
+//         int user_2 = ulh_it->first;
+
+//         if(areFriends && !spos->areFriends(user_1, user_2)){
+//           continue;
+//         }
+
+//         vector<pair<int, int>>* cooccurrence_counts_vector_base = ulh_it->second;
+//         vector<pair<int, int>>* cooccurrence_counts_vector_cmp = NULL;
+
+//         int cooccurrence_count_cmp = 0;
+//         int cooccurrence_count_base = 0;
+//         auto iter_inner = users_location_frequency_map_cmp->find(user_2);
+//         if(iter_inner != users_location_frequency_map_cmp->end()){
+//           cooccurrence_counts_vector_cmp = iter_inner->second;
+//           for(auto l_it=cooccurrence_counts_vector_cmp->begin(); l_it != cooccurrence_counts_vector_cmp->end(); l_it++){
+//             int cooccrences_at_l = l_it->second;
+//             cooccurrence_count_cmp += cooccrences_at_l;
+//           }
+//         }else{
+//           // do nothing because cooccurences are zero
+//           // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurrence_counts_vector"<<endl;
+//         }
+
+//         for(auto l_it=cooccurrence_counts_vector_base->begin(); l_it != cooccurrence_counts_vector_base->end(); l_it++){
+//           int cooccrences_at_l = l_it->second;
+//           cooccurrence_count_base += cooccrences_at_l;
+//         }
+
+//         cooccurrences_across_users_base += cooccurrence_count_base;
+//         cooccurrences_across_users_cmp += cooccurrence_count_cmp;
+//         cooccurrences_across_users_min += min(cooccurrence_count_cmp,cooccurrence_count_base);
+//       }
+
+//       if(cooccurrences_across_users_cmp != 0){
+//         double temp_precision = cooccurrences_across_users_min/(double)cooccurrences_across_users_cmp;
+//         double temp_recall = cooccurrences_across_users_min/(double)cooccurrences_across_users_base;
+//         if(temp_recall > 1) {temp_recall=1;}
+//         precision += temp_precision * users_location_frequency_map_base->size();
+//         recall += temp_recall * users_location_frequency_map_base->size();
+//         sum_of_weights_precision += users_location_frequency_map_base->size();
+//         sum_of_weights_recall += users_location_frequency_map_base->size();
+//       }
+//       else{
+//         sum_of_weights_precision += users_location_frequency_map_base->size();
+//         sum_of_weights_recall += users_location_frequency_map_base->size();
+//       }
+//       // outfile<<it->first<< " "<<precision<<" "<<recall<<" "<<cooccurrence_counts_vector_base->size()<<endl;
+//       // user_to_precision_recall.insert(make_pair(user_1,make_pair(precision,recall)));
+//     }else{
+//       //case when user is not there in cmp cooccurrence matrix
+//       sum_of_weights_precision += users_location_frequency_map_base->size();
+//       sum_of_weights_recall += users_location_frequency_map_base->size();
+//       // user_to_precision_recall.insert(make_pair(user_1,make_pair(0,0)));
+//       // cout<<"ERROR ? baseGPOs and cmpGPOs do not have similar cooccurence matrices"<<endl;
+//     }
+//   }
+
+//   for(auto c_it = cooccurence_matrix_cmp->begin(); c_it != cooccurence_matrix_cmp->end(); c_it++){
+//     int user = c_it->first;
+//     auto users_location_frequency_map_base = c_it->second;
+//     if(seen_users_in_base.find(user) == seen_users_in_base.end()){
+//       sum_of_weights_precision += users_location_frequency_map_base->size();
+//       // user_to_precision_recall.insert(make_pair(user,make_pair(0,0)));
+//     }
+//   }
+//   double res_precision = precision/(double)sum_of_weights_precision;
+//   double res_recall    = recall/(double)sum_of_weights_recall;
+//   double f1 = 2 * res_precision * res_recall / (res_precision + res_recall);
+
+//   if(areFriends){
+//     cout << "are_freinds_basic_metric_precision{{" << res_precision << "}}" << endl;
+//     cout << "are_freinds_basic_metric_recall{{" << res_recall << "}}" << endl;
+//     cout << "are_freinds_basic_metric_f1{{" << f1 << "}}" << endl;
+//   } else {
+//     cout << "basic_metric_precision{{" << res_precision << "}}" << endl;
+//     cout << "basic_metric_recall{{" << res_recall << "}}" << endl;
+//     cout << "basic_metric_f1{{" << f1 << "}}" << endl;
+//   }
+
+
+//   // for(auto it = user_to_precision_recall.begin(); it != user_to_precision_recall.end(); it++){
+//   //   auto precision_recall_pair = it->second;
+//   //   double precision = precision_recall_pair.first;
+//   //   double recall = precision_recall_pair.second;
+//   //   outfile<<it->first<< " "<<precision<<" "<<recall<<endl;
+//   // }
+//   // outfile.close();
+//   //------------------
+// }
+
 
 void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *spos){
   cmpGPOs->countU2UCoOccurrences();
@@ -303,8 +311,9 @@ void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *sp
   runEBM(cmpGPOs, spos);
 
   if(run_utilties){
-    runBasicOnNoised(baseGPOs, cmpGPOs, spos, false);
-    runBasicOnNoised(baseGPOs, cmpGPOs, spos, true);
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
+    // runBasicOnNoised(baseGPOs, cmpGPOs, spos, false);
+    // runBasicOnNoised(baseGPOs, cmpGPOs, spos, true);
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
 }
@@ -318,22 +327,6 @@ void plainEBM(){
 
   runEBM(gpos, spos);
 }
-
-// Out dated
-// void gridSnappingVsEBM(double grid_size_in_km){
-//   bool preload_LE  = false;
-//   bool preload_OCC = true;
-
-//   GPOs* baseGPOs   = loadCheckins(checkins_file, preload_LE, preload_OCC);
-//   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-
-//   GPOs* cmpGPOs    = new GPOs(time_range_in_seconds);
-//   cmpGPOs->createNewGPOsbyGridSnapping(baseGPOs, grid_size_in_km);
-//   cout << "Number of locations loaded " << cmpGPOs->locations.size() << endl;
-//   cout << "------------- Noise added -------------------" << endl;
-
-//   runEBMOnNoised(baseGPOs, baseGPOs, cmpGPOs, spos);
-// }
 
 // KNN Noise on only one checkin in cooccurrence
 void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_spatial, bool add_temporal){
@@ -368,8 +361,8 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
 
     cmpGPOs->countU2UCoOccurrences();
 
-    runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
-    runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
+    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
+    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
 
     delete spatiallyPurturbedGPOs;
     delete cmpGPOs;
@@ -409,14 +402,13 @@ void selectiveGaussianNoise(bool only_cooccurrences, int spatial_k, double spati
 
     cmpGPOs->countU2UCoOccurrences();
 
-    runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
-    runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
+    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
+    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
 
     delete spatiallyPurturbedGPOs;
     delete cmpGPOs;
   }
 }
-
 
 void gaussianNoiseVsEBM(double noise_radius, double group_radius, double time_deviation, bool add_spatial, bool add_temporal){
   bool preload_LE  = false;

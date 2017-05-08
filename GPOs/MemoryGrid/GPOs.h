@@ -45,6 +45,7 @@ public:
     map<int , vector< Point* >*> user_to_location;
     map<int , vector< Point* >*> location_to_user;
     map<int , vector< Point* >*> time_to_checkins;
+    vector< Point* > checkin_list;
 
     bool cooccurrences_created=false;
     map< int, map<int,int>* >* location_to_user_to_cooccurrences;
@@ -71,6 +72,7 @@ public:
     virtual vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
     virtual set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
     virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
+    void getRangeByTime(int time_start, int time_end, vector<Point*>* results);
     virtual double estimateNearestDistance(double x, double y, int k, double max_radius);
     virtual void clearNextNN();
     virtual unordered_map<int, double>* getLocationEntropy();
@@ -107,6 +109,7 @@ public:
     void generateFrequencyCache();
     void generateCooccurrenceCache();
 
+    vector< pair<int,int> >* getCooccurredCheckins();
     vector< pair<int,int> > cooccurred_checkins;
 
     // nextNN without the incremental approach of NN
@@ -162,8 +165,10 @@ public:
     void getRangeSpatioTemporalBound(Point *p, vector< Point* >* results);
 
     void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
+    void computeSkylineMetricsOptimized(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines);
 
+    void computeSTKNNDistancesOptimized(int k, int type);
     void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type);
     double getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates, int type);
     void getSpatioTemporalKNN(Point *p, int k,
