@@ -291,10 +291,9 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
 }
 
 
-void GPOs::getSkylinePoints(Point *p, vector <res_point*> *candidates, vector< pair< int, res_point* > > *skylines){
+void GPOs::getSkylinePoints(Point *p, vector <res_point*> *candidates, map< int, pair<int, res_point*> > *skylines){
   for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
-    int domination_count = 0;
 
     if(chk->id == p->getID())
       continue;
@@ -303,33 +302,38 @@ void GPOs::getSkylinePoints(Point *p, vector <res_point*> *candidates, vector< p
       continue;
 
     if(skylines->size() == 0){
-      skylines->push_back( make_pair(1, chk) );
+      skylines->insert(make_pair(chk->oid, make_pair(0, chk)));
       continue;
     }
 
     bool checkinIsDominated = false;
     for(auto sk_it = skylines->begin(); sk_it != skylines->end(); sk_it++){
-      res_point *skyline = (*sk_it).second;
+      int d_count = sk_it->second.first;
+      res_point *skyline = sk_it->second.second;
       if(p->doesSkylineDominatePoint(skyline, chk)){
         checkinIsDominated = true;
-        domination_count = 0;
+        sk_it->second.first = d_count + 1;
         break;
       }
     }
 
     if(!checkinIsDominated){
+      int domination_count = 0;
       for(auto sk_it = skylines->begin(); sk_it != skylines->end(); ){
-        res_point *skyline = (*sk_it).second;
+        int skyline_id = sk_it->first;
+        int d_count = sk_it->second.first;
+        res_point *skyline = sk_it->second.second;
         if(p->doesPointDominateSkyline(skyline, chk)){
           auto pt_to_delete = sk_it;
           sk_it++;
-          skylines->erase(pt_to_delete);
-          domination_count = domination_count + sk_it->first;
+          skylines->erase(skyline_id);
+          domination_count = domination_count + d_count;
         } else {
           sk_it++;
         }
       }
-      skylines->push_back( make_pair(domination_count, chk) );
+
+      skylines->insert(make_pair(chk->oid, make_pair(domination_count, chk)));
     }
   }
 }
@@ -1126,12 +1130,14 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
       Point *p = checkin_list.find(order)->second;
       vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
 
-      vector< pair<int, res_point*> > skylines;
+      map< int, pair<int, res_point*> > skylines;
       getSkylinePoints(p, candidates, &skylines);
 
       for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
-        res_point *skyline = sk_it->second;
-        int domination_count = sk_it->first;
+        int skyline_id = sk_it->first;
+        res_point *skyline = sk_it->second.second;
+        int domination_count = sk_it->second.first;
+
         outfile << p->getOrder() << " " << skyline->oid << " " << domination_count << " ";
         outfile << p->computeMinDistInKiloMeters(skyline->x, skyline->y) << " ";
         outfile << (double) p->getTimeDifference(skyline) / 3600.0 << endl;
