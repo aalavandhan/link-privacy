@@ -157,7 +157,7 @@ int Point::getTimeInSeconds() const{
 
 // 1 Hour time blocks
 int Point::getTimeIndex(){
-    return (int)( (double) getTimeInSeconds() / (double) (3 * 60 * 60) );
+    return (int)( (double) getTimeInSeconds() / (double) (60 * 60) );
 }
 
 int Point::getTimeDifference(Point *q){

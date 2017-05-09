@@ -264,13 +264,15 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
   vector <Point*> temporal_candidates;
   vector <res_point*>* candidates = new vector <res_point*>();
 
-  getRangeByTime(p->getTimeIndex() - ( (TEMPORAL_SOFT_BOUND/3) - 1), p->getTimeIndex() + ( (TEMPORAL_SOFT_BOUND/3) + 1), &temporal_candidates);
+  getRangeByTime(p->getTimeIndex() - (TEMPORAL_SOFT_BOUND - 1), p->getTimeIndex() + (TEMPORAL_SOFT_BOUND + 1), &temporal_candidates);
 
   for(auto cd_it = temporal_candidates.begin(); cd_it != temporal_candidates.end(); cd_it++){
     Point *q = (*cd_it);
     if(p->getUID() != q->getUID() && p->getID() != q->getID()){
       double dist = p->computeMinDist(q->getX(), q->getY());
-      if(dist * EARTH_CIRCUMFERENCE/360 <= SPATIAL_SOFT_BOUND){
+      double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
+
+      if( (dist * EARTH_CIRCUMFERENCE/360) <= SPATIAL_SOFT_BOUND && time_deviation <= TEMPORAL_SOFT_BOUND * 3600){
         res_point *rp = new res_point();
         rp->id = q->getID();
         rp->uid = q->getUID();
@@ -281,6 +283,7 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
         rp->dist = dist;
         candidates->push_back(rp);
       }
+
     }
   }
 
