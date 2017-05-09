@@ -1112,33 +1112,34 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
 
   int checkin_count = 0;
 
-  set<int> checkins_of_interest;
-  pickSingleCheckinFromCooccurrences(&checkins_of_interest);
+  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
 
-  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
-    int order = *c_it;
-    Point *p = checkin_list.find(order)->second;
+    int orders[] = {o1, o2};
 
-    vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
+    for(int i=0; i<2; i++){
+      int order = orders[ i ];
+      Point *p = checkin_list.find(order)->second;
+      vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
 
-    unordered_set< res_point* > skylines;
-    getSkylinePoints(p, candidates, &skylines);
+      unordered_set< res_point* > skylines;
+      getSkylinePoints(p, candidates, &skylines);
+      for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
+        res_point *skyline = (*sk_it);
+        outfile << p->getOrder() << " " << skyline->oid << " ";
+        outfile << p->computeMinDistInKiloMeters(skyline->x, skyline->y) << " ";
+        outfile << (double) p->getTimeDifference(skyline) / 3600.0 << endl;
+      }
 
-    for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
-      res_point *skyline = (*sk_it);
-      outfile << p->getOrder() << " " << skyline->oid << " ";
-      outfile << p->computeMinDistInKiloMeters(skyline->x, skyline->y) << " ";
-      outfile << (double) p->getTimeDifference(skyline) / 3600.0 << endl;
+      for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
+        delete *sc_it;
+      }
+      delete candidates;
+      checkin_count++;
+      if(checkin_count % 10000 == 0)
+        cout << checkin_count << endl;
     }
-
-    for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
-      delete *sc_it;
-    }
-    delete candidates;
-
-    checkin_count++;
-    if(checkin_count % 10000 == 0)
-      cout << checkin_count << endl;
   }
 
   outfile.close();
@@ -1176,49 +1177,50 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
   outfile.open( filePath.c_str() );
   int checkin_count = 0;
 
-  set<int> checkins_of_interest;
-  pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
-    int order = *c_it;
-    Point *p = checkin_list.find(order)->second;
+  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
 
-    vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
+    int orders[] = {o1, o2};
 
-    priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
-    getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, type);
+    for(int i=0; i<2; i++){
+      int order = orders[ i ];
+      Point *p = checkin_list.find(order)->second;
+      vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
 
-    int result_size = spatioTemporalKNNs.size();
+      priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
+      getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, type);
 
-    outfile << p->getOrder() << " ";
-    while( !spatioTemporalKNNs.empty() ){
-      res_point* candidate = spatioTemporalKNNs.top().second;
+      int result_size = spatioTemporalKNNs.size();
 
-      outfile << candidate->oid << " ";
-      outfile << spatioTemporalKNNs.top().first << " ";
-      outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
-      outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
+      outfile << p->getOrder() << " ";
+      while( !spatioTemporalKNNs.empty() ){
+        res_point* candidate = spatioTemporalKNNs.top().second;
+        outfile << candidate->oid << " ";
+        outfile << spatioTemporalKNNs.top().first << " ";
+        outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
+        outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
+        spatioTemporalKNNs.pop();
+      }
 
-      spatioTemporalKNNs.pop();
+      for(int i=result_size; i < k; i++ ){
+        outfile << -1 << " ";
+        outfile << std::numeric_limits<double>::infinity() << " ";
+        outfile << std::numeric_limits<double>::infinity() << " ";
+        outfile << std::numeric_limits<double>::infinity() << " ";
+      }
+      outfile << endl;
+
+      for(auto cd_it = candidates->begin(); cd_it != candidates->end(); cd_it++){
+        delete(*cd_it);
+      }
+      delete candidates;
+
+      checkin_count++;
+      if(checkin_count % 10000 == 0)
+        cout << checkin_count << endl;
     }
-
-    for(int i=result_size; i < k; i++ ){
-      outfile << -1 << " ";
-      outfile << std::numeric_limits<double>::infinity() << " ";
-      outfile << std::numeric_limits<double>::infinity() << " ";
-      outfile << std::numeric_limits<double>::infinity() << " ";
-    }
-    outfile << endl;
-
-    for(auto cd_it = candidates->begin(); cd_it != candidates->end(); cd_it++){
-      delete(*cd_it);
-    }
-    delete candidates;
-
-    checkin_count++;
-    if(checkin_count % 10000 == 0)
-      cout << checkin_count << endl;
-
   }
 
   outfile.close();
@@ -1274,6 +1276,25 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
 
 // Only co-occurrences
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
+
+  map <int, queue<int>* > st_knn;
+
+  ifstream fin("knn-noise-combined-10-coocc.csv");
+
+  while(!fin){
+    int order;
+    queue<int>* neighbours = new queue<int>();
+    fin >> order;
+    for(int i = 0; i<10; i++){
+      int knn_order;
+      double st_distance, s_distance, t_distance;
+      fin >> knn_order >> st_distance >> s_distance >> t_distance;
+      if(st_distance != std::numeric_limits<double>::infinity())
+        neighbours->push(knn_order);
+    }
+    st_knn.insert(make_pair(order, neighbours));
+  }
+
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
@@ -1285,30 +1306,32 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     int order = c_it->first;
     Point *p = c_it->second;
 
-
     if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
 
-      vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
-      priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
-      getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 0);
+      auto knn_it = st_knn.find(order);
+      if(knn_it == st_knn.end())
+        continue;
 
-      if(spatioTemporalKNNs.size() == 0)
+      queue<int>* neighbours = knn_it->second;
+
+      if(neighbours->size() == 0)
         continue;
 
       // Pick a KNN at random
-      int k_lim = spatioTemporalKNNs.size() < k ? spatioTemporalKNNs.size() : k;
+      int k_lim = neighbours->size() < k ? neighbours->size() : k;
       int kth = rand() % k_lim + 1;
 
       for(int i=1; i<kth; i++)
-        spatioTemporalKNNs.pop();
+        neighbours->pop();
 
-      res_point *neighbor = spatioTemporalKNNs.top().second;
+      int neighbor = neighbours->front();
+      Point *q = checkin_list.find(neighbor)->second;
 
-      double noise_radius = p->computeMinDistInKiloMeters(neighbor->x, neighbor->y) * 1000;
-      double time_deviation = abs((p->getTime() - neighbor->time).total_seconds());
+      double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
+      double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
 
-      pair<double,double> coordinates_with_noise = util.addGaussianNoise(neighbor->x, neighbor->y, noise_radius);
-      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(neighbor->time, time_deviation);
+      pair<double,double> coordinates_with_noise = util.addGaussianNoise(q->getX(), q->getY(), noise_radius);
+      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation);
 
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
       total_temporal_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
@@ -1320,9 +1343,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
       spatial_purturbed_count++;
       temporal_purturbed_count++;
 
-      for(auto c_it = candidates->begin(); c_it != candidates->end(); c_it++)
-        delete *c_it;
-      delete candidates;
+      delete neighbours;
 
     } else {
       loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
@@ -1352,6 +1373,22 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
   double total_spatial_displacement = 0;
   double total_temporal_displacement = 0;
+
+  map <int, queue<int>* > st_knn;
+  ifstream fin("skyline-coocc.csv");
+  while(!fin){
+    int order;
+    queue<int>* neighbours = new queue<int>();
+    fin >> order;
+    for(int i = 0; i<10; i++){
+      int knn_order;
+      double st_distance, s_distance, t_distance;
+      fin >> knn_order >> st_distance >> s_distance >> t_distance;
+      if(st_distance != std::numeric_limits<double>::infinity())
+        neighbours->push(knn_order);
+    }
+    st_knn.insert(make_pair(order, neighbours));
+  }
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
