@@ -1,5 +1,4 @@
-#include "../headers.h"
-
+#include "../headersMemory.h"
 
 Group::Group(){
     friends = new priority_queue<res_point*, vector<res_point*>, res_point_ascending_dist>();

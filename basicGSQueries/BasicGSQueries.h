@@ -1,7 +1,7 @@
 class SimpleQueries{
 
 private:
-    IGPOs *gpos;
+    GPOs *gpos;
     ISPOs *spos;
     Utilities util;
 
@@ -10,7 +10,7 @@ private:
     map<int, map<int, double>*> weighted_frequency_matrix;
 
 public:
-    SimpleQueries(IGPOs *spatialIndex, ISPOs *socialGraph);
+    SimpleQueries(GPOs *spatialIndex, ISPOs *socialGraph);
     ~SimpleQueries();
 
     map<int, map<int, double>*> cacluateSocialStrength();
@@ -19,8 +19,8 @@ public:
     void buildMatrices(double q);
     int countCooccurredFriends();
     map< int, bool >* getUsersOfInterest(double tresh);
-    void checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius, double noise_distance);
-    void checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh, double noise_distance);
+    void checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius, double noise_distance);
+    void checkUtilityProximity(const char* fileName, GPOs *base_gpos, double radius, double tresh, double noise_distance);
     unordered_set< pair<int,int>, PairHasher >* computeProximityUserList(double x, double y, double radius, double tresh, double noise_distance);
     void checkUtilityStats(const char* fileName, double radius, double noise_radius);
     void getInterestingQueryPoints(const char* fileName, double radius, double noise_radius, const char* query_file, int DATA_SET);
@@ -39,6 +39,6 @@ public:
     void computeAccuracyOfSocialStrength(double precision_limit);
     void generateSocialGraph(char *DATASET_PATH, double tresh);
 
-    void checkUtilityBasic(IGPOs *base_gpos);
+    void checkUtilityBasic(GPOs *base_gpos);
 };
 

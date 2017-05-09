@@ -20,12 +20,6 @@ Group.o : utilities/Group.cpp headers.h
 Utilities.o : utilities/Utilities.cpp headers.h
 	$(CC) $(CPPFLAGS) -c utilities/Utilities.cpp
 	$(CC) -MM utilities/Utilities.cpp > Utilities.d
-Cell.o : GPOs/MemoryGrid/grid/Cell.cpp headersMemory.h
-	$(CC) $(CPPFLAGS) -c GPOs/MemoryGrid/grid/Cell.cpp
-	$(CC) -MM GPOs/MemoryGrid/grid/Cell.cpp > Cell.d
-Grid.o : GPOs/MemoryGrid/grid/Grid.cpp headersMemory.h
-	$(CC) $(CPPFLAGS) -c GPOs/MemoryGrid/grid/Grid.cpp
-	$(CC) -MM GPOs/MemoryGrid/grid/Grid.cpp > Grid.d
 Point.o : GPOs/MemoryGrid/grid/Point.cpp headersMemory.h
 	$(CC) $(CPPFLAGS) -c GPOs/MemoryGrid/grid/Point.cpp
 	$(CC) -MM GPOs/MemoryGrid/grid/Point.cpp > Point.d
@@ -35,6 +29,12 @@ SPOs.o : SPOs/MemoryMap/SPOs.cpp headersMemory.h
 GPOs.o : GPOs/MemoryGrid/GPOs.cpp headersMemory.h
 	$(CC) $(CPPFLAGS) -c GPOs/MemoryGrid/GPOs.cpp
 	$(CC) -MM GPOs/MemoryGrid/GPOs.cpp > GPOs.d
+Grid.o : GPOs/MemoryGrid/grid/Grid.cpp headersMemory.h
+	$(CC) $(CPPFLAGS) -c GPOs/MemoryGrid/grid/Grid.cpp
+	$(CC) -MM GPOs/MemoryGrid/grid/Grid.cpp > Grid.d
+Cell.o : GPOs/MemoryGrid/grid/Cell.cpp headersMemory.h
+	$(CC) $(CPPFLAGS) -c GPOs/MemoryGrid/grid/Cell.cpp
+	$(CC) -MM GPOs/MemoryGrid/grid/Cell.cpp > Cell.d
 Value.o : SPOs/MemoryMap/Value.cpp  headersMemory.h
 	$(CC) $(CPPFLAGS) -c SPOs/MemoryMap/Value.cpp
 	$(CC) -MM SPOs/MemoryMap/Value.cpp > Value.d

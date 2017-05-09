@@ -1,11 +1,4 @@
-// struct priority_queue_pair_ascending_comparator : public binary_function< pair<double, Point*>, pair<double, Point*>, bool >
-// {
-//     bool operator()(const pair<double, Point*> x, const pair<double, Point*> y) const {
-//       return x.first > y.first;
-//     }
-// };
-
-class GPOs : public IGPOs
+class GPOs
 {
 
 private:
@@ -64,47 +57,47 @@ public:
     // map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix_insignificant;
 
     void createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axis_in_km);
-    virtual vector< Point* >* getLocations(int user_id);
-    virtual res_point* getNextNN(double x, double y, int incrStep);
-    virtual vector<res_point*>* getkNN(double x, double y, int k);
-    virtual vector<res_point*>* getRange(double x, double y, double radius);
-    virtual vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
-    virtual vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
-    virtual set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
-    virtual vector<res_point*>* getRangeSortedId(double x, double y, double radius);
+    vector< Point* >* getLocations(int user_id);
+    res_point* getNextNN(double x, double y, int incrStep);
+    vector<res_point*>* getkNN(double x, double y, int k);
+    vector<res_point*>* getRange(double x, double y, double radius);
+    vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
+    vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
+    set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
+    vector<res_point*>* getRangeSortedId(double x, double y, double radius);
     void getRangeByTime(int time_start, int time_end, vector<Point*>* results);
-    virtual double estimateNearestDistance(double x, double y, int k, double max_radius);
-    virtual void clearNextNN();
-    virtual unordered_map<int, double>* getLocationEntropy();
-    virtual map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
-    // virtual map<int, map<int, vector<pair<int, int> >* >*>* getInsignificantCooccurrenceMatrix();
-    virtual unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs();
-    virtual vector<int>* getUsersInRange(double x, double y, double r1, double r2);
+    double estimateNearestDistance(double x, double y, int k, double max_radius);
+    void clearNextNN();
+    unordered_map<int, double>* getLocationEntropy();
+    map<int, map<int, vector<pair<int, int> >* >*>* getCooccurrenceMatrix();
+    // map<int, map<int, vector<pair<int, int> >* >*>* getInsignificantCooccurrenceMatrix();
+    unordered_set< pair<int,int>, PairHasher >* getCoOccurredUserPairs();
+    vector<int>* getUsersInRange(double x, double y, double r1, double r2);
 
-    virtual vector<int>* getUsersInRange(double x, double y, double radius);
-    virtual vector<int>* getUsersInRange(int source, double radius);
+    vector<int>* getUsersInRange(double x, double y, double radius);
+    vector<int>* getUsersInRange(int source, double radius);
 
-    virtual unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double r1, double r2);
-    virtual unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double radius);
+    unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double r1, double r2);
+    unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double radius);
 
-    virtual map<int, res_point*>* getPointsInRange(double x, double y, double radius);
-    virtual map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);
-    virtual int getUserCooccurrences(int user_id);
-    virtual map<int , vector< Point* >*>* getLocationToUser();
+    map<int, res_point*>* getPointsInRange(double x, double y, double radius);
+    map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);
+    int getUserCooccurrences(int user_id);
+    map<int , vector< Point* >*>* getLocationToUser();
 
     unordered_map<int, double>* calculateLocationEntropy();
 
     void printCooccurrenceMatrix(char *DATA_SET);
 
-    virtual vector<Point*>* getLocations();
-    virtual unordered_map<int, double>* getHiLasMap();
-    virtual unordered_map<int, double>* getHiJasMap();
-    virtual unordered_map<int, double>* getHlLasMap();
+    vector<Point*>* getLocations();
+    unordered_map<int, double>* getHiLasMap();
+    unordered_map<int, double>* getHiJasMap();
+    unordered_map<int, double>* getHlLasMap();
 
-    virtual unordered_map< int, map< int, map<int, double >* >* >* getPltMap(double time_block, int max_checkins, double max_radius);
-    virtual vector<int>* getUsersInRangeAndTimeBlock(double x, double y, double time_block, int max_checkins, double max_radius);
+    unordered_map< int, map< int, map<int, double >* >* >* getPltMap(double time_block, int max_checkins, double max_radius);
+    vector<int>* getUsersInRangeAndTimeBlock(double x, double y, double time_block, int max_checkins, double max_radius);
 
-    virtual map< int, map<int,int>* >* getL2U2COOCC();
+    map< int, map<int,int>* >* getL2U2COOCC();
 
     void generateFrequencyCache();
     void generateCooccurrenceCache();

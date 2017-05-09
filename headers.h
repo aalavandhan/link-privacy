@@ -133,6 +133,86 @@ extern int DATA_SET;
 
 #define TIME_RANGE_IN_SECONDS 1200 // defines the time difference between 2 checkins to be considered a co-occurrence
 
+// dataset scalability
+extern double DATASET_SIZE;
+#define X 15000 // table[X][Y]
+#define Y 15000
+extern double MIN_X;
+extern double MIN_Y;
+extern double MAX_X;
+extern double MAX_Y;
+
+//#define DATASET_SIZE 10000
+
+/// @brief The usual PI/180 constant
+#define DEG_TO_RAD 0.017453292519943295769236907684886
+
+/// @brief Earth's quatratic mean radius for WGS-84
+#define EARTH_RADIUS_IN_KILOMETERS 6371
+#define EARTH_CIRCUMFERENCE 40075.017
+
+extern double DELTA_X ;
+extern double DELTA_Y ;
+
+#define SPATIAL_HARD_BOUND 5000
+#define TEMPORAL_HARD_BOUND 24 // hours
+
+#define SPATIAL_SOFT_BOUND 5000
+#define TEMPORAL_SOFT_BOUND 12 // hours
+
+/*
+ // DENSE
+
+// Grid Set Up
+#define X 300 // table[X][Y]
+#define Y 300
+#define MIN_X 40
+#define MIN_Y -73
+#define MAX_X 41
+#define MAX_Y -72
+#define DELTA_X ((MAX_X - MIN_X)/ (X-1))
+#define DELTA_Y ((MAX_Y - MIN_Y)/ (Y-1))
+
+*/
+
+/*
+ //SPARSE
+
+// Grid Set Up
+#define X 300 // table[X][Y]
+#define Y 300
+#define MIN_X 30
+#define MIN_Y -84
+#define MAX_X 50
+#define MAX_Y -62
+#define DELTA_X ((MAX_X - MIN_X)/ (X-1))
+#define DELTA_Y ((MAX_Y - MIN_Y)/ (Y-1))
+
+
+// Dataset
+#define DATASET_SIZE 10000
+*/
+
+// Cell type, it is used for the heaps
+#define CELL 0
+#define RECTANGLE 1
+#define POINT 2
+
+// CPM directions
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
+
+// PI
+#define PI 3.1428
+
+
+//#include "SPOs/MemoryMap/pch.h"
+//#include "GPOs/MemoryGrid/headers.h"
+
+
+
 #include "utilities/res_point.h"
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"
@@ -147,10 +227,11 @@ extern int DATA_SET;
 #include "pTools/WeightedEntropy.h"
 
 #include "GPOs/MemoryGrid/grid/Point.h"
+#include "GPOs/MemoryGrid/grid/Cell.h"
+#include "GPOs/MemoryGrid/grid/Grid.h"
+#include "GPOs/MemoryGrid/GPOs.h"
 
 #include "SPOs/ISPOs.h"
-#include "GPOs/IGPOs.h"
-
 
 #include "utilities/Group.h"
 #include "basicGSQueries/BasicGSQueries.h"

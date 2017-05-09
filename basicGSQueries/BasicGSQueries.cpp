@@ -1,6 +1,6 @@
-#include "../headers.h"
+#include "../headersMemory.h"
 
-SimpleQueries::SimpleQueries(IGPOs *spatialIndex, ISPOs *socialGraph){
+SimpleQueries::SimpleQueries(GPOs *spatialIndex, ISPOs *socialGraph){
     spos = socialGraph;
     gpos = spatialIndex;
 }
@@ -96,7 +96,7 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
-void SimpleQueries::checkUtilityBasic(IGPOs *base_gpos){
+void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   unordered_set< pair<int,int>, PairHasher > original_cooccurrences;
 
   vector< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
@@ -150,7 +150,7 @@ void SimpleQueries::checkUtilityBasic(IGPOs *base_gpos){
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
 // between base_gpos and this->gpos
-void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, double radius, double noise_distance){
+void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius, double noise_distance){
   ifstream fin(fileName);
   double x,y, precision, recall, avg_precision=0, avg_recall=0, day;
   int count=-1;
@@ -213,7 +213,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
 
 // Given a set of locations of interest and a range  this utility counts the pairs of users with
 // katz score greater than the defined treshold
-void SimpleQueries::checkUtilityProximity(const char* fileName, IGPOs *base_gpos, double radius, double tresh, double noise_distance){
+void SimpleQueries::checkUtilityProximity(const char* fileName, GPOs *base_gpos, double radius, double tresh, double noise_distance){
   ifstream fin(fileName);
 
   if (!fin) {
