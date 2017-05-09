@@ -1287,23 +1287,33 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
 
 // Only co-occurrences
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
-  map <int, queue<int>* > st_knn;
+  map <int, vector<int>* > st_knn;
 
   ifstream fin("knn-noise-combined-10-coocc.csv");
 
-  while(!fin){
+  while(fin){
     int order;
-    queue<int>* neighbours = new queue<int>();
+    vector<int> *neighbours = new vector<int>();
     fin >> order;
+
     for(int i = 0; i<10; i++){
       int knn_order;
       double st_distance, s_distance, t_distance;
       fin >> knn_order >> st_distance >> s_distance >> t_distance;
-      if(st_distance != std::numeric_limits<double>::infinity())
-        neighbours->push(knn_order);
+
+      if(knn_order != -1)
+        neighbours->push_back(knn_order);
     }
-    st_knn.insert(make_pair(order, neighbours));
+
+    if(neighbours->size() > 0){
+      reverse(neighbours->begin(),neighbours->end());
+      st_knn.insert(make_pair(order, neighbours));
+    }
+    else
+      delete neighbours;
   }
+
+  cout << "Loaded ST_KNN " << st_knn.size() << endl;
 
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
@@ -1316,26 +1326,18 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     int order = c_it->first;
     Point *p = c_it->second;
 
-    if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
+    auto knn_it = st_knn.find(order);
 
-      auto knn_it = st_knn.find(order);
-      if(knn_it == st_knn.end())
-        continue;
-
-      queue<int>* neighbours = knn_it->second;
-
-      if(neighbours->size() == 0)
-        continue;
+    if( checkins_of_interest.find(order) != checkins_of_interest.end() && knn_it != st_knn.end() ){
+      vector<int> *neighbours = knn_it->second;
 
       // Pick a KNN at random
-      int k_lim = neighbours->size() < k ? neighbours->size() : k;
-      int kth = rand() % k_lim + 1;
+      int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
+      int kth = rand() % k_lim;
 
-      for(int i=1; i<kth; i++)
-        neighbours->pop();
+      int neighbor = neighbours->at(kth);
 
-      int neighbor = neighbours->front();
-      Point *q = checkin_list.find(neighbor)->second;
+      Point *q = gpos->checkin_list.find(neighbor)->second;
 
       double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
       double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
