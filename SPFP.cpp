@@ -312,8 +312,6 @@ void runEBMOnNoised(GPOs *baseGPOs, GPOs *purturbedGPOs, GPOs *cmpGPOs, SPOs *sp
 
   if(run_utilties){
     runBasicUtility(cmpGPOs, baseGPOs, spos);
-    // runBasicOnNoised(baseGPOs, cmpGPOs, spos, false);
-    // runBasicOnNoised(baseGPOs, cmpGPOs, spos, true);
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
 }
@@ -328,8 +326,7 @@ void plainEBM(){
   runEBM(gpos, spos);
 }
 
-// KNN Noise on only one checkin in cooccurrence
-void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_spatial, bool add_temporal){
+void selectiveGaussianNoise(){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -340,36 +337,20 @@ void selectiveGaussianNoise(int spatial_k, double spatial_std_radio, bool add_sp
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000};
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
+  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
 
-  for( int i=0; i<=12; i++){
-    cout << "Using group Radius : " << radi[i] << endl;
-    double radius = radi[i];
+  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGpos, noise_radius, time_deviation);
+  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+  cmpGPOs->countU2UCoOccurrences();
 
-    GPOs* spatiallyPurturbedGPOs = new GPOs(time_range_in_seconds);
-    GPOs* cmpGPOs  = new GPOs(time_range_in_seconds);
-
-    spatiallyPurturbedGPOs->loadPurturbedLocationSelectiveKNNDistance(fixedGpos,
-      spatial_k,
-      spatial_std_radio,
-      fixedGpos->getL2U2COOCC());
-    cout << "------------- Locations spatially perturbed -------------------" << endl;
-
-    // cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
-    cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
-    cout << "------------- Locations Grouped -------------------" << endl;
-
-    cmpGPOs->countU2UCoOccurrences();
-
-    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
-    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
-
-    delete spatiallyPurturbedGPOs;
-    delete cmpGPOs;
+  if(run_utilties){
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
+    runUtilities(purturbedGPOs, baseGPOs, spos);
   }
 }
 
-void selectiveGaussianNoise(bool only_cooccurrences, int spatial_k, double spatial_std_radio, bool add_spatial, bool add_temporal){
+void selectiveSTKNNNoise(int k){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -380,33 +361,40 @@ void selectiveGaussianNoise(bool only_cooccurrences, int spatial_k, double spati
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  double radi[] = {0, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7500, 10000};
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
+  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
 
-  for( int i=0; i<=12; i++){
-    cout << "Using group Radius : " << radi[i] << endl;
-    double radius = radi[i];
+  purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGpos, k);
+  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+  cmpGPOs->countU2UCoOccurrences();
 
-    GPOs* spatiallyPurturbedGPOs = new GPOs(time_range_in_seconds);
-    GPOs* cmpGPOs  = new GPOs(time_range_in_seconds);
+  if(run_utilties){
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
+    runUtilities(purturbedGPOs, baseGPOs, spos);
+  }
+}
 
-    spatiallyPurturbedGPOs->loadPurturbedLocationKNNDistance(fixedGpos,
-      only_cooccurrences,
-      spatial_k,
-      spatial_std_radio,
-      fixedGpos->getL2U2COOCC());
-    cout << "------------- Locations spatially perturbed -------------------" << endl;
+void selectiveSkylineNoise(){
+  bool preload_LE  = false;
+  bool preload_OCC = true;
 
-    // cmpGPOs->groupLocationsByKNNDistance(spatiallyPurturbedGPOs, spatial_k, spatial_std_radio);
-    cmpGPOs->groupLocationsByRange(spatiallyPurturbedGPOs, radius, false);
-    cout << "------------- Locations Grouped -------------------" << endl;
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-    cmpGPOs->countU2UCoOccurrences();
+  GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+  fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
+  fixedGpos->countU2UCoOccurrences();
 
-    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, false);
-    // runBasicOnNoised(fixedGpos, cmpGPOs, spos, true);
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
+  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
 
-    delete spatiallyPurturbedGPOs;
-    delete cmpGPOs;
+  purturbedGPOs->loadPurturbedBasedOnSelectiveSkyline(fixedGpos);
+  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+  cmpGPOs->countU2UCoOccurrences();
+
+  if(run_utilties){
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
+    runUtilities(purturbedGPOs, baseGPOs, spos);
   }
 }
 
@@ -826,41 +814,39 @@ int main(int argc, char *argv[]){
     }
 
     case 6:{
-      cout << "ITRATION: Selective Gaussian Noise based on KNN" << endl;
-
-      bool only_cooccurrences;
-      if(p1 == 0){
-        cout << "KNN for all locations "         << endl;
-        only_cooccurrences = false;
-      } else {
-        cout << "KNN for co_occurred locations " << endl;
-        only_cooccurrences = true;
-      }
-
-      spatial_k                 = p2;
-      spatial_std_radio         = 1;
-
-      bool add_spatial          = p5;
-      bool add_temporal         = p6;
+      cout << "ITRATION: Selective Gaussian Noise" << endl;
+      noise_radius            = p1;
+      time_deviation          = p2;
+      group_radius            = p3;
+      time_range_in_seconds   = p4;
 
       printParameters();
-      selectiveGaussianNoise(only_cooccurrences, spatial_k, spatial_std_radio, add_spatial, add_temporal);
+      selectiveGaussianNoise();
+
       break;
     }
 
     case 7:{
-      cout << "ITRATION: Selective Gaussian Noise based on KNN only one cooccurence" << endl;
+      cout << "ITRATION: Selective Noise based on Skyline" << endl;
 
-      cout << "KNN for co_occurred locations " << endl;
-
-      spatial_k                 = p2;
-      spatial_std_radio         = 1;
-
-      bool add_spatial          = p5;
-      bool add_temporal         = p6;
+      group_radius            = p3;
+      time_range_in_seconds   = p4;
 
       printParameters();
-      selectiveGaussianNoise(spatial_k, spatial_std_radio, add_spatial, add_temporal);
+      selectiveSkylineNoise();
+
+      break;
+    }
+
+    case 8:{
+      cout << "ITRATION: Selective Noise based on st-knn" << endl;
+
+      int k                   = p1;
+      group_radius            = p3;
+      time_range_in_seconds   = p4;
+
+      printParameters();
+      selectiveSTKNNNoise(k);
 
       break;
     }

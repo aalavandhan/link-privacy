@@ -153,6 +153,10 @@ public:
         int noise_function);
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
+    void loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint time_deviation);
+    void loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k);
+    void loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos);
+
     virtual map< int, double >* computeTemporalLocality(int max_checkins, double max_radius);
 
     Point* getKNN(Point *p, int k);
@@ -174,5 +178,4 @@ public:
         priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > *spatioTemporalKNNs,
         vector<res_point*> *spatial_candidates,
         int type);
-
 };
