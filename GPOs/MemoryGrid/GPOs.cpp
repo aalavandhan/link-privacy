@@ -291,19 +291,8 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
 }
 
 
-void GPOs::getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines){
-  res_point rp;
-  res_point_checkin_time_comparator_ascending comporator;
-  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
-
-  rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() - TEMPORAL_HARD_BOUND * 3600);
-  auto lb_it = lower_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
-
-  rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() + TEMPORAL_HARD_BOUND * 3600);
-  auto ub_it = upper_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
-
-
-  for(auto it=lb_it; it != ub_it; it++){
+void GPOs::getSkylinePoints(Point *p, vector <res_point*> *candidates, unordered_set< res_point* > *skylines){
+  for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
 
     if(chk->id == p->getID())
@@ -342,10 +331,10 @@ void GPOs::getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, u
   }
 }
 
-double GPOs::getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates, int metric_type){
+double GPOs::getSTKNNDistance(Point *p, int k, vector<res_point*> *candidates, int metric_type){
   priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
 
-  getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, spatial_candidates, metric_type);
+  getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, metric_type);
 
   if(spatioTemporalKNNs.size() == k){
     return spatioTemporalKNNs.top().first;
@@ -359,27 +348,17 @@ double GPOs::getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candi
 // metric_type == 2 ( Temporal  )
 void GPOs::getSpatioTemporalKNN(Point *p, int k,
   priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > *spatioTemporalKNNs,
-  vector<res_point*> *spatial_candidates,
+  vector<res_point*> *candidates,
   int metric_type){
 
   // timeval start_metric,end_metric, start_bound, end_bound;
   // gettimeofday(&start_bound, NULL);
 
-  res_point rp;
-  res_point_checkin_time_comparator_ascending comporator;
-  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
-
-  rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() - TEMPORAL_SOFT_BOUND * 3600);
-  auto lb_it = lower_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
-
-  rp.time = time_t_epoch + boost::posix_time::seconds(p->getTimeInSeconds() + TEMPORAL_SOFT_BOUND * 3600);
-  auto ub_it = upper_bound(spatial_candidates->begin(), spatial_candidates->end(), &rp, comporator );
-
   // gettimeofday(&end_bound, NULL);
   // bound_computation_time+=util.print_time(start_bound, end_bound);
   // gettimeofday(&start_metric, NULL);
 
-  for(auto it=lb_it; it != ub_it; it++){
+  for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
 
     // Discount the current location and current user
