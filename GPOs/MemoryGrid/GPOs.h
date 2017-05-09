@@ -169,7 +169,7 @@ public:
     vector <res_point*>* getRangeSpatioTemporalBound(Point *p);
 
     void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
-    void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, unordered_set< res_point* > *skylines);
+    void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, vector< pair< int, res_point* > > *skylines);
 
     void computeSTKNNDistancesOptimized(int k, int type);
     void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type);
