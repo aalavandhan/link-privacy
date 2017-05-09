@@ -337,9 +337,10 @@ void selectiveGaussianNoise(){
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
-  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
+  GPOs* purturbedGPOs = new GPOs(time_block);
+  GPOs* cmpGPOs       = new GPOs(time_block);
 
+  // purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGpos, noise_radius, time_deviation);
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cmpGPOs->countU2UCoOccurrences();
@@ -361,10 +362,13 @@ void selectiveSTKNNNoise(int k){
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
-  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
+  GPOs* purturbedGPOs = new GPOs(time_block);
+  GPOs* cmpGPOs       = new GPOs(time_block);
 
+  // purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGpos, k);
+
+
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cmpGPOs->countU2UCoOccurrences();
 
@@ -374,7 +378,7 @@ void selectiveSTKNNNoise(int k){
   }
 }
 
-void selectiveSkylineNoise(){
+void selectiveSkylineNoise(int k){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -385,10 +389,12 @@ void selectiveSkylineNoise(){
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
-  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
+  GPOs* purturbedGPOs = new GPOs(time_block);
+  GPOs* cmpGPOs       = new GPOs(time_block);
 
-  purturbedGPOs->loadPurturbedBasedOnSelectiveSkyline(fixedGpos);
+  // purturbedGPOs->loadPurturbedBasedOnSelectiveSkyline(baseGPOs, k);
+  purturbedGPOs->loadPurturbedBasedOnSelectiveSkyline(fixedGpos, k);
+
   cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
   cmpGPOs->countU2UCoOccurrences();
 
@@ -821,7 +827,7 @@ int main(int argc, char *argv[]){
       noise_radius            = p1;
       time_deviation          = p2;
       group_radius            = p3;
-      time_range_in_seconds   = p4;
+      time_block              = p4;
 
       printParameters();
       selectiveGaussianNoise();
@@ -840,7 +846,7 @@ int main(int argc, char *argv[]){
       }
 
       group_radius            = p3;
-      time_range_in_seconds   = p4;
+      time_block              = p4;
 
       printParameters();
       selectiveSkylineNoise(k);
@@ -853,7 +859,7 @@ int main(int argc, char *argv[]){
 
       int k                   = p1;
       group_radius            = p3;
-      time_range_in_seconds   = p4;
+      time_block              = p4;
 
       printParameters();
       selectiveSTKNNNoise(k);

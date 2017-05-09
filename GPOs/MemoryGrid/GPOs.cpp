@@ -1413,12 +1413,10 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
     int order = c_it->first;
     Point *p = c_it->second;
 
-    if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
+    auto sk_it = skyline_map.find(order);
 
-      auto sk_it = skyline_map.find(order);
+    if( checkins_of_interest.find(order) != checkins_of_interest.end() && sk_it != skyline_map.end() ){
       priority_queue< pair<int, int>, vector<pair<int, int>>>* skylines = sk_it->second;
-
-      cout << "Processing Order " << order << endl;
 
       int kth;
       if(k == -1){
@@ -1426,16 +1424,9 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
         kth = rand() % skylines->size();
       } else {
         // Pick 1 of top k at random
-        int k_lim = (skylines->size() < k ? skylines->size() : k);
+        int k_lim = (skylines->size() < k) ? skylines->size() : k;
         kth = rand() % k_lim;
       }
-
-      while(!skylines->empty()){
-        cout << skylines->top().first << " " << skylines->top().second << endl;
-        skylines->pop();
-      }
-
-      exit(-1);
 
       for(int i=0; i<kth; i++)
         skylines->pop();
