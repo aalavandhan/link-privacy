@@ -134,14 +134,14 @@ void SimpleQueries::checkUtilityBasic(IGPOs *base_gpos){
     positive++;
   }
 
-  double precision = (double) true_positive / (double) gt;
-  double recall    = (double) positive / (double) gt;
+  double precision = (double) true_positive / (double) positive;
+  double recall    = (double) true_positive / (double) gt;
   double f1        = 2 * precision * recall / ( precision + recall );
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ BASIC METRIC ]" << endl;
-  cout << "Number of co-occurrences before" << gt << endl;
-  cout << "Number of after                " << purturbed_cooccurrences->size() << endl;
+  cout << "Number of co-occurrences before : " << gt << endl;
+  cout << "Number of after                 : " << purturbed_cooccurrences->size() << endl;
   cout << "utility_basic_precision{{" << precision  << "}}" << endl;
   cout << "utility_basic_recall{{" << recall  << "}}" << endl;
   cout << "utility_basic_f1{{" << f1  << "}}" << endl;
@@ -205,9 +205,9 @@ void SimpleQueries::checkUtilityRange(const char* fileName, IGPOs *base_gpos, do
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
   cout << "Number of locations time blocks" << count << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance  << "m " << endl;
-  cout << "Precision :" << avg_precision << endl;
-  cout << "Recall    :" << avg_recall    << endl;
-  cout << "F1 Score  :" << f1            << endl;
+  cout << "utility_range_precision{{" << avg_precision <<"}}" << endl;
+  cout << "utility_range_recall{{" << avg_recall    <<"}}"<< endl;
+  cout << "utility_range_f1{{" << f1            <<"}}"<< endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
