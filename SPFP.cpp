@@ -831,12 +831,19 @@ int main(int argc, char *argv[]){
 
     case 7:{
       cout << "ITRATION: Selective Noise based on Skyline" << endl;
+      int k                   = p1;
+
+      if(k == -1){
+        cout << "Picking skylines at random " << endl;
+      } else {
+        cout << "TopK" << endl;
+      }
 
       group_radius            = p3;
       time_range_in_seconds   = p4;
 
       printParameters();
-      selectiveSkylineNoise();
+      selectiveSkylineNoise(k);
 
       break;
     }

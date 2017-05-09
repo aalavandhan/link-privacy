@@ -1379,7 +1379,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
 }
 
 // Only co-occurrences
-void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos){
+void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
@@ -1420,8 +1420,15 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos){
 
       cout << "Processing Order " << order << endl;
 
-      // Pick a Skyline at random
-      int kth = rand() % skylines->size();
+      int kth;
+      if(k == -1){
+        // Pick a Skyline at random
+        kth = rand() % skylines->size();
+      } else {
+        // Pick 1 of top k at random
+        int k_lim = (skylines->size() < k ? skylines->size() : k);
+        kth = rand() % k_lim;
+      }
 
       while(!skylines->empty()){
         cout << skylines->top().first << " " << skylines->top().second << endl;
