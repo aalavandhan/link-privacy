@@ -264,7 +264,7 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
   vector <Point*> temporal_candidates;
   vector <res_point*>* candidates = new vector <res_point*>();
 
-  getRangeByTime(p->getTimeIndex() - (TEMPORAL_SOFT_BOUND - 1), p->getTimeIndex() + (TEMPORAL_SOFT_BOUND + 1), &temporal_candidates);
+  getRangeByTime(p->getTimeIndex() - (TEMPORAL_SOFT_BOUND + 1), p->getTimeIndex() + (TEMPORAL_SOFT_BOUND + 1), &temporal_candidates);
 
   for(auto cd_it = temporal_candidates.begin(); cd_it != temporal_candidates.end(); cd_it++){
     Point *q = (*cd_it);
