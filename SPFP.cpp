@@ -674,11 +674,14 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "ebm-without-gt") == 0)
     iteration_type = 5;
 
-  else if (strcmp(argv[2], "knn-noise") == 0)
+  else if (strcmp(argv[2], "selective-gaussian") == 0)
     iteration_type = 6;
 
-  else if (strcmp(argv[2], "knn-selective-noise") == 0)
+  else if (strcmp(argv[2], "selective-skyline") == 0)
     iteration_type = 7;
+
+  else if (strcmp(argv[2], "selective-stknn") == 0)
+    iteration_type = 8;
 
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
