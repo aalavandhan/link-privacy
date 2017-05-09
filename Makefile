@@ -4,7 +4,7 @@ CPPFLAGS = -g -O0 -Wall -fpermissive
 LDFLAGS = -I/usr/local/include
 LFLAGS = -L/usr/local/lib
 LIBS = -lboost_thread -lboost_filesystem -lboost_program_options -lboost_system -lboost_date_time
-OBJS = Group.o Utilities.o Cell.o Point.o Grid.o Value.o User.o Pair.o SPOs.o GPOs.o BasicGSQueries.o ArrayOperations.o CalculateProbability.o Entropy.o RenyiEntropy.o KatzScore.o WeightedEntropy.o SPFP.o
+OBJS = Group.o Utilities.o Cell.o Point.o Grid.o Value.o User.o Pair.o SPOs.o GPOs.o BasicGSQueries.o COCqueries.o PurturbQ.o ArrayOperations.o CalculateProbability.o Entropy.o RenyiEntropy.o KatzScore.o WeightedEntropy.o SPFP.o
 
 $(PROG) : $(OBJS)
 	$(CC) $(LDFLAGS) -o $(PROG) $(OBJS) $(LFLAGS) $(LIBS)
@@ -47,6 +47,12 @@ Pair.o : SPOs/MemoryMapWeighted/Pair.cpp  headersMemory.h
 BasicGSQueries.o : basicGSQueries/BasicGSQueries.cpp headers.h
 	$(CC) $(CPPFLAGS) -c basicGSQueries/BasicGSQueries.cpp
 	$(CC) -MM basicGSQueries/BasicGSQueries.cpp > BasicGSQueries.d
+COCqueries.o : COCqueries/COCqueries.cpp headers.h
+	$(CC) $(CPPFLAGS) -c COCqueries/COCqueries.cpp
+	$(CC) -MM COCqueries/COCqueries.cpp > COCqueries.d
+PurturbQ.o : PurturbQ/PurturbQ.cpp headers.h
+	$(CC) $(CPPFLAGS) -c PurturbQ/PurturbQ.cpp
+	$(CC) -MM PurturbQ/PurturbQ.cpp > PurturbQ.d
 ArrayOperations.o : pTools/ArrayOperations.c pTools/ArrayOperations.h
 	$(CC) $(cFLAGS) -c pTools/ArrayOperations.c
 	$(CC) -MM pTools/ArrayOperations.c  > ArrayOperations.d

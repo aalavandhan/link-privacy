@@ -235,5 +235,7 @@ extern double DELTA_Y ;
 
 #include "utilities/Group.h"
 #include "basicGSQueries/BasicGSQueries.h"
+#include "COCqueries/COCqueries.h"
+#include "PurturbQ/PurturbQ.h"
 
 #endif
