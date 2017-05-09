@@ -165,6 +165,7 @@ public:
     void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
     void pickSingleCheckinFromCooccurrences(set<int> *checkins_of_interest);
+    void pickUniqueCheckinFromCooccurrences(set<int> *checkins_of_interest);
 
     vector <res_point*>* getRangeSpatioTemporalBound(Point *p);
 

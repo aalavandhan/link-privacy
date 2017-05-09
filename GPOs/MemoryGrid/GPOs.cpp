@@ -1119,38 +1119,35 @@ void GPOs::computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to
 
   int checkin_count = 0;
 
-  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
-    int o1 = c_it->first;
-    int o2 = c_it->second;
+  set<int> checkins_of_interest;
+  pickUniqueCheckinFromCooccurrences(&checkins_of_interest);
+  cout << "Checkins of interest : " << checkins_of_interest.size() << endl;
 
-    int orders[] = {o1, o2};
+  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
+    int order = (*c_it);
+    Point *p = checkin_list.find(order)->second;
+    vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
 
-    for(int i=0; i<2; i++){
-      int order = orders[ i ];
-      Point *p = checkin_list.find(order)->second;
-      vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
+    map< int, pair<int, res_point*> > skylines;
+    getSkylinePoints(p, candidates, &skylines);
 
-      map< int, pair<int, res_point*> > skylines;
-      getSkylinePoints(p, candidates, &skylines);
+    for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
+      int skyline_id = sk_it->first;
+      res_point *skyline = sk_it->second.second;
+      int domination_count = sk_it->second.first;
 
-      for(auto sk_it=skylines.begin(); sk_it != skylines.end(); sk_it++){
-        int skyline_id = sk_it->first;
-        res_point *skyline = sk_it->second.second;
-        int domination_count = sk_it->second.first;
-
-        outfile << p->getOrder() << " " << skyline->oid << " " << domination_count << " ";
-        outfile << p->computeMinDistInKiloMeters(skyline->x, skyline->y) << " ";
-        outfile << (double) p->getTimeDifference(skyline) / 3600.0 << endl;
-      }
-
-      for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
-        delete *sc_it;
-      }
-      delete candidates;
-      checkin_count++;
-      if(checkin_count % 10000 == 0)
-        cout << checkin_count << endl;
+      outfile << p->getOrder() << " " << skyline->oid << " " << domination_count << " ";
+      outfile << p->computeMinDistInKiloMeters(skyline->x, skyline->y) << " ";
+      outfile << (double) p->getTimeDifference(skyline) / 3600.0 << endl;
     }
+
+    for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
+      delete *sc_it;
+    }
+    delete candidates;
+    checkin_count++;
+    if(checkin_count % 10000 == 0)
+      cout << checkin_count << endl;
   }
 
   outfile.close();
@@ -1165,6 +1162,15 @@ void GPOs::pickSingleCheckinFromCooccurrences(set<int> *checkins_of_interest){
       checkins_of_interest->insert(o1);
     else
       checkins_of_interest->insert(o2);
+  }
+}
+
+void GPOs::pickUniqueCheckinFromCooccurrences(set<int> *checkins_of_interest){
+  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+    checkins_of_interest->insert(o1);
+    checkins_of_interest->insert(o2);
   }
 }
 
@@ -1188,50 +1194,47 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
   outfile.open( filePath.c_str() );
   int checkin_count = 0;
 
+  set<int> checkins_of_interest;
+  pickUniqueCheckinFromCooccurrences(&checkins_of_interest);
+  cout << "Checkins of interest : " << checkins_of_interest.size() << endl;
 
-  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
-    int o1 = c_it->first;
-    int o2 = c_it->second;
+  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
+    int order = (*c_it);
+    Point *p = checkin_list.find(order)->second;
+    vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
 
-    int orders[] = {o1, o2};
+    priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
+    getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, type);
 
-    for(int i=0; i<2; i++){
-      int order = orders[ i ];
-      Point *p = checkin_list.find(order)->second;
-      vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
+    int result_size = spatioTemporalKNNs.size();
 
-      priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
-      getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, type);
-
-      int result_size = spatioTemporalKNNs.size();
-
-      outfile << p->getOrder() << " ";
-      while( !spatioTemporalKNNs.empty() ){
-        res_point* candidate = spatioTemporalKNNs.top().second;
-        outfile << candidate->oid << " ";
-        outfile << spatioTemporalKNNs.top().first << " ";
-        outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
-        outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
-        spatioTemporalKNNs.pop();
-      }
-
-      for(int i=result_size; i < k; i++ ){
-        outfile << -1 << " ";
-        outfile << std::numeric_limits<double>::infinity() << " ";
-        outfile << std::numeric_limits<double>::infinity() << " ";
-        outfile << std::numeric_limits<double>::infinity() << " ";
-      }
-      outfile << endl;
-
-      for(auto cd_it = candidates->begin(); cd_it != candidates->end(); cd_it++){
-        delete(*cd_it);
-      }
-      delete candidates;
-
-      checkin_count++;
-      if(checkin_count % 10000 == 0)
-        cout << checkin_count << endl;
+    outfile << p->getOrder() << " ";
+    while( !spatioTemporalKNNs.empty() ){
+      res_point* candidate = spatioTemporalKNNs.top().second;
+      outfile << candidate->oid << " ";
+      outfile << spatioTemporalKNNs.top().first << " ";
+      outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
+      outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
+      spatioTemporalKNNs.pop();
     }
+
+    for(int i=result_size; i < k; i++ ){
+      outfile << -1 << " ";
+      outfile << std::numeric_limits<double>::infinity() << " ";
+      outfile << std::numeric_limits<double>::infinity() << " ";
+      outfile << std::numeric_limits<double>::infinity() << " ";
+    }
+    outfile << endl;
+
+    for(auto cd_it = candidates->begin(); cd_it != candidates->end(); cd_it++){
+      delete(*cd_it);
+    }
+    delete candidates;
+
+    checkin_count++;
+    if(checkin_count % 10000 == 0)
+      cout << checkin_count << endl;
+
   }
 
   outfile.close();
@@ -1319,8 +1322,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
-  double total_spatial_displacement = 0;
-  double total_temporal_displacement = 0;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
@@ -1346,7 +1347,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation);
 
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-      total_temporal_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+      total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
 
       loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
 
@@ -1386,18 +1387,18 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos){
   double total_spatial_displacement = 0;
   double total_temporal_displacement = 0;
 
-  map <int, priority_queue< pair<int, int>, vector<pair<int, int>>, std::greater<pair<int,int>> >* > skyline_map;
+  map <int, priority_queue< pair<int, int>, vector<pair<int, int>> >* > skyline_map;
   ifstream fin("skyline-coocc.csv");
-  while(!fin){
+  while(fin){
     int order, skyline_id, d_count;
     double s_distance, t_distance;
-    priority_queue< pair<int, int>, vector<pair<int, int>>, std::greater<pair<int,int>> >* skyline_queue;
+    priority_queue< pair<int, int>, vector<pair<int, int>> >* skyline_queue;
 
     fin >> order >> skyline_id >> d_count >> s_distance >> t_distance;
 
     auto sk_it = skyline_map.find(order);
     if(sk_it  == skyline_map.end() ){
-      skyline_queue = new priority_queue< pair<int, int>, vector<pair<int, int>>, std::greater<pair<int,int>> >();
+      skyline_queue = new priority_queue< pair<int, int>, vector<pair<int, int>> >();
       skyline_queue->push(make_pair(d_count, skyline_id));
       skyline_map.insert(make_pair(order, skyline_queue));
     } else {
@@ -1406,6 +1407,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos){
     }
   }
 
+  cout << "Loaded skylines " << skyline_map.size() << endl;
+
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
     Point *p = c_it->second;
@@ -1413,19 +1416,25 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos){
     if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
 
       auto sk_it = skyline_map.find(order);
-      priority_queue< pair<int, int>, vector<pair<int, int>>, std::greater<pair<int,int>>>* skylines = sk_it->second;
+      priority_queue< pair<int, int>, vector<pair<int, int>>>* skylines = sk_it->second;
 
-      if(skylines->empty())
-        continue;
+      cout << "Processing Order " << order << endl;
 
       // Pick a Skyline at random
-      int kth = rand() % skylines->size() + 1;
+      int kth = rand() % skylines->size();
 
-      for(int i=1; i<kth; i++)
+      while(!skylines->empty()){
+        cout << skylines->top().first << " " << skylines->top().second << endl;
+        skylines->pop();
+      }
+
+      exit(-1);
+
+      for(int i=0; i<kth; i++)
         skylines->pop();
 
       int skyline_id = skylines->top().second;
-      Point *skyline = checkin_list.find(skyline_id)->second;
+      Point *skyline = gpos->checkin_list.find(skyline_id)->second;
 
       double noise_radius = p->computeMinDistInKiloMeters(skyline->getX(), skyline->getY()) * 1000;
       double time_deviation = abs((p->getTime() - skyline->getTime()).total_seconds());
