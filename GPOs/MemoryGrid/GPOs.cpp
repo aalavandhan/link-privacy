@@ -1194,7 +1194,7 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     while( !spatioTemporalKNNs.empty() ){
       res_point* candidate = spatioTemporalKNNs.top().second;
 
-      outfile << candidate->getOrder() << " ";
+      outfile << candidate->oid << " ";
       outfile << spatioTemporalKNNs.top().first << " ";
       outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
       outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
