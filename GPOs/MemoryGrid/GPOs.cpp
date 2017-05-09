@@ -1190,15 +1190,20 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
 
     int result_size = spatioTemporalKNNs.size();
 
+    outfile << p->getOrder() << " ";
     while( !spatioTemporalKNNs.empty() ){
-      outfile << spatioTemporalKNNs.top().first << " ";
       res_point* candidate = spatioTemporalKNNs.top().second;
+
+      outfile << candidate->getOrder() << " ";
+      outfile << spatioTemporalKNNs.top().first << " ";
       outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
       outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
+
       spatioTemporalKNNs.pop();
     }
 
     for(int i=result_size; i < k; i++ ){
+      outfile << -1 << " ";
       outfile << std::numeric_limits<double>::infinity() << " ";
       outfile << std::numeric_limits<double>::infinity() << " ";
       outfile << std::numeric_limits<double>::infinity() << " ";
