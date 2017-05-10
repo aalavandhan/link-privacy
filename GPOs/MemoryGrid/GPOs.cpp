@@ -1029,49 +1029,51 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   double radius_geo_dist,x=0, y=0;
   unsigned int count=0, order;
 
-  unordered_set<int>* seenLocations = new unordered_set<int>();
+  unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
   GPOs *_duplicate_gpos = new GPOs(gpos);
 
   // Shuffling the locations
   std::random_shuffle( gpos->locations.begin(), gpos->locations.end() );
 
-  for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
-    Point *p = *l;
-    x   = p->getX();
-    y   = p->getY();
-    order = p->getOrder();
-    double s_dist, t_dist;
+  for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
+    Point *p = l->second;
+    x        = p->getX();
+    y        = p->getY();
+    order    = p->getOrder();
+    time     = p->getTime();
 
+    double s_dist, t_dist;
     auto st_it = st_knn.find(order);
+
     if(st_it == st_knn.end()){
-      s_dist = SPATIAL_SOFT_BOUND;
+      s_dist = SPATIAL_SOFT_BOUND/1000.0;
       t_dist = TEMPORAL_SOFT_BOUND;
     } else {
-      s_dist = st_it->second.first  * 0.90;
-      t_dist = st_it->second.second * 0.90;
+      s_dist = st_it->second.first  * 0.95;
+      t_dist = st_it->second.second * 0.95;
     }
 
     radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
-    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist, p->getTime(), t_dist);
+    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist, time, t_dist);
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
-      if( seenLocations->find( (*c)->oid ) == seenLocations->end() ){
+      if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
         loadPoint(x, y, p->getID(), (*c)->uid, (*c)->time, (*c)->oid);
-        seenLocations->insert( (*c)->oid );
-        count++;
+        seenLocations.insert( (*c)->oid );
       }
       delete (*c);
     }
     delete checkins;
 
-    if(count % 100000==0)
+    count++;
+
+    if( count != 100000 )
       cout << count << " " << endl;
 
   };
   cout << "Check-ins inserted : " << count << endl;
 
-  delete seenLocations;
   delete _duplicate_gpos;
 
   generateFrequencyCache();
