@@ -1246,10 +1246,7 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
-
-  total_spatial_displacement = 0;
-  total_time_displacement = 0;
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
@@ -1322,10 +1319,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
-
-  total_spatial_displacement = 0;
-  total_time_displacement = 0;
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
@@ -1365,7 +1359,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     } else {
       loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
     }
-
     point_count++;
   }
 
@@ -1387,9 +1380,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
-  total_spatial_displacement = 0;
-  total_time_displacement = 0;
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
 
   map <int, priority_queue< pair<int, int>, vector<pair<int, int>> >* > skyline_map;
   ifstream fin("skyline-coocc.csv");

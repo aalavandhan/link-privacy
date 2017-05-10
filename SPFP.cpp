@@ -40,13 +40,13 @@ char *checkins_file, *graph_file, *query_file, *query_test_file;
 int iteration_type = 1;
 bool run_utilties = false;
 bool is_noise_method = false;
-int data_set = 0, spatial_k;
+int data_set = 0, k;
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
          total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
          function_type, p1, p2, p3, p4, p5, p6,
          time_deviation,
          time_range_in_seconds = TIME_RANGE_IN_SECONDS,
-         day_of_week, time_block, noise_type, noise_function, spatial_std_radio;
+         day_of_week, time_block, noise_type, noise_function;
 #endif
 
 void printParameters(){
@@ -67,8 +67,7 @@ void printParameters(){
   cout << "day_of_week          : " << day_of_week << endl;
   cout << "time_block           : " << time_block << endl;
   cout << "noise_type           : " << noise_type << endl;
-  cout << "spatial_k            : " << spatial_k << endl;
-  cout << "spatial_std_radio    : " << spatial_std_radio << endl;
+  cout << "K                    : " << k << endl;
   cout << "------------------------------------------" << endl;
 }
 
@@ -358,24 +357,46 @@ void selectiveSTKNNNoise(int k){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
+  double spatial_grouping[]  = {0, 0.10, 0.25, 0.5, 0.75, 1, 1.5};
+  double temporal_grouping[] = {0, 0.10, 0.25, 0.5, 0.75, 1, 1.5};
+
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
   GPOs* purturbedGPOs = new GPOs(time_block);
-  GPOs* cmpGPOs       = new GPOs(time_block);
-
-  // purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGpos, k);
-
-
-  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
-  cmpGPOs->countU2UCoOccurrences();
-
+  // purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
   if(run_utilties){
-    runBasicUtility(cmpGPOs, baseGPOs, spos);
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
+
+  double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
+  double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
+
+  cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
+  cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
+
+  for(int i=0; i<7;i++){
+    for(int j=0; j<7;j++){
+      double sg = group_radius_spatial * 1000.0 * spatial_grouping[ i ] + 3.3;
+      double tg = group_radius_temporal * 3600.0 * temporal_grouping[ j ] + 180;
+
+      cout << "Using Spatial  Grouping : " << sg << endl;
+      cout << "Using Temporal Grouping : " << tg << endl;
+
+      GPOs* cmpGPOs       = new GPOs(tg);
+      cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+      cmpGPOs->countU2UCoOccurrences();
+
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+
+      delete cmpGPOs;
+    }
+  }
+
 }
 
 void selectiveSkylineNoise(int k){
@@ -837,7 +858,7 @@ int main(int argc, char *argv[]){
 
     case 7:{
       cout << "ITRATION: Selective Noise based on Skyline" << endl;
-      int k                   = p1;
+      k                   = p1;
 
       if(k == -1){
         cout << "Picking skylines at random " << endl;
@@ -857,9 +878,7 @@ int main(int argc, char *argv[]){
     case 8:{
       cout << "ITRATION: Selective Noise based on st-knn" << endl;
 
-      int k                   = p1;
-      group_radius            = p3;
-      time_block              = p4;
+      k                   = p1;
 
       printParameters();
       selectiveSTKNNNoise(k);
