@@ -1059,7 +1059,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
-        loadPoint(x, y, p->getID(), (*c)->uid, (*c)->time, (*c)->oid);
+        loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
         seenLocations.insert( (*c)->oid );
       }
       delete (*c);
