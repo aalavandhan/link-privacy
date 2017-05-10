@@ -1297,6 +1297,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     vector<int> *neighbours = new vector<int>();
     fin >> order;
 
+    cout << "Loading : " << order << endl;
     for(int i = 0; i<10; i++){
       int knn_order;
       double st_distance, s_distance, t_distance;
@@ -1309,6 +1310,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     if(neighbours->size() > 0){
       reverse(neighbours->begin(),neighbours->end());
       st_knn.insert(make_pair(order, neighbours));
+      cout << "Inserting : " << order << endl;
     }
     else
       delete neighbours;
