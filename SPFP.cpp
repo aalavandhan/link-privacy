@@ -923,8 +923,6 @@ int main(int argc, char *argv[]){
       cout << "ITRATION: Selective Gaussian Noise" << endl;
       noise_radius            = p1;
       time_deviation          = p2;
-      group_radius            = p3;
-      time_block              = p4;
 
       printParameters();
       selectiveGaussianNoise();
