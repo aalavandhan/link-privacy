@@ -1397,7 +1397,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
 
   map <int, priority_queue< pair<int, int>, vector<pair<int, int>> >* > skyline_map;
   ifstream fin("skyline-coocc.csv");
-  while(fin){
+
+  while(!fin.eof()){
     int order, skyline_id, d_count;
     double s_distance, t_distance;
     priority_queue< pair<int, int>, vector<pair<int, int>> >* skyline_queue;
@@ -1415,6 +1416,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
     }
   }
 
+  fin.close();
+
   cout << "Loaded skylines " << skyline_map.size() << endl;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
@@ -1424,7 +1427,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
     auto sk_it = skyline_map.find(order);
 
     if( checkins_of_interest.find(order) != checkins_of_interest.end() && sk_it != skyline_map.end() ){
-      priority_queue< pair<int, int>, vector<pair<int, int>>>* skylines = sk_it->second;
+      priority_queue< pair<int, int>, vector<pair<int, int>>> *skylines = sk_it->second;
 
       int kth;
       if(k == -1){
@@ -1458,15 +1461,15 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
       spatial_purturbed_count++;
       temporal_purturbed_count++;
 
-      for(auto sk_it = skyline_map.begin(); sk_it != skyline_map.end(); sk_it++)
-        delete sk_it->second;
-
     } else {
       loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
     }
 
     point_count++;
   }
+
+  for(auto sk_it = skyline_map.begin(); sk_it != skyline_map.end(); sk_it++)
+    delete sk_it->second;
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
