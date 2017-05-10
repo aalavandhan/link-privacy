@@ -357,8 +357,8 @@ void selectiveSTKNNNoise(int k){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = {0.10, 0.25, 0.5, 0.75, 1, 1.5};
-  double temporal_grouping[] = {0.10, 0.25, 0.5, 0.75, 1, 1.5};
+  double spatial_grouping[]  = {0.10, 0.25, 0.5, 0.75, 1};
+  double temporal_grouping[] = {0.10, 0.25, 0.5, 0.75, 1};
 
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
@@ -377,8 +377,8 @@ void selectiveSTKNNNoise(int k){
   cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
-  for(int i=0; i<7;i++){
-    for(int j=0; j<7;j++){
+  for(int i=0; i<5;i++){
+    for(int j=0; j<5;j++){
       double sg = group_radius_spatial * 1000.0 * spatial_grouping[ i ] + 3.3;
       double tg = group_radius_temporal * 3600.0 * temporal_grouping[ j ] + 180;
 
