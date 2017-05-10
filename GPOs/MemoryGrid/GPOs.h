@@ -129,6 +129,7 @@ public:
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
     void groupLocationsByDD(GPOs* gpos, int k);
     void groupLocationsByKNNDistance(GPOs* gpos, int k, double std_radio);
+    void groupLocationsByST(GPOs* gpos, double radius, double time_deviation);
     void loadPurturbedLocations(GPOs* gpos, double radius);
     void loadPurturbedLocationsByTime(GPOs* gpos, uint time_deviation);
     void verifyRange(double radius);

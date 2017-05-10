@@ -993,6 +993,49 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 //   generateCooccurrenceCache();
 // };
 
+void GPOs::groupLocationsByST(GPOs* gpos, double radius, double time_deviation){
+  double radius_geo_dist = (radius) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
+  unsigned int count=0, order;
+
+  double time_deviation_in_hours = time_deviation / 3600.0;
+
+  unordered_set<int> seenLocations;
+  boost::posix_time::ptime time;
+  GPOs *_duplicate_gpos = new GPOs(gpos);
+
+  for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
+    Point *p = l->second;
+    x        = p->getX();
+    y        = p->getY();
+    order    = p->getOrder();
+    time     = p->getTime();
+
+    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist, time, time_deviation_in_hours);
+
+    for(auto c = checkins->begin(); c != checkins->end(); c++){
+      if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
+        loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
+        seenLocations.insert( (*c)->oid );
+      }
+      delete (*c);
+    }
+    delete checkins;
+
+    count++;
+
+    if( count % 100000 == 0 )
+      cout << count << " " << endl;
+
+  };
+  cout << "Check-ins inserted : " << seenLocations.size() << endl;
+
+  delete _duplicate_gpos;
+
+  generateFrequencyCache();
+  generateCooccurrenceCache();
+
+}
+
 void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   map <int, pair<double, double> > st_knn;
   ifstream fin("knn-noise-all-10-coocc.csv");
@@ -1033,9 +1076,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   boost::posix_time::ptime time;
   GPOs *_duplicate_gpos = new GPOs(gpos);
 
-  // Shuffling the locations
-  std::random_shuffle( gpos->locations.begin(), gpos->locations.end() );
-
   for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
     Point *p = l->second;
     x        = p->getX();
@@ -1072,7 +1112,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       cout << count << " " << endl;
 
   };
-  cout << "Check-ins inserted : " << count << endl;
+  cout << "Check-ins inserted : " << seenLocations.size() << endl;
 
   delete _duplicate_gpos;
 

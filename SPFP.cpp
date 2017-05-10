@@ -332,21 +332,43 @@ void selectiveGaussianNoise(){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
+  double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.5, 0.75 };
+  double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.5, 0.75 };
+
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_block);
-  GPOs* cmpGPOs       = new GPOs(time_block);
-
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
   // purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGpos, noise_radius, time_deviation);
-  cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
-  cmpGPOs->countU2UCoOccurrences();
-
   if(run_utilties){
-    runBasicUtility(cmpGPOs, baseGPOs, spos);
     runUtilities(purturbedGPOs, baseGPOs, spos);
+  }
+
+  double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
+  double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
+
+  cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
+  cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
+
+  for(int i=0; i<5;i++){
+    for(int j=0; j<5;j++){
+      double sg = group_radius_spatial * 1000.0 * spatial_grouping[ i ] + 3.3;
+      double tg = group_radius_temporal * 3600.0 * temporal_grouping[ j ] + 180;
+
+      cout << "Using Spatial  Grouping : " << sg << endl;
+      cout << "Using Temporal Grouping : " << tg << endl;
+
+      GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+      cmpGPOs->countU2UCoOccurrences();
+      if(run_utilties){
+        runUtilities(purturbedGPOs, baseGPOs, spos);
+      }
+
+      delete cmpGPOs;
+    }
   }
 }
 
@@ -361,10 +383,11 @@ void selectiveGaussianNoiseDDAdversary(int k){
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_block);
-  GPOs* cmpGPOs       = new GPOs(time_block);
-
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
+  // purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGpos, noise_radius, time_deviation);
+
+  GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
   cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
   cmpGPOs->countU2UCoOccurrences();
 
@@ -382,14 +405,14 @@ void selectiveSTKNNNoise(int k){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.375, 0.5 };
-  double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.375, 0.5 };
+  double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.5, 0.75 };
+  double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.5, 0.75 };
 
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_block);
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGpos, k);
   // purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
   if(run_utilties){
@@ -410,8 +433,8 @@ void selectiveSTKNNNoise(int k){
       cout << "Using Spatial  Grouping : " << sg << endl;
       cout << "Using Temporal Grouping : " << tg << endl;
 
-      GPOs* cmpGPOs       = new GPOs(tg);
-      cmpGPOs->groupLocationsByRange(purturbedGPOs, sg, false);
+      GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countU2UCoOccurrences();
 
       if(run_utilties){
@@ -430,14 +453,14 @@ void selectiveSkylineNoise(int k){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = {0.10, 0.25, 0.5, 0.75, 1};
-  double temporal_grouping[] = {0.10, 0.25, 0.5, 0.75, 1};
+  double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.5, 0.75 };
+  double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.5, 0.75 };
 
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
   fixedGpos->countU2UCoOccurrences();
 
-  GPOs* purturbedGPOs = new GPOs(time_block);
+  GPOs* purturbedGPOs = new GPOs(time_range_in_seconds);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSkyline(fixedGpos, k);
   // purturbedGPOs->loadPurturbedBasedOnSelectiveSkyline(baseGPOs, k);
   if(run_utilties){
@@ -458,8 +481,8 @@ void selectiveSkylineNoise(int k){
       cout << "Using Spatial  Grouping : " << sg << endl;
       cout << "Using Temporal Grouping : " << tg << endl;
 
-      GPOs* cmpGPOs       = new GPOs(tg);
-      cmpGPOs->groupLocationsByRange(purturbedGPOs, sg, false);
+      GPOs* cmpGPOs       = new GPOs(time_range_in_seconds);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countU2UCoOccurrences();
 
       if(run_utilties){
