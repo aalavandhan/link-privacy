@@ -1314,6 +1314,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
       delete neighbours;
   }
 
+  fin.close();
+
   cout << "Loaded ST_KNN " << st_knn.size() << endl;
 
   set<int> checkins_of_interest;
