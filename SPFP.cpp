@@ -386,7 +386,7 @@ void selectiveSTKNNNoise(int k){
       cout << "Using Temporal Grouping : " << tg << endl;
 
       GPOs* cmpGPOs       = new GPOs(tg);
-      cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+      cmpGPOs->groupLocationsByRange(purturbedGPOs, sg, false);
       cmpGPOs->countU2UCoOccurrences();
 
       if(run_utilties){
@@ -434,7 +434,7 @@ void selectiveSkylineNoise(int k){
       cout << "Using Temporal Grouping : " << tg << endl;
 
       GPOs* cmpGPOs       = new GPOs(tg);
-      cmpGPOs->groupLocationsByRange(purturbedGPOs, group_radius, false);
+      cmpGPOs->groupLocationsByRange(purturbedGPOs, sg, false);
       cmpGPOs->countU2UCoOccurrences();
 
       if(run_utilties){
