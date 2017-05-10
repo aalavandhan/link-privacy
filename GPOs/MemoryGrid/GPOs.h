@@ -27,7 +27,7 @@ public:
     GPOs(uint time_range);
     GPOs(GPOs *gpos);
     ~GPOs();
-    vector<int> ids;
+    set<int> ids;
     vector<Point*> locations;
     double total_spatial_displacement = 0;
     double total_time_displacement    = 0;

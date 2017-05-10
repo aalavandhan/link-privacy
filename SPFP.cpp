@@ -755,6 +755,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "compute-stknn-metrics") == 0)
     iteration_type = 98;
 
+  else if (strcmp(argv[2], "compute-all-stknn-metrics") == 0)
+    iteration_type = 99;
+
   else
     iteration_type = -1;
 
@@ -1082,15 +1085,12 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      // vector< pair<int,int> >* co_occ_list = new vector< pair<int,int> >();
-      // gpos->generateU2U2OrderMap(co_occ_list);
-      // cout << "Number of co-occurrences :" << gpos->cooccurred_checkins.size() << endl;
 
-      // GPOs* fixedGpos = new GPOs(time_range_in_seconds);
-      // fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      // fixedGpos->countU2UCoOccurrences();
-      // fixedGpos->computeSkylineMetrics(fixedGpos->getL2U2COOCC());
-      gpos->computeSkylineMetrics(gpos->getL2U2COOCC());
+      GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+      fixedGpos->groupLocationsByRange(gpos, 3.3, false);
+      fixedGpos->countU2UCoOccurrences();
+      fixedGpos->computeSkylineMetrics(fixedGpos->getL2U2COOCC());
+      // gpos->computeSkylineMetrics(gpos->getL2U2COOCC());
 
       break;
     }
@@ -1106,11 +1106,30 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
-      // GPOs* fixedGpos = new GPOs(time_range_in_seconds);
-      // fixedGpos->groupLocationsByRange(gpos, 3.3, false);
-      // fixedGpos->countU2UCoOccurrences();
-      // fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 0);
-      gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 0);
+      GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+      fixedGpos->groupLocationsByRange(gpos, 3.3, false);
+      fixedGpos->countU2UCoOccurrences();
+      fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 0);
+      // gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 0);
+      break;
+    }
+
+    case 99:{
+      cout << "METRICS: Compute ST KNN Metrics" << endl;
+      cout << "ST KNN for all locations " << endl;
+      printParameters();
+
+      bool preload_LE  = false;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, gpos);
+
+      GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+      fixedGpos->groupLocationsByRange(gpos, 3.3, false);
+      fixedGpos->countU2UCoOccurrences();
+      fixedGpos->computeSTKNNDistances(10, fixedGpos->getL2U2COOCC(), 3);
+      // gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 0);
       break;
     }
 

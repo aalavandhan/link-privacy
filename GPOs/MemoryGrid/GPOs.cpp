@@ -599,7 +599,7 @@ void GPOs::loadPoint(double x, double y, int lid, int uid, boost::posix_time::pt
 
   grid->addCheckIn(l);
 
-  ids.push_back(lid);
+  ids.insert(l->getOrder());
 };
 
 // Load locations from file
@@ -1190,15 +1190,23 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
   if(type == 2)
     ss << "knn-noise-temporal-" << k << "-coocc" << ".csv";
 
+  if(type == 3)
+    ss << "knn-noise-all-" << k << "-coocc" << ".csv";
+
   filePath = ss.str();
   outfile.open( filePath.c_str() );
   int checkin_count = 0;
 
-  set<int> checkins_of_interest;
-  pickUniqueCheckinFromCooccurrences(&checkins_of_interest);
-  cout << "Checkins of interest : " << checkins_of_interest.size() << endl;
+  set<int> *checkins_of_interest;
+  if(type != 3){
+    pickUniqueCheckinFromCooccurrences(checkins_of_interest);
+    cout << "Checkins of interest : " << checkins_of_interest->size() << endl;
+  } else {
+    checkins_of_interest = &ids;
+    cout << "Using all checkins : " << checkins_of_interest->size() << endl;
+  }
 
-  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
+  for(auto c_it = checkins_of_interest->begin(); c_it != checkins_of_interest->end(); c_it++){
     int order = (*c_it);
     Point *p = checkin_list.find(order)->second;
     vector <res_point*> *candidates = getRangeSpatioTemporalBound(p);
@@ -1237,6 +1245,7 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
 
   }
 
+  delete checkins_of_interest;
   outfile.close();
 }
 

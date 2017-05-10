@@ -155,10 +155,10 @@ extern double DELTA_X ;
 extern double DELTA_Y ;
 
 #define SPATIAL_HARD_BOUND 5000
-#define TEMPORAL_HARD_BOUND 24 // hours
+#define TEMPORAL_HARD_BOUND 12 // hours
 
-#define SPATIAL_SOFT_BOUND 5000
-#define TEMPORAL_SOFT_BOUND 12 // hours
+#define SPATIAL_SOFT_BOUND 1000
+#define TEMPORAL_SOFT_BOUND 4 // hours
 
 /*
  // DENSE
