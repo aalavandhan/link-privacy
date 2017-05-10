@@ -357,8 +357,8 @@ void selectiveSTKNNNoise(int k){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = {0, 0.10, 0.25, 0.5, 0.75, 1, 1.5};
-  double temporal_grouping[] = {0, 0.10, 0.25, 0.5, 0.75, 1, 1.5};
+  double spatial_grouping[]  = {0.10, 0.25, 0.5, 0.75, 1, 1.5};
+  double temporal_grouping[] = {0.10, 0.25, 0.5, 0.75, 1, 1.5};
 
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
