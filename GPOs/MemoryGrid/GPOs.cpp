@@ -1094,8 +1094,8 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       t_dist = st_it->second.second;
     }
 
-    s_dist = s_dist * 0.33;
-    t_dist = t_dist * 0.33;
+    s_dist = s_dist * 0.15;
+    t_dist = t_dist * 0.15;
 
     radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist, time, t_dist);
