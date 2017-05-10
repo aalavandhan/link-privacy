@@ -1199,6 +1199,7 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
 
   set<int> *checkins_of_interest;
   if(type != 3){
+    checkins_of_interest = new set<int>();
     pickUniqueCheckinFromCooccurrences(checkins_of_interest);
     cout << "Checkins of interest : " << checkins_of_interest->size() << endl;
   } else {
