@@ -1247,8 +1247,9 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
-  double total_spatial_displacement = 0;
-  double total_temporal_displacement = 0;
+
+  total_spatial_displacement = 0;
+  total_time_displacement = 0;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
@@ -1259,7 +1260,7 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
 
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-      total_temporal_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+      total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
 
       loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
 
@@ -1323,6 +1324,9 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
 
+  total_spatial_displacement = 0;
+  total_time_displacement = 0;
+
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
     Point *p = c_it->second;
@@ -1384,8 +1388,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, purturbed_count = 0;
-  double total_spatial_displacement = 0;
-  double total_temporal_displacement = 0;
+  total_spatial_displacement = 0;
+  total_time_displacement = 0;
 
   map <int, priority_queue< pair<int, int>, vector<pair<int, int>> >* > skyline_map;
   ifstream fin("skyline-coocc.csv");
@@ -1441,7 +1445,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k){
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(skyline->getTime(), time_deviation);
 
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-      total_temporal_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+      total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
 
       loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
 
