@@ -1068,7 +1068,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
 
     count++;
 
-    if( count != 100000 )
+    if( count % 100000 == 0 )
       cout << count << " " << endl;
 
   };
