@@ -437,6 +437,72 @@ vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius){
 }
 
 
+vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius, boost::posix_time::ptime time, double t_dist){
+    Point* p = NULL;
+    Cell* c = NULL;
+    vector<res_point*>* result = new vector<res_point*>();
+
+    int x_start = (int)(((x-radius) - MIN_X)/DELTA_X);
+    int x_end = (int)(((x+radius) - MIN_X)/DELTA_X);
+    int y_start = (int)(((y-radius) - MIN_Y)/DELTA_Y);
+    int y_end = (int)(((y+radius) - MIN_Y)/DELTA_Y);
+
+    if(x_end >= X)
+        x_end = X-1;
+
+    if(y_end >= Y)
+        y_end = Y-1;
+
+    if(x_start < 0)
+        x_start = 0;
+
+    if(y_start < 0)
+        y_start = 0;
+
+    int visits = 0;
+    int totalcells=0;
+
+    for(int i = x_start; i <= x_end; i++){
+        for(int j = y_start; j <= y_end; j++){
+            totalcells++;
+            c = getCell(i, j);
+
+            if(c != NULL && c->getCheckIns() != NULL && c->intersectsWithCircle(x, y, radius)){
+                visits++;
+                list<Point*>* L = c->getCheckIns();
+                list<Point*>::iterator it;
+
+                it=L->begin();
+                while(it != L->end()){
+                    p = *it;
+                    //count++;
+                    if(p->computeMinDist(x, y) <= radius && (p->getTime() - time).total_seconds() <= t_dist * 3600){
+                        res_point* rp = new res_point();
+                        rp->id = p->getID();
+                        rp->uid = p->getUID();
+                        rp->x = p->getX();
+                        rp->y = p->getY();
+                        rp->dist = p->getMinDist();
+                        rp->time = p->getTime();
+                        rp->oid = p->getOrder();
+                        rp->cached_time = rp->getTimeInSeconds();
+                        result->push_back(rp);
+                        auto del_iter = it;
+                        ++it;
+                        L->erase(del_iter);
+                        delete p;
+                    }else{
+                        ++it;
+                    }
+                }
+            }
+
+        }
+    }
+    return result;
+}
+
+
 // 1. get the cells which are in the circle's MBR.
 // 2. for each one of these, check if it intersects the circle,
 // 3. if yes, get the checkins that are in the circle.

@@ -447,6 +447,11 @@ vector<res_point*>* GPOs::getRangeAndDelete(double x, double y, double radius){
   return res;
 }
 
+vector<res_point*>* GPOs::getRangeAndDelete(double x, double y, double radius, boost::posix_time::ptime time, double t_dist){
+  vector<res_point*>* res = grid->getRangeAndDelete(x, y, radius, time, t_dist);
+  return res;
+}
+
 vector<res_point*>* GPOs::getRange(double x, double y, double radius){
   clock_t startC, endC;
   struct timeval start, end;
@@ -1036,30 +1041,29 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
     x   = p->getX();
     y   = p->getY();
     order = p->getOrder();
+    double s_dist, t_dist;
 
     auto st_it = st_knn.find(order);
     if(st_it == st_knn.end()){
-      loadPoint(x, y, p->getID(), p->getUID(), p->getTime(), order);
-      count++;
+      s_dist = SPATIAL_SOFT_BOUND;
+      t_dist = TEMPORAL_SOFT_BOUND;
     } else {
-      double s_dist = st_it->second.first  * 0.90;
-      double t_dist = st_it->second.second * 0.90;
-
-      radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
-      vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist);
-
-      for(auto c = checkins->begin(); c != checkins->end(); c++){
-        if(p->getTimeDifference(*c) <= t_dist * 3600){
-          if( seenLocations->find( (*c)->oid ) == seenLocations->end() ){
-            loadPoint(x, y, p->getID(), (*c)->uid, (*c)->time, (*c)->oid);
-            seenLocations->insert( (*c)->oid );
-            count++;
-          }
-          delete (*c);
-        }
-      }
-      delete checkins;
+      s_dist = st_it->second.first  * 0.90;
+      t_dist = st_it->second.second * 0.90;
     }
+
+    radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
+    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist, p->getTime(), t_dist);
+
+    for(auto c = checkins->begin(); c != checkins->end(); c++){
+      if( seenLocations->find( (*c)->oid ) == seenLocations->end() ){
+        loadPoint(x, y, p->getID(), (*c)->uid, (*c)->time, (*c)->oid);
+        seenLocations->insert( (*c)->oid );
+        count++;
+      }
+      delete (*c);
+    }
+    delete checkins;
 
     if(count % 100000==0)
       cout << count << " " << endl;
