@@ -988,6 +988,93 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 //   generateCooccurrenceCache();
 // };
 
+void GPOs::groupLocationsByDD(GPOs* gpos, int k){
+  map <int, pair<double, double> > st_knn;
+  ifstream fin("knn-noise-all-10-coocc.csv");
+  while(!fin.eof()){
+    int order;
+    double ks_dist=std::numeric_limits<double>::infinity(), kt_dist=std::numeric_limits<double>::infinity();
+    vector<int> *neighbours = new vector<int>();
+    fin >> order;
+    for(int i = 0; i<10; i++){
+      int knn_order;
+      double st_distance, s_distance, t_distance;
+      string text;
+      fin >> knn_order;
+      fin >> text;
+      st_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      s_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+
+      if(knn_order != -1 && i == k-1){
+        ks_dist = s_distance;
+        kt_dist = t_distance;
+      }
+    }
+
+    if(ks_dist != std::numeric_limits<double>::infinity() && kt_dist != std::numeric_limits<double>::infinity())
+      st_knn.insert(make_pair(order, make_pair(ks_dist, kt_dist)));
+  }
+  fin.close();
+
+  cout << "Loaded KNN for " << st_knn.size() << endl;
+
+  double radius_geo_dist,x=0, y=0;
+  unsigned int count=0, order;
+
+  unordered_set<int>* seenLocations = new unordered_set<int>();
+  boost::posix_time::ptime time;
+  GPOs *_duplicate_gpos = new GPOs(gpos);
+
+  // Shuffling the locations
+  std::random_shuffle( gpos->locations.begin(), gpos->locations.end() );
+
+  for(auto l = gpos->locations.begin(); l != gpos->locations.end(); l++){
+    Point *p = *l;
+    x   = p->getX();
+    y   = p->getY();
+    order = p->getOrder();
+
+    auto st_it = st_knn.find(order);
+    if(st_it == st_knn.end()){
+      loadPoint(x, y, p->getID(), p->getUID(), p->getTime(), order);
+      count++;
+    } else {
+      double s_dist = st_it->second.first  * 0.90;
+      double t_dist = st_it->second.second * 0.90;
+
+      radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
+      vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(x, y, radius_geo_dist);
+
+      for(auto c = checkins->begin(); c != checkins->end(); c++){
+        if(p->getTimeDifference(*c) <= t_dist * 3600){
+          if( seenLocations->find( (*c)->oid ) == seenLocations->end() ){
+            loadPoint(x, y, p->getID(), (*c)->uid, (*c)->time, (*c)->oid);
+            seenLocations->insert( (*c)->oid );
+            count++;
+          }
+          delete (*c);
+        }
+      }
+      delete checkins;
+    }
+
+    if(count % 100000==0)
+      cout << count << " " << endl;
+
+  };
+  cout << "Check-ins inserted : " << count << endl;
+
+  delete seenLocations;
+  delete _duplicate_gpos;
+
+  generateFrequencyCache();
+  generateCooccurrenceCache();
+
+}
+
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int lid, count=0;

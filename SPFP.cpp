@@ -350,6 +350,31 @@ void selectiveGaussianNoise(){
   }
 }
 
+void selectiveGaussianNoiseDDAdversary(int k){
+  bool preload_LE  = false;
+  bool preload_OCC = true;
+
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+  GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+  fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
+  fixedGpos->countU2UCoOccurrences();
+
+  GPOs* purturbedGPOs = new GPOs(time_block);
+  GPOs* cmpGPOs       = new GPOs(time_block);
+
+  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGpos, noise_radius, time_deviation);
+  cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
+  cmpGPOs->countU2UCoOccurrences();
+
+  if(run_utilties){
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
+    runUtilities(purturbedGPOs, baseGPOs, spos);
+  }
+}
+
+
 void selectiveSTKNNNoise(int k){
   bool preload_LE  = false;
   bool preload_OCC = true;
@@ -357,8 +382,8 @@ void selectiveSTKNNNoise(int k){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = {0.10, 0.25, 0.5, 0.75, 1};
-  double temporal_grouping[] = {0.10, 0.25, 0.5, 0.75, 1};
+  double spatial_grouping[]  = {0.025, 0.05, 0.10, 0.25, 0.5};
+  double temporal_grouping[] = {0.25, 0.375, 0.5, 0.75, 1 };
 
   GPOs* fixedGpos = new GPOs(time_range_in_seconds);
   fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
@@ -732,6 +757,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "selective-stknn") == 0)
     iteration_type = 8;
 
+  else if (strcmp(argv[2], "selective-gaussian-dd") == 0)
+    iteration_type = 9;
+
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
   else if (strcmp(argv[2], "compute-katz") == 0)
@@ -907,6 +935,20 @@ int main(int argc, char *argv[]){
 
       printParameters();
       selectiveSTKNNNoise(k);
+
+      break;
+    }
+
+    case 9:{
+      cout << "ITRATION: Selective Noise vs DD Adversary" << endl;
+
+      noise_radius            = p1;
+      time_deviation          = p2;
+
+      k                       = p3;
+
+      printParameters();
+      selectiveGaussianNoiseDDAdversary(k);
 
       break;
     }
