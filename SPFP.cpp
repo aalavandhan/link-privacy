@@ -360,13 +360,13 @@ void selectiveSTKNNNoise(int k){
   double spatial_grouping[]  = {0, 0.10, 0.25, 0.5, 0.75, 1, 1.5};
   double temporal_grouping[] = {0, 0.10, 0.25, 0.5, 0.75, 1, 1.5};
 
-  // GPOs* fixedGpos = new GPOs(time_range_in_seconds);
-  // fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
-  // fixedGpos->countU2UCoOccurrences();
+  GPOs* fixedGpos = new GPOs(time_range_in_seconds);
+  fixedGpos->groupLocationsByRange(baseGPOs, 3.3, false);
+  fixedGpos->countU2UCoOccurrences();
 
   GPOs* purturbedGPOs = new GPOs(time_block);
-  // purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGpos, k);
-  purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
+  purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGpos, k);
+  // purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
