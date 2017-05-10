@@ -1024,8 +1024,8 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
     }
     delete checkins;
 
-    // if(count % 100000==0)
-    //   cout << count << " " << endl;
+    if(count % 1000000==0)
+      cout << count << " " << endl;
 
   };
   cout << "Check-ins inserted : " << count << endl;
