@@ -1083,6 +1083,9 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
     order    = p->getOrder();
     time     = p->getTime();
 
+    if(p->getID() >= LOCATION_NOISE_BOUND)
+      continue;
+
     double s_dist, t_dist;
     auto st_it = st_knn.find(order);
 
@@ -1394,6 +1397,8 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
 
+  set<int> purturbed_at_l;
+
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
     Point *p = c_it->second;
@@ -1405,9 +1410,14 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
       total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
 
-      loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
+      if( purturbed_at_l.find(p->getID()) == purturbed_at_l.end() ){
+        purturbed_at_l.insert( p->getID() );
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), purtubed_time, p->getOrder() );
+      } else {
+        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
+        lid++;
+      }
 
-      lid++;
       purturbed_count++;
       spatial_purturbed_count++;
       temporal_purturbed_count++;
