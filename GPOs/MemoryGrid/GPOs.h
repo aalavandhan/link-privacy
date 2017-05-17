@@ -64,7 +64,7 @@ public:
     vector<res_point*>* getkNN(double x, double y, int k);
     vector<res_point*>* getRange(double x, double y, double radius);
     vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
-    vector<res_point*>* getRangeAndDelete(double x, double y, double radius, boost::posix_time::ptime time, double t_dist);
+    vector<res_point*>* getRangeAndDelete(Point *p, double radius, double t_dist);
     vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
     set<res_point*, res_point_ascending_id>* getSetRange(double x, double y, double radius);
     vector<res_point*>* getRangeSortedId(double x, double y, double radius);

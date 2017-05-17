@@ -1169,7 +1169,7 @@ int main(int argc, char *argv[]){
       bool preload_LE  = false;
       bool preload_OCC = true;
 
-      double coocc_spatial_radius[] = { 0, 3.3, 10, 25, 50, 100 };
+      double coocc_spatial_radius[] = { 0, 10, 25, 50, 100, 200 };
       double coocc_temporal_radius[] = { 1, 10, 20, 40, 60, 120 };
 
       for (int i = 0; i < 6; ++i){

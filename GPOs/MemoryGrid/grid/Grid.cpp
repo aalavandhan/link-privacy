@@ -437,7 +437,11 @@ vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius){
 }
 
 
-vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius, boost::posix_time::ptime time, double t_dist){
+vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, double t_dist){
+    double x = original->getX();
+    double y = original->getY();
+    boost::posix_time::ptime time = original->getTime();
+
     Point* p = NULL;
     Cell* c = NULL;
     vector<res_point*>* result = new vector<res_point*>();
@@ -476,7 +480,9 @@ vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius, b
                 while(it != L->end()){
                     p = *it;
                     //count++;
-                    if(p->computeMinDist(x, y) <= radius && (p->getTime() - time).total_seconds() <= t_dist * 3600){
+                    if( p->computeMinDist(x, y) <= radius &&
+                        (p->getTime() - time).total_seconds() <= t_dist * 3600 &&
+                        original->getUID() != p->getUID() ){
                         res_point* rp = new res_point();
                         rp->id = p->getID();
                         rp->uid = p->getUID();
