@@ -1169,8 +1169,8 @@ int main(int argc, char *argv[]){
       bool preload_LE  = false;
       bool preload_OCC = false;
 
-      double coocc_spatial_radius[] = { 0, 25, 50, 100, 200, 400 };
-      double coocc_temporal_radius[] = { 1, 20, 40, 60, 120, 240 };
+      double coocc_spatial_radius[] = { 0, 25, 50, 100, 200 };
+      double coocc_temporal_radius[] = { 1, 20, 40, 60, 120 };
 
       printParameters();
 
@@ -1179,8 +1179,8 @@ int main(int argc, char *argv[]){
       fixed->groupLocationsByRange(gpos, 3.3, false);
       delete gpos;
 
-      for (int i = 3; i < 6; ++i){
-        for (int j = 0; j < 6; ++j){
+      for (int i = 0; i < 5; ++i){
+        for (int j = 0; j < 5; ++j){
           coocc_spatial_range = coocc_spatial_radius[ i ];
           coocc_time_range    = coocc_temporal_radius[ j ] * 60;
 
