@@ -99,8 +99,8 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
 void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   unordered_set< pair<int,int>, PairHasher > original_cooccurrences;
 
-  vector< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
-  vector< pair<int,int> >* purturbed_cooccurrences = gpos->getCooccurredCheckins();
+  unordered_set< pair<int,int>, PairHasher >* base_cooccurrences = base_gpos->getCooccurredCheckins();
+  unordered_set< pair<int,int>, PairHasher >* purturbed_cooccurrences = gpos->getCooccurredCheckins();
 
   for(auto c_it = base_cooccurrences->begin(); c_it != base_cooccurrences->end(); c_it++){
     int o1 = c_it->first;

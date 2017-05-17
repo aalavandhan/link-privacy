@@ -345,8 +345,7 @@ int Utilities::countIntersection(int arr1[], int arr2[], int m, int n)
   return count;
 }
 
-int Utilities::getCooccurrencesWithinTimeBlock(vector<pair<uint, int>>* arr1, vector<pair<uint, int>>* arr2, uint time_block, vector< pair<int,int> >* orders)
-{
+int Utilities::getCooccurrencesWithinTimeBlock(vector<pair<uint, int>>* arr1, vector<pair<uint, int>>* arr2, uint time_block, unordered_set< pair<int,int>, PairHasher >* orders){
   int count=0;
   int m = arr1->size();
   int n = arr2->size();
@@ -356,10 +355,19 @@ int Utilities::getCooccurrencesWithinTimeBlock(vector<pair<uint, int>>* arr1, ve
   {
     int diff = arr1->at(i).first - arr2->at(j).first;
 
+    if(abs(diff) <= (int) time_block){
+      int o1 = arr1->at(i).second;
+      int o2 = arr2->at(j).second;
+      if(o1 > o2){
+        int temp = o2;
+        o2 = o1;
+        o1 = temp;
+      }
 
-    if(abs(diff) <= (int) time_block) {
-      orders->push_back(make_pair(arr1->at(i).second, arr2->at(j).second));
-      count++;
+      if(orders->find(make_pair(o1, o2)) == orders->end()){
+        orders->insert(make_pair(o1, o2));
+        count++;
+      }
 
       ++j;
       i++;

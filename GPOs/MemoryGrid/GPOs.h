@@ -23,8 +23,8 @@ private:
 
 public:
     Grid *grid;
-    GPOs(char* gridFileName, uint time_range_in_seconds);
-    GPOs(uint time_range);
+    GPOs(char* gridFileName, uint time_range_in_seconds, double spatial_range);
+    GPOs(uint time_range, double spatial_range);
     GPOs(GPOs *gpos);
     ~GPOs();
     set<int> ids;
@@ -32,7 +32,9 @@ public:
     double total_spatial_displacement = 0;
     double total_time_displacement    = 0;
     int purturbed_count = 0, spatial_purturbed_count=0, temporal_purturbed_count=0;
-    uint time_range_in_seconds;
+
+    uint coocc_time_range;
+    double coocc_spatial_range;
 
     //user id to checkins
     map<int , vector< Point* >*> user_to_location;
@@ -76,6 +78,8 @@ public:
     vector<int>* getUsersInRange(double x, double y, double r1, double r2);
 
     vector<int>* getUsersInRange(double x, double y, double radius);
+    vector<int>* getLocationsInRange(double x, double y, double radius);
+
     vector<int>* getUsersInRange(int source, double radius);
 
     unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double r1, double r2);
@@ -100,11 +104,10 @@ public:
 
     map< int, map<int,int>* >* getL2U2COOCC();
 
-    void generateFrequencyCache();
     void generateCooccurrenceCache();
 
-    vector< pair<int,int> >* getCooccurredCheckins();
-    vector< pair<int,int> > cooccurred_checkins;
+    unordered_set< pair<int,int>, PairHasher >* getCooccurredCheckins();
+    unordered_set< pair<int,int>, PairHasher > cooccurred_checkins;
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);

@@ -1,6 +1,6 @@
 #include "../../headersMemory.h"
 
-GPOs::GPOs (char* gridFileName, uint time_range){
+GPOs::GPOs (char* gridFileName, uint time_range, double spatial_range){
   kNNExecutions = 0;
   LocationExecutions = 0;
   NextNNExecutions = 0;
@@ -9,17 +9,18 @@ GPOs::GPOs (char* gridFileName, uint time_range){
   totalCPUTime = totalTime = 0.0;
   grid = new Grid;
 	loadLocations(gridFileName);
-  generateFrequencyCache();
   generateCooccurrenceCache();
   // grid->deleteEmptyCells();
   objects = 0;
   computedNN = returnedNN = finalNextNN = 0;
   nextNNList = new vector<res_point*>();
   flagNextNN = true;
-  time_range_in_seconds = time_range;
+
+  coocc_time_range      = time_range;
+  coocc_spatial_range   = spatial_range;
 }
 
-GPOs::GPOs(uint time_range){
+GPOs::GPOs(uint time_range, double spatial_range){
   kNNExecutions = 0;
   LocationExecutions = 0;
   NextNNExecutions = 0;
@@ -31,7 +32,9 @@ GPOs::GPOs(uint time_range){
   computedNN = returnedNN = finalNextNN = 0;
   nextNNList = new vector<res_point*>();
   flagNextNN = true;
-  time_range_in_seconds = time_range;
+
+  coocc_time_range      = time_range;
+  coocc_spatial_range   = spatial_range;
 }
 
 GPOs::GPOs(GPOs *_gpos){
@@ -49,7 +52,9 @@ GPOs::GPOs(GPOs *_gpos){
     Point *p = *l;
     this->loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
   }
-  time_range_in_seconds = _gpos->time_range_in_seconds;
+
+  coocc_time_range    = _gpos->coocc_time_range;
+  coocc_spatial_range = _gpos->coocc_spatial_range;
 }
 
 GPOs::~GPOs(){
@@ -129,81 +134,61 @@ vector<Point*>* GPOs::getLocations(){
   return &locations;
 }
 
-vector< pair<int,int> >* GPOs::getCooccurredCheckins(){
+unordered_set< pair<int,int>, PairHasher >* GPOs::getCooccurredCheckins(){
   return &cooccurred_checkins;
-}
-
-void GPOs::generateFrequencyCache(){
-  cout << "---- GENERATING CACHE ----" << endl;
-  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
-
-  for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
-    map<int, vector<uint>* > * user_frequencies = new map<int, vector<uint>* >();
-
-    int lid = l_it->first;
-    auto location_checkins_vector = l_it->second;
-
-    for(auto c_it = location_checkins_vector->begin(); c_it!= location_checkins_vector->end(); c_it++){
-      auto point = (*c_it);
-      int uid = point->getUID();
-
-      boost::posix_time::time_duration time_difference = point->getTime() - time_t_epoch;
-      int time = abs(time_difference.total_seconds());
-
-      auto user_it = user_frequencies->find(uid);
-      if(user_it == user_frequencies->end()){
-        vector<uint> *time_stamps = new vector<uint>();
-        time_stamps->push_back( time );
-        user_frequencies->insert(make_pair(uid, time_stamps));
-      } else {
-        user_it->second->push_back(time);
-      }
-    }
-
-    for(auto it = user_frequencies->begin(); it!=user_frequencies->end();it++){
-      vector<uint> *time_stamps = it->second;
-      sort(time_stamps->begin(), time_stamps->end());
-    }
-
-    locations_users_frequency_map.insert(make_pair(lid, user_frequencies));
-  }
 }
 
 void GPOs::generateCooccurrenceCache(){
   cout << "---- GENERATING CACHE ----" << endl;
-  boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2000 ,1,1));
+  double average_chkns_in_spatial_range = 0, max_chkns_in_spatial_range = 0;
 
   for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
-    map<int, vector< pair<uint, int> >* > * user_frequencies = new map<int, vector< pair<uint, int> >* >();
-
     int lid = l_it->first;
-    auto location_checkins_vector = l_it->second;
+    auto checkins_at_l = l_it->second;
 
-    for(auto c_it = location_checkins_vector->begin(); c_it!= location_checkins_vector->end(); c_it++){
-      auto point = (*c_it);
-      int uid = point->getUID();
-      auto user_it = user_frequencies->find(uid);
-      boost::posix_time::time_duration time_difference = point->getTime() - time_t_epoch;
-      int time = abs(time_difference.total_seconds());
+    map<int, vector< pair<uint, int> >* > *user_frequencies = new map<int, vector< pair<uint, int> >* >();
 
-      if(user_it == user_frequencies->end()){
-        vector<pair<uint, int>> *time_stamps = new vector<pair<uint, int>>();
-        time_stamps->push_back( make_pair( time, point->getOrder() ) );
-        user_frequencies->insert(make_pair(uid, time_stamps));
-      } else {
-        user_it->second->push_back( make_pair( time, point->getOrder() ) );
+    Point *sample = checkins_at_l->front();
+    vector<int> *nearby_locations = getLocationsInRange(sample->getX(), sample->getY(), 2*coocc_spatial_range);
+
+    average_chkns_in_spatial_range += nearby_locations->size();
+    if(nearby_locations->size() > max_chkns_in_spatial_range){
+      max_chkns_in_spatial_range = nearby_locations->size();
+    }
+
+    for(auto nl_it = nearby_locations->begin(); nl_it != nearby_locations->end(); nl_it++){
+      int n_location = (*nl_it);
+      vector< Point* > *checkins_at_n_location = location_to_user.find(n_location)->second;
+
+      for(auto c_it = checkins_at_n_location->begin(); c_it!= checkins_at_n_location->end(); c_it++){
+        auto point = (*c_it);
+        int uid = point->getUID();
+        auto user_it = user_frequencies->find(uid);
+        int time = point->getTimeInSeconds();
+
+        if(user_it == user_frequencies->end()){
+          vector<pair<uint, int>> *time_stamps = new vector<pair<uint, int>>();
+          time_stamps->push_back( make_pair( time, point->getOrder() ) );
+          user_frequencies->insert(make_pair(uid, time_stamps));
+        } else {
+          user_it->second->push_back( make_pair( time, point->getOrder() ) );
+        }
+      }
+
+      for(auto it = user_frequencies->begin(); it!=user_frequencies->end();it++){
+        vector<pair<uint, int>> *time_stamps = it->second;
+        sort(time_stamps->begin(), time_stamps->end());
       }
     }
-
-    for(auto it = user_frequencies->begin(); it!=user_frequencies->end();it++){
-      vector<pair<uint, int>> *time_stamps = it->second;
-      sort(time_stamps->begin(), time_stamps->end());
-    }
-
     locations_users_frequency_map_with_order.insert(make_pair(lid, user_frequencies));
+    delete nearby_locations;
   }
 
+  average_chkns_in_spatial_range = average_chkns_in_spatial_range / locations_users_frequency_map_with_order.size();
+
   cout << "Cache Co-occurrence Generated " << locations_users_frequency_map_with_order.size() << endl;
+  cout << "Average number of locations in vicinity :  " << average_chkns_in_spatial_range << endl;
+  cout << "Max number of locations in vicinity     :  " << max_chkns_in_spatial_range << endl;
 }
 
 vector< Point* >* GPOs::getLocations(int user_id){
@@ -677,6 +662,10 @@ bool GPOs::loadLocations(const char* fileName){
 
   while (fin){
     fin >> uid >> y >> x >> lid >> date >> time;
+
+    if(x == -97.7401685715 && y == 30.2635153076)
+      continue;
+
     dateTime = date + " " + time;
     boost::posix_time::ptime dtm = boost::posix_time::time_from_string(dateTime);
 
@@ -879,22 +868,34 @@ vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
 
 vector<int>* GPOs::getUsersInRange(double x, double y, double radius){
   vector<int> *users = new vector<int>();
-
   double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE;
   vector<res_point*>* checkins = getRange(x, y, radius_geo_dist);
-
   for(auto c = checkins->begin(); c != checkins->end(); c++){
     users->push_back( (*c)->uid );
     delete (*c);
   }
   delete checkins;
-
   // Sorting user list
   sort(users->begin(), users->end());
   // Removing duplicates
   users->erase( unique( users->begin(), users->end() ), users->end() );
-
   return users;
+}
+
+vector<int>* GPOs::getLocationsInRange(double x, double y, double radius){
+  vector<int> *locations = new vector<int>();
+  double radius_geo_dist = (radius/1000) * 360 / EARTH_CIRCUMFERENCE;
+  vector<res_point*>* checkins = getRange(x, y, radius_geo_dist);
+  for(auto c = checkins->begin(); c != checkins->end(); c++){
+    locations->push_back( (*c)->id );
+    delete (*c);
+  }
+  delete checkins;
+  // Sorting user list
+  sort(locations->begin(), locations->end());
+  // Removing duplicates
+  locations->erase( unique( locations->begin(), locations->end() ), locations->end() );
+  return locations;
 }
 
 vector<int>* GPOs::getUsersInRangeAndTimeBlock(double x, double y, double time_block, int max_checkins, double max_radius){
@@ -989,7 +990,6 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 //   delete seenLocations;
 //   delete _duplicate_gpos;
 
-//   generateFrequencyCache();
 //   generateCooccurrenceCache();
 // };
 
@@ -1031,7 +1031,6 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius, double time_deviation){
 
   delete _duplicate_gpos;
 
-  generateFrequencyCache();
   generateCooccurrenceCache();
 
 }
@@ -1122,7 +1121,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
 
   delete _duplicate_gpos;
 
-  generateFrequencyCache();
   generateCooccurrenceCache();
 
 }
@@ -1173,7 +1171,6 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   delete seenLocations;
   delete _duplicate_gpos;
 
-  generateFrequencyCache();
   generateCooccurrenceCache();
 }
 
@@ -1810,7 +1807,6 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
     cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
   }
 
-  generateFrequencyCache();
   generateCooccurrenceCache();
 }
 
@@ -1833,7 +1829,6 @@ void GPOs::countU2UCoOccurrences(){
       auto u2_it=u1_it;
       u2_it++;
 
-
       for(; u2_it != user_checkin_times->end(); u2_it++){
         int u1Id = u1_it->first;
         auto u1_timestamps = u1_it->second;
@@ -1846,7 +1841,7 @@ void GPOs::countU2UCoOccurrences(){
           u1Id = temp;
         }
 
-        int intersection_count = util.getCooccurrencesWithinTimeBlock(u1_timestamps,u2_timestamps,time_range_in_seconds, &cooccurred_checkins);
+        int intersection_count = util.getCooccurrencesWithinTimeBlock(u1_timestamps,u2_timestamps, coocc_time_range, &cooccurred_checkins);
 
         if(intersection_count > 0){
           auto coV_it = cooccurrence_matrix.find(u1Id);
@@ -1957,10 +1952,11 @@ void GPOs::countU2UCoOccurrences(){
       }
     }
   }
+
   cout << "users_with_atleast_one_cooccurrence{{" << cooccurrence_matrix.size() << "}}" << endl;
-  cout << "total_cooccurrence{{" << total_cooccurrences << "}}" << endl;
   cout << "cooccurred_user_paris{{" << cooccured_user_pairs.size() << "}}" << endl;
   cout << "significantly_cooccurred_user_paris{{" << significantly_cooccured_user_pairs.size() << "}}" << endl;
+  cout << "total_cooccurrence{{" << cooccurred_checkins.size() << "}}" << endl;
 }
 
 int GPOs::getUserCooccurrences(int user_id){
@@ -2413,7 +2409,6 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
     }
   }
 
-  generateFrequencyCache();
   generateCooccurrenceCache();
 }
 
