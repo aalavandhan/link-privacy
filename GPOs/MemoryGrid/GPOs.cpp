@@ -366,11 +366,8 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
   for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
 
-    if(cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end())
-      continue;
-
-    // Discount the current location and current user
-    if( p->getID() != chk->id && p->getUID() != chk->uid ){
+    // Discount the current location/region and current user
+    if( p->getID() != chk->id && p->getUID() != chk->uid && cooccurred_checkins->find(chk->oid) == cooccurred_checkins->end() ){
       // double spatial_distance  = p->computeMinDistInKiloMeters(chk->x, chk->y) / ( (double)SPATIAL_SOFT_BOUND / 1000.0 );
       double distance = 0.0;
 
@@ -1006,11 +1003,9 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 //   generateCooccurrenceCache();
 // };
 
-void GPOs::groupLocationsByST(GPOs* gpos, double radius, double time_deviation){
-  double radius_geo_dist = (radius) * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
+void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
+  double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int count=0, order;
-
-  double time_deviation_in_hours = time_deviation / 3600.0;
 
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;

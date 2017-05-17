@@ -132,7 +132,7 @@ extern int DATA_SET;
 
 
 #define TIME_RANGE_IN_SECONDS 1200 // defines the time difference between 2 checkins to be considered a co-occurrence
-#define SPATIAL_RANGE_IN_METERS 3.3 // defines the spatial distance between 2 checkins to be considered a co-occurrence
+#define SPATIAL_RANGE_IN_METERS 10 // defines the spatial distance between 2 checkins to be considered a co-occurrence
 
 // dataset scalability
 extern double DATASET_SIZE;

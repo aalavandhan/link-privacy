@@ -334,12 +334,13 @@ void selectiveGaussianNoise(){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.5, 0.75 };
-  double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.5, 0.75 };
+  double spatial_grouping[]  = { 0.15, 0.25, 0.35, 0.45, 0.55 };
+  double temporal_grouping[] = { 0.15, 0.25, 0.35, 0.45, 0.55 };
 
-  GPOs* fixedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  fixedGPOs->groupLocationsByRange(baseGPOs, 10, false);
-  delete baseGPOs;
+  // GPOs* fixedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+  // fixedGPOs->groupLocationsByRange(baseGPOs, 10, false);
+  // delete baseGPOs;
+  GPOs* fixedGPOs = baseGPOs;
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
@@ -353,19 +354,23 @@ void selectiveGaussianNoise(){
   cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
-  for(int i=0; i<5;i++){
-    for(int j=0; j<5;j++){
-      double sg = group_radius_spatial * 1000.0 * spatial_grouping[ i ] + 3.3;
-      double tg = group_radius_temporal * 3600.0 * temporal_grouping[ j ] + 180;
+  for(int i=3; i<4;i++){
+    for(int j=3; j<4;j++){
+      double sg = group_radius_spatial * spatial_grouping[ i ];
+      double tg = group_radius_temporal * temporal_grouping[ j ];
 
-      cout << "Using Spatial  Grouping : " << sg << endl;
-      cout << "Using Temporal Grouping : " << tg << endl;
+      cout << "Using Spatial  Grouping (KM): " << sg << endl;
+      cout << "Using Temporal Grouping (Hr): " << tg << endl;
+
+      coocc_spatial_range   = 1;
+      coocc_temporal_radius = 1;
 
       GPOs* cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countU2UCoOccurrences();
+
       if(run_utilties){
-        runUtilities(purturbedGPOs, fixedGPOs, spos);
+        runBasicUtility(cmpGPOs, fixedGPOs, spos);
       }
 
       delete cmpGPOs;
