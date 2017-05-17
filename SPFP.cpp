@@ -1137,21 +1137,23 @@ int main(int argc, char *argv[]){
     case 98:{
       cout << "METRICS: Compute ST KNN Metrics" << endl;
       cout << "ST KNN for co_occurred locations " << endl;
-      printParameters();
 
       bool preload_LE  = false;
-      bool preload_OCC = true;
+      bool preload_OCC = false;
 
       coocc_spatial_range = p1;
       coocc_time_range    = p2;
 
+      printParameters();
+
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       GPOs* fixed = new GPOs(coocc_time_range, coocc_spatial_range);
       fixed->groupLocationsByRange(gpos, 10, false);
-      delete gpos;
       fixed->countU2UCoOccurrences();
+      delete gpos;
 
       SPOs* spos = loadSocialGraph(graph_file, fixed);
+
 
       fixed->computeSTKNNDistances(10, fixed->getL2U2COOCC(), 0);
       break;
