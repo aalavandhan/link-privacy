@@ -1142,6 +1142,9 @@ int main(int argc, char *argv[]){
       bool preload_LE  = false;
       bool preload_OCC = true;
 
+      coocc_spatial_range = p1;
+      coocc_time_range    = p2;
+
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
@@ -1159,7 +1162,8 @@ int main(int argc, char *argv[]){
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
-      gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 0);
+
+      gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 3);
       break;
     }
 
