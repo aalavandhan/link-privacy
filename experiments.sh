@@ -34,7 +34,6 @@ for spatial_noise in 100 200 300 400 500 600 700; do
   done
 done
 
-
 # Gaussian temporal Noise
 for temporal_noise in 0 20 40 60 80 100 120 140 160 180; do
   for time_grouping in 0 0.25 0.5 1 1.5; do
