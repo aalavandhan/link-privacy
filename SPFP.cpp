@@ -363,7 +363,7 @@ void selectiveGaussianNoise(){
       cout << "Using Temporal Grouping (Hr): " << tg << endl;
 
       coocc_spatial_range   = 1;
-      coocc_temporal_radius = 1;
+      coocc_time_range      = 1;
 
       GPOs* cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
