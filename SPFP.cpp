@@ -1176,7 +1176,7 @@ int main(int argc, char *argv[]){
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       GPOs* fixed = new GPOs(coocc_time_range, coocc_spatial_range);
-      fixed->groupLocationsByRange(gpos, 3.3, false);
+      fixed->groupLocationsByRange(gpos, 10, false);
       delete gpos;
 
       for (int i = 0; i < 5; ++i){
@@ -1188,6 +1188,7 @@ int main(int argc, char *argv[]){
           cout << "del_t for co-occ :"  << coocc_time_range     << endl;
 
           GPOs* test_gpos = new GPOs(fixed);
+          test_gpos->generateCooccurrenceCache();
           test_gpos->countU2UCoOccurrences();
           delete test_gpos;
         }
