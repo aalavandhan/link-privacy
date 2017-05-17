@@ -354,8 +354,8 @@ void selectiveGaussianNoise(){
   cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
-  for(int i=3; i<4;i++){
-    for(int j=3; j<4;j++){
+  for(int i=0; i<5;i++){
+    for(int j=0; j<5;j++){
       double sg = group_radius_spatial * spatial_grouping[ i ];
       double tg = group_radius_temporal * temporal_grouping[ j ];
 
