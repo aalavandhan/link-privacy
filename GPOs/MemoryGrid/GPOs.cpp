@@ -109,13 +109,17 @@ GPOs::~GPOs(){
     }
 
     // map<int, map<int, vector<pair<int, int> >* >*> cooccurrence_matrix;
-
     for(auto it = cooccurrence_matrix.begin(); it!= cooccurrence_matrix.end(); it++){
       auto innerMap = it->second;
       for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
         delete iter->second;
       }
       delete innerMap;
+    }
+
+    for(auto it = cooccurrence_index.begin(); it!= cooccurrence_index.end(); it++){
+      auto innerVector = it->second;
+      delete innerVector;
     }
 }
 
@@ -357,8 +361,13 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
   // bound_computation_time+=util.print_time(start_bound, end_bound);
   // gettimeofday(&start_metric, NULL);
 
+  unordered_set<int>* cooccurred_checkins = cooccurrence_index.find(p->getOrder())->second;
+
   for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
+
+    if(cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end())
+      continue;
 
     // Discount the current location and current user
     if( p->getID() != chk->id && p->getUID() != chk->uid ){
@@ -1343,7 +1352,7 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
   set<int> *checkins_of_interest;
   if(type != 3){
     checkins_of_interest = new set<int>();
-    pickUniqueCheckinFromCooccurrences(checkins_of_interest);
+    pickSingleCheckinFromCooccurrences(checkins_of_interest);
     cout << "Checkins of interest : " << checkins_of_interest->size() << endl;
   } else {
     checkins_of_interest = &ids;
@@ -1960,10 +1969,35 @@ void GPOs::countU2UCoOccurrences(){
     }
   }
 
+  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+    unordered_set<int> *lst;
+
+    auto o1_it = cooccurrence_index.find(o1);
+    if(o1_it == cooccurrence_index.end()){
+      lst = new unordered_set<int>();
+      cooccurrence_index.insert(make_pair(o1, lst));
+    } else {
+      lst = o1_it->second;
+    }
+    lst->insert(o2);
+
+    auto o2_it = cooccurrence_index.find(o2);
+    if(o2_it == cooccurrence_index.end()){
+      lst = new unordered_set<int>();
+      cooccurrence_index.insert(make_pair(o2, lst));
+    } else {
+      lst = o2_it->second;
+    }
+    lst->insert(o1);
+  }
+
   cout << "users_with_atleast_one_cooccurrence{{" << cooccurrence_matrix.size() << "}}" << endl;
   cout << "cooccurred_user_paris{{" << cooccured_user_pairs.size() << "}}" << endl;
   cout << "significantly_cooccurred_user_paris{{" << significantly_cooccured_user_pairs.size() << "}}" << endl;
   cout << "total_cooccurrence{{" << cooccurred_checkins.size() << "}}" << endl;
+  cout << "cooccurrence_index_size{{" << cooccurrence_index.size() << "}}" << endl;
 }
 
 int GPOs::getUserCooccurrences(int user_id){

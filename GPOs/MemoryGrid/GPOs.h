@@ -108,6 +108,7 @@ public:
 
     unordered_set< pair<int,int>, PairHasher >* getCooccurredCheckins();
     unordered_set< pair<int,int>, PairHasher > cooccurred_checkins;
+    map< int, unordered_set<int>* > cooccurrence_index;
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);

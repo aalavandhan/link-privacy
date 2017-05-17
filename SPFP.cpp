@@ -337,10 +337,14 @@ void selectiveGaussianNoise(){
   double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.5, 0.75 };
   double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.5, 0.75 };
 
+  GPOs* fixedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+  fixedGPOs->groupLocationsByRange(baseGPOs, 10, false);
+  delete baseGPOs;
+
   GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
-  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
+  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
   if(run_utilties){
-    runUtilities(purturbedGPOs, baseGPOs, spos);
+    runUtilities(purturbedGPOs, fixedGPOs, spos);
   }
 
   double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
@@ -361,7 +365,7 @@ void selectiveGaussianNoise(){
       cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countU2UCoOccurrences();
       if(run_utilties){
-        runUtilities(purturbedGPOs, baseGPOs, spos);
+        runUtilities(purturbedGPOs, fixedGPOs, spos);
       }
 
       delete cmpGPOs;
@@ -898,7 +902,7 @@ int main(int argc, char *argv[]){
       noise_radius            = 0;
       time_deviation          = 0;
       group_radius            = 0;
-      coocc_time_range   = p4;
+      coocc_time_range        = p4;
       printParameters();
       runEBMWithoutGroundTruth();
       break;
@@ -906,8 +910,11 @@ int main(int argc, char *argv[]){
 
     case 6:{
       cout << "ITRATION: Selective Gaussian Noise" << endl;
-      noise_radius            = p1;
-      time_deviation          = p2;
+
+      coocc_spatial_range     = p1;
+      coocc_time_range        = p2;
+      noise_radius            = p3;
+      time_deviation          = p4;
 
       printParameters();
       selectiveGaussianNoise();
