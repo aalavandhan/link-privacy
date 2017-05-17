@@ -9,18 +9,22 @@ GPOs::GPOs (char* gridFileName, uint time_range, double spatial_range){
   totalCPUTime = totalTime = 0.0;
   grid = new Grid;
 	loadLocations(gridFileName);
+
+  coocc_time_range      = time_range;
+  coocc_spatial_range   = spatial_range;
+
   generateCooccurrenceCache();
   // grid->deleteEmptyCells();
   objects = 0;
   computedNN = returnedNN = finalNextNN = 0;
   nextNNList = new vector<res_point*>();
   flagNextNN = true;
-
-  coocc_time_range      = time_range;
-  coocc_spatial_range   = spatial_range;
 }
 
 GPOs::GPOs(uint time_range, double spatial_range){
+  coocc_time_range      = time_range;
+  coocc_spatial_range   = spatial_range;
+
   kNNExecutions = 0;
   LocationExecutions = 0;
   NextNNExecutions = 0;
@@ -32,12 +36,12 @@ GPOs::GPOs(uint time_range, double spatial_range){
   computedNN = returnedNN = finalNextNN = 0;
   nextNNList = new vector<res_point*>();
   flagNextNN = true;
-
-  coocc_time_range      = time_range;
-  coocc_spatial_range   = spatial_range;
 }
 
 GPOs::GPOs(GPOs *_gpos){
+  coocc_time_range    = _gpos->coocc_time_range;
+  coocc_spatial_range = _gpos->coocc_spatial_range;
+
   kNNExecutions = 0;
   LocationExecutions = 0;
   NextNNExecutions = 0;
@@ -52,9 +56,6 @@ GPOs::GPOs(GPOs *_gpos){
     Point *p = *l;
     this->loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
   }
-
-  coocc_time_range    = _gpos->coocc_time_range;
-  coocc_spatial_range = _gpos->coocc_spatial_range;
 }
 
 GPOs::~GPOs(){
@@ -140,6 +141,10 @@ unordered_set< pair<int,int>, PairHasher >* GPOs::getCooccurredCheckins(){
 
 void GPOs::generateCooccurrenceCache(){
   cout << "---- GENERATING CACHE ----" << endl;
+
+  cout << "del_s for co-occ :"  << coocc_spatial_range  << endl;
+  cout << "del_t for co-occ :"  << coocc_time_range     << endl;
+
   double average_chkns_in_spatial_range = 0, max_chkns_in_spatial_range = 0;
 
   for(auto l_it = location_to_user.begin(); l_it != location_to_user.end(); l_it++){
@@ -149,7 +154,7 @@ void GPOs::generateCooccurrenceCache(){
     map<int, vector< pair<uint, int> >* > *user_frequencies = new map<int, vector< pair<uint, int> >* >();
 
     Point *sample = checkins_at_l->front();
-    vector<int> *nearby_locations = getLocationsInRange(sample->getX(), sample->getY(), 2*coocc_spatial_range);
+    vector<int> *nearby_locations = getLocationsInRange(sample->getX(), sample->getY(), coocc_spatial_range);
 
     average_chkns_in_spatial_range += nearby_locations->size();
     if(nearby_locations->size() > max_chkns_in_spatial_range){
@@ -663,23 +668,6 @@ bool GPOs::loadLocations(const char* fileName){
 
   while (fin){
     fin >> uid >> y >> x >> lid >> date >> time;
-
-    // Anomalous locations in gowalla TODO [ Handle better ]
-    if(x == -97.7401685715 && y == 30.2635153076){
-      lid = 59000001;
-    }
-    if( x == -97.739481926 && y == 30.2646273022 ){
-      lid = 59000002;
-    }
-    if( x == -97 && y == 38){
-      lid = 59000003;
-    }
-    if( x == -97.739512 && y == 30.267447){
-      lid = 59000004;
-    }
-    if( x == -97.7384305 && y == 30.2654520235){
-      lid = 59000005;
-    }
 
     dateTime = date + " " + time;
     boost::posix_time::ptime dtm = boost::posix_time::time_from_string(dateTime);

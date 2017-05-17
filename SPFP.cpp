@@ -75,7 +75,7 @@ void printParameters(){
 
 GPOs* loadCheckins(char* checkins_file){
   cout << "------------- Loading checkins ---------------" << endl;
-  GPOs* gpos = new GPOs(checkins_file, coocc_time_range, coocc_spatial_range);
+  GPOs* gpos = new GPOs(checkins_file, (uint) coocc_time_range, coocc_spatial_range);
   return gpos;
 }
 
@@ -357,7 +357,7 @@ void selectiveGaussianNoise(){
       cout << "Using Spatial  Grouping : " << sg << endl;
       cout << "Using Temporal Grouping : " << tg << endl;
 
-      GPOs* cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      GPOs* cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countU2UCoOccurrences();
       if(run_utilties){
@@ -1167,20 +1167,29 @@ int main(int argc, char *argv[]){
       cout << "METRICS: Co-Occurrence Metrics" << endl;
 
       bool preload_LE  = false;
-      bool preload_OCC = true;
+      bool preload_OCC = false;
 
-      double coocc_spatial_radius[] = { 0, 10, 25, 50, 100, 200 };
-      double coocc_temporal_radius[] = { 1, 10, 20, 40, 60, 120 };
+      double coocc_spatial_radius[] = { 0, 25, 50, 100, 200, 400 };
+      double coocc_temporal_radius[] = { 1, 20, 40, 60, 120, 240 };
 
-      for (int i = 0; i < 6; ++i){
+      printParameters();
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      GPOs* fixed = new GPOs(coocc_time_range, coocc_spatial_range);
+      fixed->groupLocationsByRange(gpos, 3.3, false);
+      delete gpos;
+
+      for (int i = 3; i < 6; ++i){
         for (int j = 0; j < 6; ++j){
-          coocc_time_range    = coocc_temporal_radius[ j ] * 60;
           coocc_spatial_range = coocc_spatial_radius[ i ];
+          coocc_time_range    = coocc_temporal_radius[ j ] * 60;
 
-          printParameters();
+          cout << "del_s for co-occ :"  << coocc_spatial_range  << endl;
+          cout << "del_t for co-occ :"  << coocc_time_range     << endl;
 
-          GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
-          delete gpos;
+          GPOs* test_gpos = new GPOs(fixed);
+          test_gpos->countU2UCoOccurrences();
+          delete test_gpos;
         }
       }
 

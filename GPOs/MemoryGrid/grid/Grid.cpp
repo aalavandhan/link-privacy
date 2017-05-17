@@ -440,6 +440,7 @@ vector<res_point*>* Grid::getRangeAndDelete(double x, double y, double radius){
 vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, double t_dist){
     double x = original->getX();
     double y = original->getY();
+    int lid = original->getID();
     boost::posix_time::ptime time = original->getTime();
 
     Point* p = NULL;
