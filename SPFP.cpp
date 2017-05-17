@@ -1141,9 +1141,6 @@ int main(int argc, char *argv[]){
       bool preload_LE  = false;
       bool preload_OCC = false;
 
-      coocc_spatial_range = p1;
-      coocc_time_range    = p2;
-
       printParameters();
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
@@ -1152,10 +1149,14 @@ int main(int argc, char *argv[]){
       fixed->countU2UCoOccurrences();
       delete gpos;
 
-      SPOs* spos = loadSocialGraph(graph_file, fixed);
+      GPOs* test_gpos = new GPOs(fixed);
+      test_gpos->coocc_spatial_range = p1;
+      test_gpos->coocc_time_range    = p2;
+      test_gpos->generateCooccurrenceCache();
+      test_gpos->countU2UCoOccurrences();
 
-
-      fixed->computeSTKNNDistances(10, fixed->getL2U2COOCC(), 0);
+      SPOs* spos = loadSocialGraph(graph_file, test_gpos);
+      test_gpos->computeSTKNNDistances(10, test_gpos->getL2U2COOCC(), 0);
       break;
     }
 
