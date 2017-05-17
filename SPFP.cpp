@@ -1181,13 +1181,9 @@ int main(int argc, char *argv[]){
 
       for (int i = 0; i < 5; ++i){
         for (int j = 0; j < 5; ++j){
-          coocc_spatial_range = coocc_spatial_radius[ i ];
-          coocc_time_range    = coocc_temporal_radius[ j ] * 60;
-
-          cout << "del_s for co-occ :"  << coocc_spatial_range  << endl;
-          cout << "del_t for co-occ :"  << coocc_time_range     << endl;
-
           GPOs* test_gpos = new GPOs(fixed);
+          test_gpos->coocc_spatial_range = coocc_spatial_radius[ i ];
+          test_gpos->coocc_time_range    = coocc_temporal_radius[ j ] * 60;
           test_gpos->generateCooccurrenceCache();
           test_gpos->countU2UCoOccurrences();
           delete test_gpos;

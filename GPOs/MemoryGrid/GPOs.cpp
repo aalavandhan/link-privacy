@@ -52,6 +52,7 @@ GPOs::GPOs(GPOs *_gpos){
   objects = 0;
   computedNN = returnedNN = finalNextNN = 0;
   flagNextNN = true;
+
   for(auto l = _gpos->locations.begin(); l != _gpos->locations.end(); l++){
     Point *p = *l;
     this->loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
