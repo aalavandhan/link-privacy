@@ -1146,7 +1146,6 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       GPOs* fixed = new GPOs(coocc_time_range, coocc_spatial_range);
       fixed->groupLocationsByRange(gpos, 10, false);
-      fixed->countU2UCoOccurrences();
       delete gpos;
 
       GPOs* test_gpos = new GPOs(fixed);
