@@ -1021,7 +1021,6 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
   double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int count=0, order;
-  double checkins_around=0;
 
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
@@ -1045,7 +1044,6 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     count++;
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
-    checkins_around += checkins->size();
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
@@ -1059,10 +1057,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     delete checkins;
   };
 
-  checkins_around = checkins_around / seenLocations.size();
-
   cout << "Number of checkins after iteration     : " << count << endl;
-  cout << "Average number of checkins in vicinity : " << checkins_around << endl;
   cout << "Check-ins inserted                     : " << seenLocations.size() << endl;
   cout << "Number of total checkins               : " << gpos->checkin_list.size() << endl;
 
