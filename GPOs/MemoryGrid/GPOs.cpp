@@ -1040,6 +1040,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
       continue;
 
     loadPoint(x, y, p->getID(), p->getUID(), time, order);
+    count++;
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
     checkins_around += checkins->size();

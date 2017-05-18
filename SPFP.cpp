@@ -360,8 +360,8 @@ void selectiveGaussianNoise(int isOptimistic){
       double sg = group_radius_spatial * spatial_grouping[ i ];
       double tg = group_radius_temporal * temporal_grouping[ j ];
 
-      cout << "Using Spatial  Grouping (KM): " << sg << endl;
-      cout << "Using Temporal Grouping (Hr): " << tg << endl;
+      cout << "Using Spatial  Grouping (m): "  << sg * 1000 << endl;
+      cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
       GPOs* cmpGPOs;
 
