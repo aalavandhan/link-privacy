@@ -159,12 +159,18 @@ void GPOs::generateCooccurrenceCache(){
     map<int, vector< pair<uint, int> >* > *user_frequencies = new map<int, vector< pair<uint, int> >* >();
 
     Point *sample = checkins_at_l->front();
-    vector<int> *nearby_locations = getLocationsInRange(sample->getX(), sample->getY(), coocc_spatial_range);
+    vector<int> *nearby_locations;
+
+    if(coocc_spatial_range != 0){
+      nearby_locations = getLocationsInRange(sample->getX(), sample->getY(), coocc_spatial_range);
+    } else {
+      nearby_locations = new vector<int>();
+      nearby_locations->push_back(lid);
+    }
 
     average_chkns_in_spatial_range += nearby_locations->size();
     if(nearby_locations->size() > max_chkns_in_spatial_range){
       max_chkns_in_spatial_range = nearby_locations->size();
-      // cout << sample->getX() << " " << sample->getY() << " " << max_chkns_in_spatial_range << endl;
     }
 
     for(auto nl_it = nearby_locations->begin(); nl_it != nearby_locations->end(); nl_it++){
@@ -1019,23 +1025,21 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     order    = p->getOrder();
     time     = p->getTime();
 
-    if( seenLocations.find( order ) != seenLocations.end() )
-      continue;
+    // if( seenLocations.find( order ) != seenLocations.end() )
+    //   continue;
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
-
     checkins_around += checkins->size();
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
         loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
         seenLocations.insert( (*c)->oid );
+        count++;
       }
       delete (*c);
     }
     delete checkins;
-
-    count++;
 
     if( count % 100000 == 0 )
       cout << count << " " << endl;
@@ -1045,7 +1049,8 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
   checkins_around = checkins_around / seenLocations.size();
 
   cout << "Average number of checkins in vicinity : " << checkins_around << endl;
-  cout << "Check-ins inserted : " << seenLocations.size() << endl;
+  cout << "Check-ins inserted                     : " << seenLocations.size() << endl;
+  cout << "Number of total checkins               : " << gpos->checkin_list.size() << endl;
 
   delete _duplicate_gpos;
 

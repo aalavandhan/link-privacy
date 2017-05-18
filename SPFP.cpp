@@ -362,7 +362,7 @@ void selectiveGaussianNoise(){
       cout << "Using Spatial  Grouping (KM): " << sg << endl;
       cout << "Using Temporal Grouping (Hr): " << tg << endl;
 
-      coocc_spatial_range   = 1;
+      coocc_spatial_range   = 0;
       coocc_time_range      = 1;
 
       GPOs* cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
