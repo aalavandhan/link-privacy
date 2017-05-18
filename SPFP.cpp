@@ -372,9 +372,9 @@ void selectiveGaussianNoise(int isOptimistic){
         cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
         cmpGPOs->countU2UCoOccurrences();
       } else {
-        coocc_spatial_range   = sg * 1000;
-        coocc_time_range      = tg * 3600;
-        cmpGPOs               = purturbedGPOs;
+        cmpGPOs  = new GPOs(purturbedGPOs);
+        cmpGPOs->coocc_spatial_range   = sg * 1000;
+        cmpGPOs->coocc_time_range      = tg * 3600;
         cmpGPOs->generateCooccurrenceCache();
         cmpGPOs->countU2UCoOccurrences();
       }
@@ -383,9 +383,7 @@ void selectiveGaussianNoise(int isOptimistic){
         runBasicUtility(cmpGPOs, fixedGPOs, spos);
       }
 
-      if(!isOptimistic){
-        delete cmpGPOs;
-      }
+      delete cmpGPOs;
     }
   }
 }
