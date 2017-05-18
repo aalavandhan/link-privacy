@@ -334,8 +334,8 @@ void selectiveGaussianNoise(int isOptimistic){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = { 0.15, 0.25, 0.35, 0.45, 0.55 };
-  double temporal_grouping[] = { 0.15, 0.25, 0.35, 0.45, 0.55 };
+  double spatial_grouping[]  = { 0.25, 0.35, 0.45, 0.55, 0.65 };
+  double temporal_grouping[] = { 0.25, 0.35, 0.45, 0.55, 0.65 };
 
   GPOs* fixedGPOs = baseGPOs;
   GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
