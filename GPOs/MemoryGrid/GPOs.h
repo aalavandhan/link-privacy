@@ -106,9 +106,9 @@ public:
 
     void generateCooccurrenceCache();
 
-    unordered_set< pair<int,int>, PairHasher >* getCooccurredCheckins();
-    unordered_set< pair<int,int>, PairHasher > cooccurred_checkins;
-    map< int, unordered_set<int>* > cooccurrence_index;
+    set< pair<int,int> >* getCooccurredCheckins();
+    set< pair<int,int> > cooccurred_checkins;
+    unordered_map< int, unordered_set<int>* > cooccurrence_index;
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);

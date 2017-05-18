@@ -482,7 +482,7 @@ vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, doub
                     p = *it;
                     //count++;
                     if( p->computeMinDist(x, y) <= radius &&
-                        (p->getTime() - time).total_seconds() <= t_dist * 3600 &&
+                        abs((p->getTime() - time).total_seconds()) <= t_dist * 3600 &&
                         original->getUID() != p->getUID() ){
                         res_point* rp = new res_point();
                         rp->id = p->getID();

@@ -140,7 +140,7 @@ vector<Point*>* GPOs::getLocations(){
   return &locations;
 }
 
-unordered_set< pair<int,int>, PairHasher >* GPOs::getCooccurredCheckins(){
+set< pair<int,int> >* GPOs::getCooccurredCheckins(){
   return &cooccurred_checkins;
 }
 
@@ -1006,6 +1006,7 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
   double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int count=0, order;
+  double checkins_around=0;
 
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
@@ -1023,6 +1024,8 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
 
+    checkins_around += checkins->size();
+
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
         loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
@@ -1038,6 +1041,10 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
       cout << count << " " << endl;
 
   };
+
+  checkins_around = checkins_around / seenLocations->size();
+
+  cout << "Average number of checkins in vicinity : " << checkins_around << endl;
   cout << "Check-ins inserted : " << seenLocations.size() << endl;
 
   delete _duplicate_gpos;
@@ -1827,6 +1834,7 @@ void GPOs::countU2UCoOccurrences(){
 
   cout<<"Number of locations: "<<locations_users_frequency_map_with_order.size()<<endl;
 
+
   for(auto l_it=locations_users_frequency_map_with_order.begin(); l_it != locations_users_frequency_map_with_order.end(); l_it++){
     int location_id = l_it->first;
     map<int, vector< pair<uint, int> >* > *user_checkin_times = l_it->second;
@@ -1885,6 +1893,8 @@ void GPOs::countU2UCoOccurrences(){
 
     }
   }
+
+  cout << "Completed co-occurrences computation " << endl;
 
   //instantiating map for use with combination function based on CiL
   cooccurrences_created = true;
@@ -1963,6 +1973,8 @@ void GPOs::countU2UCoOccurrences(){
       }
     }
   }
+
+  cout << "Building co-occurrence index " << endl;
 
   for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
     int o1 = c_it->first;
