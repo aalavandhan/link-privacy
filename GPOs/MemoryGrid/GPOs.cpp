@@ -1042,7 +1042,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
   };
 
-  checkins_around = checkins_around / seenLocations->size();
+  checkins_around = checkins_around / seenLocations.size();
 
   cout << "Average number of checkins in vicinity : " << checkins_around << endl;
   cout << "Check-ins inserted : " << seenLocations.size() << endl;
