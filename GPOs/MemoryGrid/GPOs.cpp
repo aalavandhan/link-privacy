@@ -53,8 +53,8 @@ GPOs::GPOs(GPOs *_gpos){
   computedNN = returnedNN = finalNextNN = 0;
   flagNextNN = true;
 
-  for(auto l = _gpos->locations.begin(); l != _gpos->locations.end(); l++){
-    Point *p = *l;
+  for(auto l = _gpos->checkin_list.begin(); l != _gpos->checkin_list.end(); l++){
+    Point *p = l->second;
     this->loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
   }
 }
@@ -145,6 +145,15 @@ set< pair<int,int> >* GPOs::getCooccurredCheckins(){
 }
 
 void GPOs::generateCooccurrenceCache(){
+  cout << "---- Clearing CACHE ----" << endl;
+  for(auto it = locations_users_frequency_map_with_order.begin(); it!= locations_users_frequency_map_with_order.end(); it++){
+    auto innerMap = it->second;
+    for(auto iter = innerMap->begin(); iter!= innerMap->end(); iter++){
+      delete iter->second;
+    }
+    delete innerMap;
+  }
+
   cout << "---- GENERATING CACHE ----" << endl;
 
   cout << "del_s for co-occ :"  << coocc_spatial_range  << endl;
@@ -1018,6 +1027,8 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
   boost::posix_time::ptime time;
   GPOs *_duplicate_gpos = new GPOs(gpos);
 
+  cout << "Number of original checkins               : " << _duplicate_gpos->checkin_list.size() << endl;
+
   for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
     Point *p = l->second;
     x        = p->getX();
@@ -1028,20 +1039,26 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     if( seenLocations.find( order ) != seenLocations.end() )
       continue;
 
+    loadPoint(x, y, p->getID(), p->getUID(), time, order);
+
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
     checkins_around += checkins->size();
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
-      loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
-      seenLocations.insert( (*c)->oid );
-      count++;
-      delete (*c);
+      if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
+        loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
+        seenLocations.insert( (*c)->oid );
+        count++;
+        delete (*c);
+      }
     }
+
     delete checkins;
   };
 
   checkins_around = checkins_around / seenLocations.size();
 
+  cout << "Number of checkins after iteration     : " << count << endl;
   cout << "Average number of checkins in vicinity : " << checkins_around << endl;
   cout << "Check-ins inserted                     : " << seenLocations.size() << endl;
   cout << "Number of total checkins               : " << gpos->checkin_list.size() << endl;

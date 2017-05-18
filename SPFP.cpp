@@ -327,7 +327,7 @@ void plainEBM(){
   runEBM(gpos, spos);
 }
 
-void selectiveGaussianNoise(){
+void selectiveGaussianNoise(int isOptimistic){
   bool preload_LE  = false;
   bool preload_OCC = true;
 
@@ -337,11 +337,7 @@ void selectiveGaussianNoise(){
   double spatial_grouping[]  = { 0.15, 0.25, 0.35, 0.45, 0.55 };
   double temporal_grouping[] = { 0.15, 0.25, 0.35, 0.45, 0.55 };
 
-  // GPOs* fixedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  // fixedGPOs->groupLocationsByRange(baseGPOs, 10, false);
-  // delete baseGPOs;
   GPOs* fixedGPOs = baseGPOs;
-
   GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
   if(run_utilties){
@@ -354,6 +350,11 @@ void selectiveGaussianNoise(){
   cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
+  if(isOptimistic == 1)
+    cout << "OPTIMISTIC GROUPING STRATEGY" << endl;
+  else
+    cout << "PESIMISTIC GROUPING STRATEGY" << endl;
+
   for(int i=0; i<5;i++){
     for(int j=0; j<5;j++){
       double sg = group_radius_spatial * spatial_grouping[ i ];
@@ -362,18 +363,29 @@ void selectiveGaussianNoise(){
       cout << "Using Spatial  Grouping (KM): " << sg << endl;
       cout << "Using Temporal Grouping (Hr): " << tg << endl;
 
-      coocc_spatial_range   = 0;
-      coocc_time_range      = 1;
+      GPOs* cmpGPOs;
 
-      GPOs* cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
-      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-      cmpGPOs->countU2UCoOccurrences();
+      if(!isOptimistic){
+        coocc_spatial_range   = 0;
+        coocc_time_range      = 1;
+        cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+        cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+        cmpGPOs->countU2UCoOccurrences();
+      } else {
+        coocc_spatial_range   = sg * 1000;
+        coocc_time_range      = tg * 3600;
+        cmpGPOs               = purturbedGPOs;
+        cmpGPOs->generateCooccurrenceCache();
+        cmpGPOs->countU2UCoOccurrences();
+      }
 
       if(run_utilties){
         runBasicUtility(cmpGPOs, fixedGPOs, spos);
       }
 
-      delete cmpGPOs;
+      if(!isOptimistic){
+        delete cmpGPOs;
+      }
     }
   }
 }
@@ -921,8 +933,10 @@ int main(int argc, char *argv[]){
       noise_radius            = p3;
       time_deviation          = p4;
 
+      int isOptimistic        = p5;
+
       printParameters();
-      selectiveGaussianNoise();
+      selectiveGaussianNoise(isOptimistic);
 
       break;
     }
