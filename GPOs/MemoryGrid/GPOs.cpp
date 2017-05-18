@@ -1025,25 +1025,19 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     order    = p->getOrder();
     time     = p->getTime();
 
-    // if( seenLocations.find( order ) != seenLocations.end() )
-    //   continue;
+    if( seenLocations.find( order ) != seenLocations.end() )
+      continue;
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
     checkins_around += checkins->size();
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
-      if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
-        loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
-        seenLocations.insert( (*c)->oid );
-        count++;
-      }
+      loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
+      seenLocations.insert( (*c)->oid );
+      count++;
       delete (*c);
     }
     delete checkins;
-
-    if( count % 100000 == 0 )
-      cout << count << " " << endl;
-
   };
 
   checkins_around = checkins_around / seenLocations.size();
