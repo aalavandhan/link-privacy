@@ -1441,7 +1441,7 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
 
       if( purturbed_at_l.find(p->getID()) == purturbed_at_l.end() ){
         purturbed_at_l.insert( p->getID() );
-        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, p->getID(), p->getUID(), purtubed_time, p->getOrder() );
+        loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
       } else {
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
         lid++;
@@ -1469,6 +1469,8 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+
+  cout<<"Locations after perturbation :"<<location_to_user.size()<<endl;
 }
 
 // Only co-occurrences
