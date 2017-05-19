@@ -1881,33 +1881,33 @@ void GPOs::countU2UCoOccurrences(){
 
         int intersection_count = util.getCooccurrencesWithinTimeBlock(u1_timestamps,u2_timestamps, coocc_time_range, &cooccurred_checkins);
 
-        if(intersection_count > 0){
-          auto coV_it = cooccurrence_matrix.find(u1Id);
+        // if(intersection_count > 0){
+        //   auto coV_it = cooccurrence_matrix.find(u1Id);
 
-          if(cooccured_user_pairs.find(make_pair(u1Id, u2Id)) == cooccured_user_pairs.end())
-           cooccured_user_pairs.insert(make_pair( u1Id, u2Id ));
+        //   if(cooccured_user_pairs.find(make_pair(u1Id, u2Id)) == cooccured_user_pairs.end())
+        //    cooccured_user_pairs.insert(make_pair( u1Id, u2Id ));
 
-          total_cooccurrences += intersection_count;
-          if(coV_it != cooccurrence_matrix.end()){ //u1 exist in matrix
-            map<int, vector<pair<int, int> >*>* inner_map = coV_it->second;
-            //fnd user 2 and update the location list with location_id -> intersection count
-            auto flist_it = inner_map->find(u2Id);
-            if(flist_it!=inner_map->end()){  //u2 exist in matrix
-              vector<pair<int,int> >* location_freqeuncy_list = flist_it->second;
-              location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
-            }else{  //u2 does not exist in matrix
-              vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
-              location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
-              inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
-            }
-          }else{  //u1 does not exist in matrix
-            map<int, vector<pair<int, int> >* >* inner_map = new map<int, vector<pair<int, int> >* >();
-            vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
-            location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
-            inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
-            cooccurrence_matrix.insert(make_pair(u1Id,inner_map));
-          }
-        }
+        //   total_cooccurrences += intersection_count;
+        //   if(coV_it != cooccurrence_matrix.end()){ //u1 exist in matrix
+        //     map<int, vector<pair<int, int> >*>* inner_map = coV_it->second;
+        //     //fnd user 2 and update the location list with location_id -> intersection count
+        //     auto flist_it = inner_map->find(u2Id);
+        //     if(flist_it!=inner_map->end()){  //u2 exist in matrix
+        //       vector<pair<int,int> >* location_freqeuncy_list = flist_it->second;
+        //       location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
+        //     }else{  //u2 does not exist in matrix
+        //       vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
+        //       location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
+        //       inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
+        //     }
+        //   }else{  //u1 does not exist in matrix
+        //     map<int, vector<pair<int, int> >* >* inner_map = new map<int, vector<pair<int, int> >* >();
+        //     vector<pair<int,int> >* location_freqeuncy_list = new vector<pair<int,int> >();
+        //     location_freqeuncy_list->push_back(make_pair(location_id,intersection_count));
+        //     inner_map->insert(make_pair(u2Id,location_freqeuncy_list));
+        //     cooccurrence_matrix.insert(make_pair(u1Id,inner_map));
+        //   }
+        // }
       }
 
     }
@@ -1917,81 +1917,81 @@ void GPOs::countU2UCoOccurrences(){
 
   //instantiating map for use with combination function based on CiL
   cooccurrences_created = true;
-  location_to_user_to_cooccurrences = new map< int, map<int,int>* >();
+  // location_to_user_to_cooccurrences = new map< int, map<int,int>* >();
 
-  for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){
-    int user_1 = c_it->first;
-    auto users_location_frequency_map = c_it->second;
+  // for(auto c_it = cooccurrence_matrix.begin(); c_it != cooccurrence_matrix.end(); c_it++){
+  //   int user_1 = c_it->first;
+  //   auto users_location_frequency_map = c_it->second;
 
-    for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
-      int user_2 = ulh_it->first, cooccurrence_count=0;
-      vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
+  //   for(auto ulh_it = users_location_frequency_map->begin(); ulh_it != users_location_frequency_map->end(); ulh_it++){
+  //     int user_2 = ulh_it->first, cooccurrence_count=0;
+  //     vector<pair<int, int>>* cooccurrence_counts_vector = ulh_it->second;
 
-      for(auto l_it=cooccurrence_counts_vector->begin(); l_it != cooccurrence_counts_vector->end(); l_it++){
-        int location_id = l_it->first;
-        int cooccrences_at_l = l_it->second;
-        cooccurrence_count += cooccrences_at_l;
+  //     for(auto l_it=cooccurrence_counts_vector->begin(); l_it != cooccurrence_counts_vector->end(); l_it++){
+  //       int location_id = l_it->first;
+  //       int cooccrences_at_l = l_it->second;
+  //       cooccurrence_count += cooccrences_at_l;
 
-        //for cil
-        auto iter_outer = location_to_user_to_cooccurrences->find(location_id);
-        if(iter_outer != location_to_user_to_cooccurrences->end()){
-          //update/create for both users
-          map<int,int>* user_to_cooccurrences_map = iter_outer->second;
-          auto iter_inner = user_to_cooccurrences_map->find(user_1);
-          if(iter_inner != user_to_cooccurrences_map->end()){
-            iter_inner->second = iter_inner->second + cooccrences_at_l;
-          }else{
-            user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
-          }
+  //       //for cil
+  //       auto iter_outer = location_to_user_to_cooccurrences->find(location_id);
+  //       if(iter_outer != location_to_user_to_cooccurrences->end()){
+  //         //update/create for both users
+  //         map<int,int>* user_to_cooccurrences_map = iter_outer->second;
+  //         auto iter_inner = user_to_cooccurrences_map->find(user_1);
+  //         if(iter_inner != user_to_cooccurrences_map->end()){
+  //           iter_inner->second = iter_inner->second + cooccrences_at_l;
+  //         }else{
+  //           user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
+  //         }
 
-          iter_inner = user_to_cooccurrences_map->find(user_2);
-          if(iter_inner != user_to_cooccurrences_map->end()){
-            iter_inner->second = iter_inner->second + cooccrences_at_l;
-          }else{
-            user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
-          }
-        }else{
-          map<int,int>* user_to_cooccurrences_map = new map<int,int>();
-          user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
-          user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
-          location_to_user_to_cooccurrences->insert(make_pair(location_id, user_to_cooccurrences_map));
-        }
-      }
-      //-------------------------
-      if(cooccurrence_count>1){
-        if(significantly_cooccured_user_pairs.find(make_pair(user_1, user_2)) == significantly_cooccured_user_pairs.end())
-          significantly_cooccured_user_pairs.insert(make_pair( user_1, user_2 ));
-      } else {
-        // remove
-        if(insignificantly_cooccured_user_pairs.find(make_pair(user_1, user_2)) == insignificantly_cooccured_user_pairs.end())
-          insignificantly_cooccured_user_pairs.insert(make_pair( user_1, user_2 ));
-      }
-    }
-  }
+  //         iter_inner = user_to_cooccurrences_map->find(user_2);
+  //         if(iter_inner != user_to_cooccurrences_map->end()){
+  //           iter_inner->second = iter_inner->second + cooccrences_at_l;
+  //         }else{
+  //           user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
+  //         }
+  //       }else{
+  //         map<int,int>* user_to_cooccurrences_map = new map<int,int>();
+  //         user_to_cooccurrences_map->insert(make_pair(user_1,cooccrences_at_l));
+  //         user_to_cooccurrences_map->insert(make_pair(user_2,cooccrences_at_l));
+  //         location_to_user_to_cooccurrences->insert(make_pair(location_id, user_to_cooccurrences_map));
+  //       }
+  //     }
+  //     //-------------------------
+  //     if(cooccurrence_count>1){
+  //       if(significantly_cooccured_user_pairs.find(make_pair(user_1, user_2)) == significantly_cooccured_user_pairs.end())
+  //         significantly_cooccured_user_pairs.insert(make_pair( user_1, user_2 ));
+  //     } else {
+  //       // remove
+  //       if(insignificantly_cooccured_user_pairs.find(make_pair(user_1, user_2)) == insignificantly_cooccured_user_pairs.end())
+  //         insignificantly_cooccured_user_pairs.insert(make_pair( user_1, user_2 ));
+  //     }
+  //   }
+  // }
 
 
-  for(auto p=insignificantly_cooccured_user_pairs.begin(); p!=insignificantly_cooccured_user_pairs.end(); p++){
-    int u1=p->first, u2=p->second;
+  // for(auto p=insignificantly_cooccured_user_pairs.begin(); p!=insignificantly_cooccured_user_pairs.end(); p++){
+  //   int u1=p->first, u2=p->second;
 
-    auto u1_it = cooccurrence_matrix.find(u1);
-    if(u1_it != cooccurrence_matrix.end()){
-      auto users_location_frequency_map = u1_it->second;
-      auto u2_it = users_location_frequency_map->find(u2);
-      vector<pair<int, int>>* cooccurrence_counts_vector = u2_it->second;
-      // delete cooccurrence_counts_vector;
+  //   auto u1_it = cooccurrence_matrix.find(u1);
+  //   if(u1_it != cooccurrence_matrix.end()){
+  //     auto users_location_frequency_map = u1_it->second;
+  //     auto u2_it = users_location_frequency_map->find(u2);
+  //     vector<pair<int, int>>* cooccurrence_counts_vector = u2_it->second;
+  //     // delete cooccurrence_counts_vector;
 
-      if(u2_it != users_location_frequency_map->end()){
-        vector<pair<int, int>>* cooccurrence_counts_vector = u2_it->second;
-        delete cooccurrence_counts_vector;
-        users_location_frequency_map->erase(u2_it);
-      }
+  //     if(u2_it != users_location_frequency_map->end()){
+  //       vector<pair<int, int>>* cooccurrence_counts_vector = u2_it->second;
+  //       delete cooccurrence_counts_vector;
+  //       users_location_frequency_map->erase(u2_it);
+  //     }
 
-      if(users_location_frequency_map->size() == 0){
-        cooccurrence_matrix.erase(u1_it);
-        delete users_location_frequency_map;
-      }
-    }
-  }
+  //     if(users_location_frequency_map->size() == 0){
+  //       cooccurrence_matrix.erase(u1_it);
+  //       delete users_location_frequency_map;
+  //     }
+  //   }
+  // }
 
   cout << "Building co-occurrence index " << endl;
 
@@ -2019,9 +2019,9 @@ void GPOs::countU2UCoOccurrences(){
     lst->insert(o1);
   }
 
-  cout << "users_with_atleast_one_cooccurrence{{" << cooccurrence_matrix.size() << "}}" << endl;
-  cout << "cooccurred_user_paris{{" << cooccured_user_pairs.size() << "}}" << endl;
-  cout << "significantly_cooccurred_user_paris{{" << significantly_cooccured_user_pairs.size() << "}}" << endl;
+  // cout << "users_with_atleast_one_cooccurrence{{" << cooccurrence_matrix.size() << "}}" << endl;
+  // cout << "cooccurred_user_paris{{" << cooccured_user_pairs.size() << "}}" << endl;
+  // cout << "significantly_cooccurred_user_paris{{" << significantly_cooccured_user_pairs.size() << "}}" << endl;
   cout << "total_cooccurrence{{" << cooccurred_checkins.size() << "}}" << endl;
   cout << "cooccurrence_index_size{{" << cooccurrence_index.size() << "}}" << endl;
 }
