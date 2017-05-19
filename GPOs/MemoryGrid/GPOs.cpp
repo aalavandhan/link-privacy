@@ -1846,7 +1846,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
 
 // Compute CoOccurrences
 void GPOs::countU2UCoOccurrences(){
-  int total_cooccurrences=0;
+  int total_cooccurrences=0, count=0;
 
   cout<<"Number of locations: "<<locations_users_frequency_map_with_order.size()<<endl;
 
@@ -1859,6 +1859,8 @@ void GPOs::countU2UCoOccurrences(){
       continue;
     }
 
+    if(count == 10000)
+      count++;
 
     for(auto u1_it=user_checkin_times->begin(); u1_it != user_checkin_times->end(); u1_it++){
       auto u2_it=u1_it;
