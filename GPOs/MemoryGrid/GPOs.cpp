@@ -1859,8 +1859,9 @@ void GPOs::countU2UCoOccurrences(){
       continue;
     }
 
-    if(count == 10000)
-      count++;
+    count++;
+    if(count % 10000 == 0)
+      cout << count << endl;
 
     for(auto u1_it=user_checkin_times->begin(); u1_it != user_checkin_times->end(); u1_it++){
       auto u2_it=u1_it;
