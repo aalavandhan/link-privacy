@@ -338,7 +338,7 @@ void selectiveGaussianNoise(int isOptimistic){
   double temporal_grouping[] = { 1, 1.5, 2, 2.5, 3 };
 
   GPOs* fixedGPOs = baseGPOs;
-  GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
+  GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
   if(run_utilties){
     runUtilities(purturbedGPOs, fixedGPOs, spos);
@@ -882,7 +882,7 @@ int main(int argc, char *argv[]){
       noise_radius            = p1;
       time_deviation          = p2;
       group_radius            = p3;
-      coocc_time_range   = p4;
+      coocc_time_range        = p4;
       noise_type              = p5;
       noise_function          = p6;
       bool add_temporal=false, add_spatial=false;
