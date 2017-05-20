@@ -1140,8 +1140,8 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       s_dist = SPATIAL_SOFT_BOUND/1000.0;
       t_dist = TEMPORAL_SOFT_BOUND;
 
-      s_dist = s_dist * 0.85;
-      t_dist = t_dist * 0.85;
+      s_dist = s_dist * 0.55;
+      t_dist = t_dist * 0.55;
 
     } else {
       s_dist = st_it->second.first;
@@ -1153,10 +1153,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
 
     radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, t_dist);
-
-    if(st_it == st_knn.end()){
-      cout << "Sparse : " << checkins->size() << endl;
-    }
 
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
