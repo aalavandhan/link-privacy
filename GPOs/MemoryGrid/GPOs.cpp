@@ -1124,8 +1124,8 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
     order    = p->getOrder();
     time     = p->getTime();
 
-    if(p->getID() >= LOCATION_NOISE_BOUND)
-      continue;
+    // if(p->getID() >= LOCATION_NOISE_BOUND)
+    //   continue;
 
     if( seenLocations.find( order ) != seenLocations.end() )
       continue;
@@ -1140,15 +1140,15 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       s_dist = SPATIAL_SOFT_BOUND/1000.0;
       t_dist = TEMPORAL_SOFT_BOUND;
 
-      s_dist = s_dist * 0.75;
-      t_dist = t_dist * 0.75;
+      s_dist = s_dist * 0.85;
+      t_dist = t_dist * 0.85;
 
     } else {
       s_dist = st_it->second.first;
       t_dist = st_it->second.second;
 
-      s_dist = s_dist * 0.15;
-      t_dist = t_dist * 0.15;
+      s_dist = s_dist * 0.45;
+      t_dist = t_dist * 0.45;
     }
 
     radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
