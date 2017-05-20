@@ -1124,6 +1124,12 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
     order    = p->getOrder();
     time     = p->getTime();
 
+    if(p->getID() >= LOCATION_NOISE_BOUND)
+      continue;
+
+    if( seenLocations.find( order ) != seenLocations.end() )
+      continue;
+
     loadPoint(x, y, p->getID(), p->getUID(), time, order);
     seenLocations.insert( order );
 
@@ -1133,13 +1139,19 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
     if(st_it == st_knn.end()){
       s_dist = SPATIAL_SOFT_BOUND/1000.0;
       t_dist = TEMPORAL_SOFT_BOUND;
+
+      s_dist = s_dist * 0.75;
+      t_dist = t_dist * 0.75;
+
     } else {
       s_dist = st_it->second.first;
       t_dist = st_it->second.second;
-    }
 
-    s_dist = s_dist * 0.35;
-    t_dist = t_dist * 0.35;
+      s_dist = s_dist * 0.35;
+      t_dist = t_dist * 0.35;
+
+      cout << st_it->second.first << " " <<  s_dist << " | " << st_it->second.second << t_dist << " " << endl;
+    }
 
     radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, t_dist);
