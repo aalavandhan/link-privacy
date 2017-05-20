@@ -376,13 +376,21 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
   // bound_computation_time+=util.print_time(start_bound, end_bound);
   // gettimeofday(&start_metric, NULL);
 
-  unordered_set<int>* cooccurred_checkins = cooccurrence_index.find(p->getOrder())->second;
+  bool coocc_at_p = cooccurrence_index.find(p->getOrder()) != cooccurrence_index.end();
 
   for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
 
+    if(coocc_at_p){
+      unordered_set<int>* cooccurred_checkins = cooccurrence_index.find(p->getOrder())->second;
+      // Skip co-occurred checkins
+      if( cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end() ){
+        continue;
+      }
+    }
+
     // Discount the current location/region and current user
-    if( p->getID() != chk->id && p->getUID() != chk->uid && cooccurred_checkins->find(chk->oid) == cooccurred_checkins->end() ){
+    if( p->getID() != chk->id && p->getUID() != chk->uid){
       // double spatial_distance  = p->computeMinDistInKiloMeters(chk->x, chk->y) / ( (double)SPATIAL_SOFT_BOUND / 1000.0 );
       double distance = 0.0;
 
