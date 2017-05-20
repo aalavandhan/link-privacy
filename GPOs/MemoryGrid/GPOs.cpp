@@ -1139,8 +1139,8 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       t_dist = st_it->second.second;
     }
 
-    s_dist = s_dist * 0.15;
-    t_dist = t_dist * 0.15;
+    s_dist = s_dist * 0.45;
+    t_dist = t_dist * 0.45;
 
     radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, t_dist);
@@ -1377,6 +1377,7 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
   int checkin_count = 0;
 
   set<int> *checkins_of_interest;
+
   if(type != 3){
     checkins_of_interest = new set<int>();
     pickSingleCheckinFromCooccurrences(checkins_of_interest);
