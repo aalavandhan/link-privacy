@@ -1130,7 +1130,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
     double s_dist, t_dist;
     auto st_it = st_knn.find(order);
 
-    if(st_it != st_knn.end()){
+    if(st_it == st_knn.end()){
       s_dist = SPATIAL_SOFT_BOUND/1000.0;
       t_dist = TEMPORAL_SOFT_BOUND;
     } else {
