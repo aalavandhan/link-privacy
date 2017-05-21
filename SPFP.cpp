@@ -375,8 +375,7 @@ void selectiveGaussianNoise(int isOptimistic){
         cmpGPOs  = new GPOs(purturbedGPOs);
         cmpGPOs->coocc_spatial_range   = sg * 1000;
         cmpGPOs->coocc_time_range      = tg * 3600;
-        cmpGPOs->generateCooccurrenceCache();
-        cmpGPOs->countU2UCoOccurrences();
+        cmpGPOs->countCoOccurrencesOptimistic();
       }
 
       if(run_utilties){

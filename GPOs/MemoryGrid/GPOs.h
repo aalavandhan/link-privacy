@@ -63,6 +63,7 @@ public:
     res_point* getNextNN(double x, double y, int incrStep);
     vector<res_point*>* getkNN(double x, double y, int k);
     vector<res_point*>* getRange(double x, double y, double radius);
+    vector<res_point*>* getRange(Point *original, double radius, double t_dist);
     vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
     vector<res_point*>* getRangeAndDelete(Point *p, double radius, double t_dist);
     vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
@@ -179,4 +180,6 @@ public:
         priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > *spatioTemporalKNNs,
         vector<res_point*> *spatial_candidates,
         int type);
+
+    void countCoOccurrencesOptimistic();
 };

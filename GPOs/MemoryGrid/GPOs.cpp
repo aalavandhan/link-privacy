@@ -473,6 +473,10 @@ vector<res_point*>* GPOs::getRangeAndDelete(Point *p, double radius, double t_di
   return res;
 }
 
+vector<res_point*>* GPOs::getRange(Point *original, double radius, double t_dist){
+  return grid->getRange(original, radius, t_dist);
+}
+
 vector<res_point*>* GPOs::getRange(double x, double y, double radius){
   clock_t startC, endC;
   struct timeval start, end;
@@ -1028,6 +1032,49 @@ vector<int>* GPOs::getUsersInRange(int source, double radius){
 
 //   generateCooccurrenceCache();
 // };
+
+void GPOs::countCoOccurrencesOptimistic(){
+  double radius_in_km = coocc_spatial_range / 1000.0;
+  double time_deviation_in_hours = coocc_time_range / 3600.0;
+
+  double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
+  unsigned int count=0, order;
+
+  for(auto l = checkin_list.begin(); l != checkin_list.end(); l++){
+    Point *p = l->second;
+    order    = l->first;
+    x        = p->getX();
+    y        = p->getY();
+
+    vector<res_point*>* cooccurrences = getRange(p, radius_geo_dist, time_deviation_in_hours);
+
+    unordered_set<int> *coocc_list = new unordered_set<int>();
+    cooccurrence_index.insert(make_pair(order, coocc_list));
+
+    for(auto c = cooccurrences->begin(); c != cooccurrences->end(); c++){
+      coocc_list->insert((*c)->oid);
+
+      int o1 = order;
+      int o2 = (*c)->oid;
+      if(o1 > o2){
+        int temp = o2;
+        o2 = o1;
+        o1 = temp;
+      }
+      cooccurred_checkins.insert(make_pair(o1, o2));
+
+      delete (*c);
+    }
+    delete cooccurrences;
+
+    count++;
+    if(count%100000 == 0)
+      cout << count << endl;
+  }
+
+  cout<<"Completed computing cooccurrences in optimistic manner" << endl;
+  cout<<"total_cooccurrences{{"<<cooccurred_checkins.size()<<"}}"<<endl;
+}
 
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
   double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
