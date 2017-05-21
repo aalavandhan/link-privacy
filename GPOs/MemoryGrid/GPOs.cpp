@@ -1419,16 +1419,16 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
   timeval A_start,A_end,B_start,B_end,C_start,C_end,D_start,D_end;
 
   if(type == 0)
-    ss << "knn-noise-combined-" << k << "-coocc" << ".csv";
+    ss << "knn-noise-combined-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
 
   if(type == 1)
-    ss << "knn-noise-spatial-" << k << "-coocc" << ".csv";
+    ss << "knn-noise-spatial-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
 
   if(type == 2)
-    ss << "knn-noise-temporal-" << k << "-coocc" << ".csv";
+    ss << "knn-noise-temporal-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
 
   if(type == 3)
-    ss << "knn-noise-all-" << k << "-coocc" << ".csv";
+    ss << "knn-noise-all-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
 
   filePath = ss.str();
   outfile.open( filePath.c_str() );
