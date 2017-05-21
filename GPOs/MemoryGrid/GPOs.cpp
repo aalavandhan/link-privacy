@@ -1097,7 +1097,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       fin >> text;
       t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
 
-      if(knn_order != -1 && i == k-1){
+      if(knn_order != -1 && 10 == k+i ){
         ks_dist = s_distance;
         kt_dist = t_distance;
       }
@@ -1117,58 +1117,60 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   boost::posix_time::ptime time;
   GPOs *_duplicate_gpos = new GPOs(gpos);
 
-  for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
-    Point *p = l->second;
-    x        = p->getX();
-    y        = p->getY();
-    order    = p->getOrder();
-    time     = p->getTime();
+  for(auto l_it = gpos->location_to_user.begin(); l_it != gpos->location_to_user.end(); l_it++){
+    vector <Point*> *checkins_at_l = l_it->second;
+    for(auto c_it = checkins_at_l->begin(); c_it != checkins_at_l->end(); c_it++){
 
-    // if(p->getID() >= LOCATION_NOISE_BOUND)
-    //   continue;
+      Point *p = (*c_it);
+      x        = p->getX();
+      y        = p->getY();
+      order    = p->getOrder();
+      time     = p->getTime();
 
-    if( seenLocations.find( order ) != seenLocations.end() )
-      continue;
+      if( seenLocations.find( order ) != seenLocations.end() )
+        continue;
 
-    loadPoint(x, y, p->getID(), p->getUID(), time, order);
-    seenLocations.insert( order );
+      loadPoint(x, y, p->getID(), p->getUID(), time, order);
+      seenLocations.insert( order );
 
-    double s_dist, t_dist;
-    auto st_it = st_knn.find(order);
+      double s_dist, t_dist;
+      auto st_it = st_knn.find(order);
 
-    if(st_it == st_knn.end()){
-      s_dist = SPATIAL_SOFT_BOUND/1000.0;
-      t_dist = TEMPORAL_SOFT_BOUND;
+      if(st_it == st_knn.end()){
+        s_dist = SPATIAL_SOFT_BOUND/1000.0;
+        t_dist = TEMPORAL_SOFT_BOUND;
 
-      s_dist = s_dist * 0.55;
-      t_dist = t_dist * 0.55;
+        s_dist = s_dist * 0.75;
+        t_dist = t_dist * 0.75;
 
-    } else {
-      s_dist = st_it->second.first;
-      t_dist = st_it->second.second;
+      } else {
+        s_dist = st_it->second.first;
+        t_dist = st_it->second.second;
 
-      s_dist = s_dist * 0.45;
-      t_dist = t_dist * 0.45;
-    }
-
-    radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
-    vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, t_dist);
-
-    for(auto c = checkins->begin(); c != checkins->end(); c++){
-      if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
-        loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
-        seenLocations.insert( (*c)->oid );
+        s_dist = s_dist * 0.45;
+        t_dist = t_dist * 0.45;
       }
-      delete (*c);
+
+      radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
+      vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, t_dist);
+
+      for(auto c = checkins->begin(); c != checkins->end(); c++){
+        if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
+          loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
+          seenLocations.insert( (*c)->oid );
+        }
+        delete (*c);
+      }
+      delete checkins;
+
+      count++;
+      if( count % 100000 == 0 )
+        cout << count << " " << endl;
     }
-    delete checkins;
+  }
 
-    count++;
-    if( count % 100000 == 0 )
-      cout << count << " " << endl;
-
-  };
-  cout << "Check-ins inserted : " << seenLocations.size() << endl;
+  cout << "Check-ins inserted : " << seenLocations.size()      << endl;
+  cout << "Original size      : " << gpos->checkin_list.size() << endl;
 
   delete _duplicate_gpos;
 
@@ -1406,6 +1408,14 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
     int result_size = spatioTemporalKNNs.size();
 
     outfile << p->getOrder() << " ";
+
+    for(int i=result_size; i < k; i++ ){
+      outfile << -1 << " ";
+      outfile << std::numeric_limits<double>::infinity() << " ";
+      outfile << std::numeric_limits<double>::infinity() << " ";
+      outfile << std::numeric_limits<double>::infinity() << " ";
+    }
+
     while( !spatioTemporalKNNs.empty() ){
       res_point* candidate = spatioTemporalKNNs.top().second;
       outfile << candidate->oid << " ";
@@ -1413,13 +1423,6 @@ void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_
       outfile << p->computeMinDistInKiloMeters(candidate->x, candidate->y) << " ";
       outfile << (double) p->getTimeDifference(candidate) / 3600.0 << " ";
       spatioTemporalKNNs.pop();
-    }
-
-    for(int i=result_size; i < k; i++ ){
-      outfile << -1 << " ";
-      outfile << std::numeric_limits<double>::infinity() << " ";
-      outfile << std::numeric_limits<double>::infinity() << " ";
-      outfile << std::numeric_limits<double>::infinity() << " ";
     }
     outfile << endl;
 
