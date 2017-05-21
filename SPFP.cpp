@@ -85,8 +85,10 @@ GPOs* loadCheckins(char* checkins_file, bool preload_LE, bool preload_OCC){
   if(preload_LE)
     gpos->calculateLocationEntropy();
 
-  if(preload_OCC)
+  if(preload_OCC){
+    gpos->generateCooccurrenceCache();
     gpos->countU2UCoOccurrences();
+  }
 
   return gpos;
 }
@@ -1166,30 +1168,9 @@ int main(int argc, char *argv[]){
       cout << "METRICS: Compute ST KNN Metrics" << endl;
       cout << "ST KNN for co_occurred locations " << endl;
 
-      bool preload_LE  = false;
-      bool preload_OCC = false;
+      coocc_spatial_range = p1;
+      coocc_time_range    = p2;
 
-      printParameters();
-
-      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
-      GPOs* fixed = new GPOs(coocc_time_range, coocc_spatial_range);
-      fixed->groupLocationsByRange(gpos, 10, false);
-      delete gpos;
-
-      GPOs* test_gpos = new GPOs(fixed);
-      test_gpos->coocc_spatial_range = p1;
-      test_gpos->coocc_time_range    = p2;
-      test_gpos->generateCooccurrenceCache();
-      test_gpos->countU2UCoOccurrences();
-
-      SPOs* spos = loadSocialGraph(graph_file, test_gpos);
-      test_gpos->computeSTKNNDistances(10, test_gpos->getL2U2COOCC(), 0);
-      break;
-    }
-
-    case 99:{
-      cout << "METRICS: Compute ST KNN Metrics" << endl;
-      cout << "ST KNN for all locations " << endl;
       printParameters();
 
       bool preload_LE  = false;
@@ -1197,7 +1178,24 @@ int main(int argc, char *argv[]){
 
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, gpos);
+      gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 0);
+      break;
+    }
 
+    case 99:{
+      cout << "METRICS: Compute ST KNN Metrics" << endl;
+      cout << "ST KNN for all locations " << endl;
+
+      coocc_spatial_range = p1;
+      coocc_time_range    = p2;
+
+      printParameters();
+
+      bool preload_LE  = false;
+      bool preload_OCC = true;
+
+      GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, gpos);
       gpos->computeSTKNNDistances(10, gpos->getL2U2COOCC(), 3);
       break;
     }
