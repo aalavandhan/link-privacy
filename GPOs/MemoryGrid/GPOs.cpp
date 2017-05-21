@@ -13,7 +13,7 @@ GPOs::GPOs (char* gridFileName, uint time_range, double spatial_range){
   coocc_time_range      = time_range;
   coocc_spatial_range   = spatial_range;
 
-  generateCooccurrenceCache();
+  // generateCooccurrenceCache();
   // grid->deleteEmptyCells();
   objects = 0;
   computedNN = returnedNN = finalNextNN = 0;
