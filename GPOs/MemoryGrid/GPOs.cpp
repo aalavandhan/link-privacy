@@ -1140,15 +1140,15 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
         s_dist = SPATIAL_SOFT_BOUND/1000.0;
         t_dist = TEMPORAL_SOFT_BOUND;
 
-        s_dist = s_dist * 0.75;
-        t_dist = t_dist * 0.75;
+        s_dist = s_dist * 0.95;
+        t_dist = t_dist * 0.95;
 
       } else {
         s_dist = st_it->second.first;
         t_dist = st_it->second.second;
 
-        s_dist = s_dist * 0.45;
-        t_dist = t_dist * 0.45;
+        s_dist = s_dist * 0.65;
+        t_dist = t_dist * 0.65;
       }
 
       radius_geo_dist = (s_dist) * 360 / EARTH_CIRCUMFERENCE;
