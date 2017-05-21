@@ -329,7 +329,7 @@ void plainEBM(){
 
 void selectiveGaussianNoise(int isOptimistic){
   bool preload_LE  = false;
-  bool preload_OCC = true;
+  bool preload_OCC = false;
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
@@ -338,6 +338,8 @@ void selectiveGaussianNoise(int isOptimistic){
   double temporal_grouping[] = { 1, 1.5, 2, 2.5, 3 };
 
   GPOs* fixedGPOs = baseGPOs;
+  fixedGPOs->countCoOccurrencesOptimistic();
+
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
   if(run_utilties){

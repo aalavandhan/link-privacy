@@ -1074,6 +1074,7 @@ void GPOs::countCoOccurrencesOptimistic(){
 
   cout<<"Completed computing cooccurrences in optimistic manner" << endl;
   cout<<"total_cooccurrences{{"<<cooccurred_checkins.size()<<"}}"<<endl;
+  cout<<"cooccurrence_index_size{{"<<cooccurrence_index.size()<<"}}"<<endl;
 }
 
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
