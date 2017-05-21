@@ -331,7 +331,7 @@ void selectiveGaussianNoise(int isOptimistic){
   bool preload_LE  = false;
   bool preload_OCC = false;
 
-  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  GPOs* baseGPOs = loadCheckins(checkins_file, flase, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
   double spatial_grouping[]  = { 1, 1.5, 2, 2.5, 3 };
@@ -372,7 +372,7 @@ void selectiveGaussianNoise(int isOptimistic){
         coocc_time_range      = 1;
         cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
         cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-        cmpGPOs->countU2UCoOccurrences();
+        cmpGPOs->countCoOccurrencesOptimistic();
       } else {
         cmpGPOs  = new GPOs(purturbedGPOs);
         cmpGPOs->coocc_spatial_range   = sg * 1000;

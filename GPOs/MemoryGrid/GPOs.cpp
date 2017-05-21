@@ -1121,7 +1121,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
   delete _duplicate_gpos;
 
-  generateCooccurrenceCache();
+  // generateCooccurrenceCache();
 
 }
 
@@ -1222,7 +1222,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
 
   delete _duplicate_gpos;
 
-  generateCooccurrenceCache();
+  // generateCooccurrenceCache();
 
 }
 
@@ -1272,7 +1272,7 @@ void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
   delete seenLocations;
   delete _duplicate_gpos;
 
-  generateCooccurrenceCache();
+  // generateCooccurrenceCache();
 }
 
 // Perturbation
@@ -1912,7 +1912,7 @@ void GPOs::loadPurturbedLocationsBasedOnCombinationFunction(
     cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement/3600.0  * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
   }
 
-  generateCooccurrenceCache();
+  // generateCooccurrenceCache();
 }
 
 // Compute CoOccurrences
@@ -2550,7 +2550,7 @@ void GPOs::createNewGPOsbyGridSnapping(GPOs* gpos, double grid_distance_on_x_axi
     }
   }
 
-  generateCooccurrenceCache();
+  // generateCooccurrenceCache();
 }
 
 void GPOs::clearNextNN(){
