@@ -363,11 +363,11 @@ void selectiveGaussianNoise(int isOptimistic){
     else
       cout << "PESIMISTIC GROUPING STRATEGY" << endl;
 
-    double sg = group_radius;
-    double tg = group_time_radius;
+    double sg = group_radius / 1000.0;
+    double tg = group_time_radius / 3600.0;
 
-    cout << "Using Spatial  Grouping (m): "  << sg << endl;
-    cout << "Using Temporal Grouping (mi): " << tg / 60  << endl;
+    cout << "Using Spatial  Grouping (m): "  << sg * 1000 << endl;
+    cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
     GPOs* cmpGPOs;
     if(!isOptimistic){
@@ -385,7 +385,6 @@ void selectiveGaussianNoise(int isOptimistic){
 
     if(run_utilties){
       runBasicUtility(cmpGPOs, fixedGPOs, spos);
-      runUtilities(purturbedGPOs, fixedGPOs, spos);
     }
   }
 }
