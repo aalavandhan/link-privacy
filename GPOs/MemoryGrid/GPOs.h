@@ -182,4 +182,5 @@ public:
         int type);
 
     void countCoOccurrencesOptimistic();
+    void countCoOccurrencesOptimisticDD(int k);
 };

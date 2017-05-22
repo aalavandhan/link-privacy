@@ -1077,6 +1077,96 @@ void GPOs::countCoOccurrencesOptimistic(){
   cout<<"cooccurrence_index_size{{"<<cooccurrence_index.size()<<"}}"<<endl;
 }
 
+void GPOs::countCoOccurrencesOptimisticDD(int k){
+  map <int, pair<double, double> > st_knn;
+  ifstream fin("knn-noise-all-10-coocc.csv");
+  while(!fin.eof()){
+    int order;
+    double ks_dist=std::numeric_limits<double>::infinity(), kt_dist=std::numeric_limits<double>::infinity();
+    vector<int> *neighbours = new vector<int>();
+    fin >> order;
+    for(int i = 0; i<10; i++){
+      int knn_order;
+      double st_distance, s_distance, t_distance;
+      string text;
+      fin >> knn_order;
+      fin >> text;
+      st_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      s_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+
+      if(knn_order != -1 && 10 == k+i ){
+        ks_dist = s_distance;
+        kt_dist = t_distance;
+      }
+    }
+
+    if(ks_dist != std::numeric_limits<double>::infinity() && kt_dist != std::numeric_limits<double>::infinity())
+      st_knn.insert(make_pair(order, make_pair(ks_dist, kt_dist)));
+  }
+  fin.close();
+  cout << "Loaded KNN for " << st_knn.size() << endl;
+
+  double x=0, y=0;
+  unsigned int count=0, order;
+
+  for(auto l = checkin_list.begin(); l != checkin_list.end(); l++){
+    Point *p = l->second;
+    order    = l->first;
+    x        = p->getX();
+    y        = p->getY();
+
+    double s_dist, t_dist;
+    auto st_it = st_knn.find(order);
+    if(st_it == st_knn.end()){
+      s_dist = SPATIAL_SOFT_BOUND/1000.0;
+      t_dist = TEMPORAL_SOFT_BOUND;
+      s_dist = s_dist * 0.95;
+      t_dist = t_dist * 0.95;
+    } else {
+      s_dist = st_it->second.first;
+      t_dist = st_it->second.second;
+      s_dist = s_dist * 0.65;
+      t_dist = t_dist * 0.65;
+    }
+
+    double radius_in_km = s_dist;
+    double time_deviation_in_hours = t_dist;
+    double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE;
+
+    vector<res_point*>* cooccurrences = getRange(p, radius_geo_dist, time_deviation_in_hours);
+
+    unordered_set<int> *coocc_list = new unordered_set<int>();
+    cooccurrence_index.insert(make_pair(order, coocc_list));
+
+    for(auto c = cooccurrences->begin(); c != cooccurrences->end(); c++){
+      coocc_list->insert((*c)->oid);
+
+      int o1 = order;
+      int o2 = (*c)->oid;
+      if(o1 > o2){
+        int temp = o2;
+        o2 = o1;
+        o1 = temp;
+      }
+      cooccurred_checkins.insert(make_pair(o1, o2));
+
+      delete (*c);
+    }
+    delete cooccurrences;
+
+    count++;
+    if(count%100000 == 0)
+      cout << count << endl;
+  }
+
+  cout<<"Completed computing cooccurrences in optimistic manner data driven" << endl;
+  cout<<"total_cooccurrences{{"<<cooccurred_checkins.size()<<"}}"<<endl;
+  cout<<"cooccurrence_index_size{{"<<cooccurrence_index.size()<<"}}"<<endl;
+}
+
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
   double radius_geo_dist = radius_in_km * 360 / EARTH_CIRCUMFERENCE,x=0, y=0;
   unsigned int count=0, order;
@@ -1155,7 +1245,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
       st_knn.insert(make_pair(order, make_pair(ks_dist, kt_dist)));
   }
   fin.close();
-
   cout << "Loaded KNN for " << st_knn.size() << endl;
 
   double radius_geo_dist,x=0, y=0;
@@ -1183,18 +1272,14 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
 
       double s_dist, t_dist;
       auto st_it = st_knn.find(order);
-
       if(st_it == st_knn.end()){
         s_dist = SPATIAL_SOFT_BOUND/1000.0;
         t_dist = TEMPORAL_SOFT_BOUND;
-
         s_dist = s_dist * 0.95;
         t_dist = t_dist * 0.95;
-
       } else {
         s_dist = st_it->second.first;
         t_dist = st_it->second.second;
-
         s_dist = s_dist * 0.65;
         t_dist = t_dist * 0.65;
       }

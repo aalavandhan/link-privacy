@@ -44,7 +44,7 @@ int data_set = 0, k;
 double noise_radius, group_radius, grid_size_in_km, locality_treshold, entropy_treshold,
          total_parts, part_number, distance_treshold, social_strength_tresh, combination_type,
          function_type, p1, p2, p3, p4, p5, p6,
-         time_deviation,
+         time_deviation, group_time_radius,
          coocc_time_range = TIME_RANGE_IN_SECONDS,
          coocc_spatial_range = SPATIAL_RANGE_IN_METERS,
          day_of_week, time_block, noise_type, noise_function;
@@ -64,6 +64,7 @@ void printParameters(){
   cout << "combination_type     : " << combination_type << endl;
   cout << "function_type        : " << function_type << endl;
   cout << "time_deviation       : " << time_deviation << endl;
+  cout << "group_time_radius    : " << group_time_radius << endl;
   cout << "coocc_time_range     : " << coocc_time_range << endl;
   cout << "coocc_spatial_range  : " << coocc_spatial_range << endl;
   cout << "day_of_week          : " << day_of_week << endl;
@@ -336,57 +337,55 @@ void selectiveGaussianNoise(int isOptimistic){
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  double spatial_grouping[]  = { 1, 1.5, 2, 2.5, 3 };
-  double temporal_grouping[] = { 1, 1.5, 2, 2.5, 3 };
-
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
-  if(run_utilties){
-    runUtilities(purturbedGPOs, fixedGPOs, spos);
-  }
+  for(int i = 1; i<=7; i++){
+    double noise_radius   = 100 * i;
+    double time_deviation = 1200 * i;
 
-  double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
-  double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
+    cout << "Using spatial noise : (m)"  << noise_radius << endl;
+    cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
 
-  cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
-  cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
+    GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+    purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
+    if(run_utilties){
+      runUtilities(purturbedGPOs, fixedGPOs, spos);
+    }
+    double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
+    double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
 
-  if(isOptimistic == 1)
-    cout << "OPTIMISTIC GROUPING STRATEGY" << endl;
-  else
-    cout << "PESIMISTIC GROUPING STRATEGY" << endl;
+    cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
+    cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
-  for(int i=0; i<5;i++){
-    for(int j=0; j<5;j++){
-      double sg = group_radius_spatial * spatial_grouping[ i ];
-      double tg = group_radius_temporal * temporal_grouping[ j ];
+    if(isOptimistic == 1)
+      cout << "OPTIMISTIC GROUPING STRATEGY" << endl;
+    else
+      cout << "PESIMISTIC GROUPING STRATEGY" << endl;
 
-      cout << "Using Spatial  Grouping (m): "  << sg * 1000 << endl;
-      cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
+    double sg = group_radius;
+    double tg = group_time_radius;
 
-      GPOs* cmpGPOs;
+    cout << "Using Spatial  Grouping (m): "  << sg << endl;
+    cout << "Using Temporal Grouping (mi): " << tg / 60  << endl;
 
-      if(!isOptimistic){
-        coocc_spatial_range   = 0;
-        coocc_time_range      = 1;
-        cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
-        cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-        cmpGPOs->countCoOccurrencesOptimistic();
-      } else {
-        cmpGPOs  = new GPOs(purturbedGPOs);
-        cmpGPOs->coocc_spatial_range   = sg * 1000;
-        cmpGPOs->coocc_time_range      = tg * 3600;
-        cmpGPOs->countCoOccurrencesOptimistic();
-      }
+    GPOs* cmpGPOs;
+    if(!isOptimistic){
+      coocc_spatial_range   = 0;
+      coocc_time_range      = 1;
+      cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+      cmpGPOs->countCoOccurrencesOptimistic();
+    } else {
+      cmpGPOs  = new GPOs(purturbedGPOs);
+      cmpGPOs->coocc_spatial_range   = sg * 1000;
+      cmpGPOs->coocc_time_range      = tg * 3600;
+      cmpGPOs->countCoOccurrencesOptimistic();
+    }
 
-      if(run_utilties){
-        runBasicUtility(cmpGPOs, fixedGPOs, spos);
-      }
-
-      delete cmpGPOs;
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, fixedGPOs, spos);
+      runUtilities(purturbedGPOs, fixedGPOs, spos);
     }
   }
 }
@@ -445,7 +444,7 @@ void selectiveSTKNNNoise(int k){
       cout << "Using Spatial  Grouping : " << sg << endl;
       cout << "Using Temporal Grouping : " << tg << endl;
 
-      GPOs* cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countU2UCoOccurrences();
 
@@ -849,7 +848,7 @@ int main(int argc, char *argv[]){
       noise_radius            = 0;
       time_deviation          = 0;
       group_radius            = p3;
-      coocc_time_range   = p4;
+      coocc_time_range        = p4;
       printParameters();
       gaussianNoiseVsEBM(noise_radius, group_radius, time_deviation, true, true);
       break;
@@ -934,8 +933,8 @@ int main(int argc, char *argv[]){
 
       coocc_spatial_range     = p1;
       coocc_time_range        = p2;
-      noise_radius            = p3;
-      time_deviation          = p4;
+      group_radius            = p3;
+      group_time_radius       = p4;
 
       int isOptimistic        = p5;
 
