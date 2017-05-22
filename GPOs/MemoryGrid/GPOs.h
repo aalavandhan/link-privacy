@@ -174,7 +174,7 @@ public:
     void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, map< int, pair<int, res_point*> > *skylines);
 
     void computeSTKNNDistancesOptimized(int k, int type);
-    void computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type);
+    void computeSTKNNDistances(int k, int type);
     double getSTKNNDistance(Point *p, int k, vector<res_point*> *spatial_candidates, int type);
     void getSpatioTemporalKNN(Point *p, int k,
         priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > *spatioTemporalKNNs,

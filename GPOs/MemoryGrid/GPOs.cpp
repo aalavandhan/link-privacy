@@ -1411,7 +1411,7 @@ void GPOs::pickUniqueCheckinFromCooccurrences(set<int> *checkins_of_interest){
   }
 }
 
-void GPOs::computeSTKNNDistances(int k, map< int, map<int,int>* >* _location_to_user_to_cooccurrences, int type){
+void GPOs::computeSTKNNDistances(int k, int type){
   ofstream outfile;
   stringstream ss;
   std::string filePath;
