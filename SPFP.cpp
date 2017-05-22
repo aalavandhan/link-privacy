@@ -366,7 +366,7 @@ void selectiveGaussianNoise(int isOptimistic){
     double sg = group_radius / 1000.0;
     double tg = group_time_radius / 3600.0;
 
-    cout << "Using Spatial  Grouping (m): "  << sg * 1000 << endl;
+    cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
     cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
     GPOs* cmpGPOs;
@@ -413,7 +413,7 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
       cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
       cmpGPOs->countCoOccurrencesOptimistic();
     } else {
-      cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+      cmpGPOs  = new GPOs(purturbedGPOs);
       cmpGPOs->countCoOccurrencesOptimisticDD(k);
     }
 
