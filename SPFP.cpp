@@ -409,7 +409,7 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
 
     GPOs* cmpGPOs;
     if(!isOptimistic){
-      GPOs* cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
       cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
       cmpGPOs->countCoOccurrencesOptimistic();
     } else {
