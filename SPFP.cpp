@@ -397,7 +397,6 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-
   baseGPOs->countCoOccurrencesOptimistic();
 
   for(int i=1; i<=7; i++){
@@ -411,7 +410,7 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
     if(!isOptimistic){
       GPOs* cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
       cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
-      cmpGPOs->countU2UCoOccurrences();
+      cmpGPOs->countCoOccurrencesOptimistic();
     } else {
       cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->countCoOccurrencesOptimisticDD(k);
