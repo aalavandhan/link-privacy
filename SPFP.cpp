@@ -391,26 +391,38 @@ void selectiveGaussianNoise(int isOptimistic){
   }
 }
 
-void selectiveGaussianNoiseDDAdversary(int k){
+void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
   bool preload_LE  = false;
-  bool preload_OCC = true;
+  bool preload_OCC = false;
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
-  GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
-  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
+  baseGPOs->countCoOccurrencesOptimistic();
 
-  coocc_spatial_range   = 0;
-  coocc_time_range      = 1;
+  for(int i=1; i<=7; i++){
+    double noise_radius   = 100 * i;
+    double time_deviation = 1200 * i;
 
-  GPOs* cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-  cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
-  cmpGPOs->countU2UCoOccurrences();
+    GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
+    purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
-  if(run_utilties){
-    runBasicUtility(cmpGPOs, baseGPOs, spos);
-    runUtilities(purturbedGPOs, baseGPOs, spos);
+    GPOs* cmpGPOs;
+    if(!isOptimistic){
+      GPOs* cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
+      cmpGPOs->countU2UCoOccurrences();
+    } else {
+      cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+      cmpGPOs->countCoOccurrencesOptimisticDD(k);
+    }
+
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
+      runUtilities(purturbedGPOs, baseGPOs, spos);
+    }
+
+    delete cmpGPOs;
   }
 }
 
@@ -982,9 +994,10 @@ int main(int argc, char *argv[]){
       time_deviation          = p2;
 
       k                       = p3;
+      int isOptimistic        = p4;
 
       printParameters();
-      selectiveGaussianNoiseDDAdversary(k);
+      selectiveGaussianNoiseDDAdversary(k, isOptimistic);
 
       break;
     }
