@@ -990,11 +990,8 @@ int main(int argc, char *argv[]){
     case 9:{
       cout << "ITRATION: Selective Noise vs DD Adversary" << endl;
 
-      noise_radius            = p1;
-      time_deviation          = p2;
-
-      k                       = p3;
-      int isOptimistic        = p4;
+      k                       = p1;
+      int isOptimistic        = p2;
 
       printParameters();
       selectiveGaussianNoiseDDAdversary(k, isOptimistic);
