@@ -387,6 +387,7 @@ void selectiveGaussianNoise(int isOptimistic){
       runBasicUtility(cmpGPOs, fixedGPOs, spos);
     }
 
+    delete purturbedGPOs;
     delete cmpGPOs;
   }
 }
@@ -421,6 +422,7 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
       runUtilities(purturbedGPOs, baseGPOs, spos);
     }
 
+    delete purturbedGPOs;
     delete cmpGPOs;
   }
 }
