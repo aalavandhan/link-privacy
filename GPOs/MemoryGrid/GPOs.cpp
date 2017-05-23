@@ -1683,17 +1683,14 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
 
     auto knn_it = st_knn.find(order);
 
-    if( gpos->cooccurrence_index.find(order) != gpos->cooccurrence_index.end() &&
-        knn_it == st_knn.end()){
+    if( checkins_of_interest.find(order) != checkins_of_interest.end() &&
+        knn_it == st_knn.end() ){
       cooccurrences_out_of_bound++;
       point_count++;
       continue;
     };
 
-    if( checkins_of_interest.find(order) != checkins_of_interest.end() &&
-        gpos->cooccurrence_index.find(order) != gpos->cooccurrence_index.end() &&
-        knn_it != st_knn.end() ){
-
+    if( checkins_of_interest.find(order) != checkins_of_interest.end() && knn_it != st_knn.end() ){
       vector<int> *neighbours = knn_it->second;
 
       // Pick a KNN at random
