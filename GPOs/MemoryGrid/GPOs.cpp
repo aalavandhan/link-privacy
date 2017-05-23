@@ -1675,13 +1675,20 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
     Point *p = c_it->second;
 
     auto knn_it = st_knn.find(order);
+
+    if( gpos->cooccurrence_index.find(order) != gpos->cooccurrence_index.end() &&
+        knn_it == st_knn.end()){
+      cooccurrences_out_of_bound++;
+      point_count++;
+      continue;
+    };
 
     if( checkins_of_interest.find(order) != checkins_of_interest.end() &&
         gpos->cooccurrence_index.find(order) != gpos->cooccurrence_index.end() &&
@@ -1722,13 +1729,12 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
   }
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"cooccurrences_out_of_bound{{"<< cooccurrences_out_of_bound << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
   cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
-
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
-
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;

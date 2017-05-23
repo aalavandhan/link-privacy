@@ -448,8 +448,9 @@ void selectiveSTKNNNoise(int k){
   cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
-  double sg = group_radius / 1000.0;
-  double tg = group_time_radius / 3600.0;
+
+  double sg = coocc_spatial_range / 1000.0;
+  double tg = coocc_time_range    / 3600.0;
 
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
@@ -985,8 +986,9 @@ int main(int argc, char *argv[]){
       cout << "ITRATION: Selective Noise based on st-knn" << endl;
 
       k                   = p1;
-      group_radius        = p2;
-      group_time_radius   = p3;
+
+      coocc_spatial_range = p2;
+      coocc_time_range    = p3;
 
       printParameters();
       selectiveSTKNNNoise(k);
