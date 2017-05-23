@@ -1633,7 +1633,7 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
   map <int, vector<int>* > st_knn;
 
-  ifstream fin("knn-noise-combined-10-coocc.csv");
+  ifstream fin("knn-noise-all-10-coocc.csv");
 
   while(!fin.eof()){
     int order;
@@ -1683,7 +1683,10 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
 
     auto knn_it = st_knn.find(order);
 
-    if( checkins_of_interest.find(order) != checkins_of_interest.end() && knn_it != st_knn.end() ){
+    if( checkins_of_interest.find(order) != checkins_of_interest.end() &&
+        gpos->cooccurrence_index.find(order) != gpos->cooccurrence_index.end() &&
+        knn_it != st_knn.end() ){
+
       vector<int> *neighbours = knn_it->second;
 
       // Pick a KNN at random
