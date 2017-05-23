@@ -454,15 +454,25 @@ void selectiveSTKNNNoise(int k){
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-  GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-  cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-  cmpGPOs->countCoOccurrencesOptimistic();
-
-  if(run_utilties){
-    runBasicUtility(cmpGPOs, baseGPOs, spos);
+  {
+    GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+    cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+    cmpGPOs->countCoOccurrencesOptimistic();
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
+    }
+    delete cmpGPOs;
   }
 
-  delete cmpGPOs;
+  {
+    GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
+    cmpGPOs->countCoOccurrencesOptimistic();
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
+    }
+    delete cmpGPOs;
+  }
 }
 
 void selectiveSkylineNoise(int k){
