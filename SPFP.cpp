@@ -975,6 +975,8 @@ int main(int argc, char *argv[]){
       cout << "ITRATION: Selective Noise based on st-knn" << endl;
 
       k                   = p1;
+      group_radius        = p2;
+      group_time_radius   = p3;
 
       printParameters();
       selectiveSTKNNNoise(k);
