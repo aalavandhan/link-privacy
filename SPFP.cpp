@@ -430,13 +430,11 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
 
 void selectiveSTKNNNoise(int k){
   bool preload_LE  = false;
-  bool preload_OCC = true;
+  bool preload_OCC = false;
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-
-  double spatial_grouping[]  = { 0.05, 0.10, 0.25, 0.5, 0.75 };
-  double temporal_grouping[] = { 0.05, 0.10, 0.25, 0.5, 0.75 };
+  baseGPOs->countCoOccurrencesOptimistic();
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
@@ -450,25 +448,21 @@ void selectiveSTKNNNoise(int k){
   cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
 
-  for(int i=0; i<5;i++){
-    for(int j=0; j<5;j++){
-      double sg = group_radius_spatial * 1000.0 * spatial_grouping[ i ] + 3.3;
-      double tg = group_radius_temporal * 3600.0 * temporal_grouping[ j ] + 180;
+  double sg = group_radius / 1000.0;
+  double tg = group_time_radius / 3600.0;
 
-      cout << "Using Spatial  Grouping : " << sg << endl;
-      cout << "Using Temporal Grouping : " << tg << endl;
+  cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
+  cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-      GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-      cmpGPOs->countU2UCoOccurrences();
+  GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+  cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+  cmpGPOs->countCoOccurrencesOptimistic();
 
-      if(run_utilties){
-        runBasicUtility(cmpGPOs, baseGPOs, spos);
-      }
-
-      delete cmpGPOs;
-    }
+  if(run_utilties){
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
   }
+
+  delete cmpGPOs;
 }
 
 void selectiveSkylineNoise(int k){
