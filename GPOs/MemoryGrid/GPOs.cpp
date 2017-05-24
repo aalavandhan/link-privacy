@@ -1589,11 +1589,11 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
     Point *p = c_it->second;
 
     if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
-      pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), radius);
-      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
+      pair<double,double> coordinates_with_noise = util.addGaussianNoise( p->getX(), p->getY(), radius + gpos->coocc_spatial_range );
+      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise( p->getTime(), time_deviation + gpos->coocc_time_range );
 
-      total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-      total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+      total_spatial_displacement += p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+      total_time_displacement += (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
 
       if( purturbed_at_l.find(p->getID()) == purturbed_at_l.end() ){
         purturbed_at_l.insert( p->getID() );
@@ -1606,7 +1606,6 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
       purturbed_count++;
       spatial_purturbed_count++;
       temporal_purturbed_count++;
-
     } else {
       loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
     }
