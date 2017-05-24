@@ -1049,7 +1049,6 @@ void GPOs::countCoOccurrencesOptimistic(){
     vector<res_point*>* cooccurrences = getRange(p, radius_geo_dist, time_deviation_in_hours);
 
     unordered_set<int> *coocc_list = new unordered_set<int>();
-    cooccurrence_index.insert(make_pair(order, coocc_list));
 
     for(auto c = cooccurrences->begin(); c != cooccurrences->end(); c++){
       coocc_list->insert((*c)->oid);
@@ -1066,6 +1065,13 @@ void GPOs::countCoOccurrencesOptimistic(){
       delete (*c);
     }
     delete cooccurrences;
+
+
+    if(coocc_list->size() > 0){
+      cooccurrence_index.insert(make_pair(order, coocc_list));
+    } else {
+      delete coocc_list;
+    }
 
     count++;
     if(count%100000 == 0)
