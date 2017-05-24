@@ -343,8 +343,8 @@ void selectiveGaussianNoiseIdealGrouping(){
   double spatial_radi[] =  { 20, 30, 40 };
   double temporal_radi[] = { 1200, 1800, 2400 };
 
-  double noise_radius   = 100 * 4;
-  double time_deviation = 1200 * 4;
+  double noise_radius   = 100 * 2;
+  double time_deviation = 1200 * 2;
 
   cout << "Using spatial noise : (m)"  << noise_radius << endl;
   cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
