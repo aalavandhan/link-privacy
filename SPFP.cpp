@@ -330,6 +330,61 @@ void plainEBM(){
   runEBM(gpos, spos);
 }
 
+void selectiveGaussianNoiseIdealGrouping(){
+  bool preload_LE  = false;
+  bool preload_OCC = false;
+
+  GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+  GPOs* fixedGPOs = baseGPOs;
+  fixedGPOs->countCoOccurrencesOptimistic();
+
+  double spatial_radi[] =  { 20, 30, 40 };
+  double temporal_radi[] = { 1200, 1800, 2400 };
+
+  double noise_radius   = 100 * 4;
+  double time_deviation = 1200 * 4;
+
+  cout << "Using spatial noise : (m)"  << noise_radius << endl;
+  cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
+
+  GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
+  if(run_utilties){
+    runUtilities(purturbedGPOs, fixedGPOs, spos);
+  }
+
+  double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
+  double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
+
+  cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
+  cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
+
+  for(int i=0; i<3; i++){
+    for(int j=0; j<3; j++){
+      double sg = spatial_radi[i] / 1000.0;
+      double tg = temporal_radi[j] / 3600.0;
+
+      cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
+      cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
+
+      GPOs* cmpGPOs;
+      cmpGPOs  = new GPOs(purturbedGPOs);
+      cmpGPOs->coocc_spatial_range   = sg * 1000;
+      cmpGPOs->coocc_time_range      = tg * 3600;
+      cmpGPOs->countCoOccurrencesOptimistic();
+
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, fixedGPOs, spos);
+      }
+
+      delete cmpGPOs;
+    }
+  }
+
+}
+
 void selectiveGaussianNoise(int isOptimistic){
   bool preload_LE  = false;
   bool preload_OCC = false;
@@ -808,6 +863,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "selective-gaussian-dd") == 0)
     iteration_type = 9;
 
+  else if (strcmp(argv[2], "selective-gaussian-ideal-grouping") == 0)
+    iteration_type = 10;
+
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
   else if (strcmp(argv[2], "compute-katz") == 0)
@@ -1007,6 +1065,20 @@ int main(int argc, char *argv[]){
 
       break;
     }
+
+    case 10:{
+      cout << "ITRATION: Selective Gaussian Noise Ideal grouping" << endl;
+
+      coocc_spatial_range = p1;
+      coocc_time_range    = p2;
+
+      printParameters();
+      selectiveGaussianNoiseIdealGrouping();
+
+      break;
+    }
+
+
 
     // case 4:
     //   cout << "ITRATION: Running EBM with grid snapping noise" << endl;
