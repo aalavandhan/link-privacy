@@ -117,7 +117,12 @@ boost::posix_time::ptime Utilities::addTemporalGaussianNoise(boost::posix_time::
   boost::normal_distribution<> nd(0.0, deviation_in_seconds/2);
   boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
 
-  int noise_in_seconds = (int) var_norormal() + offset;
+  int noise_in_seconds = (int) var_norormal();
+
+  if( noise_in_seconds >= 0)
+    noise_in_seconds +=offset;
+  else
+    noise_in_seconds -=offset;
 
   return ( time + boost::posix_time::seconds(noise_in_seconds) );
 }
