@@ -44,9 +44,11 @@ public:
     int getCooccurrencesWithinTimeBlock(vector<pair<uint, int>>* arr1, vector<pair<uint, int>>* arr2, uint time_block, set< pair<int,int> >* orders);
 
     pair<double,double> addGaussianNoise(double x, double y, double radius);
+    pair<double,double> addGaussianNoise(double x, double y, double radius, double offset);
     pair<double,double> addNoise(double x, double y, double radius);
     double distanceBetween(double lat1, double lon1, double lat2, double lon2);
     double angleFromCoordinate(double lat1, double long1, double lat2, double long2);
     boost::posix_time::ptime addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds);
+    boost::posix_time::ptime addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds, int offset);
     boost::posix_time::ptime addTemporalNoise(boost::posix_time::ptime time, int deviation_in_seconds);
 };

@@ -73,8 +73,12 @@ pair<double,double> Utilities::addNoise(double x, double y, double radius){
   return make_pair(nLon, nLat);
 }
 
-// Noise radius in meters
 pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius){
+  return addGaussianNoise(x, y, radius, 0);
+}
+
+// Noise radius in meters
+pair<double,double> Utilities::addGaussianNoise(double x, double y, double radius, double offset){
   boost::mt19937 rng;
   static unsigned int seed = rand() % 10000;
   rng.seed(++seed);
@@ -85,7 +89,7 @@ pair<double,double> Utilities::addGaussianNoise(double x, double y, double radiu
   double lat=0,lon=0, nLat=0, nLon=0, noise_distance=0;
   int R = EARTH_RADIUS_IN_KILOMETERS * 1000;
 
-  noise_distance = abs(var_norormal());
+  noise_distance = abs(var_norormal()) + offset;
   int direction = getRandom<int>(0,360, seed);
 
   lon = x;
@@ -105,6 +109,10 @@ pair<double,double> Utilities::addGaussianNoise(double x, double y, double radiu
 }
 
 boost::posix_time::ptime Utilities::addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds){
+  return addTemporalGaussianNoise(time, deviation_in_seconds, 0);
+}
+
+boost::posix_time::ptime Utilities::addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds, int offset){
   boost::mt19937 rng;
   static unsigned int seed = rand() % 10000;
   rng.seed(++seed);
@@ -112,7 +120,7 @@ boost::posix_time::ptime Utilities::addTemporalGaussianNoise(boost::posix_time::
   boost::normal_distribution<> nd(0.0, deviation_in_seconds/2);
   boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_norormal(rng, nd);
 
-  int noise_in_seconds = (int) var_norormal();
+  int noise_in_seconds = (int) var_norormal() + offset;
 
   return ( time + boost::posix_time::seconds(noise_in_seconds) );
 }
