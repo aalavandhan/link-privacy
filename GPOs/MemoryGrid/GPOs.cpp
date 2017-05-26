@@ -1060,9 +1060,8 @@ void GPOs::countCoOccurrencesOptimistic(){
         o2 = o1;
         o1 = temp;
       }
-      cooccurred_checkins.insert(make_pair(o1, o2));
 
-      cout << o1 << " " << o2 << endl;
+      cooccurred_checkins.insert(make_pair(o1, o2));
 
       delete (*c);
     }

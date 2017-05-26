@@ -128,6 +128,15 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     }
 
     if(original_cooccurrences.find(make_pair(o1, o2)) != original_cooccurrences.end()){
+      Point *p = base_gpos->checkin_list->find(o1)->second;
+      Point *q = base_gpos->checkin_list->find(o2)->second;
+      Point *x = gpos->checkin_list->find(o1)->second;
+      Point *y = gpos->checkin_list->find(o2)->second;
+
+      cout << "(" p->getOrder() << "," << q->getOrder() << ") : (" << x->getOrder() << "," << y->getOrder() << ")" << endl;
+      cout << "Distance before : " << p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000 << " m | " << p->getTimeDifference(q) / 60 << " mi" << endl;
+      cout << "Distance after  : " << x->computeMinDistInKiloMeters(x->getX(), x->getY()) * 1000 << " m | " << x->getTimeDifference(y) / 60 << " mi" << endl;
+
       true_positive++;
     }
 
