@@ -1587,6 +1587,7 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
+  double min_spatial_noise_added=std::numeric_limits<double>::infinity(), min_temporal_noise_added=std::numeric_limits<double>::infinity();
 
   set<int> purturbed_at_l;
 
@@ -1622,8 +1623,16 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
         pair<double,double> coordinates_with_noise = util.addGaussianNoise( p->getX(), p->getY(), radius,  max_dist_spatial );
         boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise( p->getTime(), time_deviation, max_dist_temporal );
 
-        total_spatial_displacement += p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        total_time_displacement += (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+        total_spatial_displacement += sd;
+        total_time_displacement += td;
+
+        if(sd < min_spatial_noise_added)
+          min_spatial_noise_added  = sd;
+
+        if(td < min_temporal_noise_added)
+          min_temporal_noise_added = td;
 
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
         lid++;
@@ -1643,10 +1652,12 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
   cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
 
+  cout<<"min_spatial_noise_added{{"<<  min_spatial_noise_added <<"}} in km"<<endl;
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
 
+  cout<<"min_temporal_noise_added{{"<<  min_temporal_noise_added <<"}} hours"<<endl;
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
