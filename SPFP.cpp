@@ -330,7 +330,7 @@ void plainEBM(){
   runEBM(gpos, spos);
 }
 
-void selectiveGaussianNoiseIdealGrouping(){
+void selectiveGaussianNoiseIdealGrouping(int f){
   bool preload_LE  = false;
   bool preload_OCC = false;
 
@@ -343,8 +343,8 @@ void selectiveGaussianNoiseIdealGrouping(){
   double spatial_radi[] =  { 0.5, 0.75, 1, 1.25 };
   double temporal_radi[] = { 0.5, 0.75, 1, 1.25 };
 
-  double noise_radius   = 100 * 2;
-  double time_deviation = 1200 * 2;
+  double noise_radius   = 100 * f;
+  double time_deviation = 1200 * f;
 
   cout << "Using spatial noise : (m)"  << noise_radius << endl;
   cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
@@ -1072,9 +1072,10 @@ int main(int argc, char *argv[]){
 
       coocc_spatial_range = p1;
       coocc_time_range    = p2;
+      int f               = p3;
 
       printParameters();
-      selectiveGaussianNoiseIdealGrouping();
+      selectiveGaussianNoiseIdealGrouping(f);
 
       break;
     }
