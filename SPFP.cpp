@@ -340,8 +340,8 @@ void selectiveGaussianNoiseIdealGrouping(){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  double spatial_radi[] =  { 1, 1.5, 2, 2.5 };
-  double temporal_radi[] = { 1, 1.5, 2, 2.5 };
+  double spatial_radi[] =  { 0.5, 1, 1.5 };
+  double temporal_radi[] = { 0.5, 1, 1.5 };
 
   double noise_radius   = 100 * 2;
   double time_deviation = 1200 * 2;
@@ -355,28 +355,24 @@ void selectiveGaussianNoiseIdealGrouping(){
     runUtilities(purturbedGPOs, fixedGPOs, spos);
   }
 
-  cout << "Ensuring accurate perturbation .." << endl;
-  purturbedGPOs->countCoOccurrencesOptimistic();
-  runBasicUtility(purturbedGPOs, fixedGPOs, spos);
-
   double mean_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
   double mean_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
 
   cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
-  for(int i=0; i<3; i++){
-    for(int j=0; j<3; j++){
-      double sg = spatial_radi[i]  * coocc_spatial_range / 1000.0;
-      double tg = temporal_radi[j] * coocc_time_range    / 3600.0;
+  for(int i=0; i<4; i++){
+    for(int j=0; j<4; j++){
+      double sg = spatial_radi[i]  * mean_radius_spatial;
+      double tg = temporal_radi[j] * mean_radius_temporal;
 
       cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
       cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-      GPOs* cmpGPOs;
-      cmpGPOs  = new GPOs(purturbedGPOs);
-      cmpGPOs->coocc_spatial_range   = sg * 1000;
-      cmpGPOs->coocc_time_range      = tg * 3600;
+      coocc_spatial_range   = 0;
+      coocc_time_range      = 1;
+      cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){
