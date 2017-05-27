@@ -1486,11 +1486,7 @@ void GPOs::pickSingleCheckinFromCooccurrences(set<int> *checkins_of_interest){
   for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
-
-    if( rand()%2 == 0)
-      checkins_of_interest->insert(o1);
-    else
-      checkins_of_interest->insert(o2);
+    checkins_of_interest->insert(o1);
   }
 }
 
