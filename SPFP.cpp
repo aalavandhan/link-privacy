@@ -371,7 +371,8 @@ void selectiveGaussianNoiseIdealGrouping(){
 
       coocc_spatial_range   = 0;
       coocc_time_range      = 1;
-      cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+
+      GPOs *cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
       cmpGPOs->countCoOccurrencesOptimistic();
 
