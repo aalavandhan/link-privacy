@@ -97,25 +97,10 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
 }
 
 void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
-  set< pair<int,int> > original_cooccurrences;
-
   set< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
   set< pair<int,int> >* purturbed_cooccurrences = gpos->getCooccurredCheckins();
 
-  for(auto c_it = base_cooccurrences->begin(); c_it != base_cooccurrences->end(); c_it++){
-    int o1 = c_it->first;
-    int o2 = c_it->second;
-
-    if(o1 > o2){
-      int temp = o2;
-      o2 = o1;
-      o1 = temp;
-    }
-
-    original_cooccurrences.insert(make_pair(o1, o2));
-  }
-
-  int true_positive = 0, gt = original_cooccurrences.size(), positive = 0;
+  int true_positive = 0, gt = base_cooccurrences->size(), positive = 0;
 
   for(auto c_it = purturbed_cooccurrences->begin(); c_it != purturbed_cooccurrences->end(); c_it++){
     int o1 = c_it->first;
@@ -127,7 +112,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       o1 = temp;
     }
 
-    if(original_cooccurrences.find(make_pair(o1, o2)) != original_cooccurrences.end()){
+    if(base_cooccurrences->find(make_pair(o1, o2)) != base_cooccurrences->end()){
       Point *p = base_gpos->checkin_list.find(o1)->second;
       Point *q = base_gpos->checkin_list.find(o2)->second;
       Point *x = gpos->checkin_list.find(o1)->second;
@@ -135,7 +120,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
       cout << "(" << p->getOrder() << "," << q->getOrder() << ") : (" << x->getOrder() << "," << y->getOrder() << ")" << endl;
       cout << "Distance before : " << p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000 << " m | " << p->getTimeDifference(q) / 60 << " mi" << endl;
-      cout << "Distance after  : " << x->computeMinDistInKiloMeters(x->getX(), x->getY()) * 1000 << " m | " << x->getTimeDifference(y) / 60 << " mi" << endl;
+      cout << "Distance after  : " << x->computeMinDistInKiloMeters(y->getX(), y->getY()) * 1000 << " m | " << x->getTimeDifference(y) / 60 << " mi" << endl;
 
       true_positive++;
     }

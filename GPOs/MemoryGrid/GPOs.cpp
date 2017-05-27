@@ -1587,6 +1587,8 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
+  cout << "Purtubing only " << checkins_of_interest.size() << " checkins" << endl;
+
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
   double min_spatial_noise_added=std::numeric_limits<double>::infinity(), min_temporal_noise_added=std::numeric_limits<double>::infinity();
 
