@@ -340,8 +340,8 @@ void selectiveGaussianNoiseIdealGrouping(int isOptimistic, int f){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  double spatial_radi[] =  { 1.15, 1.25, 1.35 };
-  double temporal_radi[] = { 1.15, 1.25 };
+  double spatial_radi[] =  { 1.35 };
+  double temporal_radi[] = { 1.15 };
 
   double noise_radius   = 100 * f;
   double time_deviation = 1200 * f;
@@ -420,19 +420,19 @@ void selectiveGaussianNoise(int isOptimistic){
     if(run_utilties){
       runUtilities(purturbedGPOs, fixedGPOs, spos);
     }
-    double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
-    double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
+    double mean_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
+    double mean_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
 
-    cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
-    cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
+    cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
+    cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
     if(isOptimistic == 1)
       cout << "OPTIMISTIC GROUPING STRATEGY" << endl;
     else
       cout << "PESIMISTIC GROUPING STRATEGY" << endl;
 
-    double sg = group_radius / 1000.0;
-    double tg = group_time_radius / 3600.0;
+    double sg = mean_radius_spatial * group_radius;
+    double tg = mean_radius_temporal * group_time_radius;
 
     cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
     cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
