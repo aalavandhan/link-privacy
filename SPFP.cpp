@@ -330,7 +330,7 @@ void plainEBM(){
   runEBM(gpos, spos);
 }
 
-void selectiveGaussianNoiseIdealGrouping(int f){
+void selectiveGaussianNoiseIdealGrouping(int isOptimistic, int f){
   bool preload_LE  = false;
   bool preload_OCC = false;
 
@@ -361,6 +361,11 @@ void selectiveGaussianNoiseIdealGrouping(int f){
   cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
+  if(isOptimistic == 1)
+    cout << "OPTIMISTIC GROUPING STRATEGY" << endl;
+  else
+    cout << "PESIMISTIC GROUPING STRATEGY" << endl;
+
   for(int i=0; i<4; i++){
     for(int j=0; j<4; j++){
       double sg = spatial_radi[i]  * mean_radius_spatial;
@@ -369,12 +374,19 @@ void selectiveGaussianNoiseIdealGrouping(int f){
       cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
       cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-      coocc_spatial_range   = 0;
-      coocc_time_range      = 1;
-
-      GPOs *cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
-      cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-      cmpGPOs->countCoOccurrencesOptimistic();
+      GPOs* cmpGPOs;
+      if(!isOptimistic){
+        coocc_spatial_range   = 0;
+        coocc_time_range      = 1;
+        cmpGPOs  = new GPOs(coocc_time_range, coocc_spatial_range);
+        cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+        cmpGPOs->countCoOccurrencesOptimistic();
+      } else {
+        cmpGPOs  = new GPOs(purturbedGPOs);
+        cmpGPOs->coocc_spatial_range   = sg * 1000;
+        cmpGPOs->coocc_time_range      = tg * 3600;
+        cmpGPOs->countCoOccurrencesOptimistic();
+      }
 
       if(run_utilties){
         runBasicUtility(cmpGPOs, fixedGPOs, spos);
@@ -1073,9 +1085,10 @@ int main(int argc, char *argv[]){
       coocc_spatial_range = p1;
       coocc_time_range    = p2;
       int f               = p3;
+      int isOptimistic    = p4;
 
       printParameters();
-      selectiveGaussianNoiseIdealGrouping(f);
+      selectiveGaussianNoiseIdealGrouping(isOptimistic, f);
 
       break;
     }
