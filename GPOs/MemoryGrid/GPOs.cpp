@@ -1227,7 +1227,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   stringstream ss;
   ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
   ifstream fin(ss.str());
-
   while(!fin.eof()){
     int order;
     double ks_dist=std::numeric_limits<double>::infinity(), kt_dist=std::numeric_limits<double>::infinity();
@@ -1250,7 +1249,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
         kt_dist = t_distance;
       }
     }
-
     if(ks_dist != std::numeric_limits<double>::infinity() && kt_dist != std::numeric_limits<double>::infinity())
       st_knn.insert(make_pair(order, make_pair(ks_dist, kt_dist)));
   }

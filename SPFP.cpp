@@ -534,7 +534,7 @@ void selectiveSTKNNNoise(int k){
 
   {
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, std::min(k, 1));
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, std::max(k, 1));
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
