@@ -1265,7 +1265,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   set<int> purturbed_checkins;
   gpos->pickOtherCheckinFromCooccurrences(&purturbed_checkins);
 
-  cout << "Adversary has knowledge about where to group from : " << purturbed_checkins.size();
+  cout << "Adversary has knowledge about where to group from : " << purturbed_checkins.size() << endl;
 
   for(auto c_it = purturbed_checkins.begin(); c_it != purturbed_checkins.end(); c_it++){
     Point *p = gpos->checkin_list.find(*c_it)->second;

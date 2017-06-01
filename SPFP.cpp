@@ -509,6 +509,7 @@ void selectiveSTKNNNoise(int k){
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
+  purturbedGPOs->countCoOccurrencesOptimistic();
 
   double mean_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
   double mean_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
