@@ -1225,7 +1225,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 void GPOs::groupLocationsByDD(GPOs* gpos, int k){
   map <int, pair<double, double> > st_knn;
   stringstream ss;
-  ss << "knn-noise-combined-" << k <<"-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
+  ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
   ifstream fin(ss.str());
 
   while(!fin.eof()){
@@ -1637,23 +1637,24 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
   cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
-
   cout<<"min_spatial_noise_added{{"<<  min_spatial_noise_added <<"}} in km"<<endl;
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
-
   cout<<"min_temporal_noise_added{{"<<  min_temporal_noise_added <<"}} hours"<<endl;
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
-
   cout<<"Locations after perturbation :"<<location_to_user.size()<<endl;
 }
 
 pair<double, double> GPOs::minDistanceOutsideCooccurrence(Point *p){
   int order = p->getOrder();
   double max_dist_spatial = 0, max_dist_temporal = 0;
+
+  if(cooccurrence_index.find(order) == cooccurrence_index.end())
+    return make_pair(SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND*3600);
+
   unordered_set<int>* cooccurred_checkins = cooccurrence_index.find(order)->second;
 
   for(auto co_it = cooccurred_checkins->begin(); co_it != cooccurred_checkins->end(); co_it++){
@@ -1761,7 +1762,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     if(checkin_of_interest && !knn_out_of_bound){
       if(k == 0){
         vector<int> *neighbours = knn_it->second;
-        int neighbor = neighbours->at(1);
+        int neighbor = neighbours->at(0);
         Point *q = gpos->checkin_list.find(neighbor)->second;
         double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
         double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
