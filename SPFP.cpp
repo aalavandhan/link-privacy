@@ -472,7 +472,7 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
     double noise_radius   = 100 * i;
     double time_deviation = 1200 * i;
 
-    GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
+    GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
     GPOs* cmpGPOs;
@@ -504,38 +504,37 @@ void selectiveSTKNNNoise(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  GPOs* purturbedGPOs = new GPOs(coocc_time_range,coocc_spatial_range);
+  GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
 
-  double group_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
-  double group_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
+  double mean_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
+  double mean_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
 
-  cout << "Mean Radius Spatial  :" << group_radius_spatial  << endl;
-  cout << "Mean Radius Temporal :" << group_radius_temporal << endl;
+  cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
+  cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
-
-  double sg = coocc_spatial_range / 1000.0;
-  double tg = coocc_time_range    / 3600.0;
+  double sg = mean_radius_spatial  * 1.35;
+  double tg = mean_radius_temporal * 1.15;
 
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-  {
-    GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
-    }
-    delete cmpGPOs;
-  }
+  // {
+  //   GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+  //   cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+  //   cmpGPOs->countCoOccurrencesOptimistic();
+  //   if(run_utilties){
+  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
+  //   }
+  //   delete cmpGPOs;
+  // }
 
   {
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, std::min(k, 1));
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
@@ -1070,8 +1069,11 @@ int main(int argc, char *argv[]){
     case 9:{
       cout << "ITRATION: Selective Noise vs DD Adversary" << endl;
 
-      k                       = p1;
-      int isOptimistic        = p2;
+
+      coocc_spatial_range     = p1;
+      coocc_time_range        = p2;
+      k                       = p3;
+      int isOptimistic        = p4;
 
       printParameters();
       selectiveGaussianNoiseDDAdversary(k, isOptimistic);
@@ -1092,8 +1094,6 @@ int main(int argc, char *argv[]){
 
       break;
     }
-
-
 
     // case 4:
     //   cout << "ITRATION: Running EBM with grid snapping noise" << endl;

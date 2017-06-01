@@ -110,6 +110,7 @@ public:
     set< pair<int,int> >* getCooccurredCheckins();
     set< pair<int,int> > cooccurred_checkins;
     unordered_map< int, unordered_set<int>* > cooccurrence_index;
+    set<int> unpurtrubed_cooccurrences;
 
     // nextNN without the incremental approach of NN
     //virtual res_point* getNextNN(double x, double y, int incrStep);
@@ -166,6 +167,7 @@ public:
     void loadPurturbedLocationSelectiveKNNDistance(GPOs* gpos, int k, double std_radio, map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
 
     void pickSingleCheckinFromCooccurrences(set<int> *checkins_of_interest);
+    void pickOtherCheckinFromCooccurrences(set<int> *checkins_of_interest);
     void pickUniqueCheckinFromCooccurrences(set<int> *checkins_of_interest);
 
     vector <res_point*>* getRangeSpatioTemporalBound(Point *p);
@@ -183,4 +185,6 @@ public:
 
     void countCoOccurrencesOptimistic();
     void countCoOccurrencesOptimisticDD(int k);
+
+    pair<double, double> minDistanceOutsideCooccurrence(Point *p);
 };
