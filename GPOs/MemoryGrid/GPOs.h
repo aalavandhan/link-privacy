@@ -64,6 +64,7 @@ public:
     vector<res_point*>* getkNN(double x, double y, int k);
     vector<res_point*>* getRange(double x, double y, double radius);
     vector<res_point*>* getRange(Point *original, double radius, double t_dist);
+    vector<res_point*>* getRange(Point *original, double radius, double t_dist, double st_distance);
     vector<res_point*>* getRangeAndDelete(double x, double y, double radius);
     vector<res_point*>* getRangeAndDelete(Point *p, double radius, double t_dist);
     vector<res_point*>* getRangeSortedByTime(double x, double y, double radius);
@@ -133,7 +134,8 @@ public:
 
     void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order);
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
-    void groupLocationsByDD(GPOs* gpos, int k);
+    void groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k);
+
     void groupLocationsByKNNDistance(GPOs* gpos, int k, double std_radio);
     void groupLocationsByST(GPOs* gpos, double radius, double time_deviation);
     void loadPurturbedLocations(GPOs* gpos, double radius);
@@ -186,5 +188,5 @@ public:
     void countCoOccurrencesOptimistic();
     void countCoOccurrencesOptimisticDD(int k);
 
-    pair<double, double> minDistanceOutsideCooccurrence(Point *p);
+    pair<double, double> maxDistanceOutsideCooccurrence(Point *p);
 };

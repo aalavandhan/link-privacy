@@ -468,6 +468,9 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
+  set<int> purturbed_checkins;
+  baseGPOs->pickSingleCheckinFromCooccurrences(&purturbed_checkins);
+
   for(int i=1; i<=7; i++){
     double noise_radius   = 100 * i;
     double time_deviation = 1200 * i;
@@ -476,9 +479,10 @@ void selectiveGaussianNoiseDDAdversary(int k, int isOptimistic){
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
     GPOs* cmpGPOs;
+
     if(!isOptimistic){
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, k);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, k);
       cmpGPOs->countCoOccurrencesOptimistic();
     } else {
       cmpGPOs  = new GPOs(purturbedGPOs);
@@ -509,7 +513,6 @@ void selectiveSTKNNNoise(int k){
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
-  purturbedGPOs->countCoOccurrencesOptimistic();
 
   double mean_radius_spatial  = (double) purturbedGPOs->total_spatial_displacement / (double) purturbedGPOs->purturbed_count;
   double mean_radius_temporal = (double) purturbedGPOs->total_time_displacement    / (double) purturbedGPOs->purturbed_count;
@@ -533,9 +536,12 @@ void selectiveSTKNNNoise(int k){
   //   delete cmpGPOs;
   // }
 
+  set<int> purturbed_checkins;
+  baseGPOs->pickOtherCheckinFromCooccurrences(&purturbed_checkins);
+
   {
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, std::max(k, 1));
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, std::max(k, 1));
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
@@ -1318,8 +1324,8 @@ int main(int argc, char *argv[]){
       bool preload_LE  = false;
       bool preload_OCC = false;
 
-      double coocc_spatial_radius[] = { 0, 25, 50, 100, 200 };
-      double coocc_temporal_radius[] = { 1, 20, 40, 60, 120 };
+      double coocc_spatial_radius[] =  { 0, 25, 50, 75, 100, 125 };
+      double coocc_temporal_radius[] = { 1, 20, 40, 60, 80,  100 };
 
       printParameters();
 
@@ -1328,15 +1334,13 @@ int main(int argc, char *argv[]){
       fixed->groupLocationsByRange(gpos, 10, false);
       delete gpos;
 
-      for (int i = 0; i < 5; ++i){
-        for (int j = 0; j < 5; ++j){
-          GPOs* test_gpos = new GPOs(fixed);
-          test_gpos->coocc_spatial_range = coocc_spatial_radius[ i ];
-          test_gpos->coocc_time_range    = coocc_temporal_radius[ j ] * 60;
-          test_gpos->generateCooccurrenceCache();
-          test_gpos->countU2UCoOccurrences();
-          delete test_gpos;
-        }
+      for (int i = 0; i < 6; ++i){
+        GPOs* test_gpos = new GPOs(fixed);
+        test_gpos->coocc_spatial_range = coocc_spatial_radius[ i ];
+        test_gpos->coocc_time_range    = coocc_temporal_radius[ i ] * 60;
+        test_gpos->generateCooccurrenceCache();
+        test_gpos->countU2UCoOccurrences();
+        delete test_gpos;
       }
 
       break;

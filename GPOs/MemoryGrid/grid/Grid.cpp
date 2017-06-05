@@ -503,7 +503,7 @@ vector<res_point*>* Grid::getRange(Point *original, double radius, double t_dist
     return result;
 }
 
-
+// Radius in geodist and t_dist in hours
 vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, double t_dist){
     double x = original->getX();
     double y = original->getY();

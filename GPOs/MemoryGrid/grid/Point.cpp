@@ -180,3 +180,17 @@ int Point::getCheckinHour(){
 int Point::getCheckinDay(){
     return p_time.date().day_of_week();
 }
+
+double Point::getSTDistance(Point *q){
+    double st_dist;
+    st_dist = 0.5 * ( computeMinDistInKiloMeters(q->getX(), q->getY()) / (SPATIAL_SOFT_BOUND/1000.0) );
+    st_dist+= 0.5 * ( (double) getTimeDifference(q) / (TEMPORAL_SOFT_BOUND * 3600.0) );
+    return st_dist;
+}
+
+double Point::getSTDistance(res_point *q){
+    double st_dist;
+    st_dist = 0.5 * ( computeMinDistInKiloMeters(q->x, q->y) / (SPATIAL_SOFT_BOUND/1000.0) );
+    st_dist+= 0.5 * ( (double) getTimeDifference(q) / (TEMPORAL_SOFT_BOUND * 3600.0) );
+    return st_dist;
+}
