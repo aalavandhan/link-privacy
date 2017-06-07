@@ -1332,11 +1332,9 @@ int main(int argc, char *argv[]){
       GPOs* gpos = loadCheckins(checkins_file, preload_LE, preload_OCC);
 
       for (int i = 0; i < 6; ++i){
-        GPOs* test_gpos = new GPOs(gpos);
-        test_gpos->coocc_spatial_range = coocc_spatial_radius[ i ];
-        test_gpos->coocc_time_range    = coocc_temporal_radius[ i ] * 60;
-        test_gpos->countCoOccurrencesOptimistic();
-        delete test_gpos;
+        gpos->coocc_spatial_range = coocc_spatial_radius[ i ];
+        gpos->coocc_time_range    = coocc_temporal_radius[ i ] * 60;
+        gpos->countCoOccurrencesOptimistic();
       }
 
       break;
