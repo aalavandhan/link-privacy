@@ -408,7 +408,7 @@ void selectiveGaussianNoise(int isOptimistic){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  for(int i=1; i<=7; i++){
+  for(int i=1; i<=10; i++){
     double noise_radius   = 100 * i;
     double time_deviation = 1200 * i;
 
