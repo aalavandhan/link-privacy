@@ -1226,6 +1226,10 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 }
 
 void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k){
+  groupLocationsByDD(gpos, purturbed_checkins, k, 0.99);
+}
+
+void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, double factor){
   map <int, double > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
@@ -1291,7 +1295,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k){
     }else{
       st_distance = 0.5;
     }
-    st_distance = st_distance * 0.95;
+    st_distance = st_distance * factor;
 
     // max_s_dist in KM and max_t_dist in hours
     max_s_dist = 2 * st_distance * (SPATIAL_SOFT_BOUND/1000.0);
