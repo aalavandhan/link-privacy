@@ -478,13 +478,12 @@ void selectiveGaussianNoiseDDAdversary(int k){
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
-    double factors[]  = { 0.25, 0.50, 0.75, 0.99 };
+    double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
 
-
-    for(int j=1; j<=10; j++){
+    for(int j=0; j<6; j++){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, k, 0.25);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, k, factors[j]);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){
