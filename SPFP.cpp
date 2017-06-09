@@ -489,9 +489,12 @@ void selectiveGaussianNoiseDDAdversary(int k){
 
       if(run_utilties){
         runBasicUtility(cmpGPOs, baseGPOs, spos);
-        runUtilities(purturbedGPOs, baseGPOs, spos);
       }
       delete cmpGPOs;
+    }
+
+    if(run_utilties){
+      runUtilities(purturbedGPOs, baseGPOs, spos);
     }
 
     delete purturbedGPOs;
