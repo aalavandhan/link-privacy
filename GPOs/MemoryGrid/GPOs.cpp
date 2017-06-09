@@ -1270,6 +1270,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, d
   boost::posix_time::ptime time;
 
   cout << "Adversary has knowledge about where to group from : " << purturbed_checkins->size() << endl;
+  cout << "Using factor : " << factor << endl;
 
   for(auto c_it = purturbed_checkins->begin(); c_it != purturbed_checkins->end(); c_it++){
     Point *p = gpos->checkin_list.find(*c_it)->second;

@@ -522,33 +522,37 @@ void selectiveSTKNNNoise(int k){
   cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
-  double sg = mean_radius_spatial  * 1.35;
-  double tg = mean_radius_temporal * 1.15;
+  double sg = mean_radius_spatial  * 1.25;
+  double tg = mean_radius_temporal * 1.25;
 
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-  // {
-  //   GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-  //   cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-  //   cmpGPOs->countCoOccurrencesOptimistic();
-  //   if(run_utilties){
-  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
-  //   }
-  //   delete cmpGPOs;
-  // }
-
-  set<int> purturbed_checkins;
-  baseGPOs->pickOtherCheckinFromCooccurrences(&purturbed_checkins);
-
   {
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, std::max(k, 1));
+    cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
     }
     delete cmpGPOs;
+  }
+
+  set<int> purturbed_checkins;
+  baseGPOs->pickOtherCheckinFromCooccurrences(&purturbed_checkins);
+
+  double factors[]  = { 0.50, 0.75, 0.99 };
+
+  for(int j=1; j<=5; j++){
+    for(int l=0; l<3; l++){
+      GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, j, factors[l]);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
+    }
   }
 }
 
