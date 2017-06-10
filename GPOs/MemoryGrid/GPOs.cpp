@@ -1748,11 +1748,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
 
   unordered_set<int>* cooccred_with = gpos->cooccurrence_index.find(3235434)->second;
-  cout << "3235434 | ";
-  for(auto c_it = cooccred_with->begin(); c_it != cooccred_with->end(); c_it++){
-    cout << *c_it << " ";
-  }
-  cout<< endl;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
@@ -1802,9 +1797,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
         spatial_purturbed_count++;
         temporal_purturbed_count++;
         point_count++;
-
-        if(p->getOrder() == 3235434)
-          cout << p->getOrder() << " " << q->getOrder() << " " << noise_radius << " " << time_deviation <<" " << 0.5*(noise_radius/1000.0+time_deviation/(4*3600)) << endl;
       }
 
       else {
@@ -1813,14 +1805,10 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
         int kth = rand() % k_lim;
         int neighbor = neighbours->at(kth);
         Point *q = gpos->checkin_list.find(neighbor)->second;
-        double max_dist_spatial = 0, max_dist_temporal = 0;
-        pair<double, double> max_dist = gpos->maxDistanceOutsideCooccurrence(q);
-        max_dist_spatial  = max_dist.first;
-        max_dist_temporal = max_dist.second;
         double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
         double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
-        pair<double,double> coordinates_with_noise = util.addGaussianNoise(q->getX(), q->getY(), noise_radius, max_dist_spatial);
-        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation, max_dist_temporal);
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(q->getX(), q->getY(), noise_radius, 0);
+        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation, 0);
         total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
         total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
