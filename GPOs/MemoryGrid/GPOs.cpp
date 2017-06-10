@@ -1273,15 +1273,20 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, d
   cout << "Using factor : " << factor << endl;
 
   for(auto c_it = purturbed_checkins->begin(); c_it != purturbed_checkins->end(); c_it++){
-    Point *p = gpos->checkin_list.find(*c_it)->second;
+    auto p_it = gpos->checkin_list.find(*c_it);
+
+    if(p_it == gpos->checkin_list.end())
+      continue;
+
+    Point *p = p_it->second;
     x        = p->getX();
     y        = p->getY();
     order    = p->getOrder();
     time     = p->getTime();
 
-    if(order ==  3316248  || order == 3316247 || order == 3235434){
-      cout << "Processing : " << order << endl;
-    }
+    // if(order ==  3316248  || order == 3316247 || order == 3235434){
+    //   cout << "Processing : " << order << endl;
+    // }
 
     // if( seenLocations.find( order ) != seenLocations.end() )
     //   continue;
@@ -1322,9 +1327,9 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, d
       delete (*c);
     }
 
-    if(order ==  3316248  || order == 3316247){
-      cout << order << " " << max_s_dist << " " << max_t_dist << " " << st_distance << " " << checkins->size() << endl;
-    }
+    // if(order ==  3316248  || order == 3316247){
+    //   cout << order << " " << max_s_dist << " " << max_t_dist << " " << st_distance << " " << checkins->size() << endl;
+    // }
 
     delete checkins;
   }
@@ -1770,7 +1775,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
       total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
       // loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
-
       cooccurrences_out_of_bound++;
       lid++;
       purturbed_count++;
