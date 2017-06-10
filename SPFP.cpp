@@ -541,10 +541,10 @@ void selectiveSTKNNNoise(int k){
   set<int> purturbed_checkins;
   baseGPOs->pickOtherCheckinFromCooccurrences(&purturbed_checkins);
 
-  double factors[]  = { 0.50, 0.75, 0.99, 1.25 };
+  double factors[]  = { 0.50, 0.75, 0.99 };
 
-  for(int j=1; j<=5; j++){
-    for(int l=0; l<4; l++){
+  for(int j=1; j<=2; j++){
+    for(int l=0; l<3; l++){
       GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
       cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, j, factors[l]);
       cmpGPOs->countCoOccurrencesOptimistic();
