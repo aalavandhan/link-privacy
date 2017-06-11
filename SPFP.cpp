@@ -468,9 +468,6 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  set<int> purturbed_checkins;
-  baseGPOs->pickSingleCheckinFromCooccurrences(&purturbed_checkins);
-
   for(int i=1; i<=10; i++){
     double noise_radius   = 100 * i;
     double time_deviation = (80*60) * i;
@@ -483,7 +480,7 @@ void selectiveGaussianNoiseDDAdversary(int k){
     for(int j=0; j<6; j++){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, k, factors[j]);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, k, factors[j]);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){
@@ -536,14 +533,11 @@ void selectiveSTKNNNoise(int k){
     delete cmpGPOs;
   }
 
-  set<int> purturbed_checkins;
-  baseGPOs->pickOtherCheckinFromCooccurrences(&purturbed_checkins);
-
   double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
 
   for(int l=0; l<6; l++){
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, 1, factors[l]);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, 1, factors[l]);
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);

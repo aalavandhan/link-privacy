@@ -1225,11 +1225,13 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
 }
 
-void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k){
-  groupLocationsByDD(gpos, purturbed_checkins, k, 0.99);
+void GPOs::groupLocationsByDD(GPOs* gpos, int k){
+  groupLocationsByDD(gpos, k, 0.99);
 }
 
-void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, double factor){
+void GPOs::groupLocationsByDD(GPOs* gpos, int k, double factor){
+  gpos->calculateLocationEntropy();
+
   map <int, double > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
@@ -1269,12 +1271,27 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, d
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
 
-  cout << "Adversary has knowledge about where to group from : " << purturbed_checkins->size() << endl;
+  cout << "Adversary has knowledge location entropies : " << gpos->location_to_H.size() << endl;
+
+  vector<pair<int,int>> ordered_checkins;
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    Point *p = c_it->second;
+    auto l_it = gpos->location_to_H.find(p->getID());
+    double entropy=0;
+    if(l_it != gpos->location_to_H.end())
+      entropy = l_it->second;
+    ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
+  }
+
+  std::sort(ordered_checkins.begin(), ordered_checkins.end());
+  std::reverse(ordered_checkins.begin(), ordered_checkins.end());
+
   cout << "Using factor : " << factor << endl;
 
-  for(auto c_it = purturbed_checkins->begin(); c_it != purturbed_checkins->end(); c_it++){
-    auto p_it = gpos->checkin_list.find(*c_it);
+  for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
+    int checkin_order = (*c_it).second;
 
+    auto p_it = gpos->checkin_list.find(checkin_order);
     if(p_it == gpos->checkin_list.end())
       continue;
 
@@ -1292,7 +1309,11 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, d
     if(st_it != st_knn.end()){
       st_distance = st_it->second;
     }else{
-      st_distance = 0.99;
+      // Find a cleaner way
+      if(p->getID() >= LOCATION_NOISE_BOUND)
+        st_distance = 0.99;
+      else
+        st_distance = 0;
     }
     st_distance = st_distance * factor;
 
@@ -1534,7 +1555,7 @@ void GPOs::computeSTKNNDistances(int k, int type){
     ss << "knn-noise-temporal-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
 
   if(type == 3)
-    ss << "knn-noise-all-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
+    ss << "knn-noise-combined-" << k <<"-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
 
   filePath = ss.str();
   outfile.open( filePath.c_str() );
@@ -1786,7 +1807,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
       else {
         vector<int> *neighbours = knn_it->second;
         int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
-        int kth = rand() % k_lim;
+        // int kth = rand() % k_lim;
+        int kth = k_lim;
         int neighbor = neighbours->at(kth);
         Point *q = gpos->checkin_list.find(neighbor)->second;
         double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
