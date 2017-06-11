@@ -1796,7 +1796,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
         vector<int> *neighbours = knn_it->second;
         int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
         // int kth = rand() % k_lim;
-        int kth = k_lim;
+        int kth = k_lim-1;
         int neighbor = neighbours->at(kth);
         Point *q = gpos->checkin_list.find(neighbor)->second;
         double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
