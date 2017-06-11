@@ -1225,13 +1225,11 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
 }
 
-void GPOs::groupLocationsByDD(GPOs* gpos, int k){
-  groupLocationsByDD(gpos, k, 0.99);
+void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_to_H, int k){
+  groupLocationsByDD(gpos, location_to_H, k, 0.99);
 }
 
-void GPOs::groupLocationsByDD(GPOs* gpos, int k, double factor){
-  gpos->calculateLocationEntropy();
-
+void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double factor){
   map <int, double > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
@@ -1271,14 +1269,14 @@ void GPOs::groupLocationsByDD(GPOs* gpos, int k, double factor){
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
 
-  cout << "Adversary has knowledge location entropies : " << gpos->location_to_H.size() << endl;
+  cout << "Adversary has knowledge location entropies : " << location_to_H->size() << endl;
 
   vector<pair<int,int>> ordered_checkins;
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     Point *p = c_it->second;
-    auto l_it = gpos->location_to_H.find(p->getID());
+    auto l_it = location_to_H->find(p->getID());
     double entropy=0;
-    if(l_it != gpos->location_to_H.end())
+    if(l_it != location_to_H->end())
       entropy = l_it->second;
     ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
   }

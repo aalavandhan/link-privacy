@@ -461,7 +461,7 @@ void selectiveGaussianNoise(int isOptimistic){
 }
 
 void selectiveGaussianNoiseDDAdversary(int k){
-  bool preload_LE  = false;
+  bool preload_LE  = true;
   bool preload_OCC = false;
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
@@ -480,7 +480,7 @@ void selectiveGaussianNoiseDDAdversary(int k){
     for(int j=0; j<6; j++){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, k, factors[j]);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){
@@ -498,7 +498,7 @@ void selectiveGaussianNoiseDDAdversary(int k){
 }
 
 void selectiveSTKNNNoise(int k){
-  bool preload_LE  = false;
+  bool preload_LE  = true;
   bool preload_OCC = false;
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
@@ -537,7 +537,7 @@ void selectiveSTKNNNoise(int k){
 
   for(int l=0; l<6; l++){
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, 1, factors[l]);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, factors[l]);
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
