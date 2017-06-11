@@ -1307,14 +1307,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *purturbed_checkins, int k, d
     max_s_dist = 2 * st_distance * (SPATIAL_SOFT_BOUND/1000.0);
     max_t_dist = 2 * st_distance * (TEMPORAL_SOFT_BOUND);
 
-    coocc_dist_s = gpos->coocc_spatial_range/(SPATIAL_SOFT_BOUND);
-    coocc_dist_t = gpos->coocc_time_range/(TEMPORAL_SOFT_BOUND*3600.0);
-    coocc_dist_st = 0.5*(coocc_dist_s + coocc_dist_t);
-
-    max_s_dist = max_s_dist > coocc_dist_s ? max_s_dist : coocc_dist_s;
-    max_t_dist = max_t_dist > coocc_dist_t ? max_t_dist : coocc_dist_t;
-
-    st_cmp_dist = st_distance > coocc_dist_st ? st_distance : coocc_dist_st;
+    st_cmp_dist = st_distance;
 
     radius_geo_dist = (max_s_dist) * 360 / EARTH_CIRCUMFERENCE;
     vector<res_point*>* checkins = gpos->getRange(p, radius_geo_dist, max_t_dist);
@@ -1637,8 +1630,8 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
       max_dist_spatial  = max_dist.first;
       max_dist_temporal = max_dist.second;
 
-      pair<double,double> coordinates_with_noise = util.addGaussianNoise( p->getX(), p->getY(), radius,  max_dist_spatial );
-      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise( p->getTime(), time_deviation, max_dist_temporal );
+      pair<double,double> coordinates_with_noise = util.addGaussianNoise( p->getX(), p->getY(), radius,  0 );
+      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise( p->getTime(), time_deviation, 0 );
 
       double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
       double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
@@ -1752,8 +1745,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
 
-  unordered_set<int>* cooccred_with = gpos->cooccurrence_index.find(3235434)->second;
-
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
     Point *p = c_it->second;
@@ -1770,8 +1761,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     if(checkin_of_interest && knn_out_of_bound){
       double noise_radius = SPATIAL_SOFT_BOUND;
       double time_deviation = TEMPORAL_SOFT_BOUND * 3600;
-      pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, max_dist_spatial);
-      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, max_dist_temporal);
+      pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, 0);
+      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, 0);
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
       total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
       loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
@@ -1791,8 +1782,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
         Point *q = gpos->checkin_list.find(neighbor)->second;
         double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
         double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
-        pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, max_dist_spatial);
-        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, max_dist_temporal);
+        pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, 0);
+        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, 0);
         total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
         total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );

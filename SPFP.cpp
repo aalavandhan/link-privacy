@@ -340,8 +340,8 @@ void selectiveGaussianNoiseIdealGrouping(int isOptimistic, int f){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  double spatial_radi[] =  { 1.25, 1.375, 1.5 };
-  double temporal_radi[] = { 1.25, 1.375, 1.5 };
+  double spatial_radi[] =  { 0.75, 1, 1.25 };
+  double temporal_radi[] = { 0.75, 1, 1.25 };
 
   double noise_radius   = 100 * f;
   double time_deviation = 1200 * f;
@@ -410,7 +410,7 @@ void selectiveGaussianNoise(int isOptimistic){
 
   for(int i=1; i<=10; i++){
     double noise_radius   = 100 * i;
-    double time_deviation = 1200 * i;
+    double time_deviation = (80*60) * i;
 
     cout << "Using spatial noise : (m)"  << noise_radius << endl;
     cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
@@ -473,7 +473,7 @@ void selectiveGaussianNoiseDDAdversary(int k){
 
   for(int i=1; i<=10; i++){
     double noise_radius   = 100 * i;
-    double time_deviation = 1200 * i;
+    double time_deviation = (80*60) * i;
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
@@ -497,7 +497,6 @@ void selectiveGaussianNoiseDDAdversary(int k){
     }
 
     delete purturbedGPOs;
-
   }
 }
 
@@ -522,8 +521,8 @@ void selectiveSTKNNNoise(int k){
   cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
-  double sg = mean_radius_spatial  * 1.25;
-  double tg = mean_radius_temporal * 1.25;
+  double sg = mean_radius_spatial;
+  double tg = mean_radius_temporal;
 
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
@@ -543,16 +542,14 @@ void selectiveSTKNNNoise(int k){
 
   double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
 
-  for(int j=1; j<=1; j++){
-    for(int l=0; l<6; l++){
-      GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, j, factors[l]);
-      cmpGPOs->countCoOccurrencesOptimistic();
-      if(run_utilties){
-        runBasicUtility(cmpGPOs, baseGPOs, spos);
-      }
-      delete cmpGPOs;
+  for(int l=0; l<6; l++){
+    GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, &purturbed_checkins, 1, factors[l]);
+    cmpGPOs->countCoOccurrencesOptimistic();
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
     }
+    delete cmpGPOs;
   }
 }
 
