@@ -1307,17 +1307,13 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
     if(st_it != st_knn.end()){
       st_distance = st_it->second;
     }else{
-      // Find a cleaner way
-      if(p->getID() >= LOCATION_NOISE_BOUND)
-        st_distance = 0.99;
-      else
-        st_distance = 0;
+      st_distance = 0.99;
     }
     st_distance = st_distance * factor;
 
     // max_s_dist in KM and max_t_dist in hours
-    max_s_dist = 2 * st_distance * (SPATIAL_SOFT_BOUND/1000.0);
-    max_t_dist = 2 * st_distance * (TEMPORAL_SOFT_BOUND);
+    max_s_dist = st_distance * (SPATIAL_SOFT_BOUND/1000.0);
+    max_t_dist = st_distance * (TEMPORAL_SOFT_BOUND);
 
     st_cmp_dist = st_distance;
 
@@ -1333,12 +1329,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
     }
 
     delete checkins;
-  }
-
-  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
-    Point *p = c_it->second;
-    if( seenLocations.find( p->getOrder() ) == seenLocations.end() )
-      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
   }
 
   cout << "Check-ins inserted : " << checkin_list.size()      << endl;
