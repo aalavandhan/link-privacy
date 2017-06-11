@@ -500,7 +500,6 @@ void selectiveGaussianNoiseDDAdversary(int k){
   }
 }
 
-
 void selectiveSTKNNNoise(int k){
   bool preload_LE  = false;
   bool preload_OCC = false;
