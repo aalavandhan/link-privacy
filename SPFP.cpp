@@ -340,8 +340,8 @@ void selectiveGaussianNoiseIdealGrouping(int isOptimistic, int f){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  double spatial_radi[] =  { 1, 1.25, 1.5 };
-  double temporal_radi[] = { 1, 1.25, 1.5 };
+  double spatial_radi[] =  { 0.08, 0.1, 0.12 };
+  double temporal_radi[] = { 90.0, 105.0, 120.0 };
 
   double noise_radius   = 100 * f;
   double time_deviation = (80*60) * f;
@@ -368,8 +368,8 @@ void selectiveGaussianNoiseIdealGrouping(int isOptimistic, int f){
 
   for(int i=0; i<3; i++){
     for(int j=0; j<3; j++){
-      double sg = spatial_radi[i]  * mean_radius_spatial;
-      double tg = temporal_radi[j] * mean_radius_temporal;
+      double sg = spatial_radi[i];
+      double tg = temporal_radi[j]/60.0;
 
       cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
       cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
