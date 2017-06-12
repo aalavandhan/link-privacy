@@ -468,9 +468,11 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  for(int i=1; i<=10; i++){
-    double noise_radius   = 100 * i;
-    double time_deviation = (80*60) * i;
+  double radi[]  = { 1,5,10 };
+
+  for(int i=0; i<3; i++){
+    double noise_radius   = 100 * radi[i];
+    double time_deviation = (80*60) * radi[i];
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
