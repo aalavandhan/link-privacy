@@ -431,7 +431,7 @@ void selectiveGaussianNoise(int isOptimistic){
     else
       cout << "PESIMISTIC GROUPING STRATEGY" << endl;
 
-    double sg = mean_radius_spatial * group_radius;
+    double sg = mean_radius_spatial  * group_radius;
     double tg = mean_radius_temporal * group_time_radius;
 
     cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
@@ -525,7 +525,7 @@ void selectiveSTKNNNoise(int k){
 
   {
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
+    cmpGPOs->groupLocationsByST(purturbedGPOs, sg * 1.25, tg * 1.25);
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
