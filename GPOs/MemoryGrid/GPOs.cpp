@@ -1757,8 +1757,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     max_dist_temporal = max_dist.second;
 
     if(checkin_of_interest && knn_out_of_bound){
-      double noise_radius = SPATIAL_SOFT_BOUND * 0.5;
-      double time_deviation = TEMPORAL_SOFT_BOUND * 3600 * 0.5;
+      double noise_radius = SPATIAL_SOFT_BOUND;
+      double time_deviation = TEMPORAL_SOFT_BOUND * 3600;
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, 0);
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, 0);
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
@@ -1778,8 +1778,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
         vector<int> *neighbours = knn_it->second;
         int neighbor = neighbours->at(0);
         Point *q = gpos->checkin_list.find(neighbor)->second;
-        double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000 * 0.5;
-        double time_deviation = abs((p->getTime() - q->getTime()).total_seconds()) * 0.5;
+        double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
+        double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, 0);
         boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, 0);
         total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
@@ -1795,12 +1795,11 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
       else {
         vector<int> *neighbours = knn_it->second;
         int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
-        // int kth = rand() % k_lim;
-        int kth = k_lim-1;
+        int kth = rand() % k_lim;
         int neighbor = neighbours->at(kth);
         Point *q = gpos->checkin_list.find(neighbor)->second;
-        double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000 * 0.5;
-        double time_deviation = abs((p->getTime() - q->getTime()).total_seconds()) * 0.5;
+        double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000 * 0.25;
+        double time_deviation = abs((p->getTime() - q->getTime()).total_seconds()) * 0.25;
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(q->getX(), q->getY(), noise_radius, 0);
         boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation, 0);
         total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
