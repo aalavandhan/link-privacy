@@ -499,7 +499,7 @@ void selectiveGaussianNoiseDDAdversary(int k){
   }
 }
 
-void selectiveSTKNNNoise(int k){
+void selectiveSTKNNNoise(int k, bool hide){
   bool preload_LE  = true;
   bool preload_OCC = false;
 
@@ -508,7 +508,7 @@ void selectiveSTKNNNoise(int k){
   baseGPOs->countCoOccurrencesOptimistic();
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k);
+  purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k, hide);
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
   }
@@ -1065,8 +1065,14 @@ int main(int argc, char *argv[]){
       coocc_spatial_range = p2;
       coocc_time_range    = p3;
 
+      bool hide           = p4;
+
       printParameters();
-      selectiveSTKNNNoise(k);
+
+      if(hide)
+        cout << "Hiding sparse locations " << endl;
+
+      selectiveSTKNNNoise(k, hide);
 
       break;
     }

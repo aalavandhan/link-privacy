@@ -1697,7 +1697,7 @@ pair<double, double> GPOs::maxDistanceOutsideCooccurrence(Point *p){
 }
 
 // Only co-occurrences
-void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
+void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   map <int, vector<int>* > st_knn;
 
   stringstream ss;
@@ -1757,8 +1757,11 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k){
     max_dist_temporal = max_dist.second;
 
     if(checkin_of_interest && knn_out_of_bound){
-      double noise_radius = 2*SPATIAL_SOFT_BOUND;
-      double time_deviation = 2*TEMPORAL_SOFT_BOUND;
+      if(hide)
+        continue;
+
+      double noise_radius = SPATIAL_SOFT_BOUND;
+      double time_deviation = TEMPORAL_SOFT_BOUND;
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius);
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
       total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
