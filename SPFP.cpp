@@ -132,8 +132,6 @@ void runBasicUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
   SimpleQueries* query = new SimpleQueries(purturbedGPOs, spos);
 
   cout << "------------- Evaluating basic utility ---------------" << endl;
-
-  double base_radius = (double) max((int)noise_radius, (int)800);
   query->checkUtilityBasic(baseGPOs);
 }
 

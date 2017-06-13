@@ -100,17 +100,20 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   vector< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
   vector< pair<int,int> >* purturbed_cooccurrences = gpos->getCooccurredCheckins();
 
+  cout << "Base Co-occurrences      :" << base_cooccurrences->size() << endl;
+  cout << "Perturbed Co-occurrences :" << purturbed_cooccurrences->size() << endl;
+
   unordered_set< pair<int,int>, PairHasher > base_cooccurrences_hash, purturbed_cooccurrences_hash;
 
   for(auto c_it = base_cooccurrences->begin(); c_it != base_cooccurrences->end(); c_it++){
-    int o1 = (*c_it).first;
-    int o2 = (*c_it).second;
+    int o1 = c_it->first;
+    int o2 = c_it->second;
     base_cooccurrences_hash.insert(make_pair(o1, o2));
   }
 
   for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
-    int o1 = (*c_it).first;
-    int o2 = (*c_it).second;
+    int o1 = c_it->first;
+    int o2 = c_it->second;
     purturbed_cooccurrences_hash.insert(make_pair(o1, o2));
   }
 
