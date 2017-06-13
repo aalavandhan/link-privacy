@@ -114,6 +114,9 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     purturbed_cooccurrences_hash.insert(make_pair(o1, o2));
   }
 
+  cout << "Base Co-occurrences      :" << base_cooccurrences_hash.size() << endl;
+  cout << "Perturbed Co-occurrences :" << purturbed_cooccurrences_hash.size() << endl;
+
   {
     int true_positive = 0, gt = base_cooccurrences_hash.size(), positive = 0;
     for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
