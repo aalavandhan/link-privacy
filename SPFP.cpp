@@ -1065,14 +1065,14 @@ int main(int argc, char *argv[]){
       coocc_spatial_range = p2;
       coocc_time_range    = p3;
 
-      bool hide           = p4;
+      int hide            = p4;
 
       printParameters();
 
-      if(hide)
+      if(hide == 1)
         cout << "Hiding sparse locations " << endl;
 
-      selectiveSTKNNNoise(k, hide);
+      selectiveSTKNNNoise(k, (hide==1));
 
       break;
     }
