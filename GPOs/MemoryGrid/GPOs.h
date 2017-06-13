@@ -108,8 +108,9 @@ public:
 
     void generateCooccurrenceCache();
 
-    set< pair<int,int> >* getCooccurredCheckins();
-    set< pair<int,int> > cooccurred_checkins;
+    vector< pair<int,int> >* getCooccurredCheckins();
+    unordered_set< pair<int,int>, PairHasher > cooccurred_checkins;
+
     unordered_map< int, unordered_set<int>* > cooccurrence_index;
     set<int> unpurtrubed_cooccurrences;
 

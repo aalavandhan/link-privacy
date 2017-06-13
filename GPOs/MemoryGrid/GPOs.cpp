@@ -140,8 +140,14 @@ vector<Point*>* GPOs::getLocations(){
   return &locations;
 }
 
-set< pair<int,int> >* GPOs::getCooccurredCheckins(){
-  return &cooccurred_checkins;
+vector< pair<int,int> >* GPOs::getCooccurredCheckins(){
+  vector< pair<int,int> >* cooccurred_checkins_vector = new vector< pair<int,int> >();
+  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+    cooccurred_checkins_vector->push_back(make_pair(o1,o2));
+  }
+  return cooccurred_checkins_vector;
 }
 
 void GPOs::generateCooccurrenceCache(){
@@ -2111,6 +2117,8 @@ void GPOs::countU2UCoOccurrences(){
   int total_cooccurrences=0, count=0;
 
   int user_checkins_size = 0;
+
+  set <pair<int,int>> cooccurred_checkins; // TODO FIX THIS
 
   cout<<"Number of locations: "<<locations_users_frequency_map_with_order.size()<<endl;
 
