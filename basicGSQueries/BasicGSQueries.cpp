@@ -143,94 +143,115 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
 
   // Basic utility : Sparse vs Dense
-  // map <int, vector<int>* > st_knn;
-  // stringstream ss;
-  // ss << "knn-noise-combined-10-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
-  // ifstream fin(ss.str());
+  map <int, vector<int>* > st_knn;
+  stringstream ss;
+  ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
+  ifstream fin(ss.str());
+  while(!fin.eof()){
+    int order;
+    vector<int> *neighbours = new vector<int>();
+    fin >> order;
+    for(int i = 0; i<10; i++){
+      int knn_order;
+      double st_distance, s_distance, t_distance;
+      string text;
+      fin >> knn_order;
+      fin >> text;
+      st_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      s_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      if(knn_order != -1)
+        neighbours->push_back(knn_order);
+    }
+    if(neighbours->size() > 0){
+      reverse(neighbours->begin(),neighbours->end());
+      st_knn.insert(make_pair(order, neighbours));
+    }
+    else
+      delete neighbours;
+  }
+  fin.close();
+  cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
-  // while(!fin.eof()){
-  //   int order;
-  //   vector<int> *neighbours = new vector<int>();
-  //   fin >> order;
-  //   for(int i = 0; i<10; i++){
-  //     int knn_order;
-  //     double st_distance, s_distance, t_distance;
-  //     string text;
-  //     fin >> knn_order;
-  //     fin >> text;
-  //     st_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
-  //     fin >> text;
-  //     s_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
-  //     fin >> text;
-  //     t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
-  //     if(knn_order != -1)
-  //       neighbours->push_back(knn_order);
-  //   }
-  //   if(neighbours->size() > 0){
-  //     reverse(neighbours->begin(),neighbours->end());
-  //     st_knn.insert(make_pair(order, neighbours));
-  //   }
-  //   else
-  //     delete neighbours;
-  // }
-  // fin.close();
-  // cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
+  unordered_set< pair<int,int>, PairHasher > sparse_set, dense_set, p_sparse_set, p_dense_set;
 
-  // set< pair<int,int> > p_dense_set, p_sparse_set;
-  // for(auto c_it = purturbed_cooccurrences->begin(); c_it != purturbed_cooccurrences->end(); c_it++){
-  //   int o1 = c_it->first;
-  //   int o2 = c_it->second;
-  //   if(st_knn.find(o1) != st_knn.end() && st_knn.find(o2) != st_knn.end()){
-  //     p_dense_set.insert(make_pair(o1,o2));
-  //   } else {
-  //     p_sparse_set.insert(make_pair(o1,o2));
-  //   }
-  // }
+  for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+    if(st_knn.find(o1) != st_knn.end() && st_knn.find(o2) != st_knn.end()){
+      dense_set.insert(make_pair(o1,o2));
+    } else {
+      sparse_set.insert(make_pair(o1,o2));
+    }
+  }
 
-  // set< pair<int,int> > dense_set, sparse_set;
-  // for(auto c_it = base_cooccurrences->begin(); c_it != base_cooccurrences->end(); c_it++){
-  //   int o1 = c_it->first;
-  //   int o2 = c_it->second;
-  //   if(st_knn.find(o1) != st_knn.end() && st_knn.find(o2) != st_knn.end()){
-  //     dense_set.insert(make_pair(o1,o2));
-  //   } else {
-  //     sparse_set.insert(make_pair(o1,o2));
-  //   }
-  // }
+  for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+    if(st_knn.find(o1) != st_knn.end() && st_knn.find(o2) != st_knn.end()){
+      p_dense_set.insert(make_pair(o1,o2));
+    } else {
+      p_sparse_set.insert(make_pair(o1,o2));
+    }
+  }
 
-  // cout << "Number of perturbed co-occurrences in dense region :" << p_dense_set.size() << endl;
-  // cout << "Number of perturbed co-occurrences in sparse region :" << p_sparse_set.size() << endl;
-  // cout << "Number of co-occurrences in dense region :" << dense_set.size() << endl;
-  // cout << "Number of co-occurrences in sparse region :" << sparse_set.size() << endl;
+  {
+    int true_positive = 0, gt = sparse_set.size(), positive = 0;
+    for(auto c_it = p_sparse_set.begin(); c_it != p_sparse_set.end(); c_it++){
+      int o1 = c_it->first;
+      int o2 = c_it->second;
+      if(o1 > o2){
+        int temp = o2;
+        o2 = o1;
+        o1 = temp;
+      }
+      if(sparse_set.find(make_pair(o1, o2)) != sparse_set.end()){
+        true_positive++;
+      }
+      positive++;
+    }
+    double precision = (double) true_positive / (double) positive;
+    double recall    = (double) true_positive / (double) gt;
+    double f1        = 2 * precision * recall / ( precision + recall );
+    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    cout << "Utility SPARSE [ BASIC METRIC ]" << endl;
+    cout << "Number of co-occurrences before : " << gt << endl;
+    cout << "Number of after                 : " << p_sparse_set.size() << endl;
+    cout << "utility_basic_sparse_precision{{" << precision  << "}}" << endl;
+    cout << "utility_basic_sparse_recall{{" << recall  << "}}" << endl;
+    cout << "utility_basic_sparse_f1{{" << f1  << "}}" << endl;
+    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  }
 
-  // {
-  //   int true_positive = 0, gt = dense_set.size(), positive = 0;
-  //   for(auto c_it = purturbed_cooccurrences->begin(); c_it != purturbed_cooccurrences->end(); c_it++){
-  //     int o1 = c_it->first;
-  //     int o2 = c_it->second;
-  //     if(o1 > o2){
-  //       int temp = o2;
-  //       o2 = o1;
-  //       o1 = temp;
-  //     }
-  //     if(dense_set.find(make_pair(o1, o2)) != dense_set.end()){
-  //       true_positive++;
-  //     }
-  //     positive++;
-  //   }
-  //   double precision = (double) true_positive / (double) positive;
-  //   double recall    = (double) true_positive / (double) gt;
-  //   double f1        = 2 * precision * recall / ( precision + recall );
-  //   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  //   cout << "Utility [ BASIC METRIC ]" << endl;
-  //   cout << "Number of co-occurrences before : " << gt << endl;
-  //   cout << "Number of after                 : " << purturbed_cooccurrences->size() << endl;
-  //   cout << "utility_basic_precision{{" << precision  << "}}" << endl;
-  //   cout << "utility_basic_recall{{" << recall  << "}}" << endl;
-  //   cout << "utility_basic_f1{{" << f1  << "}}" << endl;
-  //   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  // }
-
+  {
+    int true_positive = 0, gt = dense_set.size(), positive = 0;
+    for(auto c_it = p_dense_set.begin(); c_it != p_dense_set.end(); c_it++){
+      int o1 = c_it->first;
+      int o2 = c_it->second;
+      if(o1 > o2){
+        int temp = o2;
+        o2 = o1;
+        o1 = temp;
+      }
+      if(dense_set.find(make_pair(o1, o2)) != dense_set.end()){
+        true_positive++;
+      }
+      positive++;
+    }
+    double precision = (double) true_positive / (double) positive;
+    double recall    = (double) true_positive / (double) gt;
+    double f1        = 2 * precision * recall / ( precision + recall );
+    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    cout << "Utility DENSE [ BASIC METRIC ]" << endl;
+    cout << "Number of co-occurrences before : " << gt << endl;
+    cout << "Number of after                 : " << p_dense_set.size() << endl;
+    cout << "utility_basic_dense_precision{{" << precision  << "}}" << endl;
+    cout << "utility_basic_dense_recall{{" << recall  << "}}" << endl;
+    cout << "utility_basic_dense_f1{{" << f1  << "}}" << endl;
+    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  }
 }
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
