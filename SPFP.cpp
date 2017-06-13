@@ -431,7 +431,7 @@ void selectiveGaussianNoise(int isOptimistic){
     else
       cout << "PESIMISTIC GROUPING STRATEGY" << endl;
 
-    double sg = mean_radius_spatial  * group_radius;
+    double sg = 0.1;
     double tg = mean_radius_temporal * group_time_radius;
 
     cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
