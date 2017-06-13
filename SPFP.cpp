@@ -468,33 +468,29 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  double radi[]  = { 1,5,10 };
-
-  for(int i=0; i<3; i++){
-    double noise_radius   = 100 * radi[i];
-    double time_deviation = (80*60) * radi[i];
+  for(int i=0; i<=10; i++){
+    double noise_radius   = 100 * i;
+    double time_deviation = (80*60) * i;
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
-    double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
+    // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
+    double factors[]  = { 0.99 };
 
-    for(int j=0; j<6; j++){
+    for(int j=0; j<1; j++){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
       cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
       cmpGPOs->countCoOccurrencesOptimistic();
-
       if(run_utilties){
         runBasicUtility(cmpGPOs, baseGPOs, spos);
       }
       delete cmpGPOs;
     }
-
     if(run_utilties){
       runUtilities(purturbedGPOs, baseGPOs, spos);
     }
-
     delete purturbedGPOs;
   }
 }
@@ -519,7 +515,7 @@ void selectiveSTKNNNoise(int k, bool hide){
   cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
-  double sg = mean_radius_spatial * 1.25;
+  double sg = 0.1;
   double tg = mean_radius_temporal * 1.25;
 
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
@@ -536,6 +532,7 @@ void selectiveSTKNNNoise(int k, bool hide){
   }
 
   double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
+  // double factors[]  = { 0.99 };
 
   for(int l=0; l<6; l++){
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);

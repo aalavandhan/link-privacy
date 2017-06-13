@@ -1699,7 +1699,6 @@ pair<double, double> GPOs::maxDistanceOutsideCooccurrence(Point *p){
 // Only co-occurrences
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   map <int, vector<int>* > st_knn;
-
   stringstream ss;
   ss << "knn-noise-combined-10-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
   ifstream fin(ss.str());
@@ -1731,9 +1730,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
     else
       delete neighbours;
   }
-
   fin.close();
-
   cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
   set<int> checkins_of_interest;
@@ -1776,6 +1773,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
       temporal_purturbed_count++;
       point_count++;
       continue;
+
     };
 
     if(checkin_of_interest && !knn_out_of_bound){
