@@ -466,9 +466,9 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  double radi[] = { 1, 5, 7, 9}
+  double radi[] = { 1, 5, 7, 9};
 
-  for(int i=1; i<=10; i++){
+  for(int i=0; i<4; i++){
     double noise_radius   = 100 * radi[i];
     double time_deviation = (80*60) * radi[i];
 
