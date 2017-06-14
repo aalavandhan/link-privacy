@@ -151,7 +151,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   // Basic utility : Sparse vs Dense
   map <int, vector<int>* > st_knn;
   stringstream ss;
-  ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
+  ss << "knn-noise-combined-10-25-1200.csv";
   ifstream fin(ss.str());
   while(!fin.eof()){
     int order;
