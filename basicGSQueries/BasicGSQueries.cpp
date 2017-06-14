@@ -111,7 +111,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     base_cooccurrences_hash.insert(make_pair(o1, o2));
   }
 
-  for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
+  for(auto c_it = purturbed_cooccurrences->begin(); c_it != purturbed_cooccurrences->end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
     purturbed_cooccurrences_hash.insert(make_pair(o1, o2));
