@@ -205,7 +205,6 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
   {
     int true_positive = 0, gt = sparse_set.size(), positive = 0;
-    double spatial_noise_distance=0, temporal_noise_distance=0, purturb_count=0;
     for(auto c_it = p_sparse_set.begin(); c_it != p_sparse_set.end(); c_it++){
       int o1 = c_it->first;
       int o2 = c_it->second;
@@ -218,35 +217,12 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
         true_positive++;
       }
       positive++;
-
-      auto x1_bit = base_gpos->checkin_list.find(o1);
-      auto x1_pit = gpos->checkin_list.find(o1);
-      if(x1_bit != base_gpos->checkin_list.end() && x1_pit != gpos->checkin_list.end()){
-        Point *x1_b = x1_bit->second;
-        Point *x1_p = x1_pit->second;
-        spatial_noise_distance += x1_b->computeMinDistInKiloMeters(x1_p->getX(),x1_p->getY());
-        temporal_noise_distance += x1_b->getTimeDifference(x1_p) / 3600.0;
-        purturb_count++;
-      }
-      auto x2_bit = base_gpos->checkin_list.find(o2);
-      auto x2_pit = gpos->checkin_list.find(o2);
-      if(x2_bit != base_gpos->checkin_list.end() && x2_pit != gpos->checkin_list.end()){
-        Point *x2_b = x2_bit->second;
-        Point *x2_p = x2_pit->second;
-        spatial_noise_distance += x2_b->computeMinDistInKiloMeters(x2_p->getX(),x2_p->getY());
-        temporal_noise_distance += x2_b->getTimeDifference(x2_p) / 3600.0;
-        purturb_count++;
-      }
     }
     double precision = (double) true_positive / (double) positive;
     double recall    = (double) true_positive / (double) gt;
     double f1        = 2 * precision * recall / ( precision + recall );
     cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     cout << "Utility SPARSE [ BASIC METRIC ]" << endl;
-    cout << "sparse_region_spatial_noise_total{{" << spatial_noise_distance << "}}" << endl;
-    cout << "sparse_region_temporal_noise_total{{" << temporal_noise_distance << "}}" << endl;
-    cout << "sparse_region_spatial_noise_avg{{" << spatial_noise_distance/purturb_count*1000 << "}}" << endl; // In meters
-    cout << "sparse_region_temporal_noise_avg{{" << temporal_noise_distance/purturb_count*3600 << "}}" << endl; // In seconds
     cout << "sparse_cooccurrences_before{{" << gt << "}}" << endl;
     cout << "sparse_cooccurrences_after{{" << p_sparse_set.size() << "}}" << endl;
     cout << "utility_basic_sparse_precision{{" << precision  << "}}" << endl;
@@ -257,7 +233,6 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
   {
     int true_positive = 0, gt = dense_set.size(), positive = 0;
-    double spatial_noise_distance=0, temporal_noise_distance=0, purturb_count=0;
     for(auto c_it = p_dense_set.begin(); c_it != p_dense_set.end(); c_it++){
       int o1 = c_it->first;
       int o2 = c_it->second;
@@ -270,35 +245,12 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
         true_positive++;
       }
       positive++;
-
-      auto x1_bit = base_gpos->checkin_list.find(o1);
-      auto x1_pit = gpos->checkin_list.find(o1);
-      if(x1_bit != base_gpos->checkin_list.end() && x1_pit != gpos->checkin_list.end()){
-        Point *x1_b = x1_bit->second;
-        Point *x1_p = x1_pit->second;
-        spatial_noise_distance += x1_b->computeMinDistInKiloMeters(x1_p->getX(),x1_p->getY());
-        temporal_noise_distance += x1_b->getTimeDifference(x1_p) / 3600.0;
-        purturb_count++;
-      }
-      auto x2_bit = base_gpos->checkin_list.find(o2);
-      auto x2_pit = gpos->checkin_list.find(o2);
-      if(x2_bit != base_gpos->checkin_list.end() && x2_pit != gpos->checkin_list.end()){
-        Point *x2_b = x2_bit->second;
-        Point *x2_p = x2_pit->second;
-        spatial_noise_distance += x2_b->computeMinDistInKiloMeters(x2_p->getX(),x2_p->getY());
-        temporal_noise_distance += x2_b->getTimeDifference(x2_p) / 3600.0;
-        purturb_count++;
-      }
     }
     double precision = (double) true_positive / (double) positive;
     double recall    = (double) true_positive / (double) gt;
     double f1        = 2 * precision * recall / ( precision + recall );
     cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     cout << "Utility DENSE [ BASIC METRIC ]" << endl;
-    cout << "dense_region_spatial_noise_total{{" << spatial_noise_distance << "}}" << endl;
-    cout << "dense_region_temporal_noise_total{{" << temporal_noise_distance << "}}" << endl;
-    cout << "dense_region_spatial_noise_avg{{" << spatial_noise_distance/purturb_count*1000 << "}}" << endl; // In meters
-    cout << "dense_region_temporal_noise_avg{{" << temporal_noise_distance/purturb_count*3600 << "}}" << endl; // In seconds
     cout << "dense_cooccurrences_before{{" << gt << "}}" << endl;
     cout << "dense_cooccurrences_after{{" << p_dense_set.size() << "}}" << endl;
     cout << "utility_basic_dense_precision{{" << precision  << "}}" << endl;

@@ -1767,16 +1767,23 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
 
       if(!hide){
-        total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+        total_spatial_displacement+=sd;
+        total_time_displacement+=td;
+
+        total_spatial_displacement_sparse+=sd;
+        total_time_displacement_sparse+=td;
+        sparse_purturbed_count++;
+
+        purturbed_count++;
+        spatial_purturbed_count++;
+        temporal_purturbed_count++;
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
       }
 
       cooccurrences_out_of_bound++;
       lid++;
-      purturbed_count++;
-      spatial_purturbed_count++;
-      temporal_purturbed_count++;
       point_count++;
       continue;
 
@@ -1791,8 +1798,16 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
         double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, 0);
         boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, 0);
-        total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+
+        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+        total_spatial_displacement+=sd;
+        total_time_displacement+=td;
+
+        total_spatial_displacement_dense+=sd;
+        total_time_displacement_dense+=td;
+        dense_purturbed_count++;
+
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
         lid++;
         purturbed_count++;
@@ -1813,8 +1828,17 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
         double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
         pair<double,double> coordinates_with_noise = util.addGaussianNoise(q->getX(), q->getY(), noise_radius, 0);
         boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation, 0);
-        total_spatial_displacement+=p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        total_time_displacement+= (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+
+        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+
+        total_spatial_displacement+=sd;
+        total_time_displacement+=td;
+
+        total_spatial_displacement_dense+=sd;
+        total_time_displacement_dense+=td;
+        dense_purturbed_count++;
+
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
 
         lid++;
@@ -1841,6 +1865,16 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+  cout<<"dense_purturbed_count{{"<< dense_purturbed_count <<"}}"<<endl;
+  cout<<"total_spatial_displacement_dense{{"<< total_spatial_displacement_dense <<"}}"<<endl;
+  cout<<"total_time_displacement_dense{{"<< total_time_displacement_dense <<"}}"<<endl;
+  cout<<"average_spatial_displacement_dense{{"<< total_spatial_displacement_dense/(double)sparse_purturbed_count*1000.0 <<"}}"<<endl;
+  cout<<"average_time_displacement_dense{{"<< total_time_displacement_dense/(double)dense_purturbed_count*3600.0 <<"}}"<<endl;
+  cout<<"sparse_purturbed_count{{"<< sparse_purturbed_count <<"}}"<<endl;
+  cout<<"total_spatial_displacement_sparse{{"<< total_spatial_displacement_sparse <<"}}"<<endl;
+  cout<<"total_time_displacement_sparse{{"<< total_time_displacement_sparse <<"}}"<<endl;
+  cout<<"average_spatial_displacement_sparse{{"<< total_spatial_displacement_sparse/(double)sparse_purturbed_count*1000.0 <<"}}"<<endl;
+  cout<<"average_time_displacement_sparse{{"<< total_time_displacement_sparse/(double)dense_purturbed_count*3600.0 <<"}}"<<endl;
 }
 
 // Only co-occurrences

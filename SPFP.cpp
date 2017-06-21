@@ -535,9 +535,10 @@ void selectiveSTKNNNoise(int k, bool hide){
     delete cmpGPOs;
   }
 
-  double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
+  // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
+  double factors[]  = { 0.99 };
 
-  for(int l=0; l<6; l++){
+  for(int l=0; l<1; l++){
     GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
     cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, factors[l]);
     cmpGPOs->countCoOccurrencesOptimistic();

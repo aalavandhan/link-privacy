@@ -31,7 +31,15 @@ public:
     vector<Point*> locations;
     double total_spatial_displacement = 0;
     double total_time_displacement    = 0;
+
+    double total_spatial_displacement_sparse = 0;
+    double total_time_displacement_sparse    = 0;
+    double total_spatial_displacement_dense = 0;
+    double total_time_displacement_dense    = 0;
+
     int purturbed_count = 0, spatial_purturbed_count=0, temporal_purturbed_count=0;
+    int sparse_purturbed_count = 0;
+    int dense_purturbed_count  = 0;
 
     uint coocc_time_range;
     double coocc_spatial_range;
