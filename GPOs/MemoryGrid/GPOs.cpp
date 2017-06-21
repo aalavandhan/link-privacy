@@ -1760,12 +1760,10 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
     max_dist_temporal = max_dist.second;
 
     if(checkin_of_interest && knn_out_of_bound){
-
       double noise_radius = SPATIAL_SOFT_BOUND;
-      double time_deviation = TEMPORAL_SOFT_BOUND;
+      double time_deviation = TEMPORAL_SOFT_BOUND * 3600.0;
       pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius);
       boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
-
       if(!hide){
         double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
         double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
@@ -1781,12 +1779,10 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
         temporal_purturbed_count++;
         loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
       }
-
       cooccurrences_out_of_bound++;
       lid++;
       point_count++;
       continue;
-
     };
 
     if(checkin_of_interest && !knn_out_of_bound){
