@@ -1868,13 +1868,13 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
   cout<<"dense_purturbed_count{{"<< dense_purturbed_count <<"}}"<<endl;
   cout<<"total_spatial_displacement_dense{{"<< total_spatial_displacement_dense <<"}}"<<endl;
   cout<<"total_time_displacement_dense{{"<< total_time_displacement_dense <<"}}"<<endl;
-  cout<<"average_spatial_displacement_dense{{"<< total_spatial_displacement_dense/(double)sparse_purturbed_count*1000.0 <<"}}"<<endl;
+  cout<<"average_spatial_displacement_dense{{"<< total_spatial_displacement_dense/(double)dense_purturbed_count*1000.0 <<"}}"<<endl;
   cout<<"average_time_displacement_dense{{"<< total_time_displacement_dense/(double)dense_purturbed_count*3600.0 <<"}}"<<endl;
   cout<<"sparse_purturbed_count{{"<< sparse_purturbed_count <<"}}"<<endl;
   cout<<"total_spatial_displacement_sparse{{"<< total_spatial_displacement_sparse <<"}}"<<endl;
   cout<<"total_time_displacement_sparse{{"<< total_time_displacement_sparse <<"}}"<<endl;
   cout<<"average_spatial_displacement_sparse{{"<< total_spatial_displacement_sparse/(double)sparse_purturbed_count*1000.0 <<"}}"<<endl;
-  cout<<"average_time_displacement_sparse{{"<< total_time_displacement_sparse/(double)dense_purturbed_count*3600.0 <<"}}"<<endl;
+  cout<<"average_time_displacement_sparse{{"<< total_time_displacement_sparse/(double)sparse_purturbed_count*3600.0 <<"}}"<<endl;
 }
 
 // Only co-occurrences
