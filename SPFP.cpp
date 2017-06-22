@@ -472,9 +472,14 @@ void selectiveGaussianNoiseDDAdversary(int k){
 
   double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
 
-  for(int i=0; i<10; i++){
-    double noise_radius   = 100 * radi[i];
-    double time_deviation = (80*60) * radi[i];
+  double sradi[] = { 3.75,  6.5,  8,  9 };
+  double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
+
+  for(int i=0; i<4; i++){
+    // double noise_radius   = 100 * radi[i];
+    // double time_deviation = (80*60) * radi[i];
+    double noise_radius   = 100 * sradi[i];
+    double time_deviation = (80*60) * tradi[i];
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
