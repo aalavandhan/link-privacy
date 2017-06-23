@@ -1832,9 +1832,8 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     }
 
     vector<int> *neighbours = knn_it->second;
-    int kth = neighbours->size() < k ? neighbours->size() : k;
-
-    for(int i=1; i<=kth ; i++){
+    int kth = k;
+    for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
       if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
