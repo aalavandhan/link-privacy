@@ -1387,7 +1387,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     }
 
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
-    vector<res_point*> *candidates = getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
+    vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
     gpos->getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
 
     // KNN in bound
