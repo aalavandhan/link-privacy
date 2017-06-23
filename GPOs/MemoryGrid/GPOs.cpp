@@ -1837,7 +1837,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     for(int i=1; i<=kth ; i++){
       int neighbor = neighbours->at(i-1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-      if(seenLocations.find(q->getOrder()) == seenLocations.end()){
+      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
         loadPoint( p1->getX(), p1->getY(), lid, q->getUID(), p1->getTime(), q->getOrder() );
         sd = p1->computeMinDistInKiloMeters(q->getX(), q->getY());
         td = (double) abs( (p1->getTime() - q->getTime()).total_seconds() ) / 3600.0;
@@ -1847,6 +1847,8 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
         purturbed_count++;
         lid++;
         seenLocations.insert(q->getOrder());
+      } else {
+        kth++; // Check the next NN
       }
     }
   }
