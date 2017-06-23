@@ -1365,9 +1365,6 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     order    = p->getOrder();
     time     = p->getTime();
 
-    if(p->getID() >= LOCATION_NOISE_BOUND)
-      continue;
-
     if(seenLocations.find(p->getOrder()) == seenLocations.end()){
       loadPoint(x, y, p->getID(), p->getUID(), time, order);
       seenLocations.insert(p->getOrder());
@@ -1377,11 +1374,18 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
     gpos->getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 4);
 
+    if(candidates.size() > 0){
+      cout << "Candidates size : " << candidates->size() << endl;
+      cout << "KNN size : "        << spatioTemporalKNNs.size() << endl;
+    }
+
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
       res_point* topK = spatioTemporalKNNs.top().second;
+      cout << "In range : " << topK->oid << " " << topK->id << endl;
+      if(seenLocations.find(topK->oid) == seenLocations.end()){
+        cout << "Added co-occ" << endl;
 
-      if(seenLocations.find(topK->oid) == seenLocations.end() && topK->id >= LOCATION_NOISE_BOUND){
         co_occurrences++;
         loadPoint(x, y, p->getID(), topK->uid, time, topK->oid);
         seenLocations.insert(topK->oid);
