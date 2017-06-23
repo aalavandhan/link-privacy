@@ -1134,7 +1134,6 @@ int main(int argc, char *argv[]){
       bool preload_OCC = false;
       GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-      baseGPOs->countCoOccurrencesOptimistic();
 
       GPOs* fixedGPOs = baseGPOs;
       fixedGPOs->countCoOccurrencesOptimistic();
