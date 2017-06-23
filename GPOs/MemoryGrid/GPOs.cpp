@@ -1798,25 +1798,29 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
-  set <int> purturbed_list;
   set <int> seenLocations;
 
   for(auto c_it = gpos->cooccurred_checkins.begin(); c_it != gpos->cooccurred_checkins.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
 
-    if(purturbed_list.find(o1) != purturbed_list.end()) // Co-Location has been perturbed
-      continue;
-
     auto knn_it = st_knn.find(o1);
     Point *p1 = gpos->checkin_list.find(o1)->second;
     Point *p2 = gpos->checkin_list.find(o2)->second;
 
+    double baseX=p1->getX(), baseY=p1->getY();
+    boost::posix_time::ptime baseTime;
+
     if(seenLocations.find(p1->getOrder()) == seenLocations.end()){
-      loadPoint( p1->getX(), p1->getY(), p1->getID(), p1->getUID(), p1->getTime(), p1->getOrder() );
+      loadPoint( baseX, baseY, p1->getID(), p1->getUID(), baseTime, p1->getOrder() );
       point_count++;
       seenLocations.insert(p1->getOrder());
-      purturbed_list.insert(p1->getOrder());
+    } else {
+      // o1 already anonomyzed, move o2 to o1
+      Point *p1_purt = checkin_list.find(p1->getOrder())->second;
+      baseX = p1_purt->getX();
+      baseY = p1_purt->getY();
+      baseTime = p1_purt->getTime();
     }
 
     if(knn_it == st_knn.end() && hide){  // Hide sparse
@@ -1824,7 +1828,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     }
 
     if(seenLocations.find(p2->getOrder()) == seenLocations.end()){
-      loadPoint( p1->getX(), p1->getY(), lid, p2->getUID(), p1->getTime(), p2->getOrder() );
+      loadPoint( baseX, baseY, lid, p2->getUID(), baseTime, p2->getOrder() );
       sd = p1->computeMinDistInKiloMeters(p2->getX(), p2->getY());
       td = (double) abs( (p1->getTime() - p2->getTime()).total_seconds() ) / 3600.0;
       total_spatial_displacement+=sd;
@@ -1846,7 +1850,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
       int neighbor = neighbours->at(i-1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
       if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
-        loadPoint( p1->getX(), p1->getY(), lid, q->getUID(), p1->getTime(), q->getOrder() );
+        loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
         sd = p1->computeMinDistInKiloMeters(q->getX(), q->getY());
         td = (double) abs( (p1->getTime() - q->getTime()).total_seconds() ) / 3600.0;
         total_spatial_displacement+=sd;

@@ -186,7 +186,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
-    if(st_knn.find(o1) != st_knn.end() && st_knn.find(o2) != st_knn.end()){
+    if(st_knn.find(o1) != st_knn.end() || st_knn.find(o2) != st_knn.end()){
       dense_set.insert(make_pair(o1,o2));
     } else {
       sparse_set.insert(make_pair(o1,o2));
@@ -196,7 +196,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
-    if(st_knn.find(o1) != st_knn.end() && st_knn.find(o2) != st_knn.end()){
+    if(st_knn.find(o1) != st_knn.end() || st_knn.find(o2) != st_knn.end()){
       p_dense_set.insert(make_pair(o1,o2));
     } else {
       p_sparse_set.insert(make_pair(o1,o2));
