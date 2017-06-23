@@ -392,9 +392,17 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
 
     if(coocc_at_p && metric_type != 4){
       unordered_set<int>* cooccurred_checkins = cooccurrence_index.find(p->getOrder())->second;
-      // Skip co-occurred checkins
+      // Skip co-occurred check-ins
       if( cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end() ){
         continue;
+      }
+
+      // Skip users of co-occurred check-ins
+      for(auto coch_it = cooccurred_checkins->begin(); coch_it != cooccurred_checkins->end(); coch_it++){
+        int coch_order = (*coch_it);
+        Point *ch = checkin_list.find(coch_order)->second;
+        if(ch->getUID() == chk->uid)
+          continue;
       }
     }
 
@@ -1811,8 +1819,9 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
       purturbed_list.insert(p1->getOrder());
     }
 
-    if(knn_it == st_knn.end() && hide) // Hide sparse
-      continue;
+    if(knn_it == st_knn.end() && hide){  // Hide sparse
+      seenLocations.insert(p2->getOrder());
+    }
 
     if(seenLocations.find(p2->getOrder()) == seenLocations.end()){
       loadPoint( p1->getX(), p1->getY(), lid, p2->getUID(), p1->getTime(), p2->getOrder() );
