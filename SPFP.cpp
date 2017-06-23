@@ -474,16 +474,16 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  // double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
+  double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
 
-  double sradi[] = { 3.5, 6.5, 8, 9 };
-  double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
+  // double sradi[] = { 3.5, 6.5, 8, 9 };
+  // double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
 
   for(int i=0; i<4; i++){
-    // double noise_radius   = 100 * radi[i];
-    // double time_deviation = (80*60) * radi[i];
-    double noise_radius   = 100 * sradi[i];
-    double time_deviation = (80*60) * tradi[i];
+    double noise_radius   = 100 * radi[i];
+    double time_deviation = (80*60) * radi[i];
+    // double noise_radius   = 100 * sradi[i];
+    // double time_deviation = (80*60) * tradi[i];
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
@@ -494,8 +494,8 @@ void selectiveGaussianNoiseDDAdversary(int k){
     for(int j=0; j<1; j++){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
-      // cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, 100, time_deviation/2 * 1/3600.0);
+      // cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, 100, time_deviation/2 * 1/3600.0);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){

@@ -1365,8 +1365,11 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
     gpos->getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
 
+    cout << "Candidates :" << candidates->size() << endl;
+    cout << "Neighbours :" << spatioTemporalKNNs.size() << endl;
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
+      cout << "Distance of  " << k << "th neighbor: " <<  spatioTemporalKNNs.top().first << endl;
       res_point* topK = spatioTemporalKNNs.top().second;
       if(seenLocations.find(topK->oid) == seenLocations.end()){
         co_occurrences++;
