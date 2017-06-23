@@ -495,7 +495,7 @@ void selectiveGaussianNoiseDDAdversary(int k){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
       // cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
-      cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, 100, time_deviation/2 * 1/3600.0);
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, noise_radius, time_deviation/3600.0);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){
