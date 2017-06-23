@@ -278,10 +278,14 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
 }
 
 vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
+  return getRangeSpatioTemporalBound(p, SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND);
+}
+
+vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p, double spatial_bound_in_meters, double temporal_bound_in_hours){
   vector <Point*> temporal_candidates;
   vector <res_point*>* candidates = new vector <res_point*>();
 
-  getRangeByTime(p->getTimeIndex() - (TEMPORAL_SOFT_BOUND + 1), p->getTimeIndex() + (TEMPORAL_SOFT_BOUND + 1), &temporal_candidates);
+  getRangeByTime(p->getTimeIndex() - (temporal_bound_in_hours + 1), p->getTimeIndex() + (temporal_bound_in_hours + 1), &temporal_candidates);
 
   for(auto cd_it = temporal_candidates.begin(); cd_it != temporal_candidates.end(); cd_it++){
     Point *q = (*cd_it);
@@ -289,7 +293,7 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
       double dist = p->computeMinDistInKiloMeters(q->getX(), q->getY());
       double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
 
-      if( (dist * 1000) <= SPATIAL_SOFT_BOUND && ((double)time_deviation/3600.0) <= TEMPORAL_SOFT_BOUND){
+      if( (dist * 1000) <= spatial_bound_in_meters && ((double)time_deviation/3600.0) <= temporal_bound_in_hours){
         res_point *rp = new res_point();
         rp->id = q->getID();
         rp->uid = q->getUID();
@@ -1276,7 +1280,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
   boost::posix_time::ptime time;
 
   cout << "Adversary has knowledge location entropies : " << location_to_H->size() << endl;
-
   vector<pair<int,int>> ordered_checkins;
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     Point *p = c_it->second;
@@ -1286,7 +1289,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
       entropy = l_it->second;
     ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
   }
-
   std::sort(ordered_checkins.begin(), ordered_checkins.end());
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
 
@@ -1339,6 +1341,63 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
 
   cout << "Check-ins inserted : " << checkin_list.size()      << endl;
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
+}
+
+void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location_to_H,
+    int k, double spatial_bound_in_meters, double temporal_bound_in_hours){
+
+  double x,y,order;
+  boost::posix_time::ptime time;
+  unordered_set<int> seenLocations;
+
+  cout << "Adversary has knowledge location entropies : " << location_to_H->size() << endl;
+  vector<pair<int,int>> ordered_checkins;
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    Point *p = c_it->second;
+    auto l_it = location_to_H->find(p->getID());
+    double entropy=0;
+    if(l_it != location_to_H->end())
+      entropy = l_it->second;
+
+    if(entropy > 0)
+      ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
+    else{
+      // Load checkins
+      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
+      seenLocations.insert(p->getOrder());
+    }
+  }
+  std::sort(ordered_checkins.begin(), ordered_checkins.end());
+  std::reverse(ordered_checkins.begin(), ordered_checkins.end());
+
+  for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
+    int checkin_order = (*c_it).second;
+
+    auto p_it = gpos->checkin_list.find(checkin_order);
+    Point *p = p_it->second;
+    x        = p->getX();
+    y        = p->getY();
+    order    = p->getOrder();
+    time     = p->getTime();
+
+    if(seenLocations.find(p->getOrder()) != seenLocations.end()){
+      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
+      seenLocations.insert(p->getOrder());
+    }
+
+    priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
+    vector<res_point*> *candidates = getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
+    getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
+
+    // KNN in bound
+    if(spatioTemporalKNNs.size() == k){
+      res_point* topK = spatioTemporalKNNs.top().second;
+      if(seenLocations.find(topK->oid) != seenLocations.end()){
+        loadPoint(p->getX(), p->getY(), topK->id, topK->uid, p->getTime(), topK->oid);
+        seenLocations.insert(topK->oid);
+      }
+    }
+  }
 }
 
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){

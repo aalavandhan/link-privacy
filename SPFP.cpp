@@ -406,9 +406,15 @@ void selectiveGaussianNoise(int isOptimistic){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  for(int i=1; i<=10; i++){
-    double noise_radius   = 100 * i;
-    double time_deviation = (80*60) * i;
+  // double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
+  double sradi[] = { 3.5, 6.5, 8, 9 };
+  double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
+
+  for(int i=0; i<4; i++){
+    // double noise_radius   = 100 * radi[i];
+    // double time_deviation = (80*60) * radi[i];
+    double noise_radius   = 100 * sradi[i];
+    double time_deviation = (80*60) * tradi[i];
 
     cout << "Using spatial noise : (m)"  << noise_radius << endl;
     cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
@@ -429,10 +435,8 @@ void selectiveGaussianNoise(int isOptimistic){
     else
       cout << "PESIMISTIC GROUPING STRATEGY" << endl;
 
-
     // Hardcoding spatial noise : 100m
     double sg = 0.1;
-
     // Temporal noise : 50% ( 1SD ) = 1.25 ( Mean )
     double tg = mean_radius_temporal * 1.25;
 
@@ -470,9 +474,9 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
-  double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
+  // double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
 
-  double sradi[] = { 3.75,  6.5,  8,  9 };
+  double sradi[] = { 3.5, 6.5, 8, 9 };
   double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
 
   for(int i=0; i<4; i++){
@@ -485,13 +489,19 @@ void selectiveGaussianNoiseDDAdversary(int k){
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
     // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
-    double factors[]  = { 0.50 };
+    double factors[]  = { 0.99 };
 
     for(int j=0; j<1; j++){
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
+      // cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
+
+
+      cout << "Spatial KNN Limit:" << 0.1 << endl;
+      cout << "Temporal KNN Limit:" << 0.39*time_deviation/3600.0 << endl;
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, 0.1, 0.39*time_deviation/3600.0);
       cmpGPOs->countCoOccurrencesOptimistic();
+
       if(run_utilties){
         runBasicUtility(cmpGPOs, baseGPOs, spos);
       }

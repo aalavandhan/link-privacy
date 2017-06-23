@@ -183,6 +183,7 @@ public:
     void pickUniqueCheckinFromCooccurrences(set<int> *checkins_of_interest);
 
     vector <res_point*>* getRangeSpatioTemporalBound(Point *p);
+    vector <res_point*>* getRangeSpatioTemporalBound(Point *p, double spatial_bound_in_meters, double temporal_bound_in_hours);
 
     void computeSkylineMetrics(map< int, map<int,int>* >* _location_to_user_to_cooccurrences);
     void getSkylinePoints(Point *p, vector <res_point*> *spatial_candidates, map< int, pair<int, res_point*> > *skylines);
@@ -199,4 +200,7 @@ public:
     void countCoOccurrencesOptimisticDD(int k);
 
     pair<double, double> maxDistanceOutsideCooccurrence(Point *p);
+
+    void groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double spatial_bound_in_meters, double temporal_bound_in_hours);
+
 };
