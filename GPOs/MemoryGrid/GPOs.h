@@ -202,5 +202,5 @@ public:
     pair<double, double> maxDistanceOutsideCooccurrence(Point *p);
 
     void groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double spatial_bound_in_meters, double temporal_bound_in_hours);
-
+    void anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide);
 };

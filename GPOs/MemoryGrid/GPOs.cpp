@@ -1752,8 +1752,127 @@ pair<double, double> GPOs::maxDistanceOutsideCooccurrence(Point *p){
   return make_pair(max_dist_spatial, max_dist_temporal);
 }
 
+void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
+  map <int, vector<int>* > st_knn;
+  stringstream ss;
+  ss << "knn-noise-combined-10-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
+  ifstream fin(ss.str());
+
+  while(!fin.eof()){
+    int order;
+    vector<int> *neighbours = new vector<int>();
+    fin >> order;
+
+    for(int i = 0; i<10; i++){
+      int knn_order;
+      double st_distance, s_distance, t_distance;
+      string text;
+      fin >> knn_order;
+      fin >> text;
+      st_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      s_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      fin >> text;
+      t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
+      if(knn_order != -1)
+        neighbours->push_back(knn_order);
+    }
+
+    if(neighbours->size() > 0){
+      reverse(neighbours->begin(),neighbours->end());
+      st_knn.insert(make_pair(order, neighbours));
+    }
+    else
+      delete neighbours;
+  }
+  fin.close();
+  cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
+
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
+  double sd, td;
+  set <int> purturbed_list;
+  set <int> seenLocations;
+
+  for(auto c_it = gpos->cooccurred_checkins.begin(); c_it != gpos->cooccurred_checkins.end(); c_it++){
+    int o1 = c_it->first;
+    int o2 = c_it->second;
+
+    if(purturbed_list.find(o1) != purturbed_list.end()) // Co-Location has been perturbed
+      continue;
+
+    auto knn_it = st_knn.find(o1);
+    Point *p1 = gpos->checkin_list.find(o1)->second;
+    Point *p2 = gpos->checkin_list.find(o2)->second;
+
+    if(seenLocations.find(p1->getOrder()) == seenLocations.end()){
+      loadPoint( p1->getX(), p1->getY(), p1->getID(), p1->getUID(), p1->getTime(), p1->getOrder() );
+      point_count++;
+      seenLocations.insert(p1->getOrder());
+      purturbed_list.insert(p1->getOrder());
+    }
+
+    if(knn_it == st_knn.end() && hide) // Hide sparse
+      continue;
+
+    if(seenLocations.find(p2->getOrder()) == seenLocations.end()){
+      loadPoint( p1->getX(), p1->getY(), lid, p2->getUID(), p1->getTime(), p2->getOrder() );
+      sd = p1->computeMinDistInKiloMeters(p2->getX(), p2->getY());
+      td = (double) abs( (p1->getTime() - p2->getTime()).total_seconds() ) / 3600.0;
+      total_spatial_displacement+=sd;
+      total_time_displacement+=td;
+      point_count++;
+      purturbed_count++;
+      lid++;
+      seenLocations.insert(p2->getOrder());
+    }
+
+    if(knn_it == st_knn.end()){ // Sparse region
+      cooccurrences_out_of_bound++;
+      continue;
+    }
+
+    vector<int> *neighbours = knn_it->second;
+    int kth = neighbours->size() < k ? neighbours->size() : k;
+
+    for(int i=1; i<=kth ; i++){
+      int neighbor = neighbours->at(i-1);
+      Point *q = gpos->checkin_list.find(neighbor)->second;
+      if(seenLocations.find(q->getOrder()) == seenLocations.end()){
+        loadPoint( p1->getX(), p1->getY(), lid, q->getUID(), p1->getTime(), q->getOrder() );
+        sd = p1->computeMinDistInKiloMeters(q->getX(), q->getY());
+        td = (double) abs( (p1->getTime() - q->getTime()).total_seconds() ) / 3600.0;
+        total_spatial_displacement+=sd;
+        total_time_displacement+=td;
+        point_count++;
+        purturbed_count++;
+        lid++;
+        seenLocations.insert(q->getOrder());
+      }
+    }
+  }
+
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    int order = c_it->first;
+    Point *p = c_it->second;
+
+    if(seenLocations.find(order) == seenLocations.end()){
+      loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+    }
+  }
+
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"cooccurrences_out_of_bound{{"<< cooccurrences_out_of_bound << "}}" << endl;
+  cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
+  cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / purturbed_count) * 1000 <<"}} in meters"<<endl;
+  cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
+  cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
+  cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)purturbed_count) <<"}} hours"<<endl;
+}
+
 // Only co-occurrences
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
+
   map <int, vector<int>* > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-10-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
@@ -1793,8 +1912,6 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
   cout << "Loaded checkins of interest : " << checkins_of_interest.size() << endl;
-
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
