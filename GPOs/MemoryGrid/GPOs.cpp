@@ -1365,6 +1365,9 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     order    = p->getOrder();
     time     = p->getTime();
 
+    if(topK->id >= LOCATION_NOISE_BOUND)
+      continue;
+
     if(seenLocations.find(p->getOrder()) == seenLocations.end()){
       loadPoint(x, y, p->getID(), p->getUID(), time, order);
       seenLocations.insert(p->getOrder());
