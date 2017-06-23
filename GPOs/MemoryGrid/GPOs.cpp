@@ -1238,41 +1238,9 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
 }
 
 void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double factor){
-  map <int, double > st_knn;
-  stringstream ss;
-  ss << "knn-noise-combined-10-" << gpos->coocc_spatial_range << "-" << gpos->coocc_time_range << "-coocc" << ".csv";
-  ifstream fin(ss.str());
-  while(!fin.eof()){
-    int order;
-    double ks_dist=std::numeric_limits<double>::infinity(), kt_dist=std::numeric_limits<double>::infinity(), kst_dist = std::numeric_limits<double>::infinity();
-    vector<int> *neighbours = new vector<int>();
-    fin >> order;
-    for(int i = 0; i<10; i++){
-      int knn_order;
-      double st_distance, s_distance, t_distance;
-      string text;
-      fin >> knn_order;
-      fin >> text;
-      st_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
-      fin >> text;
-      s_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
-      fin >> text;
-      t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
-
-      if(knn_order != -1 && 10 == k+i ){
-        ks_dist = s_distance;
-        kt_dist = t_distance;
-        kst_dist = st_distance;
-      }
-    }
-    if(ks_dist != std::numeric_limits<double>::infinity() && kt_dist != std::numeric_limits<double>::infinity())
-      st_knn.insert(make_pair(order, kst_dist));
-  }
-  fin.close();
-  cout << "Loaded KNN for from " << ss.str() << " : " << st_knn.size() << endl;
-
   double radius_geo_dist,x=0, y=0;
   unsigned int order;
+  int co_occurrences=0;
 
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
@@ -1289,15 +1257,12 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
   }
   std::sort(ordered_checkins.begin(), ordered_checkins.end());
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
-
   cout << "Using factor : " << factor << endl;
 
   for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
     int checkin_order = (*c_it).second;
 
     auto p_it = gpos->checkin_list.find(checkin_order);
-    if(p_it == gpos->checkin_list.end())
-      continue;
 
     Point *p = p_it->second;
     x        = p->getX();
@@ -1307,43 +1272,51 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
 
     loadPoint(x, y, p->getID(), p->getUID(), time, order);
     seenLocations.insert( order );
-    double max_s_dist, max_t_dist, st_distance, coocc_dist_s, coocc_dist_t, coocc_dist_st, st_cmp_dist;
 
-    auto st_it = st_knn.find(order);
-    if(st_it != st_knn.end()){
-      st_distance = st_it->second;
-    }else{
-      st_distance = 0.99;
+    // Get KNNs in SPATIAL_TEMPORAL [ RANGE ]
+    priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
+    vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p);
+    gpos->getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
+
+    // Sort KNNs in ascending order
+    map< double, res_point* > knnHash;
+    while(!spatioTemporalKNNs.empty()){
+      double distance = spatioTemporalKNNs.top().first;
+      res_point* topK = spatioTemporalKNNs.top().second;
+      knnHash.insert(make_pair(distance, topK));
     }
-    st_distance = st_distance * factor;
 
-    // max_s_dist in KM and max_t_dist in hours
-    max_s_dist = st_distance * (SPATIAL_SOFT_BOUND/1000.0);
-    max_t_dist = st_distance * (TEMPORAL_SOFT_BOUND);
+    // Create co-occurrences until the first actual location
+    vector<res_point*> cooccurrences;
+    for(auto knn_it=knnHash.begin(); knn_it!=knnHash.end(); knn_it++){
+      cout << knn_it->first << " ";
+      res_point *rp = knn_it->second;
+      if(rp->id < LOCATION_NOISE_BOUND)
+        break;
 
-    st_cmp_dist = st_distance;
-
-    radius_geo_dist = (max_s_dist) * 360 / EARTH_CIRCUMFERENCE;
-    vector<res_point*>* checkins = gpos->getRange(p, radius_geo_dist, max_t_dist);
-
-    for(auto c = checkins->begin(); c != checkins->end(); c++){
-      if( seenLocations.find( (*c)->oid ) == seenLocations.end() && p->getSTDistance(*c) <= st_cmp_dist ){
-        loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
-        seenLocations.insert( (*c)->oid );
+      if(seenLocations.find(rp->oid) == seenLocations.end()){
+        co_occurrences++;
+        loadPoint(x, y, p->getID(), rp->uid, time, rp->oid);
+        seenLocations.insert(rp->oid);
       }
-      delete (*c);
     }
+    cout << endl;
 
-    delete checkins;
+    // deleting candidates
+    for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
+      delete *sc_it;
+    }
+    delete candidates;
+
+    if(checkin_list.size()%100000 == 0)
+      cout << checkin_list.size() << " " << co_occurrences << endl;
   }
 
   cout << "Check-ins inserted : " << checkin_list.size()      << endl;
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
 
-void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location_to_H,
-    int k, double spatial_bound_in_meters, double temporal_bound_in_hours){
-
+void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double spatial_bound_in_meters, double temporal_bound_in_hours){
   double x,y,order;
   boost::posix_time::ptime time;
   unordered_set<int> seenLocations;
