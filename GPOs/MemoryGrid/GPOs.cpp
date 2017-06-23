@@ -1800,7 +1800,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
   fin.close();
   cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
+  unsigned int lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
   set <int> seenLocations;
 
@@ -1808,41 +1808,51 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     int o1 = c_it->first;
     int o2 = c_it->second;
 
-    auto knn_it = st_knn.find(o1);
     Point *p1 = gpos->checkin_list.find(o1)->second;
     Point *p2 = gpos->checkin_list.find(o2)->second;
 
     double baseX=p1->getX(), baseY=p1->getY();
     boost::posix_time::ptime baseTime=p1->getTime();
 
-    if(seenLocations.find(p1->getOrder()) == seenLocations.end()){
-      loadPoint( baseX, baseY, p1->getID(), p1->getUID(), baseTime, p1->getOrder() );
-      point_count++;
-      seenLocations.insert(p1->getOrder());
-    } else {
-      // o1 already anonomyzed, move o2 to o1
-      Point *p1_purt = checkin_list.find(p1->getOrder())->second;
-      baseX = p1_purt->getX();
-      baseY = p1_purt->getY();
-      baseTime = p1_purt->getTime();
-    }
-
+    auto knn_it = st_knn.find(o1);
     if(knn_it == st_knn.end() && hide){  // Hide sparse
       seenLocations.insert(p2->getOrder());
       cooccurrences_out_of_bound++;
       continue;
     }
 
+    if(seenLocations.find(p1->getOrder()) != seenLocations.end()){
+      // o1 already anonomyzed
+      Point *p1_purt = checkin_list.find(p1->getOrder())->second;
+      baseX = p1_purt->getX();
+      baseY = p1_purt->getY();
+      baseTime = p1_purt->getTime();
+    }
+
+    if(seenLocations.find(p2->getOrder()) != seenLocations.end()){
+      // o2 already anonomyzed
+      Point *p2_purt = checkin_list.find(p2->getOrder())->second;
+      baseX = p2_purt->getX();
+      baseY = p2_purt->getY();
+      baseTime = p2_purt->getTime();
+    }
+
+    if(seenLocations.find(p1->getOrder()) == seenLocations.end()){
+      loadPoint( baseX, baseY, lid, p1->getUID(), baseTime, p1->getOrder() );
+      seenLocations.insert(p1->getOrder());
+      lid++;
+      total_spatial_displacement+=p1->computeMinDistInKiloMeters(baseX, baseY);
+      total_time_displacement+=(double)abs((p1->getTime() - baseTime).total_seconds())/3600.0;
+      purturbed_count++;
+    }
+
     if(seenLocations.find(p2->getOrder()) == seenLocations.end()){
       loadPoint( baseX, baseY, lid, p2->getUID(), baseTime, p2->getOrder() );
-      sd = p1->computeMinDistInKiloMeters(p2->getX(), p2->getY());
-      td = (double) abs( (p1->getTime() - p2->getTime()).total_seconds() ) / 3600.0;
-      total_spatial_displacement+=sd;
-      total_time_displacement+=td;
-      point_count++;
-      purturbed_count++;
-      lid++;
       seenLocations.insert(p2->getOrder());
+      lid++;
+      total_spatial_displacement+=p1->computeMinDistInKiloMeters(baseX, baseY);
+      total_time_displacement+=(double)abs((p1->getTime() - baseTime).total_seconds())/3600.0;
+      purturbed_count++;
     }
 
     if(knn_it == st_knn.end()){ // Sparse region
@@ -1854,17 +1864,15 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     int kth = k, knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
+      Point tp = Point(baseX, baseY, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
       if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
         loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
-        sd = p1->computeMinDistInKiloMeters(q->getX(), q->getY());
-        td = (double) abs( (p1->getTime() - q->getTime()).total_seconds() ) / 3600.0;
-        total_spatial_displacement+=sd;
-        total_time_displacement+=td;
-        point_count++;
-        purturbed_count++;
-        lid++;
         seenLocations.insert(q->getOrder());
+        lid++;
+        total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
+        total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
+        purturbed_count++;
         knn_added++;
       } else {
         kth++; // Check the next NN
@@ -1890,7 +1898,6 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / purturbed_count) * 1000 <<"}} in meters"<<endl;
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
-  cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)purturbed_count) <<"}} hours"<<endl;
 }
 
