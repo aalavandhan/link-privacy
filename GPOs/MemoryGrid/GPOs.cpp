@@ -1796,7 +1796,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
   fin.close();
   cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
-  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
   set <int> purturbed_list;
   set <int> seenLocations;
@@ -1841,7 +1841,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     }
 
     vector<int> *neighbours = knn_it->second;
-    int kth = k;
+    int kth = k, knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
@@ -1855,10 +1855,14 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
         purturbed_count++;
         lid++;
         seenLocations.insert(q->getOrder());
+        knn_added++;
       } else {
         kth++; // Check the next NN
       }
     }
+
+    if(knn_added == 0) // Keeping track of co-occurrences which are not anonomized
+      knn_not_added++;
   }
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
@@ -1872,6 +1876,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
 
   cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
   cout<<"cooccurrences_out_of_bound{{"<< cooccurrences_out_of_bound << "}}" << endl;
+  cout<<"knn_not_added{{"<< knn_not_added << "}}" << endl;
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / purturbed_count) * 1000 <<"}} in meters"<<endl;
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
