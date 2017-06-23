@@ -1240,7 +1240,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
 void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double factor){
   double radius_geo_dist,x=0, y=0;
   unsigned int order;
-  int co_occurrences=0;
 
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
@@ -1257,6 +1256,9 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
   }
   std::sort(ordered_checkins.begin(), ordered_checkins.end());
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
+  cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
+
+  double co_occurrences = 0;
   cout << "Using factor : " << factor << endl;
 
   for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
@@ -1284,6 +1286,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
       double distance = spatioTemporalKNNs.top().first;
       res_point* topK = spatioTemporalKNNs.top().second;
       knnHash.insert(make_pair(distance, topK));
+      spatioTemporalKNNs.pop();
     }
 
     // Create co-occurrences until the first actual location
@@ -1340,7 +1343,6 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
   }
   std::sort(ordered_checkins.begin(), ordered_checkins.end());
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
-
   cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
   double co_occurrences = 0;
 
