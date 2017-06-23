@@ -1390,9 +1390,6 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     vector<res_point*> *candidates = getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
     getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
 
-    cout << "candidates in vicinity :" << candidates->size() << endl;
-    cout << "KNN in bound           :" << spatioTemporalKNNs.size() << endl;
-
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
       res_point* topK = spatioTemporalKNNs.top().second;
