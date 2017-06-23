@@ -1365,7 +1365,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     order    = p->getOrder();
     time     = p->getTime();
 
-    if(topK->id >= LOCATION_NOISE_BOUND)
+    if(p->getID() >= LOCATION_NOISE_BOUND)
       continue;
 
     if(seenLocations.find(p->getOrder()) == seenLocations.end()){
