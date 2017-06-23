@@ -1126,9 +1126,11 @@ int main(int argc, char *argv[]){
       k                   = p1;
       coocc_spatial_range = p2;
       coocc_time_range    = p3;
-      int hide            = p4;
+      bool hide           = (p4==1);
 
       printParameters();
+
+      cout << "Hiding sparse co-locations" << endl;
 
       bool preload_LE  = true;
       bool preload_OCC = false;
