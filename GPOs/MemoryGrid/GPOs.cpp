@@ -1377,8 +1377,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
       res_point* topK = spatioTemporalKNNs.top().second;
-      // if(seenLocations.find(topK->oid) == seenLocations.end()){
-      if(topK->id >= LOCATION_NOISE_BOUND){
+      if(seenLocations.find(topK->oid) == seenLocations.end() && topK->id >= LOCATION_NOISE_BOUND){
         co_occurrences++;
         loadPoint(x, y, p->getID(), topK->uid, time, topK->oid);
         seenLocations.insert(topK->oid);
