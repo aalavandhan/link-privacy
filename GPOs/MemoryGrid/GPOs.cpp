@@ -1370,6 +1370,8 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
   std::sort(ordered_checkins.begin(), ordered_checkins.end());
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
 
+  cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
+
   for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
     int checkin_order = (*c_it).second;
 
@@ -1387,7 +1389,11 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
 
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
     vector<res_point*> *candidates = getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
+
     getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
+
+    cout << "candidates in vicinity :" << candidates->size() << endl;
+    cout << "KNN in bound           :" << spatioTemporalKNNs.size() << endl;
 
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
@@ -1397,7 +1403,16 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
         seenLocations.insert(topK->oid);
       }
     }
+
+    // deleting candidates
+    for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
+      delete *sc_it;
+    }
+    delete candidates;
   }
+
+  cout << "Check-ins inserted : " << checkin_list.size()      << endl;
+  cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
 
 void GPOs::groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic){
