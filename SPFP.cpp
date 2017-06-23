@@ -1130,7 +1130,8 @@ int main(int argc, char *argv[]){
 
       printParameters();
 
-      cout << "Hiding sparse co-locations" << endl;
+      if(hide)
+        cout << "Hiding sparse co-locations" << endl;
 
       bool preload_LE  = true;
       bool preload_OCC = false;

@@ -1810,7 +1810,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     Point *p2 = gpos->checkin_list.find(o2)->second;
 
     double baseX=p1->getX(), baseY=p1->getY();
-    boost::posix_time::ptime baseTime;
+    boost::posix_time::ptime baseTime=p1->getTime();
 
     if(seenLocations.find(p1->getOrder()) == seenLocations.end()){
       loadPoint( baseX, baseY, p1->getID(), p1->getUID(), baseTime, p1->getOrder() );
