@@ -497,9 +497,9 @@ void selectiveGaussianNoiseDDAdversary(int k){
       // cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
 
 
-      cout << "Spatial KNN Limit:" << 0.1 << endl;
+      cout << "Spatial KNN Limit:" << 100 << endl;
       cout << "Temporal KNN Limit:" << 0.39*time_deviation/3600.0 << endl;
-      cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, 0.1, 0.39*time_deviation/3600.0);
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, 100, 0.39*time_deviation/3600.0);
       cmpGPOs->countCoOccurrencesOptimistic();
 
       if(run_utilties){
