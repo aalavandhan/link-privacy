@@ -1413,7 +1413,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
       cout << checkin_list.size() << endl;
   }
 
-  cout << "Artificially created co-occurrences : " << co_occurrences.size()      << endl;
+  cout << "Artificially created co-occurrences : " << co_occurrences      << endl;
   cout << "Check-ins inserted : " << checkin_list.size()      << endl;
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
