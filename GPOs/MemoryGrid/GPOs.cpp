@@ -292,7 +292,6 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p, double spatial_
     if(p->getUID() != q->getUID() && p->getID() != q->getID()){
       double dist = p->computeMinDistInKiloMeters(q->getX(), q->getY());
       double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
-
       if( (dist * 1000) <= spatial_bound_in_meters && ((double)time_deviation/3600.0) <= temporal_bound_in_hours){
         res_point *rp = new res_point();
         rp->id = q->getID();
@@ -304,7 +303,6 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p, double spatial_
         rp->dist = dist * 360/EARTH_CIRCUMFERENCE;
         candidates->push_back(rp);
       }
-
     }
   }
 
@@ -1371,6 +1369,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
 
   cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
+  double co_occurrences = 0;
 
   for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
     int checkin_order = (*c_it).second;
@@ -1382,14 +1381,13 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     order    = p->getOrder();
     time     = p->getTime();
 
-    if(seenLocations.find(p->getOrder()) != seenLocations.end()){
-      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
+    if(seenLocations.find(p->getOrder()) == seenLocations.end()){
+      loadPoint(x, y, p->getID(), p->getUID(), time, order);
       seenLocations.insert(p->getOrder());
     }
 
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
     vector<res_point*> *candidates = getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
-
     getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
 
     cout << "candidates in vicinity :" << candidates->size() << endl;
@@ -1398,8 +1396,9 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
       res_point* topK = spatioTemporalKNNs.top().second;
-      if(seenLocations.find(topK->oid) != seenLocations.end()){
-        loadPoint(p->getX(), p->getY(), topK->id, topK->uid, p->getTime(), topK->oid);
+      if(seenLocations.find(topK->oid) == seenLocations.end()){
+        co_occurrences++;
+        loadPoint(x, y, p->getID(), topK->uid, time, topK->oid);
         seenLocations.insert(topK->oid);
       }
     }
@@ -1409,8 +1408,12 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
       delete *sc_it;
     }
     delete candidates;
+
+    if(checkin_list.size()%100000 == 0)
+      cout << checkin_list.size() << endl;
   }
 
+  cout << "Artificially created co-occurrences : " << co_occurrences.size()      << endl;
   cout << "Check-ins inserted : " << checkin_list.size()      << endl;
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
