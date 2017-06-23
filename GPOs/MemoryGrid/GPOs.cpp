@@ -1388,7 +1388,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
 
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
     vector<res_point*> *candidates = getRangeSpatioTemporalBound(p, spatial_bound_in_meters, temporal_bound_in_hours);
-    getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
+    gpos->getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 3);
 
     // KNN in bound
     if(spatioTemporalKNNs.size() == k){
@@ -1407,11 +1407,11 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     delete candidates;
 
     if(checkin_list.size()%100000 == 0)
-      cout << checkin_list.size() << endl;
+      cout << checkin_list.size() << " " << co_occurrences << endl;
   }
 
-  cout << "Artificially created co-occurrences : " << co_occurrences      << endl;
-  cout << "Check-ins inserted : " << checkin_list.size()      << endl;
+  cout << "Artificially created co-occurrences : " << co_occurrences << endl;
+  cout << "Check-ins inserted : " << checkin_list.size()       << endl;
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
 
