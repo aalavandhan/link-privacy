@@ -1383,7 +1383,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     if(spatioTemporalKNNs.size() == k){
       res_point* topK = spatioTemporalKNNs.top().second;
 
-      cout << "Co-Occ : "<< topK->oid << " " << topK->id << " " << LOCATION_NOISE_BOUND << " " << topK->id >= LOCATION_NOISE_BOUND << endl;
+      cout << "Co-Occ : "<< topK->oid << " " << topK->id << " " << LOCATION_NOISE_BOUND << " " << (topK->id >= LOCATION_NOISE_BOUND) << endl;
       if(seenLocations.find(topK->oid) == seenLocations.end() && topK->id >= LOCATION_NOISE_BOUND){
         co_occurrences++;
         loadPoint(x, y, p->getID(), topK->uid, time, topK->oid);
