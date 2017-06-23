@@ -1827,7 +1827,7 @@ void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide)
     if(knn_it == st_knn.end() && hide){  // Hide sparse
       seenLocations.insert(p2->getOrder());
       cooccurrences_out_of_bound++;
-      continue
+      continue;
     }
 
     if(seenLocations.find(p2->getOrder()) == seenLocations.end()){
