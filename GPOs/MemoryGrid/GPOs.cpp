@@ -1345,11 +1345,14 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
     if(entropy > 0)
       ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
     else{
-      // Load checkins
-      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
-      seenLocations.insert(p->getOrder());
+      // Load checkins without significant LE
+      if(p->getID() < LOCATION_NOISE_BOUND){
+        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
+        seenLocations.insert(p->getOrder());
+      }
     }
   }
+
   std::sort(ordered_checkins.begin(), ordered_checkins.end());
   std::reverse(ordered_checkins.begin(), ordered_checkins.end());
   cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
