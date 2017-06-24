@@ -554,25 +554,12 @@ void selectiveSTKNNNoise(int k, bool hide){
   GPOs* cmpGPOs;
   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
   // cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, sg * 1000, tg);
-  cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, factors[l]);
+  cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1);
   cmpGPOs->countCoOccurrencesOptimistic();
   if(run_utilties){
     runBasicUtility(cmpGPOs, baseGPOs, spos);
   }
   delete cmpGPOs;
-
-  // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
-  // double factors[]  = { 0.99 };
-
-  // for(int l=0; l<1; l++){
-  //   GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-  //   cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, factors[l]);
-  //   cmpGPOs->countCoOccurrencesOptimistic();
-  //   if(run_utilties){
-  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
-  //   }
-  //   delete cmpGPOs;
-  // }
 }
 
 void selectiveSkylineNoise(int k){
