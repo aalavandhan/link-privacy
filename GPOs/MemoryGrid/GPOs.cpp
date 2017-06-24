@@ -1327,9 +1327,9 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
 
-void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, unordered_set<int> *interested_checkins){
+void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, set<int> *interested_checkins){
 
-  unordered_set<int> interesting_locations;
+  set<int> interesting_locations;
 
   for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
     int o1 = c_it->first;
