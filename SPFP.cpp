@@ -553,7 +553,7 @@ void selectiveSTKNNNoise(int k, bool hide){
 
   GPOs* cmpGPOs;
   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-  cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, noise_radius, time_deviation/3600.0);
+  cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, sg * 1000, tg);
   cmpGPOs->countCoOccurrencesOptimistic();
   if(run_utilties){
     runBasicUtility(cmpGPOs, baseGPOs, spos);
