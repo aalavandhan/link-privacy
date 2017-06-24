@@ -19,7 +19,7 @@ private:
     map< int, double >* temporal_locality_map;
     map< int, map<int, pair<int,double> >* >* checkin_locality_map;
 
-    unordered_map<std::pair<int,int>, double, PairHasher> katzCache = unordered_map<std::pair<int,int>, double, PairHasher>();
+    unordered_map<std::pair<int,int>, double, PairHasher> katzCache;
 
 public:
     SPOs();

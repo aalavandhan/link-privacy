@@ -530,34 +530,39 @@ void selectiveSTKNNNoise(int k, bool hide){
   cout << "Mean Radius Spatial  :" << mean_radius_spatial  << endl;
   cout << "Mean Radius Temporal :" << mean_radius_temporal << endl;
 
-  double sg = 0.1;
-  double tg = mean_radius_temporal * 1.25;
+  double sg = mean_radius_spatial;
+  double tg = mean_radius_temporal;
 
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-  {
-    GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByST(purturbedGPOs, sg, tg);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
+  double spatial_radi[] =  { 0.75, 1, 1.25, 1.5 };
+  double temporal_radi[] = { 0.75, 1, 1.25, 1.5 };
+
+  for(int i=0; i<4; i++){
+    for(int j=0; j<4; j++){
+      GPOs* cmpGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, sg * spatial_radi[ i ], tg * temporal_radi[ j ]);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
     }
-    delete cmpGPOs;
   }
 
   // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
-  double factors[]  = { 0.99 };
+  // double factors[]  = { 0.99 };
 
-  for(int l=0; l<1; l++){
-    GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, factors[l]);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
-    }
-    delete cmpGPOs;
-  }
+  // for(int l=0; l<1; l++){
+  //   GPOs* cmpGPOs       = new GPOs(coocc_time_range, coocc_spatial_range);
+  //   cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, factors[l]);
+  //   cmpGPOs->countCoOccurrencesOptimistic();
+  //   if(run_utilties){
+  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
+  //   }
+  //   delete cmpGPOs;
+  // }
 }
 
 void selectiveSkylineNoise(int k){
@@ -1141,7 +1146,7 @@ int main(int argc, char *argv[]){
       GPOs* fixedGPOs = baseGPOs;
       fixedGPOs->countCoOccurrencesOptimistic();
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-      purturbedGPOs->anaonomizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide);
+      purturbedGPOs->anonymizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
 

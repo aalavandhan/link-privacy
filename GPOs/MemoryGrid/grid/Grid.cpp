@@ -503,7 +503,7 @@ vector<res_point*>* Grid::getRange(Point *original, double radius, double t_dist
     return result;
 }
 
-// Radius in geodist and t_dist in hours
+// Radius in geodist and t_dist in hours [ Perturbation Aware!! ]
 vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, double t_dist){
     double x = original->getX();
     double y = original->getY();
@@ -550,7 +550,8 @@ vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, doub
                     //count++;
                     if( p->computeMinDist(x, y) <= radius &&
                         abs((p->getTime() - time).total_seconds()) <= t_dist * 3600 &&
-                        original->getUID() != p->getUID() ){
+                        original->getUID() != p->getUID() &&
+                        p->getID() >= LOCATION_NOISE_BOUND ){
                         res_point* rp = new res_point();
                         rp->id = p->getID();
                         rp->uid = p->getUID();
@@ -575,7 +576,6 @@ vector<res_point*>* Grid::getRangeAndDelete(Point *original, double radius, doub
     }
     return result;
 }
-
 
 // 1. get the cells which are in the circle's MBR.
 // 2. for each one of these, check if it intersects the circle,

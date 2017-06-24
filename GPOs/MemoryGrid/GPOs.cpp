@@ -1760,7 +1760,7 @@ pair<double, double> GPOs::maxDistanceOutsideCooccurrence(Point *p){
   return make_pair(max_dist_spatial, max_dist_temporal);
 }
 
-void GPOs::anaonomizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
+void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   map <int, vector<int>* > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-10-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
