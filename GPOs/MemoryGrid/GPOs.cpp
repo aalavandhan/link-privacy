@@ -1270,7 +1270,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
     gpos->getSpatioTemporalKNN(p, 25, &spatioTemporalKNNs, candidates, 4);
 
 
-    cout << "Computed top " << spatioTemporalKNNs.size() << endl;
     // Sort KNNs in ascending order
     map< double, res_point* > knnHash;
     while(!spatioTemporalKNNs.empty()){
@@ -1278,7 +1277,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
       res_point* topK = spatioTemporalKNNs.top().second;
       knnHash.insert(make_pair(distance, topK));
       spatioTemporalKNNs.pop();
-      cout << topK->oid<<"|"<<distance << " ";
     }
     cout << endl;
 
@@ -1286,7 +1284,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
     vector<res_point*> cooccurrences;
     for(auto knn_it=knnHash.begin(); knn_it!=knnHash.end(); knn_it++){
       res_point *rp = knn_it->second;
-      cout << "Scanning :" << rp->oid<< "|" << knn_it->first << "|" << rp->id << endl;
       if(rp->id < LOCATION_NOISE_BOUND)
         break;
 
