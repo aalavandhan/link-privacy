@@ -1419,7 +1419,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, set<int> *interested_checkins, int k
     delete candidates;
 
     if(seenLocations.size() % 100000==0)
-      cout << count << " " << endl;
+      cout << seenLocations.size() << " " << endl;
   }
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
