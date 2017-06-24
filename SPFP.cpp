@@ -519,7 +519,7 @@ void selectiveSTKNNNoise(int k, bool hide){
   baseGPOs->countCoOccurrencesOptimistic();
 
   set<int> interested_checkins;
-  baseGPOs->computeLocationsOfInterest(100, &interested_checkins);
+  baseGPOs->computeLocationsOfInterest(50, &interested_checkins);
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k, hide);

@@ -1338,7 +1338,7 @@ void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, set<int> *
     interesting_locations.insert(l1);
     interesting_locations.insert(l2);
   }
-  cout << "Locations of interest : " << interesting_locations.size();
+  cout << "Locations of interest : " << interesting_locations.size() << endl;
   for(auto i_it = interesting_locations.begin(); i_it != interesting_locations.end(); i_it++){
     int location = (*i_it);
     vector< Point* >* checkins_at_l = location_to_user.find(location)->second;
@@ -1419,7 +1419,7 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, set<int> *interested_checkins, int k
     delete candidates;
 
     if(seenLocations.size() % 100000==0)
-      cout << seenLocations.size() << " " << endl;
+      cout << seenLocations.size() << " " << co_occurrences << endl;
   }
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
