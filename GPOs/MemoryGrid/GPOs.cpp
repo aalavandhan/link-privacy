@@ -1291,7 +1291,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins, int k){
         seenLocations.insert(rp->oid);
       }
     }
-    cout << endl;
 
     // deleting candidates
     for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
