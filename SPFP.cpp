@@ -406,15 +406,11 @@ void selectiveGaussianNoise(int isOptimistic){
   GPOs* fixedGPOs = baseGPOs;
   fixedGPOs->countCoOccurrencesOptimistic();
 
-  // double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
-  double sradi[] = { 3.5, 6.5, 8, 9 };
-  double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
+  double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
 
-  for(int i=0; i<4; i++){
-    // double noise_radius   = 100 * radi[i];
-    // double time_deviation = (80*60) * radi[i];
-    double noise_radius   = 100 * sradi[i];
-    double time_deviation = (80*60) * tradi[i];
+  for(int i=0; i<10; i++){
+    double noise_radius   = 100 * radi[i];
+    double time_deviation = (80*60) * radi[i];
 
     cout << "Using spatial noise : (m)"  << noise_radius << endl;
     cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
