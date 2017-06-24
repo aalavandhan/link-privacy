@@ -474,35 +474,40 @@ void selectiveGaussianNoiseDDAdversary(int k){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
+  set<int> interested_checkins;
+  baseGPOs->computeLocationsOfInterest(250, 24, &interested_checkins);
+
   double radi[] = {  1, 2, 3, 4, 5, 6, 7, 8, 9, 10  };
 
-  // double sradi[] = { 3.5, 6.5, 8, 9 };
-  // double tradi[] = { 3.75, 3.9, 5.1, 5.8 };
-
-  for(int i=0; i<4; i++){
+  for(int i=0; i<10; i++){
     double noise_radius   = 100 * radi[i];
     double time_deviation = (80*60) * radi[i];
-    // double noise_radius   = 100 * sradi[i];
-    // double time_deviation = (80*60) * tradi[i];
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
-    // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
-    double factors[]  = { 0.99 };
-
-    for(int j=0; j<1; j++){
+    {
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), k, factors[j]);
-      // cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, noise_radius, time_deviation/3600.0);
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
       cmpGPOs->countCoOccurrencesOptimistic();
-
       if(run_utilties){
         runBasicUtility(cmpGPOs, baseGPOs, spos);
       }
       delete cmpGPOs;
     }
+
+    {
+      GPOs* cmpGPOs;
+      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins, 1);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
+    }
+
     if(run_utilties){
       runUtilities(purturbedGPOs, baseGPOs, spos);
     }
@@ -541,16 +546,29 @@ void selectiveSTKNNNoise(int k, bool hide){
   // }
   // delete cmpGPOs;
 
-  // Advanced grouping
-  GPOs* cmpGPOs;
-  cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-  cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, mean_radius_spatial * 1000, mean_radius_temporal);
-  // cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1);
-  cmpGPOs->countCoOccurrencesOptimistic();
-  if(run_utilties){
-    runBasicUtility(cmpGPOs, baseGPOs, spos);
+  {
+    // Advanced grouping - 1
+    GPOs* cmpGPOs;
+    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+    cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, 2*mean_radius_spatial * 1000, 2*mean_radius_temporal);
+    cmpGPOs->countCoOccurrencesOptimistic();
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
+    }
+    delete cmpGPOs;
   }
-  delete cmpGPOs;
+
+  {
+    // Advanced grouping - 2
+    GPOs* cmpGPOs;
+    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins, 1);
+    cmpGPOs->countCoOccurrencesOptimistic();
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
+    }
+    delete cmpGPOs;
+  }
 }
 
 void selectiveSkylineNoise(int k){

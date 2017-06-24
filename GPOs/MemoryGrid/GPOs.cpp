@@ -1242,36 +1242,16 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
 }
 
-void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_to_H, int k){
-  groupLocationsByDD(gpos, location_to_H, k, 0.99);
-}
-
-void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double factor){
+void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins, int k){
   double radius_geo_dist,x=0, y=0;
   unsigned int order;
 
   unordered_set<int> seenLocations;
   boost::posix_time::ptime time;
 
-  cout << "Adversary has knowledge location entropies : " << location_to_H->size() << endl;
-  vector<pair<int,int>> ordered_checkins;
-  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
-    Point *p = c_it->second;
-    auto l_it = location_to_H->find(p->getID());
-    double entropy=0;
-    if(l_it != location_to_H->end())
-      entropy = l_it->second;
-    ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
-  }
-  std::sort(ordered_checkins.begin(), ordered_checkins.end());
-  std::reverse(ordered_checkins.begin(), ordered_checkins.end());
-  cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
-
   double co_occurrences = 0;
-  cout << "Using factor : " << factor << endl;
-
-  for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
-    int checkin_order = (*c_it).second;
+  for(auto c_it = interested_checkins->begin(); c_it != interested_checkins->end(); c_it++){
+    int checkin_order = (*c_it);
 
     auto p_it = gpos->checkin_list.find(checkin_order);
 
@@ -1323,7 +1303,13 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
       cout << checkin_list.size() << " " << co_occurrences << endl;
   }
 
-  cout << "Check-ins inserted : " << checkin_list.size()      << endl;
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    Point *p = c_it->second;
+    if( seenLocations.find(p->getOrder()) == seenLocations.end() )
+      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
+  }
+
+  cout << "Check-ins inserted : " << checkin_list.size()       << endl;
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
 
