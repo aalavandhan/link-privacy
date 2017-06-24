@@ -1301,7 +1301,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
     // Create co-occurrences until the first actual location
     vector<res_point*> cooccurrences;
     for(auto knn_it=knnHash.begin(); knn_it!=knnHash.end(); knn_it++){
-      cout << knn_it->first << " ";
       res_point *rp = knn_it->second;
       if(rp->id < LOCATION_NOISE_BOUND)
         break;
