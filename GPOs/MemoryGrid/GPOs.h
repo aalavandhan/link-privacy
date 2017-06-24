@@ -143,7 +143,7 @@ public:
 
     void loadPoint(double x, double y, int lid, int uid, boost::posix_time::ptime time, int order);
     void groupLocationsByRange(GPOs* gpos, double radius, bool isOptimistic);
-    void groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins, int k);
+    void groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins);
 
     void groupLocationsByKNNDistance(GPOs* gpos, int k, double std_radio);
     void groupLocationsByST(GPOs* gpos, double radius, double time_deviation);

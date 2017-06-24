@@ -482,21 +482,21 @@ void selectiveGaussianNoiseDDAdversary(int k){
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
-    {
-      GPOs* cmpGPOs;
-      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
-      cmpGPOs->countCoOccurrencesOptimistic();
-      if(run_utilties){
-        runBasicUtility(cmpGPOs, baseGPOs, spos);
-      }
-      delete cmpGPOs;
-    }
+    // {
+    //   GPOs* cmpGPOs;
+    //   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+    //   cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
+    //   cmpGPOs->countCoOccurrencesOptimistic();
+    //   if(run_utilties){
+    //     runBasicUtility(cmpGPOs, baseGPOs, spos);
+    //   }
+    //   delete cmpGPOs;
+    // }
 
     {
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-      cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins, 1);
+      cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins);
       cmpGPOs->countCoOccurrencesOptimistic();
       if(run_utilties){
         runBasicUtility(cmpGPOs, baseGPOs, spos);
@@ -558,7 +558,7 @@ void selectiveSTKNNNoise(int k, bool hide){
     // Advanced grouping - 2
     GPOs* cmpGPOs;
     cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins, 1);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins);
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);

@@ -1242,7 +1242,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
 
 }
 
-void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins, int k){
+void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
   double radius_geo_dist,x=0, y=0;
   unsigned int order;
 
@@ -1267,8 +1267,10 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins, int k){
     // Get KNNs in SPATIAL_TEMPORAL [ RANGE ]
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
     vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p);
-    gpos->getSpatioTemporalKNN(p, k, &spatioTemporalKNNs, candidates, 4);
+    gpos->getSpatioTemporalKNN(p, 25, &spatioTemporalKNNs, candidates, 4);
 
+
+    cout << "Computed top " << spatioTemporalKNNs.size() << endl;
     // Sort KNNs in ascending order
     map< double, res_point* > knnHash;
     while(!spatioTemporalKNNs.empty()){
@@ -1276,12 +1278,15 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins, int k){
       res_point* topK = spatioTemporalKNNs.top().second;
       knnHash.insert(make_pair(distance, topK));
       spatioTemporalKNNs.pop();
+      cout << topK->oid<<"|"<<distance << " ";
     }
+    cout << endl;
 
     // Create co-occurrences until the first actual location
     vector<res_point*> cooccurrences;
     for(auto knn_it=knnHash.begin(); knn_it!=knnHash.end(); knn_it++){
       res_point *rp = knn_it->second;
+      cout << "Scanning :" << rp->oid<< "|" << knn_it->first << "|" << rp->id << endl;
       if(rp->id < LOCATION_NOISE_BOUND)
         break;
 
