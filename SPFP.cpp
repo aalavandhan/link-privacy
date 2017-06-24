@@ -482,16 +482,16 @@ void selectiveGaussianNoiseDDAdversary(int k){
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
 
-    // {
-    //   GPOs* cmpGPOs;
-    //   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    //   cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
-    //   cmpGPOs->countCoOccurrencesOptimistic();
-    //   if(run_utilties){
-    //     runBasicUtility(cmpGPOs, baseGPOs, spos);
-    //   }
-    //   delete cmpGPOs;
-    // }
+    {
+      GPOs* cmpGPOs;
+      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
+    }
 
     {
       GPOs* cmpGPOs;
@@ -542,17 +542,17 @@ void selectiveSTKNNNoise(int k, bool hide){
   // }
   // delete cmpGPOs;
 
-  {
-    // Advanced grouping - 1
-    GPOs* cmpGPOs;
-    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, 0.5*SPATIAL_SOFT_BOUND, 0.5*TEMPORAL_SOFT_BOUND);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
-    }
-    delete cmpGPOs;
-  }
+  // {
+  //   // Advanced grouping - 1
+  //   GPOs* cmpGPOs;
+  //   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+  //   cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, 0.5*SPATIAL_SOFT_BOUND, 0.5*TEMPORAL_SOFT_BOUND);
+  //   cmpGPOs->countCoOccurrencesOptimistic();
+  //   if(run_utilties){
+  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
+  //   }
+  //   delete cmpGPOs;
+  // }
 
   {
     // Advanced grouping - 2
