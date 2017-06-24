@@ -533,33 +533,25 @@ void selectiveSTKNNNoise(int k, bool hide){
   double sg = mean_radius_spatial;
   double tg = mean_radius_temporal;
 
-  cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
-  cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
-
-  // double spatial_radi[] =  { 0.75, 1, 1.25, 1.5 };
-  // double temporal_radi[] = { 0.75, 1, 1.25, 1.5 };
-
-  // for(int i=0; i<4; i++){
-  //   for(int j=0; j<4; j++){
-  //     GPOs* cmpGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  //     cmpGPOs->groupLocationsByST(purturbedGPOs, sg * spatial_radi[ i ], tg * temporal_radi[ j ]);
-  //     cmpGPOs->countCoOccurrencesOptimistic();
-  //     if(run_utilties){
-  //       runBasicUtility(cmpGPOs, baseGPOs, spos);
-  //     }
-  //     delete cmpGPOs;
-  //   }
-  // }
-
-  GPOs* cmpGPOs;
-  cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-  // cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, sg * 1000, tg);
-  cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1);
+  // Gaussian grouping
+  GPOs* cmpGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+  cmpGPOs->groupLocationsByST(purturbedGPOs, 100, 1.25 * sg * 3600);
   cmpGPOs->countCoOccurrencesOptimistic();
   if(run_utilties){
     runBasicUtility(cmpGPOs, baseGPOs, spos);
   }
   delete cmpGPOs;
+
+  // Advanced grouping
+  // GPOs* cmpGPOs;
+  // cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+  // // cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, sg * 1000, tg);
+  // cmpGPOs->groupLocationsByDD(purturbedGPOs, baseGPOs->getLocationEntropy(), 1);
+  // cmpGPOs->countCoOccurrencesOptimistic();
+  // if(run_utilties){
+  //   runBasicUtility(cmpGPOs, baseGPOs, spos);
+  // }
+  // delete cmpGPOs;
 }
 
 void selectiveSkylineNoise(int k){
