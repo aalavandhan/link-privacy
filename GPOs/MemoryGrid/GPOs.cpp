@@ -1327,49 +1327,48 @@ void GPOs::groupLocationsByDD(GPOs* gpos, unordered_map<int, double> *location_t
   cout << "Original size      : " << gpos->checkin_list.size() << endl;
 }
 
-void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, set<int> *interested_checkins){
-  vector<pair<double, int>> interested_checkins_unordered;
-  set<int> interesting_locations;
+void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, double time_bound_in_hours, set<int> *interested_checkins){
+  set<int> interested_checkins_unordered;
+  vector<pair<double, int>> interested_checkins_ordered;
   for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->first;
-    int l1 = checkin_list.find(o1)->second->getID();
-    int l2 = checkin_list.find(o2)->second->getID();
-    interesting_locations.insert(l1);
-    interesting_locations.insert(l2);
+    interested_checkins_unordered.insert(o1);
+    interested_checkins_unordered.insert(o2);
   }
-  cout << "Locations of interest : " << interesting_locations.size() << endl;
-  for(auto i_it = interesting_locations.begin(); i_it != interesting_locations.end(); i_it++){
-    int location = (*i_it);
-    vector< Point* >* checkins_at_l = location_to_user.find(location)->second;
-    double x,y;
-    Point *q = checkins_at_l->front();
-    x=q->getX();
-    y=q->getY();
+
+  cout << "Co-occurred check-ins : " << interested_checkins_unordered.size() << endl;
+
+  for(auto i_it = interested_checkins_unordered.begin(); i_it != interested_checkins_unordered.end(); i_it++){
+    int order = (*i_it);
+    Point *q = checkin_list.find(order)->second;
+
     auto l_it = location_to_H.find(q->getID());
     double entropy=0;
     if(l_it != location_to_H.end())
       entropy = l_it->second;
     if(q->getID() < LOCATION_NOISE_BOUND){
-      interested_checkins_unordered.push_back(make_pair(entropy, q->getOrder()));
+      interested_checkins_ordered.push_back(make_pair(entropy, q->getOrder()));
     }
+
     // Get check-ins in vicinity
     double radius_geo_dist = (spatial_bound_in_meters/1000) * 360 / EARTH_CIRCUMFERENCE;
-    vector<res_point*>* checkins_in_vicinity = getRange( x, y, radius_geo_dist );
+    vector<res_point*>* checkins_in_vicinity = getRange( q, radius_geo_dist, time_bound_in_hours );
     for(auto sc_it=checkins_in_vicinity->begin(); sc_it != checkins_in_vicinity->end(); sc_it++){
       auto l_it = location_to_H.find((*sc_it)->id);
       double entropy=0;
       if(l_it != location_to_H.end())
         entropy = l_it->second;
       if((*sc_it)->id < LOCATION_NOISE_BOUND && entropy != 0)
-        interested_checkins_unordered.push_back( make_pair(entropy, (*sc_it)->oid) );
+        interested_checkins_ordered.push_back( make_pair(entropy, (*sc_it)->oid) );
       delete *sc_it;
     }
     delete checkins_in_vicinity;
   }
-  std::sort(interested_checkins_unordered.begin(), interested_checkins_unordered.end());
-  std::reverse(interested_checkins_unordered.begin(), interested_checkins_unordered.end());
-  for(auto k_it=interested_checkins_unordered.begin(); k_it != interested_checkins_unordered.end(); k_it++){
+  std::sort(interested_checkins_ordered.begin(), interested_checkins_ordered.end());
+  std::reverse(interested_checkins_ordered.begin(), interested_checkins_ordered.end());
+
+  for(auto k_it=interested_checkins_ordered.begin(); k_it != interested_checkins_ordered.end(); k_it++){
     interested_checkins->insert(k_it->second);
   }
   cout << "Computed check-ins of interest to perform advanced restoration : " << interested_checkins->size() << endl;
