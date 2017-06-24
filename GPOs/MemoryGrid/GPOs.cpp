@@ -1342,6 +1342,8 @@ void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, set<int> *
     interesting_locations.insert(l2);
   }
 
+  cout << "Locations of interest : " << interesting_locations.size();
+
   for(auto i_it = interesting_locations.begin(); i_it != interesting_locations.end(); i_it++){
     int location = (*i_it);
     vector< Point* >* checkins_at_l = location_to_user.find(location)->second;
@@ -1365,47 +1367,26 @@ void GPOs::computeLocationsOfInterest(double spatial_bound_in_meters, set<int> *
     delete checkins_in_vicinity;
   }
 
-  cout << " Computed checkins of interest to perform advanced restoration : " << interested_checkins->size() << endl;
+  cout << "Computed checkins of interest to perform advanced restoration : " << interested_checkins->size() << endl;
 }
 
-void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location_to_H, int k, double spatial_bound_in_meters, double temporal_bound_in_hours){
+void GPOs::groupLocationsToTopK(GPOs* gpos, set<int> *interested_checkins, int k, double spatial_bound_in_meters, double temporal_bound_in_hours){
   double x,y,order;
   boost::posix_time::ptime time;
-
-  unordered_set<int> seenLocations;
-  cout << "Adversary has knowledge location entropies : " << location_to_H->size() << endl;
-  vector<pair<int,int>> ordered_checkins;
-  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
-    Point *p = c_it->second;
-    auto l_it = location_to_H->find(p->getID());
-    double entropy=0;
-    if(l_it != location_to_H->end())
-      entropy = l_it->second;
-
-    if(entropy > 0)
-      ordered_checkins.push_back(make_pair(entropy, p->getOrder()));
-    else{
-      // Load checkins without significant LE
-      if(p->getID() < LOCATION_NOISE_BOUND){
-        loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
-        seenLocations.insert(p->getOrder());
-      }
-    }
-  }
-  std::sort(ordered_checkins.begin(), ordered_checkins.end());
-  std::reverse(ordered_checkins.begin(), ordered_checkins.end());
-  cout << "Check-ins with 0 entropy : " << seenLocations.size() << endl;
   double co_occurrences=0;
-
-  for(auto c_it = ordered_checkins.begin(); c_it != ordered_checkins.end(); c_it++){
-    int checkin_order = (*c_it).second;
-
+  unordered_set<int> seenLocations;
+  for(auto c_it = interested_checkins->begin(); c_it != interested_checkins->end(); c_it++){
+    int checkin_order = (*c_it);
     auto p_it = gpos->checkin_list.find(checkin_order);
+
     Point *p = p_it->second;
     x        = p->getX();
     y        = p->getY();
     order    = p->getOrder();
     time     = p->getTime();
+
+    if(p->getID() >= LOCATION_NOISE_BOUND)
+      continue;
 
     if(seenLocations.find(p->getOrder()) == seenLocations.end()){
       loadPoint(x, y, p->getID(), p->getUID(), time, order);
@@ -1431,9 +1412,12 @@ void GPOs::groupLocationsToTopK(GPOs* gpos, unordered_map<int, double> *location
       delete *sc_it;
     }
     delete candidates;
+  }
 
-    if(checkin_list.size()%100000 == 0)
-      cout << checkin_list.size() << " " << co_occurrences << endl;
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    Point *p = c_it->second;
+    if( seenLocations.find(p->getOrder()) == seenLocations.end() )
+      loadPoint(p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder());
   }
 
   cout << "Artificially created co-occurrences : " << co_occurrences << endl;
