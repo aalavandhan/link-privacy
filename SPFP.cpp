@@ -546,7 +546,7 @@ void selectiveSTKNNNoise(int k, bool hide){
     // Advanced grouping - 1
     GPOs* cmpGPOs;
     cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, 2*mean_radius_spatial * 1000, 2*mean_radius_temporal);
+    cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, 0.5*SPATIAL_SOFT_BOUND, 0.5*TEMPORAL_SOFT_BOUND);
     cmpGPOs->countCoOccurrencesOptimistic();
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
