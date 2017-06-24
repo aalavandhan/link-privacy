@@ -536,20 +536,29 @@ void selectiveSTKNNNoise(int k, bool hide){
   cout << "Using Spatial  Grouping (m):  " << sg * 1000 << endl;
   cout << "Using Temporal Grouping (mi): " << tg * 60   << endl;
 
-  double spatial_radi[] =  { 0.75, 1, 1.25, 1.5 };
-  double temporal_radi[] = { 0.75, 1, 1.25, 1.5 };
+  // double spatial_radi[] =  { 0.75, 1, 1.25, 1.5 };
+  // double temporal_radi[] = { 0.75, 1, 1.25, 1.5 };
 
-  for(int i=0; i<4; i++){
-    for(int j=0; j<4; j++){
-      GPOs* cmpGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-      cmpGPOs->groupLocationsByST(purturbedGPOs, sg * spatial_radi[ i ], tg * temporal_radi[ j ]);
-      cmpGPOs->countCoOccurrencesOptimistic();
-      if(run_utilties){
-        runBasicUtility(cmpGPOs, baseGPOs, spos);
-      }
-      delete cmpGPOs;
-    }
+  // for(int i=0; i<4; i++){
+  //   for(int j=0; j<4; j++){
+  //     GPOs* cmpGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+  //     cmpGPOs->groupLocationsByST(purturbedGPOs, sg * spatial_radi[ i ], tg * temporal_radi[ j ]);
+  //     cmpGPOs->countCoOccurrencesOptimistic();
+  //     if(run_utilties){
+  //       runBasicUtility(cmpGPOs, baseGPOs, spos);
+  //     }
+  //     delete cmpGPOs;
+  //   }
+  // }
+
+  GPOs* cmpGPOs;
+  cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+  cmpGPOs->groupLocationsToTopK(purturbedGPOs, baseGPOs->getLocationEntropy(), 1, noise_radius, time_deviation/3600.0);
+  cmpGPOs->countCoOccurrencesOptimistic();
+  if(run_utilties){
+    runBasicUtility(cmpGPOs, baseGPOs, spos);
   }
+  delete cmpGPOs;
 
   // double factors[]  = { 0.25, 0.50, 0.75, 0.99, 1.25, 1.5 };
   // double factors[]  = { 0.99 };
@@ -1081,10 +1090,8 @@ int main(int argc, char *argv[]){
       cout << "ITRATION: Selective Noise based on st-knn" << endl;
 
       k                   = p1;
-
       coocc_spatial_range = p2;
       coocc_time_range    = p3;
-
       int hide            = p4;
 
       printParameters();
