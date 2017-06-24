@@ -518,6 +518,9 @@ void selectiveSTKNNNoise(int k, bool hide){
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
   baseGPOs->countCoOccurrencesOptimistic();
 
+  unordered_set<int> interested_checkins;
+  baseGPOs->computeLocationsOfInterest(250, &interested_checkins);
+
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k, hide);
   if(run_utilties){
