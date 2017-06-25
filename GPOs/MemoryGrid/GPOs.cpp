@@ -1278,7 +1278,6 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
       knnHash.insert(make_pair(distance, topK));
       spatioTemporalKNNs.pop();
     }
-    cout << endl;
 
     // Create co-occurrences until the first actual location
     vector<res_point*> cooccurrences;
