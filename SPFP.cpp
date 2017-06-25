@@ -542,17 +542,17 @@ void selectiveSTKNNNoise(int k, bool hide){
   // }
   // delete cmpGPOs;
 
-  {
-    // Advanced grouping - 1
-    GPOs* cmpGPOs;
-    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
-    }
-    delete cmpGPOs;
-  }
+  // {
+  //   // Advanced grouping - 1
+  //   GPOs* cmpGPOs;
+  //   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+  //   cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND);
+  //   cmpGPOs->countCoOccurrencesOptimistic();
+  //   if(run_utilties){
+  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
+  //   }
+  //   delete cmpGPOs;
+  // }
 
   {
     // Advanced grouping - 2
