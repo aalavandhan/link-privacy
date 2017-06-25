@@ -1964,105 +1964,52 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
     int order = c_it->first;
     Point *p = c_it->second;
-
     auto knn_it = st_knn.find(order);
     bool checkin_of_interest = (checkins_of_interest.find(order) != checkins_of_interest.end());
     bool knn_out_of_bound = (knn_it == st_knn.end());
-
-    double max_dist_spatial = 0, max_dist_temporal = 0;
-    pair<double, double> max_dist = gpos->maxDistanceOutsideCooccurrence(p);
-    max_dist_spatial  = max_dist.first;
-    max_dist_temporal = max_dist.second;
-
-    if(checkin_of_interest && knn_out_of_bound){
-      double noise_radius = SPATIAL_SOFT_BOUND;
-      double time_deviation = TEMPORAL_SOFT_BOUND * 3600.0;
-      pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius);
-      boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation);
-      if(!hide){
-        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
-        total_spatial_displacement+=sd;
-        total_time_displacement+=td;
-
-        total_spatial_displacement_sparse+=sd;
-        total_time_displacement_sparse+=td;
-        sparse_purturbed_count++;
-
-        purturbed_count++;
-        spatial_purturbed_count++;
-        temporal_purturbed_count++;
-        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
-      }
-      cooccurrences_out_of_bound++;
-      lid++;
+    if(!checkin_of_interest){
+      loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
       point_count++;
-      continue;
+    }
+
+    Point *base_checkin;
+    double noise_radius, time_deviation;
+
+    if(knn_out_of_bound){
+      noise_radius = SPATIAL_SOFT_BOUND;
+      time_deviation = TEMPORAL_SOFT_BOUND * 3600.0;
+      base_checkin = p;
+    } else {
+      vector<int> *neighbours = knn_it->second;
+      Point *q;
+      int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
+      int kth = rand() % (k_lim+1);
+      if(kth==0){
+        q = gpos->checkin_list.find(0)->second;
+        base_checkin=p;
+      } else {
+        int neighbor = neighbours->at(kth-1);
+        q = gpos->checkin_list.find(neighbor)->second;
+        base_checkin=q;
+      }
+      noise_radius = 2 * base_checkin->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
+      time_deviation = 2 * abs((base_checkin->getTime() - q->getTime()).total_seconds());
     };
 
-    if(checkin_of_interest && !knn_out_of_bound){
-      if(k == 0){
-        vector<int> *neighbours = knn_it->second;
-        int neighbor = neighbours->at(0);
-        Point *q = gpos->checkin_list.find(neighbor)->second;
-        double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
-        double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
-        pair<double,double> coordinates_with_noise = util.addGaussianNoise(p->getX(), p->getY(), noise_radius, 0);
-        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(p->getTime(), time_deviation, 0);
-
-        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
-        total_spatial_displacement+=sd;
-        total_time_displacement+=td;
-
-        total_spatial_displacement_dense+=sd;
-        total_time_displacement_dense+=td;
-        dense_purturbed_count++;
-
-        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
-        lid++;
-        purturbed_count++;
-        spatial_purturbed_count++;
-        temporal_purturbed_count++;
-        point_count++;
-      }
-
-      else {
-        vector<int> *neighbours = knn_it->second;
-        int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
-        // int kth = rand() % k_lim;
-        int kth = k_lim-1;
-        int neighbor = neighbours->at(kth);
-
-        Point *q = gpos->checkin_list.find(neighbor)->second;
-        double noise_radius = p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
-        double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
-        pair<double,double> coordinates_with_noise = util.addGaussianNoise(q->getX(), q->getY(), noise_radius, 0);
-        boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(q->getTime(), time_deviation, 0);
-
-        double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
-        double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
-
-        total_spatial_displacement+=sd;
-        total_time_displacement+=td;
-
-        total_spatial_displacement_dense+=sd;
-        total_time_displacement_dense+=td;
-        dense_purturbed_count++;
-
-        loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
-
-        lid++;
-        purturbed_count++;
-        spatial_purturbed_count++;
-        temporal_purturbed_count++;
-        point_count++;
-      }
-
-      continue;
-    };
-
-    loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+    pair<double,double> coordinates_with_noise = util.addGaussianNoise(base_checkin->getX(), base_checkin->getY(), noise_radius);
+    boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(base_checkin->getTime(), time_deviation);
+    double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+    double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+    total_spatial_displacement+=sd;
+    total_time_displacement+=td;
+    total_spatial_displacement_sparse+=sd;
+    total_time_displacement_sparse+=td;
+    sparse_purturbed_count++;
+    purturbed_count++;
+    spatial_purturbed_count++;
+    temporal_purturbed_count++;
+    loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
+    lid++;
     point_count++;
   }
 
