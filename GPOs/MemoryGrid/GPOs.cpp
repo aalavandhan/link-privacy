@@ -1281,26 +1281,18 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
       spatioTemporalKNNs.pop();
     }
 
-    if(candidates->size() < 5){
-      cout << "candidates size : " << candidates->size() << endl;
-    }
-
-
     // Create co-occurrences until the first actual location
     vector<res_point*> cooccurrences;
     for(auto knn_it=knnHash.begin(); knn_it!=knnHash.end(); knn_it++){
       res_point *rp = knn_it->second;
-      cout << rp->oid << "|" << knn_it->first << "|" << rp->id << " ";
       if(rp->id < LOCATION_NOISE_BOUND)
         break;
       if(seenLocations.find(rp->oid) == seenLocations.end()){
         co_occurrences++;
         loadPoint(x, y, p->getID(), rp->uid, time, rp->oid);
         seenLocations.insert(rp->oid);
-        cout << "(added) ";
       }
     }
-    cout << endl;
 
     // deleting candidates
     for(auto sc_it=candidates->begin(); sc_it != candidates->end(); sc_it++){
