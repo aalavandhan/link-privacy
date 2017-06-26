@@ -278,7 +278,7 @@ res_point* GPOs::getNextNN(double x, double y, int incrStep){
 }
 
 vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p){
-  return getRangeSpatioTemporalBound(p, SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND);
+  return getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND, TEMPORAL_HARD_BOUND);
 }
 
 vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p, double spatial_bound_in_meters, double temporal_bound_in_hours){
