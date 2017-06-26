@@ -181,16 +181,16 @@ int Point::getCheckinDay(){
     return p_time.date().day_of_week();
 }
 
-double Point::getSTDistance(Point *q){
+double Point::getSTDistance(Point *q, double coocc_spatial_range, uint coocc_time_range){
     double st_dist;
-    st_dist = 0.5 * ( computeMinDistInKiloMeters(q->getX(), q->getY()) / (SPATIAL_SOFT_BOUND/1000.0) );
-    st_dist+= 0.5 * ( (double) getTimeDifference(q) / (TEMPORAL_SOFT_BOUND * 3600.0) );
+    st_dist = 0.5 * ( computeMinDistInKiloMeters(q->getX(), q->getY()) / (coocc_spatial_range/1000.0) );
+    st_dist+= 0.5 * ( (double) getTimeDifference(q) / (double)(coocc_time_range) );
     return st_dist;
 }
 
-double Point::getSTDistance(res_point *q){
+double Point::getSTDistance(res_point *q, double coocc_spatial_range, uint coocc_time_range){
     double st_dist;
-    st_dist = 0.5 * ( computeMinDistInKiloMeters(q->x, q->y) / (SPATIAL_SOFT_BOUND/1000.0) );
-    st_dist+= 0.5 * ( (double) getTimeDifference(q) / (TEMPORAL_SOFT_BOUND * 3600.0) );
+    st_dist = 0.5 * ( (q->dist * EARTH_CIRCUMFERENCE / 360.0) / (coocc_spatial_range/1000.0) );
+    st_dist+= 0.5 * ( (double) getTimeDifference(q) / (double)(coocc_time_range) );
     return st_dist;
 }

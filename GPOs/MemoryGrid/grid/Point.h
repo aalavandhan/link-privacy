@@ -29,8 +29,8 @@ public:
     virtual int getTimeDifference(res_point *q);
     virtual bool doesSkylineDominatePoint(res_point *skyline, res_point *other);
     virtual bool doesPointDominateSkyline(res_point *skyline, res_point *other);
-    virtual double getSTDistance(Point *q);
-    virtual double getSTDistance(res_point *q);
+    virtual double getSTDistance(Point *q, double coocc_spatial_range, uint coocc_time_range);
+    virtual double getSTDistance(res_point *q, double coocc_spatial_range, uint coocc_time_range);
 
     //Overload the < operator.
     bool operator< (const Point& p) const;

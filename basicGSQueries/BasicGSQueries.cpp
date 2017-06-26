@@ -186,20 +186,58 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
-    if(st_knn.find(o1) != st_knn.end() || st_knn.find(o2) != st_knn.end()){
-      dense_set.insert(make_pair(o1,o2));
-    } else {
+
+    if(st_knn.find(o1) == st_knn.end() && st_knn.find(o2) == st_knn.end()){
       sparse_set.insert(make_pair(o1,o2));
+    } else {
+      Point *p,*q;
+
+      auto knn_it = st_knn.find(o1);
+      int neighbor = knn_it->second->at(0);
+      p = gpos->checkin_list.find(o1)->second;
+      q = gpos->checkin_list.find(neighbor)->second;
+      bool o1_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
+      o1_out_of_soft_bound = o1_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
+
+      knn_it = st_knn.find(o2);
+      neighbor = knn_it->second->at(0);
+      p = gpos->checkin_list.find(o2)->second;
+      q = gpos->checkin_list.find(neighbor)->second;
+      bool o2_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
+      o2_out_of_soft_bound = o2_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
+
+      if(o1_out_of_soft_bound || o2_out_of_soft_bound)
+        sparse_set.insert(make_pair(o1,o2));
+      else
+        dense_set.insert(make_pair(o1,o2));
     }
   }
 
   for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
-    if(st_knn.find(o1) != st_knn.end() || st_knn.find(o2) != st_knn.end()){
-      p_dense_set.insert(make_pair(o1,o2));
-    } else {
+    if(st_knn.find(o1) == st_knn.end() && st_knn.find(o2) == st_knn.end()){
       p_sparse_set.insert(make_pair(o1,o2));
+    } else {
+      Point *p,*q;
+      auto knn_it = st_knn.find(o1);
+      int neighbor = knn_it->second->at(0);
+      p = gpos->checkin_list.find(o1)->second;
+      q = gpos->checkin_list.find(0)->second;
+      bool o1_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
+      o1_out_of_soft_bound = o1_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
+
+      knn_it = st_knn.find(o2);
+      neighbor = knn_it->second->at(0);
+      p = gpos->checkin_list.find(o2)->second;
+      q = gpos->checkin_list.find(neighbor)->second;
+      bool o2_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
+      o2_out_of_soft_bound = o2_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
+
+      if(o1_out_of_soft_bound || o2_out_of_soft_bound)
+        p_sparse_set.insert(make_pair(o1,o2));
+      else
+        p_dense_set.insert(make_pair(o1,o2));
     }
   }
 
