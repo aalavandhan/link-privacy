@@ -1985,15 +1985,16 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
       int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
       int kth = rand() % (k_lim+1);
       if(kth==0){
-        q = gpos->checkin_list.find(0)->second;
+        int neighbor = neighbours->at(0);
+        q = gpos->checkin_list.find(neighbor)->second;
         base_checkin=p;
       } else {
         int neighbor = neighbours->at(kth-1);
         q = gpos->checkin_list.find(neighbor)->second;
         base_checkin=q;
       }
-      noise_radius = 2 * base_checkin->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
-      time_deviation = 2 * abs((base_checkin->getTime() - q->getTime()).total_seconds());
+      noise_radius = 2 * p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
+      time_deviation = 2 * abs((p->getTime() - q->getTime()).total_seconds());
     };
 
     pair<double,double> coordinates_with_noise = util.addGaussianNoise(base_checkin->getX(), base_checkin->getY(), noise_radius);
