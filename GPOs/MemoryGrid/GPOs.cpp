@@ -1967,9 +1967,11 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
     auto knn_it = st_knn.find(order);
     bool checkin_of_interest = (checkins_of_interest.find(order) != checkins_of_interest.end());
     bool knn_out_of_bound = (knn_it == st_knn.end());
+
     if(!checkin_of_interest){
       loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
       point_count++;
+      continue;
     }
 
     Point *base_checkin;
@@ -2001,14 +2003,23 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
     boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(base_checkin->getTime(), time_deviation);
     double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
     double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+
+    if(knn_out_of_bound){
+      total_spatial_displacement_sparse+=sd;
+      total_time_displacement_sparse+=td;
+      sparse_purturbed_count++;
+    } else {
+      total_spatial_displacement_dense+=sd;
+      total_time_displacement_dense+=td;
+      dense_purturbed_count++;
+    }
+
     total_spatial_displacement+=sd;
     total_time_displacement+=td;
-    total_spatial_displacement_sparse+=sd;
-    total_time_displacement_sparse+=td;
-    sparse_purturbed_count++;
     purturbed_count++;
     spatial_purturbed_count++;
     temporal_purturbed_count++;
+
     loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
     lid++;
     point_count++;
