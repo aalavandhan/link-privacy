@@ -471,7 +471,7 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
   baseGPOs->countCoOccurrencesOptimistic();
 
   set<int> interested_checkins;
-  baseGPOs->computeLocationsOfInterest(SPATIAL_SOFT_BOUND*4, TEMPORAL_SOFT_BOUND*4, &interested_checkins);
+  baseGPOs->computeLocationsOfInterest(SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND, &interested_checkins);
 
   double noise_radius   = spatial_noise_in_m;
   double time_deviation = temporal_noise_in_minutes * 60;
@@ -516,7 +516,7 @@ void selectiveSTKNNNoise(int k, bool hide){
   baseGPOs->countCoOccurrencesOptimistic();
 
   set<int> interested_checkins;
-  baseGPOs->computeLocationsOfInterest(SPATIAL_SOFT_BOUND*4, TEMPORAL_SOFT_BOUND*4, &interested_checkins);
+  baseGPOs->computeLocationsOfInterest(SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND, &interested_checkins);
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(baseGPOs, k, hide);
