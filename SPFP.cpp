@@ -907,6 +907,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "selective-hiding") == 0)
     iteration_type = 13;
 
+  else if (strcmp(argv[2], "dummy-checkins") == 0)
+    iteration_type = 14;
+
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
   else if (strcmp(argv[2], "compute-katz") == 0)
@@ -1204,7 +1207,31 @@ int main(int argc, char *argv[]){
       GPOs* fixedGPOs = baseGPOs;
       fixedGPOs->countCoOccurrencesOptimistic();
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-      purturbedGPOs->hidePurturbed(fixedGPOs, prob);
+      purturbedGPOs->hideCoLocations(fixedGPOs, prob);
+      purturbedGPOs->countCoOccurrencesOptimistic();
+      runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+
+      break;
+    }
+
+    case 14:{
+      cout << "ITRATION: Dummy Checkins  " << endl;
+
+      k                   = p1;
+      coocc_spatial_range = p2;
+      coocc_time_range    = p3;
+
+      printParameters();
+
+      bool preload_LE  = false;
+      bool preload_OCC = false;
+      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+      GPOs* fixedGPOs = baseGPOs;
+      fixedGPOs->countCoOccurrencesOptimistic();
+      GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+      purturbedGPOs->dummyCoLocations(fixedGPOs, k);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
 

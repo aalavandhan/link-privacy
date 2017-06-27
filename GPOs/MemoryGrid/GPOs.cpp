@@ -1596,7 +1596,7 @@ void GPOs::computeSTKNNDistances(int k, int type){
 }
 
 
-void GPOs::hidePurturbed(GPOs* gpos, double prob){
+void GPOs::hideCoLocations(GPOs* gpos, double prob){
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
@@ -1629,6 +1629,43 @@ void GPOs::hidePurturbed(GPOs* gpos, double prob){
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+}
+
+void GPOs::dummyCoLocations(GPOs* gpos, int k){
+  set<int> checkins_of_interest;
+  gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
+
+  cout << "Adding  " << k << "dummies per co-location" << endl;
+
+  unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
+
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    int order = c_it->first;
+    Point *p = c_it->second;
+
+    if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
+      loadPoint( p->getX(), p->getY(), lid, lid, p->getTime(), lid );
+
+      lid++;
+      purturbed_count++;
+      spatial_purturbed_count++;
+      temporal_purturbed_count++;
+    }
+
+    loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
+    point_count++;
+  }
+
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
+  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
+  cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
+  cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
+  cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+  cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
+  cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
+  cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+
 }
 
 // Only co-occurrences

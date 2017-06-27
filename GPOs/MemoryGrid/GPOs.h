@@ -205,5 +205,6 @@ public:
     void anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide);
     void computeLocationsOfInterest(double spatial_bound_in_meters, double temporal_bound_in_hours, set<int> *interested_checkins);
 
-    void hidePurturbed(GPOs* gpos, double prob);
+    void hideCoLocations(GPOs* gpos, double prob);
+    void dummyCoLocations(GPOs* gpos, int k);
 };
