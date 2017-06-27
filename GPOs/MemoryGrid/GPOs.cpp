@@ -1825,17 +1825,26 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(baseX, baseY, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
-        loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
-        seenLocations.insert(q->getOrder());
-        lid++;
-        total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
-        total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
-        purturbed_count++;
-        knn_added++;
-      } else {
-        kth++; // Check the next NN
-      }
+
+      // HOT FIX
+      loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
+      seenLocations.insert(q->getOrder());
+      lid++;
+      total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
+      total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
+      purturbed_count++;
+      knn_added++;
+      // if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
+      //   loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
+      //   seenLocations.insert(q->getOrder());
+      //   lid++;
+      //   total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
+      //   total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
+      //   purturbed_count++;
+      //   knn_added++;
+      // } else {
+      //   kth++; // Check the next NN
+      // }
     }
 
     if(knn_added == 0) // Keeping track of co-occurrences which are not anonomized
