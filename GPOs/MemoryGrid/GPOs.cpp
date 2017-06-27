@@ -1849,8 +1849,8 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
     double noise_radius, time_deviation;
 
     if(knn_out_of_hard_bound){
-      noise_radius = SPATIAL_HARD_BOUND;
-      time_deviation = TEMPORAL_HARD_BOUND * 3600.0;
+      noise_radius = 2 * SPATIAL_HARD_BOUND;
+      time_deviation = 2 * TEMPORAL_HARD_BOUND * 3600.0;
       base_checkin = p;
     }
     else {
@@ -1876,7 +1876,16 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
     double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
     double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
 
-    if(knn_out_of_hard_bound){
+    bool knn_out_of_soft_bound = false;
+    if(!knn_out_of_hard_bound){
+      vector<int> *neighbours = knn_it->second;
+      int neighbor = neighbours->at(0);
+      Point *q = gpos->checkin_list.find(neighbor)->second;
+      knn_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
+      knn_out_of_soft_bound = knn_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
+    }
+
+    if(knn_out_of_soft_bound || knn_out_of_hard_bound){
       total_spatial_displacement_sparse+=sd;
       total_time_displacement_sparse+=td;
       sparse_purturbed_count++;
