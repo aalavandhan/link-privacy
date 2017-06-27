@@ -904,6 +904,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "selective-anon-2") == 0)
     iteration_type = 12;
 
+  else if (strcmp(argv[2], "selective-hiding") == 0)
+    iteration_type = 13;
+
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
   else if (strcmp(argv[2], "compute-katz") == 0)
@@ -1139,7 +1142,7 @@ int main(int argc, char *argv[]){
       if(hide)
         cout << "Hiding sparse co-locations" << endl;
 
-      bool preload_LE  = true;
+      bool preload_LE  = false;
       bool preload_OCC = false;
       GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
@@ -1167,7 +1170,7 @@ int main(int argc, char *argv[]){
       if(hide)
         cout << "Hiding sparse co-locations" << endl;
 
-      bool preload_LE  = true;
+      bool preload_LE  = false;
       bool preload_OCC = false;
       GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
@@ -1176,6 +1179,33 @@ int main(int argc, char *argv[]){
       fixedGPOs->countCoOccurrencesOptimistic();
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGPOs, k, false, hide);
+      purturbedGPOs->countCoOccurrencesOptimistic();
+      runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+
+      break;
+    }
+
+    case 13:{
+      cout << "ITRATION: Checkin hiding " << endl;
+
+      double prob         = p1;
+      coocc_spatial_range = p2;
+      coocc_time_range    = p3;
+
+      printParameters();
+
+      if(hide)
+        cout << "Hiding with prob" << prob << endl;
+
+      bool preload_LE  = false;
+      bool preload_OCC = false;
+      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+      GPOs* fixedGPOs = baseGPOs;
+      fixedGPOs->countCoOccurrencesOptimistic();
+      GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+      purturbedGPOs->hidePurturbed(fixedGPOs, prob);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
 

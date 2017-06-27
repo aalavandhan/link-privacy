@@ -204,4 +204,6 @@ public:
     void groupLocationsToTopK(GPOs* gpos, set<int> *interested_checkins, int k, double spatial_bound_in_meters, double temporal_bound_in_hours);
     void anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide);
     void computeLocationsOfInterest(double spatial_bound_in_meters, double temporal_bound_in_hours, set<int> *interested_checkins);
+
+    void hidePurturbed(GPOs* gpos, double prob);
 };
