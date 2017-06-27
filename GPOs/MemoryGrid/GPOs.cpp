@@ -1829,7 +1829,6 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
 
       // HOT FIX
       loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
-      seenLocations.insert(q->getOrder());
       lid++;
       total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
       total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
