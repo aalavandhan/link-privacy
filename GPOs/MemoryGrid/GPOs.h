@@ -168,6 +168,7 @@ public:
 
     void loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint time_deviation);
     void loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide);
+    void loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool gaussian, bool hide);
     void loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k);
 
     virtual map< int, double >* computeTemporalLocality(int max_checkins, double max_radius);

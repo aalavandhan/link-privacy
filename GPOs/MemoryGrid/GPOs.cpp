@@ -1788,8 +1788,12 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)purturbed_count) <<"}} hours"<<endl;
 }
 
-// Only co-occurrences
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
+  loadPurturbedBasedOnSelectiveSTKNNDistance(gpos, k, true, hide);
+}
+
+// Only co-occurrences
+void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool gaussian, bool hide){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
 
   map <int, vector<int>* > st_knn;
@@ -1870,6 +1874,11 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
       noise_radius = 2 * p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
       time_deviation = 2 * abs((p->getTime() - q->getTime()).total_seconds());
     };
+
+    if(!gaussian){
+      noise_radius = 0;
+      time_deviation = 0;
+    }
 
     pair<double,double> coordinates_with_noise = util.addGaussianNoise(base_checkin->getX(), base_checkin->getY(), noise_radius);
     boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise(base_checkin->getTime(), time_deviation);

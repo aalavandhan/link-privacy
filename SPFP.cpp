@@ -898,8 +898,11 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "selective-gaussian-ideal-grouping") == 0)
     iteration_type = 10;
 
-  else if (strcmp(argv[2], "selective-anan-st") == 0)
+  else if (strcmp(argv[2], "selective-anon-1") == 0)
     iteration_type = 11;
+
+  else if (strcmp(argv[2], "selective-anon-2") == 0)
+    iteration_type = 12;
 
   else if (strcmp(argv[2], "occ-hist") == 0)
     iteration_type = 90;
@@ -1124,7 +1127,7 @@ int main(int argc, char *argv[]){
     }
 
     case 11:{
-      cout << "ITRATION: Anonamization " << endl;
+      cout << "ITRATION: Anonamization -1 " << endl;
 
       k                   = p1;
       coocc_spatial_range = p2;
@@ -1145,6 +1148,34 @@ int main(int argc, char *argv[]){
       fixedGPOs->countCoOccurrencesOptimistic();
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->anonymizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide);
+      purturbedGPOs->countCoOccurrencesOptimistic();
+      runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+
+      break;
+    }
+
+    case 12:{
+      cout << "ITRATION: Anonamization -2 " << endl;
+
+      k                   = p1;
+      coocc_spatial_range = p2;
+      coocc_time_range    = p3;
+      bool hide           = (p4==1);
+
+      printParameters();
+
+      if(hide)
+        cout << "Hiding sparse co-locations" << endl;
+
+      bool preload_LE  = true;
+      bool preload_OCC = false;
+      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+      GPOs* fixedGPOs = baseGPOs;
+      fixedGPOs->countCoOccurrencesOptimistic();
+      GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+      purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGPOs, k, false, hide);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
 
