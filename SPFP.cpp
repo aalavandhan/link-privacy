@@ -1194,8 +1194,7 @@ int main(int argc, char *argv[]){
 
       printParameters();
 
-      if(hide)
-        cout << "Hiding with prob" << prob << endl;
+      cout << "Hiding with prob" << prob << endl;
 
       bool preload_LE  = false;
       bool preload_OCC = false;
