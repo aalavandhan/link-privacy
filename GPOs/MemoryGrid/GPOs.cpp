@@ -1644,12 +1644,13 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
     Point *p = c_it->second;
 
     if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
-      loadPoint( p->getX(), p->getY(), lid, lid, p->getTime(), lid );
-
-      lid++;
-      purturbed_count++;
-      spatial_purturbed_count++;
-      temporal_purturbed_count++;
+      for(int j=1; j<=k; j++){
+        loadPoint( p->getX(), p->getY(), lid, lid, p->getTime(), lid );
+        lid++;
+        purturbed_count++;
+        spatial_purturbed_count++;
+        temporal_purturbed_count++;
+      }
     }
 
     loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
