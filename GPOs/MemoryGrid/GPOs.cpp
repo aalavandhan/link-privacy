@@ -1173,7 +1173,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
 
     // Get KNNs in SPATIAL_TEMPORAL [ RANGE ]
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
-    vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p);
+    vector<res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, 4*SPATIAL_SOFT_BOUND, 4*TEMPORAL_SOFT_BOUND);
     gpos->getSpatioTemporalKNN(p, 25, &spatioTemporalKNNs, candidates, 4);
 
     // Sort KNNs in ascending order
