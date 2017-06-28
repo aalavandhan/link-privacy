@@ -1,5 +1,14 @@
 #include "../../headersMemory.h"
 
+template <typename It>
+double Median(It begin, It end)
+{
+    using T = typename std::iterator_traits<It>::value_type;
+    std::vector<T> data(begin, end);
+    std::nth_element(data.begin(), data.begin() + data.size() / 2, data.end());
+    return data[data.size() / 2];
+}
+
 GPOs::GPOs (char* gridFileName, uint time_range, double spatial_range){
   kNNExecutions = 0;
   LocationExecutions = 0;
@@ -1828,23 +1837,24 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       Point *q = gpos->checkin_list.find(neighbor)->second;
 
       // HOT FIX
-      loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
-      lid++;
-      total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
-      total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
-      purturbed_count++;
-      knn_added++;
-      // if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
-      //   loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
-      //   seenLocations.insert(q->getOrder());
-      //   lid++;
-      //   total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
-      //   total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
-      //   purturbed_count++;
-      //   knn_added++;
-      // } else {
-      //   kth++; // Check the next NN
-      // }
+      // loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
+      // lid++;
+      // total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
+      // total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
+      // purturbed_count++;
+      // knn_added++;
+
+      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
+        loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
+        seenLocations.insert(q->getOrder());
+        lid++;
+        total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
+        total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
+        purturbed_count++;
+        knn_added++;
+      } else {
+        kth++; // Check the next NN
+      }
     }
 
     if(knn_added == 0) // Keeping track of co-occurrences which are not anonomized
@@ -1940,20 +1950,22 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
     }
     else {
       vector<int> *neighbours = knn_it->second;
-      Point *q;
       int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
       int kth = rand() % (k_lim+1);
+      int neighbor;
+
       if(kth==0){
-        int neighbor = neighbours->at(0);
-        q = gpos->checkin_list.find(neighbor)->second;
-        base_checkin=p;
+        neighbor = neighbours->at(0);
       } else {
-        int neighbor = neighbours->at(kth-1);
-        q = gpos->checkin_list.find(neighbor)->second;
-        base_checkin=q;
+        neighbor = neighbours->at(kth-1);
       }
-      noise_radius = 2 * p->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
-      time_deviation = 2 * abs((p->getTime() - q->getTime()).total_seconds());
+      Point *n = gpos->checkin_list.find(neighbor)->second;
+      int neighbours_neighbour = st_knn.find(neighbor)->second->at(0);
+      Point *q = gpos->checkin_list.find(neighbours_neighbour)->second;
+
+      noise_radius = 2 * n->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
+      time_deviation = 2 * abs((n->getTime() - q->getTime()).total_seconds());
+      base_checkin = n;
     };
 
     if(!gaussian){
@@ -1987,6 +1999,10 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
 
     total_spatial_displacement+=sd;
     total_time_displacement+=td;
+
+    spatial_displacement.push_back(sd);
+    temporal_displacement.push_back(td);
+
     purturbed_count++;
     spatial_purturbed_count++;
     temporal_purturbed_count++;
@@ -2003,9 +2019,11 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
   cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
   cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+  cout<<"median_spatial_displacement{{"<< Median(spatial_displacement.begin(), spatial_displacement.end()) * 1000 <<"}} in meters"<<endl;
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+  cout<<"median_temporal_displacement{{"<< Median(temporal_displacement.begin(), temporal_displacement.end()) * 3600 <<"}} seconds"<<endl;
   cout<<"dense_purturbed_count{{"<< dense_purturbed_count <<"}}"<<endl;
   cout<<"total_spatial_displacement_dense{{"<< total_spatial_displacement_dense <<"}}"<<endl;
   cout<<"total_time_displacement_dense{{"<< total_time_displacement_dense <<"}}"<<endl;

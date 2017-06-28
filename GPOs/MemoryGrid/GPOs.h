@@ -36,6 +36,7 @@ public:
     double total_time_displacement_sparse    = 0;
     double total_spatial_displacement_dense = 0;
     double total_time_displacement_dense    = 0;
+    vector<double> spatial_displacement,temporal_displacement; // KM, Hours
 
     int purturbed_count = 0, spatial_purturbed_count=0, temporal_purturbed_count=0;
     int sparse_purturbed_count = 0;
