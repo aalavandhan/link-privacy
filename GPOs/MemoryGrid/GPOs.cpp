@@ -1983,6 +1983,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
         Point *n = gpos->checkin_list.find(neighbor)->second;
         noise_radius = 2 * p->computeMinDistInKiloMeters(n->getX(), n->getY()) * 1000;
         time_deviation = 2 * abs((p->getTime() - n->getTime()).total_seconds());
+        base_checkin = p;
       } else {
         neighbor = neighbours->at(kth-1);
         vector<int> *neighbours_neighbours = st_knn.find(neighbor)->second;
@@ -1991,8 +1992,9 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
         Point *q = gpos->checkin_list.find(neighbours_neighbour)->second;
         noise_radius = 2 * n->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
         time_deviation = 2 * abs((n->getTime() - q->getTime()).total_seconds());
+        base_checkin = n;
       }
-      base_checkin = n;
+
     };
 
     if(!gaussian){
