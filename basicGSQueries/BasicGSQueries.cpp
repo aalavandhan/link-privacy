@@ -24,43 +24,22 @@ int SimpleQueries::countCooccurredFriends(){
 }
 
 
-void SimpleQueries::getInterestingQueryPoints(const char* fileName, double radius, double noise_distance, const char* query_file, int DATA_SET){
-  ifstream fin(fileName);
+void SimpleQueries::getInterestingQueryPoints(double radius, const char* query_file, int DATA_SET){
   ofstream outfile;
   outfile.open( query_file );
   double x,y;
   int day, count=0;
 
-  if (!fin) {
-    std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
-  }
-  int limit = 25;
-
-  if(DATA_SET == 0){
-    limit = 25;
-  } else if(DATA_SET == 1){
-    limit = 100;
-  } else if(DATA_SET == 2){
-    limit = 50;
-  }
-
-  cout << "User limit :" << limit << endl;
-
-  while (fin){
-    fin >> y >> x >> day;
-    unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
-    for(int i=0; i<7; i++){
-      vector<int> *u_set = user_list->find(i)->second;
-      if(u_set->size() > limit){
-        outfile << y << " " << x << " " << i << endl;
-        count++;
-      }
-    }
+  set<int> checkins_of_interest, selected_checkins;
+  gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
+  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
+    int order = (*c_it);
+    Point *p = gpos->checkin_list.find(order)->second;
+    vector<int>* user_list = gpos->getUsersInRangeByHourBlock(p, radius);
+    outfile << p->getX() << " " << p->getY() << " " << p->getTime() << " " << p->getOrder() << " " << user_list->size() << endl;
     delete user_list;
   }
 
-  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Keeping top Location time blocks with at least  " << limit << " : " << count << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 

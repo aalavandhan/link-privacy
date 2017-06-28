@@ -208,4 +208,6 @@ public:
 
     void hideCoLocations(GPOs* gpos, double prob);
     void dummyCoLocations(GPOs* gpos, int k);
+
+    vector<int>* getUsersInRangeByHourBlock(Point *p, double r);
 };

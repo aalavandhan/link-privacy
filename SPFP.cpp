@@ -669,20 +669,21 @@ void CombinationNoiseVsEBM(double noise_radius, double time_deviation, bool add_
 void checkQueryFileStats(){
   cout << "------------- Evaluating query locations ---------------" << endl;
 
-  GPOs* baseGPOs = loadCheckins(checkins_file);
-  SPOs* spos = loadSocialGraph(graph_file);
+  GPOs* baseGPOs = loadCheckins(checkins_file, false, false);
+  SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+  baseGPOs->countCoOccurrencesOptimistic();
 
   SimpleQueries* query = new SimpleQueries(baseGPOs, spos);
 
-  query->getInterestingQueryPoints(query_test_file, 800, 100, query_file, DATA_SET);
+  query->getInterestingQueryPoints(500, query_file, DATA_SET);
 
-  query->checkUtilityStats(query_file, 800, 100);
-  query->checkUtilityStats(query_file, 800, 200);
-  query->checkUtilityStats(query_file, 800, 300);
-  query->checkUtilityStats(query_file, 800, 400);
-  query->checkUtilityStats(query_file, 800, 500);
-  query->checkUtilityStats(query_file, 800, 600);
-  query->checkUtilityStats(query_file, 800, 700);
+  // query->checkUtilityStats(query_file, 800, 100);
+  // query->checkUtilityStats(query_file, 800, 200);
+  // query->checkUtilityStats(query_file, 800, 300);
+  // query->checkUtilityStats(query_file, 800, 400);
+  // query->checkUtilityStats(query_file, 800, 500);
+  // query->checkUtilityStats(query_file, 800, 600);
+  // query->checkUtilityStats(query_file, 800, 700);
 }
 
 void testpTools(){

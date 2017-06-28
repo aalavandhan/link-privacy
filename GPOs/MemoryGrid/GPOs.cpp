@@ -919,6 +919,31 @@ unordered_map< int, vector<int>* >* GPOs::getUsersInRangeByHourBlock(double x, d
   return user_list;
 }
 
+vector<int>* GPOs::getUsersInRangeByHourBlock(Point *p, double r){
+  double radius_geo_dist = (r/1000) * 360 / EARTH_CIRCUMFERENCE;
+  vector<res_point*>* checkins = getRange(p->getX(), p->getY(), radius_geo_dist);
+
+  vector<int>* user_list = new vector<int>();
+
+  for(auto c = checkins->begin(); c != checkins->end(); c++){
+    Point q = Point(*c);
+    if((p->getTime() - q.getTime()).total_seconds() <= 3600){
+      user_list->push_back(q.getUID());
+    }
+  }
+
+  sort(user_list->begin(), user_list->end());
+  user_list->erase( unique( user_list->begin(), user_list->end() ), user_list->end() );
+
+  for(auto c = checkins->begin(); c != checkins->end(); c++){
+    delete (*c);
+  }
+  delete checkins;
+
+  return user_list;
+}
+
+
 // r1 -> Outer radius, r2 -> inner radius
 vector<int>* GPOs::getUsersInRange(double x, double y, double r1, double r2){
   vector<int> *u1_list = getUsersInRange(x, y, r1);
@@ -1952,15 +1977,18 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
       vector<int> *neighbours = knn_it->second;
       int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
       int kth = rand() % (k_lim+1);
-      int neighbor;
+      int neighbor, neighbours_neighbour;
 
       if(kth==0){
         neighbor = neighbours->at(0);
+        neighbours_neighbour = p->getOrder();
       } else {
         neighbor = neighbours->at(kth-1);
+        vector<int> *neighbours_neighbours = st_knn.find(neighbor)->second;
+        neighbours_neighbour = neighbours_neighbours->at(0);
       }
+
       Point *n = gpos->checkin_list.find(neighbor)->second;
-      int neighbours_neighbour = st_knn.find(neighbor)->second->at(0);
       Point *q = gpos->checkin_list.find(neighbours_neighbour)->second;
 
       noise_radius = 2 * n->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
