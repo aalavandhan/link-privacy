@@ -1978,21 +1978,20 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
       int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
       int kth = rand() % (k_lim+1);
       int neighbor, neighbours_neighbour;
-
       if(kth==0){
         neighbor = neighbours->at(0);
-        neighbours_neighbour = p->getOrder();
+        Point *n = gpos->checkin_list.find(neighbor)->second;
+        noise_radius = 2 * p->computeMinDistInKiloMeters(n->getX(), n->getY()) * 1000;
+        time_deviation = 2 * abs((p->getTime() - n->getTime()).total_seconds());
       } else {
         neighbor = neighbours->at(kth-1);
         vector<int> *neighbours_neighbours = st_knn.find(neighbor)->second;
         neighbours_neighbour = neighbours_neighbours->at(0);
+        Point *n = gpos->checkin_list.find(neighbor)->second;
+        Point *q = gpos->checkin_list.find(neighbours_neighbour)->second;
+        noise_radius = 2 * n->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
+        time_deviation = 2 * abs((n->getTime() - q->getTime()).total_seconds());
       }
-
-      Point *n = gpos->checkin_list.find(neighbor)->second;
-      Point *q = gpos->checkin_list.find(neighbours_neighbour)->second;
-
-      noise_radius = 2 * n->computeMinDistInKiloMeters(q->getX(), q->getY()) * 1000;
-      time_deviation = 2 * abs((n->getTime() - q->getTime()).total_seconds());
       base_checkin = n;
     };
 
