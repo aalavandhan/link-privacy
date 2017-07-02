@@ -1390,10 +1390,10 @@ int main(int argc, char *argv[]){
       gpos->countCoOccurrencesOptimistic();
 
       if(compute_spatial)
-        gpos->computeSTKNNDistances(10, 1);
+        gpos->computeSTKNNDistances(100, 1);
 
       if(compute_temporal)
-        gpos->computeSTKNNDistances(10, 2);
+        gpos->computeSTKNNDistances(100, 2);
 
       break;
     }
@@ -1431,7 +1431,7 @@ int main(int argc, char *argv[]){
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
       gpos->countCoOccurrencesOptimistic();
-      gpos->computeSTKNNDistances(10, 0);
+      gpos->computeSTKNNDistances(100, 0);
       break;
     }
 
@@ -1451,7 +1451,7 @@ int main(int argc, char *argv[]){
       SPOs* spos = loadSocialGraph(graph_file, gpos);
 
       gpos->countCoOccurrencesOptimistic();
-      gpos->computeSTKNNDistances(10, 3);
+      gpos->computeSTKNNDistances(100, 3);
       break;
     }
 
