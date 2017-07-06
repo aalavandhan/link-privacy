@@ -1808,7 +1808,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     double baseX=(p1->getX() + p2->getX()) / 2,
            baseY=(p1->getY() + p2->getY()) / 2;
 
-    boost::posix_time::ptime baseTime= p1->getTime() + (p2->getTime() - p1->getTime());
+    boost::posix_time::ptime baseTime= p1->getTime() + (p2->getTime() - p1->getTime())/2;
 
     auto knn_it = st_knn.find(o1);
     if(knn_it == st_knn.end() && hide){  // Hide very sparse
