@@ -1526,7 +1526,17 @@ void GPOs::pickSingleCheckinFromCooccurrences(set<int> *checkins_of_interest){
     int o1 = c_it->first;
     int o2 = c_it->second;
 
-    checkins_of_interest->insert(o1);
+    unordered_set<int>* o1_orders = cooccurrence_index.find(o1)->second;
+    unordered_set<int>* o2_orders = cooccurrence_index.find(o2)->second;
+
+    int order; // Dominating check-in
+    if(o1_orders->size() >= o2_orders->size())
+      order = o1;
+    else
+      order = o2;
+
+    if( checkins_of_interest->find(order) == checkins_of_interest->end() )
+      checkins_of_interest->insert(order);
   }
 }
 
@@ -1796,46 +1806,32 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
 
   unsigned int lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
-  set <int> seenLocations;
 
-  for(auto c_it = gpos->cooccurred_checkins.begin(); c_it != gpos->cooccurred_checkins.end(); c_it++){
-    int o1 = c_it->first;
-    int o2 = c_it->second;
+  set <int> seenLocations, checkins_of_interest;
+  gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-    Point *p1 = gpos->checkin_list.find(o1)->second;
-    Point *p2 = gpos->checkin_list.find(o2)->second;
+  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
+    int order = (*c_it);
+    Point *p = gpos->checkin_list.find(order)->second;
 
-    double baseX=(p1->getX() + p2->getX()) / 2,
-           baseY=(p1->getY() + p2->getY()) / 2;
+    double baseX=p->getX(),
+           baseY=p->getY();
+    boost::posix_time::ptime baseTime= p->getTime();
 
-    boost::posix_time::ptime baseTime= p1->getTime() + (p2->getTime() - p1->getTime())/2;
+    auto knn_it = st_knn.find(order);
 
-    auto knn_it = st_knn.find(o1);
-    if(knn_it == st_knn.end() && hide){  // Hide very sparse
-      seenLocations.insert(p2->getOrder());
-      cooccurrences_out_of_bound++;
+    if( seenLocations.find(p->getOrder()) == seenLocations.end() ){
+      loadPoint( p->getX(), p->getY(), lid, p->getUID(), p->getTime(), p->getOrder() );
+      seenLocations.insert(p->getOrder());
+      lid++;
+      total_spatial_displacement+=p->computeMinDistInKiloMeters(p->getX(), p->getY());
+      total_time_displacement+=(double)abs((p->getTime() - p->getTime()).total_seconds())/3600.0;
+      purturbed_count++;
+    } else {
       continue;
     }
 
-    if(seenLocations.find(p1->getOrder()) == seenLocations.end()){
-      loadPoint( p1->getX(), p1->getY(), lid, p1->getUID(), p1->getTime(), p1->getOrder() );
-      seenLocations.insert(p1->getOrder());
-      lid++;
-      total_spatial_displacement+=p1->computeMinDistInKiloMeters(p1->getX(), p1->getY());
-      total_time_displacement+=(double)abs((p1->getTime() - p1->getTime()).total_seconds())/3600.0;
-      purturbed_count++;
-    }
-
-    if(seenLocations.find(p2->getOrder()) == seenLocations.end()){
-      loadPoint( p2->getX(), p2->getY(), lid, p2->getUID(), p2->getTime(), p2->getOrder() );
-      seenLocations.insert(p2->getOrder());
-      lid++;
-      total_spatial_displacement+=p1->computeMinDistInKiloMeters(p2->getX(), p2->getY());
-      total_time_displacement+=(double)abs((p1->getTime() - p2->getTime()).total_seconds())/3600.0;
-      purturbed_count++;
-    }
-
-    if(knn_it == st_knn.end()){ // Sparse region
+    if(knn_it == st_knn.end()){ // Hide very sparse
       cooccurrences_out_of_bound++;
       continue;
     }
@@ -1846,8 +1842,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(baseX, baseY, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-      bool no_cooccurrence_at_neighbour = gpos->cooccurrence_index.find(neighbor) == gpos->cooccurrence_index.end();
-
+      bool no_cooccurrence_at_neighbour = (gpos->cooccurrence_index.find(neighbor) == gpos->cooccurrence_index.end());
       if( seenLocations.find(q->getOrder()) == seenLocations.end() && no_cooccurrence_at_neighbour ){
         loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
         seenLocations.insert(q->getOrder());
@@ -1859,7 +1854,6 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       } else {
         kth++; // Check the next NN
       }
-
     }
 
     if(knn_added == 0) // Keeping track of co-occurrences which are not anonomized
