@@ -130,7 +130,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   // Basic utility : Sparse vs Dense
   map <int, vector<int>* > st_knn;
   stringstream ss;
-  ss << "knn-noise-combined-10-25-1200-coocc.csv";
+  ss << "knn-noise-combined-100-25-1200-coocc.csv";
   ifstream fin(ss.str());
   while(!fin.eof()){
     int order;
@@ -148,7 +148,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       fin >> text;
       t_distance = (text == "inf") ? std::numeric_limits<double>::infinity() : atof(text.c_str());
       if(knn_order != -1)
-        neighbours->push_back(knn_order);
+        neighbours->push_back(st_distance);
     }
     if(neighbours->size() > 0){
       reverse(neighbours->begin(),neighbours->end());
@@ -160,134 +160,95 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   fin.close();
   cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
-  unordered_set< pair<int,int>, PairHasher > sparse_set, dense_set, p_sparse_set, p_dense_set;
+  double buckets[] = {0.53208299999999997, 0.58567060000000004, 0.64515509999999998, 0.70223800000000003, 0.75724099999999994, 0.80847699999999989, 0.8628517, 0.91566639999999999, 0.97168499999999991, 1.0265299999999999, 1.0890230000000001, 1.157, 1.2290700000000001, 1.305666, 1.3864299999999998, 1.47228, 1.5558350000000001, 1.6438799999999998, 1.7360349999999998, 1.8352200000000001, 1.9357689999999994, 2.0341900000000002, 2.13984, 2.2491719999999997, 2.35955, 2.4794160000000001, 2.5962529999999999, 2.7206040000000007, 2.8508929999999997, 2.9753799999999999, 3.1026599999999998, 3.2446519999999999, 3.379346, 3.5142840000000004, 3.6633449999999996, 3.8194480000000008, 3.9711199999999995, 4.1262600000000003, 4.2805239999999998, 4.4452800000000003, 4.6173569999999993, 4.8019539999999994, 4.9884849999999998, 5.19076, 5.3870250000000004, 5.5763959999999999, 5.7756300000000005, 5.9883299999999977, 6.2125680000000001, 6.4404900000000005, 6.6806920000000005, 6.9297880000000003, 7.1815429999999987, 7.4403980000000027, 7.6929750000000006, 7.9469760000000012, 8.2380029999999991, 8.542764, 8.8573359999999948, 9.1903600000000001, 9.5360929999999975, 9.9122579999999996, 10.314669999999998, 10.720680000000003, 11.171049999999999, 11.636740000000005, 12.134170000000005, 12.6488, 13.187069999999999, 13.7812, 14.385189999999998, 15.080300000000003, 15.838469999999997, 16.639820000000004, 17.5017, 18.434159999999999, 19.47711, 20.563219999999987, 21.719450000000005, 23.030799999999999, 24.4726, 26.019639999999967, 27.705359999999999, 29.481639999999985, 31.457100000000001, 33.506659999999975, 35.59911000000001, 37.76133999999999, 40.319940000000003, 43.094999999999999, 46.378520000000002, 50.193020000000004, 55.179540000000017, 61.402519999999875, 68.65625, 77.564479999999975, 89.588520000000003, 111.13499999999999, 153.13430000000071, 691.02199999999993};
+  int buckets_size = (sizeof(buckets)/sizeof(*buckets));
+  map<double, int> bucket_bound;
+  for(int i=0; i<100; i++){
+    bucket_bound.insert(make_pair(buckets[i], i));
+  }
+
+  map<int, unordered_set<pair<int,int>, PairHasher>*> bucket_hash;
+  vector<int> true_positive_vector, gt_vector, positive_vector;
 
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
+    double knn_dist;
+    if(st_knn.find(o1) != st_knn.end())
+      knn_dist = st_knn.find(o1)->second->at(0);
+    else
+      knn_dist = buckets[buckets_size-1];
 
-    if(st_knn.find(o1) == st_knn.end() && st_knn.find(o2) == st_knn.end()){
-      sparse_set.insert(make_pair(o1,o2));
-    } else {
-      Point *p,*q;
-      bool o1_out_of_soft_bound=false,o2_out_of_soft_bound=false;
-      int neighbour;
-
-      auto knn_it = st_knn.find(o1);
-      if(knn_it != st_knn.end()){
-        neighbour = knn_it->second->at(0);
-        p = gpos->checkin_list.find(o1)->second;
-        q = gpos->checkin_list.find(neighbour)->second;
-        o1_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
-        o1_out_of_soft_bound = o1_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
-      }
-
-      knn_it = st_knn.find(o2);
-      if(knn_it != st_knn.end()){
-        neighbour = knn_it->second->at(0);
-        p = gpos->checkin_list.find(o2)->second;
-        q = gpos->checkin_list.find(neighbour)->second;
-        bool o2_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
-        o2_out_of_soft_bound = o2_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
-      }
-
-      if(o1_out_of_soft_bound || o2_out_of_soft_bound)
-        sparse_set.insert(make_pair(o1,o2));
-      else
-        dense_set.insert(make_pair(o1,o2));
+    auto b_it = bucket_bound.upper_bound(knn_dist);
+    if(bucket_hash.find(b_it->second) == bucket_hash.end()){
+      unordered_set<pair<int,int>, PairHasher>* b_hash = new unordered_set<pair<int,int>, PairHasher>();
+      bucket_hash.insert(make_pair(b_it->second, b_hash));
     }
+    auto bset_it = bucket_hash.find(b_it->second);
+    unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
+    b_hash->insert(make_pair(o1, o2));
   }
 
-  for(auto c_it = purturbed_cooccurrences_hash.begin(); c_it != purturbed_cooccurrences_hash.end(); c_it++){
-    int o1 = c_it->first;
-    int o2 = c_it->second;
-    if(st_knn.find(o1) == st_knn.end() && st_knn.find(o2) == st_knn.end()){
-      p_sparse_set.insert(make_pair(o1,o2));
-    } else {
-      Point *p,*q;
-      bool o1_out_of_soft_bound=false,o2_out_of_soft_bound=false;
-      int neighbour;
+  for(auto b_it = bucket_hash.begin(); b_it != bucket_hash.end(); b_it++){
+    int bucket = b_it->first;
+    unordered_set<pair<int,int>, PairHasher>* co_occurred_checkins = b_it->second;
+    unordered_set<pair<int,int>, PairHasher> p_co_occurred_checkins;
+    set<int> checkins;
 
-      auto knn_it = st_knn.find(o1);
-      if(knn_it != st_knn.end()){
-        neighbour = knn_it->second->at(0);
-        p = gpos->checkin_list.find(o1)->second;
-        q = gpos->checkin_list.find(neighbour)->second;
-        o1_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
-        o1_out_of_soft_bound = o1_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
-      }
-
-      knn_it = st_knn.find(o2);
-      if(knn_it != st_knn.end()){
-        neighbour = knn_it->second->at(0);
-        p = gpos->checkin_list.find(o2)->second;
-        q = gpos->checkin_list.find(neighbour)->second;
-        bool o2_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
-        o2_out_of_soft_bound = o2_out_of_soft_bound || ( abs((p->getTime() - q->getTime()).total_seconds())/3600.0 >= TEMPORAL_SOFT_BOUND );
-      }
-
-      if(o1_out_of_soft_bound || o2_out_of_soft_bound)
-        p_sparse_set.insert(make_pair(o1,o2));
-      else
-        p_dense_set.insert(make_pair(o1,o2));
+    for(auto co_it = co_occurred_checkins->begin(); co_it != co_occurred_checkins->end(); co_it++){
+      checkins.insert(co_it->first);
+      checkins.insert(co_it->second);
     }
-  }
 
-  {
-    int true_positive = 0, gt = sparse_set.size(), positive = 0;
-    for(auto c_it = p_sparse_set.begin(); c_it != p_sparse_set.end(); c_it++){
+    for(auto c_it = checkins.begin(); c_it != checkins.end(); c_it++){
+      int order = (*c_it);
+      auto co_index_it = gpos->cooccurrence_index.find(order);
+      if(co_index_it != gpos->cooccurrence_index.end()){
+        unordered_set<int> *co_index = co_index_it->second;
+        for(auto co_ch_it = co_index->begin(); co_ch_it != co_index->end(); co_ch_it++){
+          int other_order = *co_ch_it;
+          if(order < other_order){
+            if(p_co_occurred_checkins.find(make_pair(order, other_order)) == p_co_occurred_checkins.end()){
+              p_co_occurred_checkins.insert(make_pair(order, other_order));
+            }
+          }
+        }
+      }
+    }
+
+    int true_positive = 0, gt = co_occurred_checkins->size(), positive = p_co_occurred_checkins.size();
+    for(auto c_it = co_occurred_checkins->begin(); c_it != co_occurred_checkins->end(); c_it++){
       int o1 = c_it->first;
       int o2 = c_it->second;
-      if(o1 > o2){
-        int temp = o2;
-        o2 = o1;
-        o1 = temp;
-      }
-      if(sparse_set.find(make_pair(o1, o2)) != sparse_set.end()){
+
+      auto f_it = p_co_occurred_checkins.find(make_pair(o1,o2));
+      if(f_it != p_co_occurred_checkins.end())
         true_positive++;
-      }
-      positive++;
     }
-    double precision = (double) true_positive / (double) positive;
-    double recall    = (double) true_positive / (double) gt;
-    double f1        = 2 * precision * recall / ( precision + recall );
-    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-    cout << "Utility SPARSE [ BASIC METRIC ]" << endl;
-    cout << "sparse_cooccurrences_before{{" << gt << "}}" << endl;
-    cout << "sparse_cooccurrences_after{{" << p_sparse_set.size() << "}}" << endl;
-    cout << "utility_basic_sparse_precision{{" << precision  << "}}" << endl;
-    cout << "utility_basic_sparse_recall{{" << recall  << "}}" << endl;
-    cout << "utility_basic_sparse_f1{{" << f1  << "}}" << endl;
-    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    delete co_occurred_checkins;
+
+    true_positive_vector.push_back(true_positive);
+    gt_vector.push_back(gt);
+    positive_vector.push_back(positive);
   }
 
-  {
-    int true_positive = 0, gt = dense_set.size(), positive = 0;
-    for(auto c_it = p_dense_set.begin(); c_it != p_dense_set.end(); c_it++){
-      int o1 = c_it->first;
-      int o2 = c_it->second;
-      if(o1 > o2){
-        int temp = o2;
-        o2 = o1;
-        o1 = temp;
-      }
-      if(dense_set.find(make_pair(o1, o2)) != dense_set.end()){
-        true_positive++;
-      }
-      positive++;
-    }
-    double precision = (double) true_positive / (double) positive;
-    double recall    = (double) true_positive / (double) gt;
-    double f1        = 2 * precision * recall / ( precision + recall );
-    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-    cout << "Utility DENSE [ BASIC METRIC ]" << endl;
-    cout << "dense_cooccurrences_before{{" << gt << "}}" << endl;
-    cout << "dense_cooccurrences_after{{" << p_dense_set.size() << "}}" << endl;
-    cout << "utility_basic_dense_precision{{" << precision  << "}}" << endl;
-    cout << "utility_basic_dense_recall{{" << recall  << "}}" << endl;
-    cout << "utility_basic_dense_f1{{" << f1  << "}}" << endl;
-    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "True Positive Count :  {{";
+  for(auto it = true_positive_vector.begin(); it != true_positive_vector.end(); it++){
+    cout << *it << ",";
   }
+  cout << "}}" << endl;
+  cout << "Ground Truth Count :  {{";
+  for(auto it = gt_vector.begin(); it != gt_vector.end(); it++){
+    cout << *it << ",";
+  }
+  cout << "}}" << endl;
+  cout << "Positive Count :  {{";
+  for(auto it = positive_vector.begin(); it != positive_vector.end(); it++){
+    cout << *it << ",";
+  }
+  cout << "}}" << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
