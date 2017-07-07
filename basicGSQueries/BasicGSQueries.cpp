@@ -166,19 +166,20 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   for(int i=0; i<100; i++){
     bucket_bound.insert(make_pair(buckets[i], i));
   }
+  cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
 
   map<int, unordered_set<pair<int,int>, PairHasher>*> bucket_hash;
   vector<int> true_positive_vector, gt_vector, positive_vector;
-
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
     double knn_dist;
     if(st_knn.find(o1) != st_knn.end())
       knn_dist = st_knn.find(o1)->second->at(0);
+    else if(st_knn.find(o2) != st_knn.end())
+      knn_dist = st_knn.find(o2)->second->at(0);
     else
       knn_dist = buckets[buckets_size-1];
-
     auto b_it = bucket_bound.upper_bound(knn_dist);
     if(bucket_hash.find(b_it->second) == bucket_hash.end()){
       unordered_set<pair<int,int>, PairHasher>* b_hash = new unordered_set<pair<int,int>, PairHasher>();
@@ -188,6 +189,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
     b_hash->insert(make_pair(o1, o2));
   }
+  cout << "STEP 2: Split co-occurrences per bucket." << endl;
 
   for(auto b_it = bucket_hash.begin(); b_it != bucket_hash.end(); b_it++){
     int bucket = b_it->first;
@@ -195,10 +197,14 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     unordered_set<pair<int,int>, PairHasher> p_co_occurred_checkins;
     set<int> checkins;
 
+    cout << "\tSTEP 3: Processing bucket " << bucket << endl;
+
     for(auto co_it = co_occurred_checkins->begin(); co_it != co_occurred_checkins->end(); co_it++){
       checkins.insert(co_it->first);
       checkins.insert(co_it->second);
     }
+
+    cout << "\tSTEP 3: Built checkin_list " << bucket << endl;
 
     for(auto c_it = checkins.begin(); c_it != checkins.end(); c_it++){
       int order = (*c_it);
@@ -216,6 +222,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       }
     }
 
+    cout << "\tSTEP 3: Computed co_occ list for bucket" << bucket << endl;
+
     int true_positive = 0, gt = co_occurred_checkins->size(), positive = p_co_occurred_checkins.size();
     for(auto c_it = co_occurred_checkins->begin(); c_it != co_occurred_checkins->end(); c_it++){
       int o1 = c_it->first;
@@ -230,6 +238,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     true_positive_vector.push_back(true_positive);
     gt_vector.push_back(gt);
     positive_vector.push_back(positive);
+
+    cout << "\tSTEP 3: Computed accuracy" << bucket << endl;
   }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
