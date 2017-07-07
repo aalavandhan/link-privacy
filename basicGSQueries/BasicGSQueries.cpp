@@ -197,14 +197,14 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     unordered_set<pair<int,int>, PairHasher> p_co_occurred_checkins;
     set<int> checkins;
 
-    cout << "\tSTEP 3: Processing bucket " << bucket << endl;
+    // cout << "\tSTEP 3: Processing bucket " << bucket << endl;
 
     for(auto co_it = co_occurred_checkins->begin(); co_it != co_occurred_checkins->end(); co_it++){
       checkins.insert(co_it->first);
       checkins.insert(co_it->second);
     }
 
-    cout << "\tSTEP 3: Built checkin_list " << bucket << endl;
+    // cout << "\tSTEP 3: Built checkin_list " << endl;
 
     for(auto c_it = checkins.begin(); c_it != checkins.end(); c_it++){
       int order = (*c_it);
@@ -222,7 +222,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       }
     }
 
-    cout << "\tSTEP 3: Computed co_occ list for bucket" << bucket << endl;
+    // cout << "\tSTEP 3: Computed co_occ list for bucket" << endl;
 
     int true_positive = 0, gt = co_occurred_checkins->size(), positive = p_co_occurred_checkins.size();
     for(auto c_it = co_occurred_checkins->begin(); c_it != co_occurred_checkins->end(); c_it++){
@@ -239,7 +239,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     gt_vector.push_back(gt);
     positive_vector.push_back(positive);
 
-    cout << "\tSTEP 3: Computed accuracy" << bucket << endl;
+    cout << "\tSTEP 3: Computed accuracy" << endl;
   }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
