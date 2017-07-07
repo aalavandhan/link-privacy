@@ -136,7 +136,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     int order;
     vector<int> *neighbours = new vector<int>();
     fin >> order;
-    for(int i = 0; i<10; i++){
+    for(int i = 0; i<100; i++){
       int knn_order;
       double st_distance, s_distance, t_distance;
       string text;
@@ -259,6 +259,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
   cout << "}}" << endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
+  for(auto knn_it=st_knn.begin(); knn_it != st_knn.end(); knn_it++){
+    delete knn_it->second;
+  }
 }
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location

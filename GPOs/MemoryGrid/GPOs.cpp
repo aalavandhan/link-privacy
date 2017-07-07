@@ -1876,6 +1876,10 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / purturbed_count) * 1000 <<"}} in meters"<<endl;
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)purturbed_count) <<"}} hours"<<endl;
+
+  for(auto knn_it=st_knn.begin(); knn_it != st_knn.end(); knn_it++){
+    delete knn_it->second;
+  }
 }
 
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
