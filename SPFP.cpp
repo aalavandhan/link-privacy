@@ -1157,6 +1157,9 @@ int main(int argc, char *argv[]){
       purturbedGPOs->anonymizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+      if(run_utilties){
+        runUtilities(purturbedGPOs, baseGPOs, spos);
+      }
 
       break;
     }
@@ -1185,6 +1188,9 @@ int main(int argc, char *argv[]){
       purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGPOs, k, false, hide);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+      if(run_utilties){
+        runUtilities(purturbedGPOs, baseGPOs, spos);
+      }
 
       break;
     }
@@ -1211,6 +1217,9 @@ int main(int argc, char *argv[]){
       purturbedGPOs->hideCoLocations(fixedGPOs, prob);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+      if(run_utilties){
+        runUtilities(purturbedGPOs, baseGPOs, spos);
+      }
 
       break;
     }
@@ -1235,6 +1244,9 @@ int main(int argc, char *argv[]){
       purturbedGPOs->dummyCoLocations(fixedGPOs, k);
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+      if(run_utilties){
+        runUtilities(purturbedGPOs, baseGPOs, spos);
+      }
 
       break;
     }
