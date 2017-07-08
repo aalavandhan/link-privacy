@@ -1892,7 +1892,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
 
   map <int, vector<int>* > st_knn;
   stringstream ss;
-  ss << "knn-noise-combined-10-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
+  ss << "knn-noise-combined-100-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
   ifstream fin(ss.str());
 
   while(!fin.eof()){
@@ -1900,7 +1900,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
     vector<int> *neighbours = new vector<int>();
     fin >> order;
 
-    for(int i = 0; i<10; i++){
+    for(int i = 0; i<100; i++){
       int knn_order;
       double st_distance, s_distance, t_distance;
       string text;

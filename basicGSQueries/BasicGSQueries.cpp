@@ -160,10 +160,11 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   fin.close();
   cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
-  double buckets[] = {0.53208299999999997, 0.58567060000000004, 0.64515509999999998, 0.70223800000000003, 0.75724099999999994, 0.80847699999999989, 0.8628517, 0.91566639999999999, 0.97168499999999991, 1.0265299999999999, 1.0890230000000001, 1.157, 1.2290700000000001, 1.305666, 1.3864299999999998, 1.47228, 1.5558350000000001, 1.6438799999999998, 1.7360349999999998, 1.8352200000000001, 1.9357689999999994, 2.0341900000000002, 2.13984, 2.2491719999999997, 2.35955, 2.4794160000000001, 2.5962529999999999, 2.7206040000000007, 2.8508929999999997, 2.9753799999999999, 3.1026599999999998, 3.2446519999999999, 3.379346, 3.5142840000000004, 3.6633449999999996, 3.8194480000000008, 3.9711199999999995, 4.1262600000000003, 4.2805239999999998, 4.4452800000000003, 4.6173569999999993, 4.8019539999999994, 4.9884849999999998, 5.19076, 5.3870250000000004, 5.5763959999999999, 5.7756300000000005, 5.9883299999999977, 6.2125680000000001, 6.4404900000000005, 6.6806920000000005, 6.9297880000000003, 7.1815429999999987, 7.4403980000000027, 7.6929750000000006, 7.9469760000000012, 8.2380029999999991, 8.542764, 8.8573359999999948, 9.1903600000000001, 9.5360929999999975, 9.9122579999999996, 10.314669999999998, 10.720680000000003, 11.171049999999999, 11.636740000000005, 12.134170000000005, 12.6488, 13.187069999999999, 13.7812, 14.385189999999998, 15.080300000000003, 15.838469999999997, 16.639820000000004, 17.5017, 18.434159999999999, 19.47711, 20.563219999999987, 21.719450000000005, 23.030799999999999, 24.4726, 26.019639999999967, 27.705359999999999, 29.481639999999985, 31.457100000000001, 33.506659999999975, 35.59911000000001, 37.76133999999999, 40.319940000000003, 43.094999999999999, 46.378520000000002, 50.193020000000004, 55.179540000000017, 61.402519999999875, 68.65625, 77.564479999999975, 89.588520000000003, 111.13499999999999, 153.13430000000071, 691.02199999999993};
+
+  double buckets[] = { 1.0265299999999999, 1.8352200000000001, 2.9753799999999999, 4.4452800000000003, 6.4404900000000005, 9.1903600000000001, 13.7812, 23.030799999999999, 43.094999999999999, 691.02199999999993 };
   int buckets_size = (sizeof(buckets)/sizeof(*buckets));
   map<double, int> bucket_bound;
-  for(int i=0; i<100; i++){
+  for(int i=0; i<10; i++){
     bucket_bound.insert(make_pair(buckets[i], i));
   }
   cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
@@ -243,17 +244,17 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "True Positive Count :  {{";
+  cout << "true_positive_count{{";
   for(auto it = true_positive_vector.begin(); it != true_positive_vector.end(); it++){
     cout << *it << ",";
   }
   cout << "}}" << endl;
-  cout << "Ground Truth Count :  {{";
+  cout << "ground_truth_count{{";
   for(auto it = gt_vector.begin(); it != gt_vector.end(); it++){
     cout << *it << ",";
   }
   cout << "}}" << endl;
-  cout << "Positive Count :  {{";
+  cout << "positive_count{{";
   for(auto it = positive_vector.begin(); it != positive_vector.end(); it++){
     cout << *it << ",";
   }
@@ -269,8 +270,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 // between base_gpos and this->gpos
 void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius, double noise_distance){
   ifstream fin(fileName);
-  double x,y, precision, recall, avg_precision=0, avg_recall=0, day;
-  int count=-1;
+  double precision, recall, avg_precision=0, avg_recall=0;
+  int count=-1, order;
 
   if (!fin) {
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
@@ -281,14 +282,18 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
   }
 
   while (fin){
-    fin >> y >> x >> day;
-    unordered_map< int, vector<int>* >* user1_set = base_gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
-    unordered_map< int, vector<int>* >* user2_set = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
+    fin >> order;
+    auto p_it = base_gpos->checkin_list.find(order);
+    if(p_it == base_gpos->checkin_list.end()){
+      cout << "Count not find checking in query file" << endl;
+      continue;
+    }
 
+    Point *p = p_it->second;
     vector<int> *u1_set, *u2_set;
 
-    u1_set = user1_set->find(day)->second;
-    u2_set = user2_set->find(day)->second;
+    u1_set = base_gpos->getUsersInRangeByHourBlock(p, radius);
+    u2_set = gpos->getUsersInRangeByHourBlock(p, radius);
 
     std::vector<int> v_intersection;
 
@@ -310,8 +315,8 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
       count++;
     }
 
-    delete user1_set;
-    delete user2_set;
+    delete u1_set;
+    delete u2_set;
   }
 
   avg_precision /= count;
