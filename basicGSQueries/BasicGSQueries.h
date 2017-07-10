@@ -19,7 +19,7 @@ public:
     void buildMatrices(double q);
     int countCooccurredFriends();
     map< int, bool >* getUsersOfInterest(double tresh);
-    void checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius, double noise_distance);
+    void checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius);
     void checkUtilityProximity(const char* fileName, GPOs *base_gpos, double radius, double tresh, double noise_distance);
     unordered_set< pair<int,int>, PairHasher >* computeProximityUserList(double x, double y, double radius, double tresh, double noise_distance);
     void checkUtilityStats(const char* fileName, double radius, double noise_radius);

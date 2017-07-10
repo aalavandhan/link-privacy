@@ -35,7 +35,7 @@ void SimpleQueries::getInterestingQueryPoints(double radius, const char* query_f
   for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
     int order = (*c_it);
     Point *p = gpos->checkin_list.find(order)->second;
-    vector<int>* user_list = gpos->getUsersInRangeByHourBlock(p, radius);
+    vector<int>* user_list = gpos->getCheckinsInRangeByHourBlock(p, radius);
     outfile << p->getX() << " " << p->getY() << " " << p->getTime() << " " << p->getOrder() << " " << user_list->size() << endl;
     delete user_list;
   }
@@ -55,24 +55,24 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
   }
 
-  while (fin){
-    fin >> y >> x >> day;
-    unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
-    vector<int> *u_set = user_list->find(day)->second;
-    locations_with_users++;
-    total_users += u_set->size();
-    count++;
-    delete user_list;
-  }
+  // while (fin){
+  //   fin >> y >> x >> day;
+  //   unordered_map< int, vector<int>* >* user_list = gpos->getUsersInRangeByHourBlock(x,y,radius,radius-noise_distance);
+  //   vector<int> *u_set = user_list->find(day)->second;
+  //   locations_with_users++;
+  //   total_users += u_set->size();
+  //   count++;
+  //   delete user_list;
+  // }
 
-  avg_users = (double) total_users / (double) locations_with_users;
+  // avg_users = (double) total_users / (double) locations_with_users;
 
-  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  cout << "Location time blocks with users : " << locations_with_users << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance << endl;
-  cout << "Total location time_blocks : " << count << endl;
-  cout << "Mean users around a location at an 1 hour interval : " << avg_users << endl;
-  cout << "Total users across all location time_blocks :" << total_users << endl;
-  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  // cout << "Location time blocks with users : " << locations_with_users << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance << endl;
+  // cout << "Total location time_blocks : " << count << endl;
+  // cout << "Mean users around a location at an 1 hour interval : " << avg_users << endl;
+  // cout << "Total users across all location time_blocks :" << total_users << endl;
+  // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
 void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
@@ -270,17 +270,13 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
 // Given a set of locations of interest and a range; this utility compares the usersInRange from each location
 // between base_gpos and this->gpos
-void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius, double noise_distance){
+void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius){
   ifstream fin(fileName);
   double precision, recall, avg_precision=0, avg_recall=0;
   int count=-1, order;
 
   if (!fin) {
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
-  }
-
-  if(noise_distance == 0){
-    noise_distance = radius;
   }
 
   while (fin){
@@ -294,8 +290,8 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
     Point *p = p_it->second;
     vector<int> *u1_set, *u2_set;
 
-    u1_set = base_gpos->getUsersInRangeByHourBlock(p, radius);
-    u2_set = gpos->getUsersInRangeByHourBlock(p, radius);
+    u1_set = base_gpos->getCheckinsInRangeByHourBlock(p, radius);
+    u2_set = gpos->getCheckinsInRangeByHourBlock(p, radius);
 
     std::vector<int> v_intersection;
 
@@ -328,7 +324,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
-  cout << "Number of locations time blocks" << count << " | Range " << radius << "m "  << " | Noise Radius " << noise_distance  << "m " << endl;
+  cout << "Number of locations time blocks" << count << " | Range " << radius << "m" << endl;
   cout << "utility_range_precision{{" << avg_precision <<"}}" << endl;
   cout << "utility_range_recall{{" << avg_recall    <<"}}"<< endl;
   cout << "utility_range_f1{{" << f1            <<"}}"<< endl;

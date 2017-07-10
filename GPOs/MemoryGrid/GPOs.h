@@ -93,8 +93,6 @@ public:
 
     vector<int>* getUsersInRange(int source, double radius);
 
-    unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double r1, double r2);
-    unordered_map< int, vector<int>* >* getUsersInRangeByHourBlock(double x, double y, double radius);
 
     map<int, res_point*>* getPointsInRange(double x, double y, double radius);
     map<int, res_point*>* getPointsInRange(double x, double y, double r1, double r2);
@@ -209,5 +207,5 @@ public:
     void hideCoLocations(GPOs* gpos, double prob);
     void dummyCoLocations(GPOs* gpos, int k);
 
-    vector<int>* getUsersInRangeByHourBlock(Point *p, double r);
+    vector<int>* getCheckinsInRangeByHourBlock(Point *p, double r);
 };

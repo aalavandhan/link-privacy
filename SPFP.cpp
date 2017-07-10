@@ -113,8 +113,8 @@ void runRangeUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
 
   cout << "------------- Evaluating range utility ---------------" << endl;
 
-  double base_radius = (double) max((int)noise_radius, (int)800);
-  query->checkUtilityRange(query_file, baseGPOs, base_radius, noise_radius);
+  double base_radius = 500;
+  query->checkUtilityRange(query_file, baseGPOs, base_radius);
 }
 
 void runProximityUtility(GPOs *purturbedGPOs, GPOs *baseGPOs, SPOs *spos){
