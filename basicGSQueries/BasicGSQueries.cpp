@@ -184,8 +184,13 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       knn_dist = buckets[buckets_size-1];
     auto b_it = bucket_bound.upper_bound(knn_dist);
     auto bset_it = bucket_hash.find(b_it->second);
-    unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
-    b_hash->insert(make_pair(o1, o2));
+    if(bset_it != bucket_hash.end()){
+      unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
+      b_hash->insert(make_pair(o1, o2));
+    } else {
+      cout << "BOUND ERROR :" << b_it->second << endl;
+    }
+
   }
   cout << "STEP 2: Split co-occurrences per bucket." << endl;
 
