@@ -1722,14 +1722,14 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
 }
 
 void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
-  map <int, vector<int>* > st_knn;
+  map <int, vector<double>* > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-100-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
   ifstream fin(ss.str());
 
   while(!fin.eof()){
     int order;
-    vector<int> *neighbours = new vector<int>();
+    vector<double> *neighbours = new vector<int>();
     fin >> order;
 
     for(int i = 0; i<100; i++){
@@ -1843,14 +1843,14 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hi
 void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool gaussian, bool hide){
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0;
 
-  map <int, vector<int>* > st_knn;
+  map <int, vector<double>* > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-100-" << coocc_spatial_range << "-" << coocc_time_range << "-coocc" << ".csv";
   ifstream fin(ss.str());
 
   while(!fin.eof()){
     int order;
-    vector<int> *neighbours = new vector<int>();
+    vector<double> *neighbours = new vector<int>();
     fin >> order;
 
     for(int i = 0; i<100; i++){
