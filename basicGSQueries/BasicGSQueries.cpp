@@ -191,7 +191,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     auto bset_it = bucket_hash.find( *b_val_it );
 
     if(bset_it == bucket_hash.end()){
-      cout << "BOUND ERROR : " << (*b_val_it) << endl;
+      cout << "BOUND ERROR : " << b_val << " " << (*b_val_it) << endl;
       continue;
     }
     unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
