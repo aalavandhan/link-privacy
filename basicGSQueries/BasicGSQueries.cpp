@@ -182,8 +182,9 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     else
       knn_dist = buckets[buckets_size-1];
 
-    auto b_it = lower_bound(buckets.begin(), buckets.end(), (knn_dist*1000) );
-    auto bset_it = bucket_hash.find((*b_it));
+    double *closest_dist = find(buckets, buckets+buckets_size, knn_dist);
+    auto bset_it = bucket_hash.find( (int)((*closest_dist) * 1000) );
+
     unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
     b_hash->insert(make_pair(o1, o2));
   }
