@@ -210,44 +210,45 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       int o2 = co_it->second;
       // True Positives
       if(gpos->cooccurred_checkins.find(make_pair(o1, o2)) != gpos->cooccurred_checkins.end()){
-        p_co_occurred_checkins.insert(make_pair(o1, o2));
+        if(p_co_occurred_checkins.find(make_pair(o1, o2)) == p_co_occurred_checkins.end()){
+          p_co_occurred_checkins.insert(make_pair(o1, o2));
+        }
       }
+
       // False Positives
-      else{
-        auto co_index_it = gpos->cooccurrence_index.find(o1);
+      auto co_index_it = gpos->cooccurrence_index.find(o1);
+      if(co_index_it != gpos->cooccurrence_index.end()){
         unordered_set<int>* co_index_set = co_index_it->second;
         for(auto co_ch_it = co_index_set->begin(); co_ch_it != co_index_set->end(); co_ch_it++){
-          {
-            int order = o1;
-            int other = (*co_ch_it);
-            if(other < order){
-              int temp = order;
-              order = other;
-              other = temp;
-            }
-            if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
-              if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
-                p_co_occurred_checkins.insert(make_pair(order, other));
-              }
+          int order = o1;
+          int other = (*co_ch_it);
+          if(other < order){
+            int temp = order;
+            order = other;
+            other = temp;
+          }
+          if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
+            if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
+              p_co_occurred_checkins.insert(make_pair(order, other));
             }
           }
         }
+      }
 
-        co_index_it = gpos->cooccurrence_index.find(o2);
-        co_index_set = co_index_it->second;
+      co_index_it = gpos->cooccurrence_index.find(o2);
+      if(co_index_it != gpos->cooccurrence_index.end()){
+        unordered_set<int>* co_index_set = co_index_it->second;
         for(auto co_ch_it = co_index_set->begin(); co_ch_it != co_index_set->end(); co_ch_it++){
-          {
-            int order = o2;
-            int other = (*co_ch_it);
-            if(other < order){
-              int temp = order;
-              order = other;
-              other = temp;
-            }
-            if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
-              if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
-                p_co_occurred_checkins.insert(make_pair(order, other));
-              }
+          int order = o2;
+          int other = (*co_ch_it);
+          if(other < order){
+            int temp = order;
+            order = other;
+            other = temp;
+          }
+          if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
+            if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
+              p_co_occurred_checkins.insert(make_pair(order, other));
             }
           }
         }
