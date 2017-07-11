@@ -172,6 +172,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
   sort(bucket_vector.begin(), bucket_vector.end());
   cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
+  cout << "\tBUCKET_SIZE : " << buckets_size << endl;
+  cout << "\tBUCKET_VECTOR_SIZE : " << bucket_vector.size() << endl;
 
   vector<int> true_positive_vector, gt_vector, positive_vector;
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
