@@ -1789,7 +1789,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       continue;
     }
 
-    vector<int> *neighbours = knn_it->second;
+    vector<double> *neighbours = knn_it->second;
     int kth = k, knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
@@ -1905,7 +1905,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
       base_checkin = p;
     }
     else {
-      vector<int> *neighbours = knn_it->second;
+      vector<double> *neighbours = knn_it->second;
       int k_lim = (neighbours->size() < k) ? neighbours->size() : k;
       int kth = rand() % (k_lim+1);
       int neighbor, neighbours_neighbour;
@@ -1945,7 +1945,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
 
     bool knn_out_of_soft_bound = false;
     if(!knn_out_of_hard_bound){
-      vector<int> *neighbours = knn_it->second;
+      vector<double> *neighbours = knn_it->second;
       int neighbor = neighbours->at(0);
       Point *q = gpos->checkin_list.find(neighbor)->second;
       knn_out_of_soft_bound = (p->computeMinDistInKiloMeters(q->getX(), q->getY())*1000.0 >= SPATIAL_SOFT_BOUND);
