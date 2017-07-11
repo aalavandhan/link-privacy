@@ -172,8 +172,6 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
   sort(bucket_vector.begin(), bucket_vector.end());
   cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
-  // cout << "\tBUCKET_SIZE : " << buckets_size << endl;
-  // cout << "\tBUCKET_VECTOR_SIZE : " << bucket_vector.size() << endl;
 
   vector<int> true_positive_vector, gt_vector, positive_vector;
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
@@ -191,16 +189,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     double b_val = (*b_val_it);
     int b_val_pos = (b_val_it - bucket_vector.begin());
     auto bset_it = bucket_hash.find( b_val_pos );
-
-    // cout << "\tKNN_DIST : "<<knn_dist<< endl;
-    // cout << "\tBUCKET_VALUE : "<<b_val<< endl;
-    // cout << "\tBUCKET_INDEX : "<<b_val_pos<< endl;
-
     if(bset_it == bucket_hash.end()){
       cout << "BOUND ERROR : " << b_val << " " << b_val_pos << endl;
       continue;
     }
-
     unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
     b_hash->insert(make_pair(o1, o2));
   }
@@ -213,24 +205,49 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     set<int> checkins;
 
     // cout << "\tSTEP 3: Processing bucket " << bucket << endl;
-
     for(auto co_it = co_occurred_checkins->begin(); co_it != co_occurred_checkins->end(); co_it++){
-      checkins.insert(co_it->first);
-      checkins.insert(co_it->second);
-    }
+      int o1 = co_it->first;
+      int o2 = co_it->second;
+      // True Positives
+      if(gpos->cooccurred_checkins.find(make_pair(o1, o2)) != gpos->cooccurred_checkins.end()){
+        p_co_occurred_checkins.insert(make_pair(o1, o2));
+      }
+      // False Positives
+      else{
+        auto co_index_it = gpos->cooccurrence_index.find(o1);
+        unordered_set<int>* co_index_set = co_index_it->second;
+        for(auto co_ch_it = co_index_set->begin(); co_ch_it != co_index_set->end(); co_ch_it++){
+          {
+            int order = o1;
+            int other = (*co_ch_it);
+            if(other < order){
+              int temp = order;
+              order = other;
+              other = temp;
+            }
+            if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
+              if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
+                p_co_occurred_checkins.insert(make_pair(order, other));
+              }
+            }
+          }
+        }
 
-    // cout << "\tSTEP 3: Built checkin_list " << endl;
-
-    for(auto c_it = checkins.begin(); c_it != checkins.end(); c_it++){
-      int order = (*c_it);
-      auto co_index_it = gpos->cooccurrence_index.find(order);
-      if(co_index_it != gpos->cooccurrence_index.end()){
-        unordered_set<int> *co_index = co_index_it->second;
-        for(auto co_ch_it = co_index->begin(); co_ch_it != co_index->end(); co_ch_it++){
-          int other_order = *co_ch_it;
-          if(order < other_order){
-            if(p_co_occurred_checkins.find(make_pair(order, other_order)) == p_co_occurred_checkins.end()){
-              p_co_occurred_checkins.insert(make_pair(order, other_order));
+        co_index_it = gpos->cooccurrence_index.find(o2);
+        co_index_set = co_index_it->second;
+        for(auto co_ch_it = co_index_set->begin(); co_ch_it != co_index_set->end(); co_ch_it++){
+          {
+            int order = o2;
+            int other = (*co_ch_it);
+            if(other < order){
+              int temp = order;
+              order = other;
+              other = temp;
+            }
+            if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
+              if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
+                p_co_occurred_checkins.insert(make_pair(order, other));
+              }
             }
           }
         }
@@ -238,7 +255,6 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     }
 
     // cout << "\tSTEP 3: Computed co_occ list for bucket" << endl;
-
     int true_positive = 0, gt = co_occurred_checkins->size(), positive = p_co_occurred_checkins.size();
     for(auto c_it = co_occurred_checkins->begin(); c_it != co_occurred_checkins->end(); c_it++){
       int o1 = c_it->first;
