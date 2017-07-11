@@ -128,13 +128,13 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
 
   // Basic utility : Sparse vs Dense
-  map <int, vector<int>* > st_knn;
+  map <int, vector<double>* > st_knn;
   stringstream ss;
   ss << "knn-noise-combined-100-25-1200-coocc.csv";
   ifstream fin(ss.str());
   while(!fin.eof()){
     int order;
-    vector<int> *neighbours = new vector<int>();
+    vector<double> *neighbours = new vector<double>();
     fin >> order;
     for(int i = 0; i<100; i++){
       int knn_order;
@@ -172,8 +172,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   }
   sort(bucket_vector.begin(), bucket_vector.end());
   cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
-  cout << "\tBUCKET_SIZE : " << buckets_size << endl;
-  cout << "\tBUCKET_VECTOR_SIZE : " << bucket_vector.size() << endl;
+  // cout << "\tBUCKET_SIZE : " << buckets_size << endl;
+  // cout << "\tBUCKET_VECTOR_SIZE : " << bucket_vector.size() << endl;
 
   vector<int> true_positive_vector, gt_vector, positive_vector;
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
@@ -192,14 +192,15 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     int b_val_pos = (b_val_it - bucket_vector.begin());
     auto bset_it = bucket_hash.find( b_val_pos );
 
-    cout << "\tKNN_DIST : "<<knn_dist<< endl;
-    cout << "\tBUCKET_VALUE : "<<b_val<< endl;
-    cout << "\tBUCKET_INDEX : "<<b_val_pos<< endl;
+    // cout << "\tKNN_DIST : "<<knn_dist<< endl;
+    // cout << "\tBUCKET_VALUE : "<<b_val<< endl;
+    // cout << "\tBUCKET_INDEX : "<<b_val_pos<< endl;
 
     if(bset_it == bucket_hash.end()){
       cout << "BOUND ERROR : " << b_val << " " << b_val_pos << endl;
       continue;
     }
+
     unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
     b_hash->insert(make_pair(o1, o2));
   }
