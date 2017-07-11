@@ -1638,13 +1638,16 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
 
     if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
       for(int j=1; j<=k; j++){
-        loadPoint( p->getX(), p->getY(), lid, lid, p->getTime(), lid );
+
+        pair <double,double> pt = util.addGaussianNoise(p->getX(),p->getY(), 1000, 0);
+
+        loadPoint( pt.first, pt.second, lid, lid, p->getTime(), lid );
         lid++;
         purturbed_count++;
         spatial_purturbed_count++;
         temporal_purturbed_count++;
 
-        loadPoint( p->getX(), p->getY(), lid, lid, p->getTime(), lid );
+        loadPoint( pt.first, pt.second, lid, lid, p->getTime(), lid );
         lid++;
         purturbed_count++;
         spatial_purturbed_count++;
