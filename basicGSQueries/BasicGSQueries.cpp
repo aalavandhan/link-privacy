@@ -185,6 +185,11 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     double *closest_dist = find(buckets, buckets+buckets_size, knn_dist);
     auto bset_it = bucket_hash.find( (int)((*closest_dist) * 1000) );
 
+    if(bset_it == bucket_hash.end()){
+      cout << "BOUND ERROR : " << (*closest_dist) << endl;
+      continue;
+    }
+
     unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
     b_hash->insert(make_pair(o1, o2));
   }
@@ -268,8 +273,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 // between base_gpos and this->gpos
 void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius){
   ifstream fin(fileName);
-  double precision, recall, avg_precision=0, avg_recall=0, avg_results=0;
-  int count=-1, order;
+  double precision, recall, avg_precision=0, avg_recall=0, total_results=0;
+  int count=0, order;
 
   if (!fin) {
     std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
@@ -289,7 +294,9 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
     u1_set = base_gpos->getCheckinsInRangeByHourBlock(p, radius);
     u2_set = gpos->getCheckinsInRangeByHourBlock(p, radius);
 
-    avg_results = avg_results + u1_set->size();
+    total_results += u1_set->size();
+
+    cout << "Result size : "<< u1_set->size() << endl;
 
     std::vector<int> v_intersection;
 
@@ -323,7 +330,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
   cout << "Number of locations time blocks" << count << " | Range " << radius << "m" << endl;
-  cout << "Average number of results per query" << avg_results/count << endl;
+  cout << "Average number of results per query" << total_results/count << endl;
   cout << "utility_range_precision{{" << avg_precision <<"}}" << endl;
   cout << "utility_range_recall{{" << avg_recall    <<"}}"<< endl;
   cout << "utility_range_f1{{" << f1            <<"}}"<< endl;
