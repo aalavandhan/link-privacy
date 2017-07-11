@@ -1729,7 +1729,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
 
   while(!fin.eof()){
     int order;
-    vector<double> *neighbours = new vector<int>();
+    vector<double> *neighbours = new vector<double>();
     fin >> order;
 
     for(int i = 0; i<100; i++){
@@ -1850,7 +1850,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
 
   while(!fin.eof()){
     int order;
-    vector<double> *neighbours = new vector<int>();
+    vector<double> *neighbours = new vector<double>();
     fin >> order;
 
     for(int i = 0; i<100; i++){
