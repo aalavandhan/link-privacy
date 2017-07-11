@@ -185,7 +185,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     else if(st_knn.find(o2) != st_knn.end())
       knn_dist = st_knn.find(o2)->second->at(0);
     else
-      knn_dist = buckets[buckets_size-1];
+      knn_dist = buckets[buckets_size-1] - 1;
 
     int b_val = (int)(knn_dist*1000);
     auto b_val_it = lower_bound(bucket_vector.begin(), bucket_vector.end(), b_val);
