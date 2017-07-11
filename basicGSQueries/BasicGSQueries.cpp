@@ -168,7 +168,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   for(int i=0; i<buckets_size; i++){
     unordered_set<pair<int,int>, PairHasher>* b_hash = new unordered_set<pair<int,int>, PairHasher>();
     bucket_vector.push_back(buckets[i]);
-    bucket_hash.insert(make_pair(i, b_hash ));
+    bucket_hash.insert(make_pair( i, b_hash ));
   }
   sort(bucket_vector.begin(), bucket_vector.end());
   cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
@@ -191,6 +191,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     double b_val = (*b_val_it);
     int b_val_pos = (b_val_it - bucket_vector.begin());
     auto bset_it = bucket_hash.find( b_val_pos );
+
+    cout << "\tKNN_DIST : "<<knn_dist<< endl;
+    cout << "\tBUCKET_VALUE : "<<b_val<< endl;
+    cout << "\tBUCKET_INDEX : "<<b_val_pos<< endl;
 
     if(bset_it == bucket_hash.end()){
       cout << "BOUND ERROR : " << b_val << " " << b_val_pos << endl;
