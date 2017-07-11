@@ -877,7 +877,7 @@ vector<int>* GPOs::getCheckinsInRangeByHourBlock(Point *p, double r){
 
   for(auto c = checkins->begin(); c != checkins->end(); c++){
     Point q = Point(*c);
-    if((p->getTime() - q.getTime()).total_seconds() <= 3600){
+    if( abs((p->getTime() - q.getTime()).total_seconds()) <= 3600 ){
       checkin_list->push_back(q.getOrder());
     }
   }
@@ -1629,8 +1629,7 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
   set<int> checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
-  cout << "Adding  " << k << "dummies per co-location" << endl;
-
+  cout << "Adding  " << k << "dummy co-locations per co-location" << endl;
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
 
   for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
@@ -1644,9 +1643,14 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
         purturbed_count++;
         spatial_purturbed_count++;
         temporal_purturbed_count++;
+
+        loadPoint( p->getX(), p->getY(), lid, lid, p->getTime(), lid );
+        lid++;
+        purturbed_count++;
+        spatial_purturbed_count++;
+        temporal_purturbed_count++;
       }
     }
-
     loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
     point_count++;
   }
@@ -1660,7 +1664,6 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
   cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
-
 }
 
 // Only co-occurrences

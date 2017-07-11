@@ -272,7 +272,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 // between base_gpos and this->gpos
 void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, double radius){
   ifstream fin(fileName);
-  double precision, recall, avg_precision=0, avg_recall=0;
+  double precision, recall, avg_precision=0, avg_recall=0, avg_results=0;
   int count=-1, order;
 
   if (!fin) {
@@ -292,6 +292,8 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
 
     u1_set = base_gpos->getCheckinsInRangeByHourBlock(p, radius);
     u2_set = gpos->getCheckinsInRangeByHourBlock(p, radius);
+
+    avg_results = avg_results + u1_set->size();
 
     std::vector<int> v_intersection;
 
@@ -325,6 +327,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "Utility [ RANGE QUERY ]" << endl;
   cout << "Number of locations time blocks" << count << " | Range " << radius << "m" << endl;
+  cout << "Average number of results per query" << avg_results/count << endl;
   cout << "utility_range_precision{{" << avg_precision <<"}}" << endl;
   cout << "utility_range_recall{{" << avg_recall    <<"}}"<< endl;
   cout << "utility_range_f1{{" << f1            <<"}}"<< endl;
