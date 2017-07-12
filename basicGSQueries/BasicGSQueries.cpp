@@ -209,7 +209,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       int o1 = co_it->first;
       int o2 = co_it->second;
       // True Positives
-      if(gpos->cooccurred_checkins.find(make_pair(o1, o2)) != gpos->cooccurred_checkins.end()){
+      if(purturbed_cooccurrences_hash.find(make_pair(o1, o2)) != purturbed_cooccurrences_hash.end()){
         if(p_co_occurred_checkins.find(make_pair(o1, o2)) == p_co_occurred_checkins.end()){
           p_co_occurred_checkins.insert(make_pair(o1, o2));
         }
@@ -227,7 +227,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
             order = other;
             other = temp;
           }
-          if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
+          if(base_cooccurrences_hash.find(make_pair(order, other)) == base_cooccurrences_hash.end() ){
             if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
               p_co_occurred_checkins.insert(make_pair(order, other));
             }
@@ -246,7 +246,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
             order = other;
             other = temp;
           }
-          if(gpos->cooccurred_checkins.find(make_pair(order, other)) == gpos->cooccurred_checkins.end() ){
+          if(base_cooccurrences_hash.find(make_pair(order, other)) == base_cooccurrences_hash.end() ){
             if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
               p_co_occurred_checkins.insert(make_pair(order, other));
             }
