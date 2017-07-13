@@ -394,13 +394,13 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
   // bound_computation_time+=util.print_time(start_bound, end_bound);
   // gettimeofday(&start_metric, NULL);
 
-  bool coocc_at_p = cooccurrence_index.find(p->getOrder()) != cooccurrence_index.end();
+  bool coocc_at_p = cooccurrence_index_indirect.find(p->getOrder()) != cooccurrence_index_indirect.end();
 
   for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
 
     if(coocc_at_p && metric_type != 4){
-      unordered_set<int>* cooccurred_checkins = cooccurrence_index.find(p->getOrder())->second;
+      unordered_set<int>* cooccurred_checkins = coocc_at_p->second;
       // Skip co-occurred check-ins
       if( cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end() ){
         continue;
@@ -1077,9 +1077,26 @@ void GPOs::countCoOccurrencesOptimistic(){
       cout << count << endl;
   }
 
+  double total_indirect_size = 0;
+  for(auto c_it = cooccurrence_index.begin(); c_it != cooccurrence_index.end(); c_it++){
+    int order = c_it->first;
+    unordered_set<int>* direct = c_it->second;
+    unordered_set<int>* indirect = new unordered_set<int>*();
+    for(auto d_it = direct->begin(); d_it != direct->end(); d_it++){
+      int other = (*d_it);
+      unordered_set<int>* others_direct = cooccurrence_index.find(other)->second;
+      for(auto od_it = others_direct->begin(); od_it != others_direct->end(); od_it++){
+        indirect->insert((*od_it));
+      }
+    }
+    cooccurrence_index_indirect.insert(make_pair(order, indirect));
+    total_indirect_size+=indirect->size();
+  }
   cout<<"Completed computing cooccurrences in optimistic manner" << endl;
   cout<<"total_cooccurrences{{"<<cooccurred_checkins.size()<<"}}"<<endl;
   cout<<"cooccurrence_index_size{{"<<cooccurrence_index.size()<<"}}"<<endl;
+  cout<<"indirect_cooccurrence_index_size{{"<<cooccurrence_index_indirect.size()<<"}}"<<endl;
+  cout<<"average_indirect_cooccurrences{{"<<total_indirect_size / cooccurrence_index_indirect.size()<<"}}"<<endl;
 }
 
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){

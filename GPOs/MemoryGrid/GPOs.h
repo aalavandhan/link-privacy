@@ -119,6 +119,7 @@ public:
     unordered_set< pair<int,int>, PairHasher > cooccurred_checkins;
 
     unordered_map< int, unordered_set<int>* > cooccurrence_index;
+    unordered_map< int, unordered_set<int>* > cooccurrence_index_indirect;
     set<int> unpurtrubed_cooccurrences;
 
     // nextNN without the incremental approach of NN
