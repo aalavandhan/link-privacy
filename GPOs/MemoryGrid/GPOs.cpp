@@ -394,13 +394,13 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
   // bound_computation_time+=util.print_time(start_bound, end_bound);
   // gettimeofday(&start_metric, NULL);
 
-  bool coocc_at_p = cooccurrence_index_indirect.find(p->getOrder()) != cooccurrence_index_indirect.end();
+  bool coocc_at_p = cooccurrence_index.find(p->getOrder()) != cooccurrence_index.end();
 
   for(auto it=candidates->begin(); it != candidates->end(); it++){
     res_point *chk = *it;
 
     if(coocc_at_p && metric_type != 4){
-      unordered_set<int>* cooccurred_checkins = coocc_at_p->second;
+      unordered_set<int>* cooccurred_checkins = cooccurrence_index_indirect.find(p->getOrder())->second;
       // Skip co-occurred check-ins
       if( cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end() ){
         continue;
