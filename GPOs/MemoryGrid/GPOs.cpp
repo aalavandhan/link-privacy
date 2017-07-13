@@ -1655,9 +1655,7 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
 
     if( checkins_of_interest.find(order) != checkins_of_interest.end() ){
       for(int j=1; j<=k; j++){
-
-        pair <double,double> pt = util.addGaussianNoise(p->getX(),p->getY(), 1000, 0);
-
+        pair <double,double> pt = util.addGaussianNoise(p->getX(),p->getY(), 50, 0);
         loadPoint( pt.first, pt.second, lid, lid, p->getTime(), lid );
         lid++;
         purturbed_count++;
