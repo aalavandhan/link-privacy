@@ -1081,7 +1081,7 @@ void GPOs::countCoOccurrencesOptimistic(){
   for(auto c_it = cooccurrence_index.begin(); c_it != cooccurrence_index.end(); c_it++){
     int order = c_it->first;
     unordered_set<int>* direct = c_it->second;
-    unordered_set<int>* indirect = new unordered_set<int>*();
+    unordered_set<int>* indirect = new unordered_set<int>();
     for(auto d_it = direct->begin(); d_it != direct->end(); d_it++){
       int other = (*d_it);
       unordered_set<int>* others_direct = cooccurrence_index.find(other)->second;
