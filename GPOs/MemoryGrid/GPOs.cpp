@@ -416,7 +416,7 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
     }
 
     // Discount the current location/region and current user
-    if( p->getOrder() != chk->order && p->getUID() != chk->uid){
+    if( p->getOrder() != chk->oid && p->getUID() != chk->uid){
       double distance = 0.0;
 
       if(metric_type == 0 || metric_type == 3 || metric_type == 4){
