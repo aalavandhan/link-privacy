@@ -421,8 +421,10 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
 
       if(metric_type == 0 || metric_type == 3 || metric_type == 4){
         distance = p->getSTDistance(chk, coocc_spatial_range, coocc_time_range);
-        if(distance <= 0.75)
+
+        if(metric_type != 4 && distance <= 0.75){
           continue;
+        }
       }
       else if(metric_type == 1){
         double spatial_distance  = (chk->dist * EARTH_CIRCUMFERENCE / 360.0) / ( (double)coocc_spatial_range / 1000.0 );
