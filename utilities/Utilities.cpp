@@ -739,7 +739,7 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
     while(iterA < n || iterB < n){
       if(iterA <= iterB){
         int idA = A->at(iterA);
-        int posB = B->at(idA);
+        int posB = B->at( (*find(B->begin(), B->end(), idA))) ;
         if(done.find(idA) != done.end()){
           iterA++;
           continue;
@@ -758,7 +758,7 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
       }
       else{
         int idB = B->at(iterB);
-        int posA = A->at(idB);
+        int posA = A->at( (*find(A->begin(), A->end(), idB)) );
         if(done.find(idB) != done.end()){
           iterB++;
           continue;
