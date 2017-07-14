@@ -386,9 +386,9 @@ void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
     }
     Point *p = p_it->second;
 
-    vector <res_point*>* c1_list = base_gpos->getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND, TEMPORAL_HARD_BOUND);
+    vector <res_point*>* c1_list = base_gpos->getRangeSpatioTemporalBound(p, 2*SPATIAL_HARD_BOUND, 2*TEMPORAL_HARD_BOUND);
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > c1_cooccurrences;
-    base_gpos->getSpatioTemporalKNN(p, 100, &c1_cooccurrences, c1_list, 4);
+    base_gpos->getSpatioTemporalKNN(p, 1000, &c1_cooccurrences, c1_list, 4);
     map< double, int > c1_hash;
     vector<int> c1_knns;
     while(!c1_cooccurrences.empty()){
@@ -401,9 +401,9 @@ void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
       c1_knns.push_back(knn_it->second);
     }
 
-    vector <res_point*>* c2_list = gpos->getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND, TEMPORAL_HARD_BOUND);
+    vector <res_point*>* c2_list = gpos->getRangeSpatioTemporalBound(p, 2*SPATIAL_HARD_BOUND, 2*TEMPORAL_HARD_BOUND);
     priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > c2_cooccurrences;
-    gpos->getSpatioTemporalKNN(p, 100, &c2_cooccurrences, c2_list, 4);
+    gpos->getSpatioTemporalKNN(p, 1000, &c2_cooccurrences, c2_list, 4);
     map< double, int > c2_hash;
     vector<int> c2_knns;
     while(!c2_cooccurrences.empty()){
