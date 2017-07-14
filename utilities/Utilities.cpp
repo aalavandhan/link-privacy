@@ -715,3 +715,96 @@ string Utilities::int_to_string(int i) {
 	out << i;
 	return out.str();
 }
+
+double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
+
+    vector<pair<int,int>> topk2;
+
+    if(A->size() != B->size()){
+      cout << "size mismatch here" << endl;
+    }
+
+    int n = A->size();
+    int xDup = 0;
+    int yDup = 0;
+
+    int iterA = 0;
+    int iterB = 0;
+
+    unordered_set<int> done;
+
+    cout << "Calculating TauB - 1.5";
+
+    int i = 0;
+    while(iterA < n || iterB < n){
+      if(iterA <= iterB){
+        int idA = A->at(iterA);
+        int posB = B->at(idA);
+        if(done.find(idA) != done.end()){
+          iterA++;
+          continue;
+        }
+        else if( posB != -1){
+          topk2.push_back(make_pair(iterA, posB));
+          i++;
+          done.insert(idA);
+        }
+        else{
+          topk2.push_back(make_pair(iterA, 999));
+          i++;
+          yDup++;
+        }
+        iterA++;
+      }
+      else{
+        int idB = B->at(iterB);
+        int posA = A->at(idB);
+        if(done.find(idB) != done.end()){
+          iterB++;
+          continue;
+        }
+        else if( posA != -1){
+          topk2.push_back(make_pair(posA, iterB));
+          i++;
+          done.insert(idB);
+        }
+        else{
+          topk2.push_back(make_pair(999, iterB));
+          i++;
+          xDup++;
+        }
+        iterB++;
+      }
+    }
+
+    cout << "Calculating TauB - 2";
+
+    vector<pair<int,int>> topk;
+    for(int it = 0;it <topk2.size();it++){
+      topk.push_back(topk2.at(it));
+    }
+
+    std::sort(topk.begin(),topk.end());
+
+
+    int concordant = 0; int discordant = 0;
+    int size = topk2.size();
+
+    for(i=0; i<size; i++) {
+      for(int j=i; j<size; j++) {
+        if(( ( topk[i].first < topk[j].first ) && ( topk[i].second <  topk[j].second ) ) || ((topk[i].first > topk[j].first ) && (topk[i].second >  topk[j].second)) ) {
+          concordant++;
+        }
+        else if(( ( topk[i].first > topk[j].first ) && (topk[i].second <  topk[j].second ) ) || (( topk[i].first < topk[j].first ) && ( topk[i].second >  topk[j].second))) {
+          discordant++;
+        }
+      }
+    }
+    int f = (int) (size * (size -1) * 0.5);
+    double Tx = xDup * (xDup - 1);
+    double Ty = yDup * (yDup - 1);
+    double den = sqrt((f - Tx)* (f - Ty));
+    double taub = (concordant - discordant) / den;
+
+    return taub;
+  }

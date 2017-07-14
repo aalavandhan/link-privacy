@@ -40,5 +40,6 @@ public:
     void generateSocialGraph(char *DATASET_PATH, double tresh);
 
     void checkUtilityBasic(GPOs *base_gpos);
+    void checkUtilityKNN(const char* fileName, GPOs *base_gpos);
 };
 
