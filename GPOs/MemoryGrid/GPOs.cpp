@@ -1781,7 +1781,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   unsigned int lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
 
-  set <int> seenLocations, checkins_of_interest;
+  set <int> seenLocations, purturbedCoLocations, checkins_of_interest;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
 
   for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
@@ -1816,8 +1816,8 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(baseX, baseY, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-      // bool no_cooccurrence_at_neighbour = (gpos->cooccurrence_index.find(neighbor) == gpos->cooccurrence_index.end());
-      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
+
+      if( seenLocations.find(q->getOrder()) == seenLocations.end() && purturbedCoLocations.find(q->getOrder()) == purturbedCoLocations.end() ){
         loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
         seenLocations.insert(q->getOrder());
         lid++;
@@ -1825,6 +1825,13 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
         purturbed_count++;
         knn_added++;
+        auto co_it = gpos->cooccurrence_index.find(q->getOrder());
+        if(co_it != gpos->cooccurrence_index.end()){
+          purturbedCoLocations.insert(q->getOrder());
+          unordered_set <int> *co_occ_list = co_it->second;
+          for(auto co_occ_list_it = co_occ_list->begin(); co_occ_list_it != co_occ_list->end(); co_occ_list_it++)
+            purturbedCoLocations.insert(*co_occ_list_it);
+        }
       } else {
         kth++; // Check the next NN
       }
