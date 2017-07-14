@@ -365,7 +365,7 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
   cout << "utility_range_f1{{" << f1            <<"}}"<< endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 
-  checkUtilityKNN(fileName, base_gpos);
+  // checkUtilityKNN(fileName, base_gpos);
 }
 
 void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
