@@ -733,13 +733,11 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
 
     unordered_set<int> done;
 
-    cout << "Calculating TauB - 1.5";
-
     int i = 0;
     while(iterA < n || iterB < n){
       if(iterA <= iterB){
         int idA = A->at(iterA);
-        int posB = B->at( (*find(B->begin(), B->end(), idA))) ;
+        int posB = find(B->begin(), B->end(), idA) - B->begin();
         if(done.find(idA) != done.end()){
           iterA++;
           continue;
@@ -758,7 +756,7 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
       }
       else{
         int idB = B->at(iterB);
-        int posA = A->at( (*find(A->begin(), A->end(), idB)) );
+        int posA = find(A->begin(), A->end(), idB) - A->begin();
         if(done.find(idB) != done.end()){
           iterB++;
           continue;
@@ -777,8 +775,6 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
       }
     }
 
-    cout << "Calculating TauB - 2";
-
     vector<pair<int,int>> topk;
     for(int it = 0;it <topk2.size();it++){
       topk.push_back(topk2.at(it));
@@ -792,14 +788,14 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
 
     for(i=0; i<size; i++) {
       for(int j=i; j<size; j++) {
-        if(( ( topk[i].first < topk[j].first ) && ( topk[i].second <  topk[j].second ) ) || ((topk[i].first > topk[j].first ) && (topk[i].second >  topk[j].second)) ) {
+        if(( ( topk[i].first < topk[j].first ) && ( topk[i].second <  topk[j].second ) ) || ((topk[i].first > topk[j].first ) && (topk[i].second >  topk[j].second)))  {
           concordant++;
-        }
-        else if(( ( topk[i].first > topk[j].first ) && (topk[i].second <  topk[j].second ) ) || (( topk[i].first < topk[j].first ) && ( topk[i].second >  topk[j].second))) {
+        } else if(( ( topk[i].first > topk[j].first ) && (topk[i].second <  topk[j].second ) ) || ( topk[i].first < topk[j].first ) && ( topk[i].second >  topk[j].second)) {
           discordant++;
         }
       }
     }
+
     int f = (int) (size * (size -1) * 0.5);
     double Tx = xDup * (xDup - 1);
     double Ty = yDup * (yDup - 1);

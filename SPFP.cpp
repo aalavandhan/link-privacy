@@ -955,18 +955,6 @@ int main(int argc, char *argv[]){
   p5 = atof(argv[8]); // ( Parameter 5 )
   p6 = atof(argv[9]); // ( Parameter 6 )
 
-
-  Utilities util = Utilities();
-
-  static const int arr_a[] = { 10, 5, 9 ,2 };
-  static const int arr_b[] = { 5, 2 ,9 , 10 };
-  cout << "Calculating TauB";
-  vector<int> a(arr_a, arr_a + sizeof(arr_a) / sizeof(arr_a[0]) );
-  vector<int> b(arr_b, arr_b + sizeof(arr_b) / sizeof(arr_b[0]) );
-  cout << "Calculating TauB - 1";
-
-  cout << "TauB" << util.calulateTauB(&a, &b) << endl;
-
   switch(iteration_type){
     case 1:{
       cout << "ITRATION: Running EBM" << endl;

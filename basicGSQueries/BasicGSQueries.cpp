@@ -364,29 +364,74 @@ void SimpleQueries::checkUtilityRange(const char* fileName, GPOs *base_gpos, dou
   cout << "utility_range_recall{{" << avg_recall    <<"}}"<< endl;
   cout << "utility_range_f1{{" << f1            <<"}}"<< endl;
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
+  checkUtilityKNN(fileName, base_gpos);
 }
 
 void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
   ifstream fin(fileName);
   int count=0, order;
+  double tauB=0;
 
-  // if (!fin) {
-  //   std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
-  // }
+  if (!fin) {
+    std::cerr << "Cannot open locations of interest file file " << fileName << std::endl;
+  }
 
-  // while (fin){
-  //   fin >> order;
-  //   auto p_it = base_gpos->checkin_list.find(order);
-  //   if(p_it == base_gpos->checkin_list.end()){
-  //     cout << "Count not find checking in query file" << endl;
-  //     continue;
-  //   }
-  //   Point *p = p_it->second;
+  while (fin){
+    fin >> order;
+    auto p_it = base_gpos->checkin_list.find(order);
+    if(p_it == base_gpos->checkin_list.end()){
+      cout << "Count not find checking in query file" << endl;
+      continue;
+    }
+    Point *p = p_it->second;
 
+    vector <res_point*>* c1_list = base_gpos->getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND, TEMPORAL_HARD_BOUND);
+    priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > c1_cooccurrences;
+    base_gpos->getSpatioTemporalKNN(p, 100, &c1_cooccurrences, c1_list, 4);
+    map< double, int > c1_hash;
+    vector<int> c1_knns;
+    while(!c1_cooccurrences.empty()){
+      double distance = c1_cooccurrences.top().first;
+      res_point* topK = c1_cooccurrences.top().second;
+      c1_hash.insert(make_pair(distance, topK->oid));
+    }
+    for(auto knn_it=c1_hash.begin(); knn_it!=c1_hash.end(); knn_it++){
+      c1_knns.push_back(knn_it->second);
+    }
 
+    vector <res_point*>* c2_list = gpos->getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND, TEMPORAL_HARD_BOUND);
+    priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > c2_cooccurrences;
+    gpos->getSpatioTemporalKNN(p, 100, &c2_cooccurrences, c2_list, 4);
+    map< double, int > c2_hash;
+    vector<int> c2_knns;
+    while(!c2_cooccurrences.empty()){
+      double distance = c2_cooccurrences.top().first;
+      res_point* topK = c2_cooccurrences.top().second;
+      c2_hash.insert(make_pair(distance, topK->oid));
+    }
+    for(auto knn_it=c2_hash.begin(); knn_it!=c2_hash.end(); knn_it++){
+      c2_knns.push_back(knn_it->second);
+    }
 
-  //   count++;
-  // }
+    for(auto sc_it=c1_list->begin(); sc_it != c1_list->end(); sc_it++){
+      delete *sc_it;
+    }
+    delete c1_list;
+
+    for(auto sc_it=c2_list->begin(); sc_it != c2_list->end(); sc_it++){
+      delete *sc_it;
+    }
+    delete c2_list;
+
+    tauB += util.calulateTauB(&c1_knns, &c2_knns);
+    count++;
+  }
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Utility [ KNN QUERY ]" << endl;
+  cout << "utility_knn_taub{{" << tauB/count <<"}}" << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
 // Given a set of locations of interest and a range  this utility counts the pairs of users with

@@ -1949,7 +1949,7 @@ void GPOs::loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool ga
         vector <res_point*> *candidates = gpos->getRangeSpatioTemporalBound(n, SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND);
         if(candidates->size() != 0){
           priority_queue < pair<double, res_point*>, vector<pair<double, res_point*> > > spatioTemporalKNNs;
-          gpos->getSpatioTemporalKNN(n, 1, &spatioTemporalKNNs, candidates, 4);
+          gpos->getSpatioTemporalKNN(n, 1, &spatioTemporalKNNs, candidates, 0);
           res_point* q = spatioTemporalKNNs.top().second;
           noise_radius = 2 * n->computeMinDistInKiloMeters(q->x, q->y) * 1000;
           time_deviation = 2 * abs((n->getTime() - q->time).total_seconds());
