@@ -426,6 +426,11 @@ void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
     }
     delete c2_list;
 
+    int knn_len = min(c1_knns.size(), c2_knns.size());
+
+    c1_knns.erase(c1_knns.begin() + knn_len, c1_knns.end());
+    c2_knns.erase(c2_knns.begin() + knn_len, c2_knns.end());
+
     tauB += util.calulateTauB(&c1_knns, &c2_knns);
     count++;
   }
