@@ -1195,7 +1195,7 @@ void GPOs::groupLocationsByDD(GPOs* gpos, set<int> *interested_checkins){
     vector<res_point*> cooccurrences;
     for(auto knn_it=knnHash.begin(); knn_it!=knnHash.end(); knn_it++){
       res_point *rp = knn_it->second;
-      if(rp->id < LOCATION_NOISE_BOUND)
+      if(rp->id < LOCATION_NOISE_BOUND && rp->id != p->getID())
         break;
       if(seenLocations.find(rp->oid) == seenLocations.end()){
         co_occurrences++;
