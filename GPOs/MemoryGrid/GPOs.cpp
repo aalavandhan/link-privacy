@@ -1084,6 +1084,7 @@ void GPOs::countCoOccurrencesOptimistic(){
     unordered_set<int>* indirect = new unordered_set<int>();
     for(auto d_it = direct->begin(); d_it != direct->end(); d_it++){
       int other = (*d_it);
+      indirect->insert(other);
       unordered_set<int>* others_direct = cooccurrence_index.find(other)->second;
       for(auto od_it = others_direct->begin(); od_it != others_direct->end(); od_it++){
         indirect->insert((*od_it));
