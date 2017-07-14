@@ -940,6 +940,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "compute-coocc-metrics") == 0)
     iteration_type = 100;
 
+  else if (strcmp(argv[2], "compute-coocc-checkins") == 0)
+    iteration_type = 101;
+
   else
     iteration_type = -1;
 
@@ -1485,6 +1488,33 @@ int main(int argc, char *argv[]){
         gpos->coocc_time_range    = coocc_temporal_radius[ i ] * 60;
         gpos->countCoOccurrencesOptimistic();
       }
+
+      break;
+    }
+
+    case 101:{
+      cout << "METRICS: Co-Occurrence ST-Percentiles" << endl;
+
+      printParameters();
+
+      bool preload_LE  = false;
+      bool preload_OCC = false;
+      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+
+      GPOs* fixedGPOs = baseGPOs;
+      fixedGPOs->countCoOccurrencesOptimistic();
+
+      set<int> checkins_of_interest;
+      fixedGPOs->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
+
+      ofstream outfile;
+      outfile.open( "co-location-list.csv" );
+
+      for(auto co_it = checkins_of_interest.begin(); co_it != checkins_of_interest.end(); co_it++)
+        outfile << (*co_it) << endl;
+
+      outfile.close();
 
       break;
     }
