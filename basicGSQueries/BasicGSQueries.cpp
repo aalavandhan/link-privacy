@@ -395,6 +395,7 @@ void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
       double distance = c1_cooccurrences.top().first;
       res_point* topK = c1_cooccurrences.top().second;
       c1_hash.insert(make_pair(distance, topK->oid));
+      c1_cooccurrences.pop();
     }
     for(auto knn_it=c1_hash.begin(); knn_it!=c1_hash.end(); knn_it++){
       c1_knns.push_back(knn_it->second);
@@ -409,6 +410,7 @@ void SimpleQueries::checkUtilityKNN(const char* fileName, GPOs *base_gpos){
       double distance = c2_cooccurrences.top().first;
       res_point* topK = c2_cooccurrences.top().second;
       c2_hash.insert(make_pair(distance, topK->oid));
+      c2_cooccurrences.pop();
     }
     for(auto knn_it=c2_hash.begin(); knn_it!=c2_hash.end(); knn_it++){
       c2_knns.push_back(knn_it->second);
