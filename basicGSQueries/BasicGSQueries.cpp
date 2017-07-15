@@ -32,7 +32,7 @@ void SimpleQueries::getInterestingQueryPoints(double radius, const char* query_f
 
   set<int> checkins_of_interest, selected_checkins;
   gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
-  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
+  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it+=25){
     int order = (*c_it);
     Point *p = gpos->checkin_list.find(order)->second;
     vector<int>* user_list = gpos->getCheckinsInRangeByHourBlock(p, radius);
