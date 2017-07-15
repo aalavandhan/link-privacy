@@ -1812,7 +1812,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       continue;
     }
 
-    if(purturbedCoLocations.find(q->getOrder()) == purturbedCoLocations.end())
+    if(purturbedCoLocations.find(p->getOrder()) == purturbedCoLocations.end())
       continue;
 
     vector<double> *neighbours = knn_it->second;
