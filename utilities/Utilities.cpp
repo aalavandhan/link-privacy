@@ -28,6 +28,8 @@ template <typename N> N getRandom(N min, N max, N sd)
   return random();
 };
 
+
+
 Utilities::Utilities(){
   srand((unsigned)time(NULL));
 }

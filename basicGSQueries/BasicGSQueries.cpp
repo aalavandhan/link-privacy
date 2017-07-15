@@ -80,6 +80,29 @@ void SimpleQueries::checkUtilityStats(const char* fileName, double radius, doubl
   // cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 }
 
+template<typename T>
+std::vector<std::vector<T>> SplitVector(const std::vector<T>& vec, size_t n)
+{
+    std::vector<std::vector<T>> outVec;
+
+    size_t length = vec.size() / n;
+    size_t remain = vec.size() % n;
+
+    size_t begin = 0;
+    size_t end = 0;
+
+    for (size_t i = 0; i < std::min(n, vec.size()); ++i)
+    {
+        end += (remain > 0) ? (length + !!(remain--)) : length;
+
+        outVec.push_back(std::vector<T>(vec.begin() + begin, vec.begin() + end));
+
+        begin = end;
+    }
+
+    return outVec;
+}
+
 void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   vector< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
   vector< pair<int,int> >* purturbed_cooccurrences = gpos->getCooccurredCheckins();
@@ -165,45 +188,42 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   fin.close();
   cout << "Loaded ST_KNN from " << ss.str() << " : " << st_knn.size() << endl;
 
-  double buckets[] = { 0, 1.01281, 1.0298376, 1.05142, 1.0753276000000001, 1.105054, 1.1374528000000002, 1.1743708000000002, 1.21411, 1.2565496, 1.30667, 1.3589983999999999, 1.4162399999999999, 1.4776472, 1.5404016, 1.609362, 1.6774619999999998, 1.7536636000000003, 1.8356115999999996, 1.9203752000000001, 2.00509, 2.0929647999999998, 2.1895004, 2.2870108, 2.38896, 2.49708, 2.6030896000000006, 2.7162975999999999, 2.8351000000000002, 2.94841, 3.0661719999999999, 3.1920624000000002, 3.3224831999999997, 3.447686, 3.5808076000000004, 3.7250040000000002, 3.8699963999999993, 4.0117076000000003, 4.1603576000000002, 4.3095328000000004, 4.4699240000000007, 4.6334755999999997, 4.8084719999999992, 4.9861975999999997, 5.1811359999999995, 5.3699159999999999, 5.5532047999999996, 5.7431975999999993, 5.9460012000000004, 6.1563407999999997, 6.3771399999999998, 6.6026336000000008, 6.842340000000001, 7.0789632000000005, 7.3298775999999997, 7.5808440000000044, 7.8181312000000016, 8.0866123999999999, 8.3650351999999994, 8.6670827999999993, 8.9789980000000007, 9.3050755999999986, 9.6438480000000002, 10.020944, 10.411948000000001, 10.8071, 11.252204000000001, 11.711348000000001, 12.188800000000001, 12.689771999999998, 13.218079999999999, 13.797123999999998, 14.378343999999995, 15.055759999999998, 15.789000000000001, 16.5791, 17.3977, 18.294864, 19.293580000000009, 20.342680000000005, 21.473200000000006, 22.673100000000002, 24.058131999999993, 25.534915999999992, 27.110796000000001, 28.83164, 30.6463, 32.628796000000001, 34.642376000000006, 36.711711999999999, 39.015000000000015, 41.59728800000002, 44.430556000000053, 47.917316000000028, 51.999451999999991, 57.321279999999973, 63.734111999999939, 71.305587999999958, 81.168807999999956, 96.866084000000001, 170.94099999999997 };
-
-  int buckets_size = (sizeof(buckets)/sizeof(*buckets));
-
-  vector<double> bucket_vector;
-  map<int, unordered_set<pair<int,int>, PairHasher>*> bucket_hash;
-  for(int i=0; i<buckets_size; i++){
-    unordered_set<pair<int,int>, PairHasher>* b_hash = new unordered_set<pair<int,int>, PairHasher>();
-    bucket_vector.push_back(buckets[i]);
-    bucket_hash.insert(make_pair( i, b_hash ));
-  }
-  sort(bucket_vector.begin(), bucket_vector.end());
-  cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
-
-  vector<int> true_positive_vector, gt_vector, positive_vector;
+  priority_queue < pair<double, pair<int,int> >, vector<pair<double, pair<int,int> >> > cooccurrences_queue;
   for(auto c_it = base_cooccurrences_hash.begin(); c_it != base_cooccurrences_hash.end(); c_it++){
     int o1 = c_it->first;
     int o2 = c_it->second;
-    double knn_dist;
+    double knn_dist = 0;
+
     if(st_knn.find(o1) != st_knn.end())
       knn_dist = st_knn.find(o1)->second->at(0);
     else if(st_knn.find(o2) != st_knn.end())
       knn_dist = st_knn.find(o2)->second->at(0);
     else
-      knn_dist = buckets[buckets_size-1] - 1;
-
-    auto b_val_it = lower_bound(bucket_vector.begin(), bucket_vector.end(), knn_dist);
-    double b_val = (*b_val_it);
-    int b_val_pos = (b_val_it - bucket_vector.begin());
-    auto bset_it = bucket_hash.find( b_val_pos );
-    if(bset_it == bucket_hash.end()){
-      cout << "BOUND ERROR : " << b_val << " " << b_val_pos << endl;
       continue;
-    }
-    unordered_set<pair<int,int>, PairHasher>* b_hash = bset_it->second;
-    b_hash->insert(make_pair(o1, o2));
-  }
-  cout << "STEP 2: Split co-occurrences per bucket." << endl;
 
+    cooccurrences_queue.push(make_pair(knn_dist, make_pair(o1,o2)));
+  }
+
+  vector<pair<int,int>> bucket_vector;
+  while(!cooccurrences_queue.empty()){
+    bucket_vector.push_back(cooccurrences_queue.top().second);
+    cooccurrences_queue.pop();
+  }
+  cout << "STEP 1: Generated bucket bounds to calculate accuracy." << endl;
+
+  vector<vector<pair<int,int>>> bucket_vector_split = SplitVector(bucket_vector, 100);
+  map<int, unordered_set<pair<int,int>, PairHasher>*> bucket_hash;
+  for(int i=0; i<100; i++){
+    unordered_set<pair<int,int>, PairHasher>* b_hash = new unordered_set<pair<int,int>, PairHasher>();
+    vector<pair<int,int>> bucket_vector_ith = bucket_vector_split.at(i);
+    for(auto bv_it = bucket_vector_ith.begin(); bv_it != bucket_vector_ith.end(); bv_it++){
+      b_hash->insert(make_pair(bv_it->first, bv_it->second));
+    }
+    bucket_hash.insert(make_pair( i, b_hash ));
+  }
+
+  cout << "STEP 2: Split co-occurrences per bucket." << endl;
+  vector<int> true_positive_vector, gt_vector, positive_vector;
   for(auto b_it = bucket_hash.begin(); b_it != bucket_hash.end(); b_it++){
     int bucket = b_it->first;
     unordered_set<pair<int,int>, PairHasher>* co_occurred_checkins = b_it->second;
