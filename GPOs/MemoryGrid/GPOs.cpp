@@ -1812,6 +1812,9 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       continue;
     }
 
+    if(purturbedCoLocations.find(q->getOrder()) == purturbedCoLocations.end())
+      continue;
+
     vector<double> *neighbours = knn_it->second;
     int kth = k, knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
@@ -1819,7 +1822,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       Point tp = Point(baseX, baseY, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
 
-      if( seenLocations.find(q->getOrder()) == seenLocations.end() && purturbedCoLocations.find(q->getOrder()) == purturbedCoLocations.end() ){
+      if( seenLocations.find(q->getOrder()) == seenLocations.end()  ){
         loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
         seenLocations.insert(q->getOrder());
         lid++;
