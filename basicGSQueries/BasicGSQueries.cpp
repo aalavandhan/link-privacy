@@ -124,7 +124,7 @@ void SimpleQueries::checkUtilityRKNN(int k){
     }
 
     int rKnn_count = 0;
-    vector <res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, 1000, 6);
+    vector <res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, 500, 3);
 
     if(candidates->size() == 0){
       rknn_not_computed++;
