@@ -1827,7 +1827,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     unordered_set<int>* cooccurrence_group = (*c_it);
 
     double base_x=0, base_y=0;
-    int base_time_seconds=0, size=0;
+    int base_time_seconds=0, remaining_size=0;
     boost::posix_time::ptime base_time;
     int origin_order;
 
@@ -1839,17 +1839,17 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         base_x += p->getX();
         base_y += p->getY();
         base_time_seconds += p->getTimeInSeconds();
-        size++;
+        remaining_size++;
       }
       origin_order = p->getOrder();
     }
 
-    if(size == 0) // TopK has other Co-locations
+    if(remaining_size == 0) // TopK has other Co-locations
       continue;
 
-    base_x/=size;
-    base_y/=size;
-    base_time_seconds/=size;
+    base_x/=remaining_size;
+    base_y/=remaining_size;
+    base_time_seconds/=remaining_size;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
 
     // Moving points together
@@ -1874,7 +1874,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     }
 
     vector<double> *neighbours = knn_it->second;
-    int kth = k * cooccurrence_group->size(), knn_added = 0;
+    int kth = k * remaining_size, knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(base_x, base_y, -1);
