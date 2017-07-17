@@ -1853,6 +1853,9 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     base_time_seconds/=remaining_size;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
 
+
+    unordered_set< pair<int,int>, PairHasher > cooccurrences_in_group;
+
     // Moving points together
     for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
       int order = (*g_it);
@@ -1866,6 +1869,21 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         total_time_displacement+=(double)abs((p->getTime() - base_time).total_seconds()) / 3600.0;
         purturbed_count++;
       }
+
+      // Counting co-occurrences in this group
+      for(auto h_it = cooccurrence_group->begin(); h_it != cooccurrence_group->end(); h_it++){
+        int order_other = (*h_it);
+        if(order == order_other)
+          continue;
+        int o1 = order;
+        int o2 = order_other;
+        if(o1 > o2){
+          int temp = o2;
+          o2 = o1;
+          o1 = temp;
+        }
+        cooccurrences_in_group.insert(make_pair(o1, o2));
+      }
     }
 
     auto knn_it = st_knn.find(origin_order);
@@ -1875,7 +1893,8 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     }
 
     vector<double> *neighbours = knn_it->second;
-    int nodes_to_add = util.computeNodesToAddForKAnon(remaining_size, remaining_size*(remaining_size-1)/2, k+1);
+
+    int nodes_to_add = util.computeNodesToAddForKAnon(remaining_size, cooccurrences_in_group.size(), k+1);
     int kth = nodes_to_add, knn_added = 0;
 
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
