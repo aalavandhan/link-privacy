@@ -1868,7 +1868,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     base_time_seconds = (min_time_seconds + max_time_seconds) / 2;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
 
-    cout << "Point : " << p->getX() << " " << p->getY() << " " << p->getTime() << endl;
+    cout << "Point : " << sample->getX() << " " << sample->getY() << " " << sample->getTime() << endl;
     cout << "X : " << min_x << " " << min_y << endl;
     cout << "Y : " << max_x << " " << max_y << endl;
     cout << "Time : " << Point::START_DATE_TIME + boost::posix_time::seconds( min_time_seconds ) << " " << Point::START_DATE_TIME + boost::posix_time::seconds( max_time_seconds ) << endl;
