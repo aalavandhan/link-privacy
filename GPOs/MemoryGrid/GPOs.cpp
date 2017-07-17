@@ -401,6 +401,7 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
 
     if(coocc_at_p && metric_type != 4){
       unordered_set<int>* cooccurred_checkins = cooccurrence_index_indirect.find(p->getOrder())->second;
+
       // Skip co-occurred check-ins
       if( cooccurred_checkins->find(chk->oid) != cooccurred_checkins->end() ){
         continue;
@@ -413,6 +414,10 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
         if(ch->getUID() == chk->uid)
           continue;
       }
+
+      // Skip if point belongs to a co-occurrence
+      // if(cooccurrence_index.find(chk->oid) != cooccurrence_index.end())
+      //   continue;
     }
 
     // Discount the current location/region and current user
@@ -1102,6 +1107,10 @@ void GPOs::countCoOccurrencesOptimistic(){
   unordered_set<int> cooccurrence_group_checkins;
   for(auto c_it = cooccurrence_index_indirect.begin(); c_it != cooccurrence_index_indirect.end(); c_it++){
     int origin_order = c_it->first;
+
+    if(cooccurrence_group_checkins.find(origin_order) == cooccurrence_group_checkins.end())
+      continue;
+
     unordered_set<int>* cooccurrences = c_it->second;
     unordered_set<int> unique_checkins;
     unique_checkins.insert(origin_order);
@@ -1109,6 +1118,7 @@ void GPOs::countCoOccurrencesOptimistic(){
       int order = (*co_it);
       unique_checkins.insert(order);
     }
+
     unordered_set<int>* cooccurrence_group = new unordered_set<int>();
     for(auto g_it = unique_checkins.begin(); g_it != unique_checkins.end(); g_it++){
       int order = (*g_it);
@@ -1812,7 +1822,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   double sd, td;
 
   unordered_set<int> seenLocations;
-  for(auto c_it = cooccurrence_groups.begin(); c_it != cooccurrence_groups.end(); c_it++){
+  for(auto c_it = gpos->cooccurrence_groups.begin(); c_it != gpos->cooccurrence_groups.end(); c_it++){
     unordered_set<int>* cooccurrence_group = (*c_it);
 
     double base_x=0, base_y=0;
