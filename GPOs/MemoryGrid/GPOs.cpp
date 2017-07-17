@@ -1107,11 +1107,11 @@ void GPOs::countCoOccurrencesOptimistic(){
   unordered_set<int> cooccurrence_group_checkins;
   for(auto c_it = cooccurrence_index_indirect.begin(); c_it != cooccurrence_index_indirect.end(); c_it++){
     int origin_order = c_it->first;
+    unordered_set<int>* cooccurrences = c_it->second;
 
-    if(cooccurrence_group_checkins.find(origin_order) == cooccurrence_group_checkins.end())
+    if(cooccurrence_group_checkins.find(origin_order) != cooccurrence_group_checkins.end())
       continue;
 
-    unordered_set<int>* cooccurrences = c_it->second;
     unordered_set<int> unique_checkins;
     unique_checkins.insert(origin_order);
     for(auto co_it = cooccurrences->begin(); co_it != cooccurrences->end(); co_it++){
