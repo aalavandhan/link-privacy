@@ -1829,7 +1829,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
 
     double base_x=0, base_y=0, base_time_seconds=0;
     double min_x=std::numeric_limits<double>::infinity(), min_y=std::numeric_limits<double>::infinity(), min_time_seconds=std::numeric_limits<double>::infinity();
-    double max_x=0, max_y=0, max_time_seconds=0;
+    double max_x=-std::numeric_limits<double>::infinity(), max_y=-std::numeric_limits<double>::infinity(), max_time_seconds=0;
     int remaining_size=0;
     boost::posix_time::ptime base_time;
 
@@ -1867,12 +1867,6 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     base_y = (min_y + max_y) / 2;
     base_time_seconds = (min_time_seconds + max_time_seconds) / 2;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
-
-    cout << "Point : " << sample->getX() << " " << sample->getY() << " " << sample->getTime() << endl;
-    cout << "X : " << min_x << " " << min_y << endl;
-    cout << "Y : " << max_x << " " << max_y << endl;
-    cout << "Time : " << Point::START_DATE_TIME + boost::posix_time::seconds( min_time_seconds ) << " " << Point::START_DATE_TIME + boost::posix_time::seconds( max_time_seconds ) << endl;
-    cout << base_x << " " << base_y << " " << base_time << endl;
 
     unordered_set< pair<int,int>, PairHasher > cooccurrences_in_group;
 
