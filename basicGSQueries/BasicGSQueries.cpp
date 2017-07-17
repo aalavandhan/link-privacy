@@ -146,6 +146,10 @@ void SimpleQueries::checkUtilityRKNN(int k){
       if(nn_candidates->size() <= k)
         rKnn_count++;
     }
+    for(auto it=candidates->begin(); it != candidates->end(); it++){
+      delete *it;
+    }
+    delete candidates;
 
     count++;
     probability += ( 1 / (rKnn_count+1) );
