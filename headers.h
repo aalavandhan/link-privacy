@@ -213,6 +213,8 @@ extern double DELTA_Y ;
 //#include "GPOs/MemoryGrid/headers.h"
 
 #include "utilities/res_point.h"
+#include "GPOs/MemoryGrid/grid/Point.h"
+
 #include "utilities/Utilities.h"
 #include "utilities/my_pair.h"
 #include "utilities/ranked_pair.h"
@@ -225,7 +227,7 @@ extern double DELTA_Y ;
 #include "pTools/RenyiEntropy.h"
 #include "pTools/WeightedEntropy.h"
 
-#include "GPOs/MemoryGrid/grid/Point.h"
+
 #include "GPOs/MemoryGrid/grid/Cell.h"
 #include "GPOs/MemoryGrid/grid/Grid.h"
 #include "GPOs/MemoryGrid/GPOs.h"

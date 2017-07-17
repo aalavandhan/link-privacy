@@ -32,6 +32,8 @@ public:
     virtual double getSTDistance(Point *q, double coocc_spatial_range, uint coocc_time_range);
     virtual double getSTDistance(res_point *q, double coocc_spatial_range, uint coocc_time_range);
 
+    virtual void set(double x, double y, boost::posix_time::ptime time);
+
     //Overload the < operator.
     bool operator< (const Point& p) const;
     //Overload the > operator.

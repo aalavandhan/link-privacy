@@ -1783,31 +1783,61 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   unsigned int lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
 
-  set <int> seenLocations, purturbedCoLocations, checkins_of_interest;
-  gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
+  unordered_set<int> seenLocations, colocation_groups;
+  for(auto c_it = cooccurrence_index_indirect.begin(); c_it != cooccurrence_index_indirect.end(); c_it++){
+    int origin_order = c_it->first;
+    unordered_set<int>* cooccurrences = c_it->second;
 
-  for(auto c_it = checkins_of_interest.begin(); c_it != checkins_of_interest.end(); c_it++){
-    int order = (*c_it);
-    Point *p = gpos->checkin_list.find(order)->second;
-
-    double baseX=p->getX(),
-           baseY=p->getY();
-    boost::posix_time::ptime baseTime= p->getTime();
-
-    auto knn_it = st_knn.find(order);
-
-    if( seenLocations.find(p->getOrder()) == seenLocations.end() ){
-      loadPoint( p->getX(), p->getY(), lid, p->getUID(), p->getTime(), p->getOrder() );
-      seenLocations.insert(p->getOrder());
-      lid++;
-      total_spatial_displacement+=p->computeMinDistInKiloMeters(p->getX(), p->getY());
-      total_time_displacement+=(double)abs((p->getTime() - p->getTime()).total_seconds())/3600.0;
-      purturbed_count++;
-    } else {
+    // Colocaiton group has been processed!
+    if(colocation_groups.find(origin_order) != colocation_groups.end())
       continue;
+
+    set<int> group;
+    group.insert(origin_order);
+    for(auto co_it = cooccurrences->begin(); co_it != cooccurrences->end(); co_it++){
+      int order = (*co_it);
+      group.insert(order);
     }
 
-    if(knn_it == st_knn.end()){ // Hide very sparse
+    double base_x=0, base_y=0;
+    int base_time_seconds=0, size=0;
+    boost::posix_time::ptime base_time;
+
+    // Using centroid
+    for(auto g_it = group.begin(); g_it != group.end(); g_it++){
+      int order = (*g_it);
+      Point *p = gpos->checkin_list.find(order)->second;
+      if(seenLocations.find(p->getOrder()) == seenLocations.end()){
+        base_x += p->getX();
+        base_y += p->getY();
+        base_time_seconds += p->getTimeInSeconds();
+        size++;
+      }
+      colocation_groups.insert(order);
+    }
+
+    base_x/=size;
+    base_y/=size;
+    base_time_seconds/=size;
+    base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
+
+    // Moving points together
+    for(auto g_it = group.begin(); g_it != group.end(); g_it++){
+      int order = (*g_it);
+      Point *p = gpos->checkin_list.find(order)->second;
+
+      if( seenLocations.find(p->getOrder()) == seenLocations.end() ){
+        loadPoint( base_x, base_y, lid, p->getUID(), base_time, p->getOrder() );
+        seenLocations.insert(p->getOrder());
+        lid++;
+        total_spatial_displacement+=p->computeMinDistInKiloMeters(base_x, base_y);
+        total_time_displacement+=(double)abs((p->getTime() - base_time).total_seconds())/3600.0;
+        purturbed_count++;
+      }
+    }
+
+    auto knn_it = st_knn.find(origin_order);
+    if(knn_it == st_knn.end()){
       cooccurrences_out_of_bound++;
       continue;
     }
@@ -1816,29 +1846,20 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     int kth = k, knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
-      Point tp = Point(baseX, baseY, -1);
+      Point tp = Point(base_x, base_y, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-
-      if( seenLocations.find(q->getOrder()) == seenLocations.end() && purturbedCoLocations.find(q->getOrder()) == purturbedCoLocations.end()  ){
-        loadPoint( baseX, baseY, lid, q->getUID(), baseTime, q->getOrder() );
+      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
+        loadPoint( base_x, base_y, lid, q->getUID(), base_time, q->getOrder() );
         seenLocations.insert(q->getOrder());
         lid++;
         total_spatial_displacement+=tp.computeMinDistInKiloMeters(q->getX(), q->getY());
-        total_time_displacement+=(double) abs( (q->getTime() - baseTime).total_seconds() ) / 3600.0;
+        total_time_displacement+=(double) abs( (q->getTime() - base_time).total_seconds() ) / 3600.0;
         purturbed_count++;
         knn_added++;
-        auto co_it = gpos->cooccurrence_index.find(q->getOrder());
-        if(co_it != gpos->cooccurrence_index.end()){
-          purturbedCoLocations.insert(q->getOrder());
-          unordered_set <int> *co_occ_list = co_it->second;
-          for(auto co_occ_list_it = co_occ_list->begin(); co_occ_list_it != co_occ_list->end(); co_occ_list_it++)
-            purturbedCoLocations.insert(*co_occ_list_it);
-        }
       } else {
         kth++; // Check the next NN
       }
     }
-
     if(knn_added == 0) // Keeping track of co-occurrences which are not anonomized
       knn_not_added++;
   }

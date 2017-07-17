@@ -58,6 +58,11 @@ int Point::getOrder(){return p_order;}
 
 boost::posix_time::ptime Point::getTime(){return p_time;}
 
+void Point::set(double x, double y, boost::posix_time::ptime time){
+    p_x = x;
+    p_y = y;
+    p_time = time;
+}
 
 // Euclidean distance
 double Point::computeMinDist(double x, double y){

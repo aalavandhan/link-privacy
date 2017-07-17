@@ -28,8 +28,6 @@ template <typename N> N getRandom(N min, N max, N sd)
   return random();
 };
 
-
-
 Utilities::Utilities(){
   srand((unsigned)time(NULL));
 }
@@ -806,3 +804,91 @@ double Utilities::calulateTauB(vector<int> *A, vector<int> *B){
 
     return taub;
   }
+
+struct distFunction{
+    double operator()(Point *a, Point *b){
+    double st_dist;
+    st_dist = 0.5 * ( a->computeMinDistInKiloMeters(b->getX(), b->getY()) / (25/1000.0) );
+    st_dist+= 0.5 * ( (double) a->getTimeDifference(b) / (double)(1200) );
+    return st_dist;
+  }
+};
+
+// void geometric_median( vector<pair<double, double>> *XC, Point* geo_median, distFunction distance, int iterations = 10 ){
+//     size_t dim = 3;
+//     size_t N = XC->size();
+
+//     double x=0,y=0;
+//      boost::posix_time::ptime ptime;
+//     uint time;
+
+//     for(auto pt_it = XC->begin(); pt_it != XC->end(); pt_it++){
+//       Point *p = (*pt_it);
+//       time = time + p->getTimeInSeconds();
+//       x += p->getX();
+//       y += p->getY();
+//     }
+
+//     vector<Point*> AC;
+//     Point *start   = new Point(x/N, y/N, -1, -1, Point::START_DATE_TIME + boost::posix_time::seconds(time/N), -1);
+//     Point *current = new Point(x/N, y/N, -1, -1, Point::START_DATE_TIME + boost::posix_time::seconds(time/N), -1);
+//     AC.push_back(start);
+
+//     cout << "Initial centroid : " << start->getX() << " " << start->getY() << " " << start->getTime() << endl;
+
+//     for(int it = 0; it < iterations; it++){
+//       vector<double> numerator;
+//       numerator.push_back(0);
+//       numerator.push_back(0);
+//       numerator.push_back(0);
+
+//       vector<double> denominator;
+//       denominator.push_back(0);
+//       denominator.push_back(0);
+//       denominator.push_back(0);
+
+//       int t = it % 2;
+//       for (int n = 0; n < N; n++){
+//         Point *np = XC->at(n);
+//         double dist = distance(np, AC[t]);
+
+//         // cout << "Processing NP : " << np->getX() << " " << np->getY() << " " << np->getTime() << endl;
+//         cout << "STDIST : " << dist << endl;
+
+//         if (dist != 0){
+//           numerator[0] +=  np->getX()         / ((dist*50)/1000.0*111);
+//           numerator[1] +=  np->getY()         / ((dist*50)/1000.0*111);
+//           numerator[2] +=  np->getTimeInSeconds() / (dist*2400);
+
+//           denominator[0] += 1.0 / ((dist*50)/1000.0);
+//           denominator[1] += 1.0 / ((dist*50)/1000.0);
+//           denominator[2] += 1.0 / (dist*2400);
+//         }
+//       }
+
+//       x = numerator[0]/denominator[0];
+//       y = numerator[1]/denominator[1];
+//       ptime = Point::START_DATE_TIME + boost::posix_time::seconds(numerator[2]/denominator[2]);
+
+//       current->set(x, y, ptime);
+//       AC[1-t] = current;
+
+//       cout << "After Movement : " << current->getX() << " " << current->getY() << " " << current->getTime() << endl;
+//     }
+
+//     geo_median = AC[iterations%2];
+// }
+
+// void Utilities::geometricMedian(vector<Point*> *points){
+//   vector<Point*> point_list;
+
+//   for(auto p_it = points->begin(); p_it != points->end(); p_it++){
+//     Point *p = (*p_it);
+//     point_list.push_back( p );
+//   }
+
+//   Point geo_median = Point(0,0,-1);
+//   geometric_median( &point_list, &geo_median, distFunction() );
+
+//   cout << "RESULT :" << geo_median.getX() << " " << geo_median.getY() << " " << geo_median.getTime() << " " << endl;
+// }

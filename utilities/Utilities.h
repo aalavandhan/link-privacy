@@ -53,4 +53,6 @@ public:
     boost::posix_time::ptime addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds);
     boost::posix_time::ptime addTemporalGaussianNoise(boost::posix_time::ptime time, uint deviation_in_seconds, int offset);
     boost::posix_time::ptime addTemporalNoise(boost::posix_time::ptime time, int deviation_in_seconds);
+
+    void geometricMedian(vector<Point*> *points);
 };

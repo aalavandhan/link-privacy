@@ -774,6 +774,20 @@ void testpTools(){
 }
 
 int main(int argc, char *argv[]){
+  // Testing stuff
+  // Utilities util;
+  // vector<Point*> points;
+  // Point pt1 = Point(112, 33, -1, -1, Point::START_DATE_TIME, -1);
+  // Point pt2 = Point(115, 37, -1, -1, Point::START_DATE_TIME, -1);
+  // Point pt3 = Point(110, 30, -1, -1, Point::START_DATE_TIME, -1);
+  // points.push_back( &pt1 );
+  // points.push_back( &pt2 );
+  // points.push_back( &pt3 );
+  // util.geometricMedian(&points);
+
+  // exit(-1);
+
+
   cout.precision(15);
 
   // testpTools();
