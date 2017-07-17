@@ -1916,7 +1916,9 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(base_x, base_y, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-      if( seenLocations.find(q->getOrder()) == seenLocations.end() && gpos->cooccurrence_index.find(q->getOrder()) == gpos->cooccurrence_index.end() ){
+
+      // gpos->cooccurrence_index.find(q->getOrder()) == gpos->cooccurrence_index.end()
+      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
         loadPoint( base_x, base_y, lid, q->getUID(), base_time, q->getOrder() );
         seenLocations.insert(q->getOrder());
         lid++;
