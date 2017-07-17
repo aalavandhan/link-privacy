@@ -103,6 +103,66 @@ std::vector<std::vector<T>> SplitVector(const std::vector<T>& vec, size_t n)
     return outVec;
 }
 
+void SimpleQueries::checkUtilityRKNN(int k){
+  vector< pair<int,int> >* cooccurrences = gpos->getCooccurredCheckins();
+
+  vector< unordered_set<int>* > cooccurrence_groups;
+  double probability=0;
+  int count=0, rknn_not_computed=0;
+
+  for(auto c_it = gpos->cooccurrence_groups.begin(); c_it != gpos->cooccurrence_groups.end(); c_it++){
+    unordered_set<int>* group = (*c_it);
+    unordered_set<int> users_in_group;
+
+    int order = *(group->begin());
+    Point *p = gpos->checkin_list.find(order)->second;
+
+    for(auto g_it = group->begin(); g_it != group->end(); g_it++){
+      int o = (*g_it);
+      Point *q = gpos->checkin_list.find(order)->second;
+      users_in_group.insert(q->getUID());
+    }
+
+    int rKnn_count = 0;
+    vector <res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND/2, TEMPORAL_HARD_BOUND/2);
+
+    cout << "Processing : " << p->getOrder() << " Group size : " << group->size() << " Candidate Size : " << candidates->size() <<endl;
+
+    if(candidates->size() == 0){
+      rknn_not_computed++;
+      continue;
+    }
+
+    for(auto it=candidates->begin(); it != candidates->end(); it++){
+      res_point *chk = *it;
+      Point q = Point(chk);
+
+      if(users_in_group.find(chk->uid) != users_in_group.end())
+        continue;
+
+      double s_dist = p->computeMinDistInKiloMeters(chk->x, chk->y);
+      double t_dist = abs( (p->getTime() - chk->time).total_seconds() );
+
+      vector <res_point*> *nn_candidates = gpos->getRangeSpatioTemporalBound(&q, s_dist, t_dist);
+
+      if(nn_candidates->size() <= k)
+        rKnn_count++;
+    }
+
+    cout << "RKNNs found : " << rKnn_count << endl;
+
+    count++;
+    probability += ( 1 / (rKnn_count+1) );
+  }
+
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << "Utility [ BASIC METRIC ]" << endl;
+  cout << "utility_rknn_group_count{{" << count   << "}}" << endl;
+  cout << "utility_rknn_not_computed{{" << rknn_not_computed   << "}}" << endl;
+  cout << "utility_rknn_precision{{" << probability/count   << "}}" << endl;
+  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+}
+
 void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   vector< pair<int,int> >* base_cooccurrences = base_gpos->getCooccurredCheckins();
   vector< pair<int,int> >* purturbed_cooccurrences = gpos->getCooccurredCheckins();

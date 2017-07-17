@@ -41,5 +41,6 @@ public:
 
     void checkUtilityBasic(GPOs *base_gpos);
     void checkUtilityKNN(const char* fileName, GPOs *base_gpos);
+    void checkUtilityRKNN(int k);
 };
 

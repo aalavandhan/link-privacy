@@ -776,9 +776,9 @@ void testpTools(){
 int main(int argc, char *argv[]){
   // // Testing stuff
   // Utilities util;
-  // cout << util.computeCoLocationCount(3,2,3) << endl;
-  // cout << util.computeCoLocationCount(4,3,3) << endl;
-  // cout << util.computeCoLocationCount(4,6,3) << endl;
+  // cout << util.computeNodesToAddForKAnon(3,3,2) << endl;
+  // cout << util.computeNodesToAddForKAnon(4,3,2) << endl;
+
 
   // vector<Point*> points;
   // Point pt1 = Point(112, 33, -1, -1, Point::START_DATE_TIME, -1);

@@ -411,6 +411,7 @@ void GPOs::getSpatioTemporalKNN(Point *p, int k,
       for(auto coch_it = cooccurred_checkins->begin(); coch_it != cooccurred_checkins->end(); coch_it++){
         int coch_order = (*coch_it);
         Point *ch = checkin_list.find(coch_order)->second;
+
         if(ch->getUID() == chk->uid)
           continue;
       }
@@ -1827,17 +1828,29 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     unordered_set<int>* cooccurrence_group = (*c_it);
 
     double base_x=0, base_y=0, base_time_seconds=0;
+    double min_x=std::numeric_limits<double>::infinity(), min_y=std::numeric_limits<double>::infinity(), min_time_seconds=std::numeric_limits<double>::infinity();
+    double max_x=0, max_y=0, max_time_seconds=0;
     int remaining_size=0;
     boost::posix_time::ptime base_time;
 
-    // Using centroid
+    // Using center of MBR
     for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
       int order = (*g_it);
       Point *p = gpos->checkin_list.find(order)->second;
       if(seenLocations.find(p->getOrder()) == seenLocations.end()){
-        base_x += p->getX();
-        base_y += p->getY();
-        base_time_seconds += p->getTimeInSeconds();
+        if(p->getX() < min_x)
+          min_x = p->getX();
+        if(p->getY() < min_y)
+          min_y = p->getY();
+        if(p->getTimeInSeconds() < min_time_seconds)
+          min_time_seconds = p->getTimeInSeconds();
+
+        if(p->getX() > max_x)
+          max_x = p->getX();
+        if(p->getY() > max_y)
+          max_y = p->getY();
+        if(p->getTimeInSeconds() > max_time_seconds)
+          max_time_seconds = p->getTimeInSeconds();
         remaining_size++;
       }
     }
@@ -1848,11 +1861,10 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     if(remaining_size == 0) // TopK has other Co-locations
       continue;
 
-    base_x/=remaining_size;
-    base_y/=remaining_size;
-    base_time_seconds/=remaining_size;
+    base_x += (min_x + max_x) / 2;
+    base_y += (min_y + max_y) / 2;
+    base_time_seconds += (min_time_seconds + max_time_seconds) / 2;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
-
 
     unordered_set< pair<int,int>, PairHasher > cooccurrences_in_group;
 
