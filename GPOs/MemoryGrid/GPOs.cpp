@@ -1843,6 +1843,9 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       origin_order = p->getOrder();
     }
 
+    if(size == 0)
+      continue;
+
     base_x/=size;
     base_y/=size;
     base_time_seconds/=size;
