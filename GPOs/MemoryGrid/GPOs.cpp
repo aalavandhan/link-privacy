@@ -1862,10 +1862,17 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     if(remaining_size == 0) // TopK has other Co-locations
       continue;
 
+
     base_x = (min_x + max_x) / 2;
     base_y = (min_y + max_y) / 2;
     base_time_seconds = (min_time_seconds + max_time_seconds) / 2;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
+
+    cout << "Point : " << p->getX() << " " << p->getY() << " " << p->getTime() << endl;
+    cout << "X : " << min_x << " " << min_y << endl;
+    cout << "Y : " << max_x << " " << max_y << endl;
+    cout << "Time : " << Point::START_DATE_TIME + boost::posix_time::seconds( min_time_seconds ) << " " << Point::START_DATE_TIME + boost::posix_time::seconds( max_time_seconds ) << endl;
+    cout << base_x << " " << base_y << " " << base_time << endl;
 
     unordered_set< pair<int,int>, PairHasher > cooccurrences_in_group;
 
