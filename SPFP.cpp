@@ -1207,6 +1207,10 @@ int main(int argc, char *argv[]){
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGPOs, k, false, hide);
       purturbedGPOs->countCoOccurrencesOptimistic();
+
+      SimpleQueries* query = new SimpleQueries(purturbedGPOs, spos);
+      query->checkUtilityRKNN();
+
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
       if(run_utilties){
         runUtilities(purturbedGPOs, baseGPOs, spos);
