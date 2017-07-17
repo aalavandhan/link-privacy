@@ -892,3 +892,36 @@ struct distFunction{
 
 //   cout << "RESULT :" << geo_median.getX() << " " << geo_median.getY() << " " << geo_median.getTime() << " " << endl;
 // }
+
+double solveQuadratic(double a, double b, double c){
+  double x1, x2, determinant, realPart, imaginaryPart;
+  determinant = (b*b)- (4*a*c);
+
+  if (determinant > 0) {
+      x1 = (-b + sqrt(determinant)) / (2*a);
+      x2 = (-b - sqrt(determinant)) / (2*a);
+      return max(x1, x2);
+  }
+
+  else if (determinant == 0) {
+      x1 = (-b + sqrt(determinant)) / (2*a);
+      return x1;
+  }
+
+  else {
+      realPart = -b/(2*a);
+      imaginaryPart =sqrt(-determinant)/(2*a);
+      cout << "Imaginary ROOTS" << endl;
+      exit(-1);
+  }
+
+  return 0;
+}
+
+int Utilities::computeNodesToAddForKAnon(int v, int e, int k){
+  double a = 1;
+  double b = (2*v - 1);
+  double c = (v*v) - v - ( 2*k*e);
+  return ceil(solveQuadratic(a,b,c));
+}
+

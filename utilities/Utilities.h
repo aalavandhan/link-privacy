@@ -55,4 +55,5 @@ public:
     boost::posix_time::ptime addTemporalNoise(boost::posix_time::ptime time, int deviation_in_seconds);
 
     void geometricMedian(vector<Point*> *points);
+    int computeNodesToAddForKAnon(int v, int e, int k);
 };
