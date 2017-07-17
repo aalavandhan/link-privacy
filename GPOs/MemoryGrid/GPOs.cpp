@@ -1068,7 +1068,8 @@ void GPOs::countCoOccurrencesOptimistic(){
         o1 = temp;
       }
 
-      cooccurred_checkins.insert(make_pair(o1, o2));
+      if(cooccurred_checkins.find(make_pair(o1, o2)) == cooccurred_checkins.end())
+        cooccurred_checkins.insert(make_pair(o1, o2));
 
       delete (*c);
     }
@@ -1843,7 +1844,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       origin_order = p->getOrder();
     }
 
-    if(size == 0)
+    if(size == 0) // TopK has other Co-locations
       continue;
 
     base_x/=size;
@@ -1873,7 +1874,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     }
 
     vector<double> *neighbours = knn_it->second;
-    int kth = k, knn_added = 0;
+    int kth = k * cooccurrence_group->size(), knn_added = 0;
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(base_x, base_y, -1);
