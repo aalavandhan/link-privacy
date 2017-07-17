@@ -1829,7 +1829,6 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     double base_x=0, base_y=0;
     int base_time_seconds=0, remaining_size=0;
     boost::posix_time::ptime base_time;
-    int origin_order;
 
     // Using centroid
     for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
@@ -1841,16 +1840,23 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         base_time_seconds += p->getTimeInSeconds();
         remaining_size++;
       }
-      origin_order = p->getOrder();
     }
+
+    int origin_order = *(cooccurrence_group->begin());
+    Point *sample = gpos->checkin_list.find(origin_order)->second;
 
     if(remaining_size == 0) // TopK has other Co-locations
       continue;
 
+    cout << "Total time in seconds : " << base_time_seconds << endl;
     base_x/=remaining_size;
     base_y/=remaining_size;
     base_time_seconds/=remaining_size;
+    cout << "Mean time in seconds : " << base_time_seconds << endl;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
+    cout << "Final time : " << base_time << endl;
+    cout << "Original Time :" << sample->getTime() << endl;
+    exit(-1);
 
     // Moving points together
     for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
@@ -1862,7 +1868,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         seenLocations.insert(p->getOrder());
         lid++;
         total_spatial_displacement+=p->computeMinDistInKiloMeters(base_x, base_y);
-        total_time_displacement+=(double)abs((p->getTime() - base_time).total_seconds())/3600.0;
+        total_time_displacement+=(double)abs((p->getTime() - base_time).total_seconds()) / 3600.0;
         purturbed_count++;
       }
     }
@@ -1879,7 +1885,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
       int neighbor = neighbours->at(i-1);
       Point tp = Point(base_x, base_y, -1);
       Point *q = gpos->checkin_list.find(neighbor)->second;
-      if( seenLocations.find(q->getOrder()) == seenLocations.end() ){
+      if( seenLocations.find(q->getOrder()) == seenLocations.end() && gpos->cooccurrence_index.find(q->getOrder()) == gpos->cooccurrence_index.end() ){
         loadPoint( base_x, base_y, lid, q->getUID(), base_time, q->getOrder() );
         seenLocations.insert(q->getOrder());
         lid++;
