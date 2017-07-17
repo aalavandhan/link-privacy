@@ -1875,7 +1875,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     }
 
     vector<double> *neighbours = knn_it->second;
-    int nodes_to_add = util.computeNodesToAddForKAnon(remaining_size, remaining_size*(remaining_size-1)/2, k);
+    int nodes_to_add = util.computeNodesToAddForKAnon(remaining_size, remaining_size*(remaining_size-1)/2, k+1);
     int kth = nodes_to_add, knn_added = 0;
 
     for(int i=1; i<=kth && i<=neighbours->size(); i++){
