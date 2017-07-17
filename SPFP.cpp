@@ -1209,7 +1209,7 @@ int main(int argc, char *argv[]){
       purturbedGPOs->countCoOccurrencesOptimistic();
 
       SimpleQueries* query = new SimpleQueries(purturbedGPOs, spos);
-      query->checkUtilityRKNN();
+      query->checkUtilityRKNN(k);
 
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
       if(run_utilties){
