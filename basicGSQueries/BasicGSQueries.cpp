@@ -124,9 +124,7 @@ void SimpleQueries::checkUtilityRKNN(int k){
     }
 
     int rKnn_count = 0;
-    vector <res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, SPATIAL_HARD_BOUND/2, TEMPORAL_HARD_BOUND/2);
-
-    cout << "Processing : " << p->getOrder() << " Group size : " << group->size() << " Candidate Size : " << candidates->size() <<endl;
+    vector <res_point*> *candidates = gpos->getRangeSpatioTemporalBound(p, 1000, 2);
 
     if(candidates->size() == 0){
       rknn_not_computed++;
@@ -148,8 +146,6 @@ void SimpleQueries::checkUtilityRKNN(int k){
       if(nn_candidates->size() <= k)
         rKnn_count++;
     }
-
-    cout << "RKNNs found : " << rKnn_count << endl;
 
     count++;
     probability += ( 1 / (rKnn_count+1) );

@@ -1851,6 +1851,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
           max_y = p->getY();
         if(p->getTimeInSeconds() > max_time_seconds)
           max_time_seconds = p->getTimeInSeconds();
+
         remaining_size++;
       }
     }
@@ -1861,9 +1862,9 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     if(remaining_size == 0) // TopK has other Co-locations
       continue;
 
-    base_x += (min_x + max_x) / 2;
-    base_y += (min_y + max_y) / 2;
-    base_time_seconds += (min_time_seconds + max_time_seconds) / 2;
+    base_x = (min_x + max_x) / 2;
+    base_y = (min_y + max_y) / 2;
+    base_time_seconds = (min_time_seconds + max_time_seconds) / 2;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
 
     unordered_set< pair<int,int>, PairHasher > cooccurrences_in_group;
@@ -1887,6 +1888,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         int order_other = (*h_it);
         if(order == order_other)
           continue;
+
         int o1 = order;
         int o2 = order_other;
         if(o1 > o2){
