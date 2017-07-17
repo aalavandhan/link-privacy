@@ -298,7 +298,7 @@ vector <res_point*>* GPOs::getRangeSpatioTemporalBound(Point *p, double spatial_
 
   for(auto cd_it = temporal_candidates.begin(); cd_it != temporal_candidates.end(); cd_it++){
     Point *q = (*cd_it);
-    if(p->getUID() != q->getUID() && p->getID() != q->getID()){
+    if( p->getUID() != q->getUID() ){
       double dist = p->computeMinDistInKiloMeters(q->getX(), q->getY());
       double time_deviation = abs((p->getTime() - q->getTime()).total_seconds());
       if( (dist * 1000) <= spatial_bound_in_meters && ((double)time_deviation/3600.0) <= temporal_bound_in_hours){
