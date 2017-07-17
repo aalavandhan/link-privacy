@@ -143,7 +143,7 @@ void SimpleQueries::checkUtilityRKNN(int k){
       double s_dist = p->computeMinDistInKiloMeters(chk->x, chk->y);
       double t_dist = abs( (p->getTime() - chk->time).total_seconds() );
 
-      vector <res_point*> *nn_candidates = gpos->getRangeSpatioTemporalBound(&q, s_dist, t_dist);
+      vector <res_point*> *nn_candidates = gpos->getRangeSpatioTemporalBound(&q, s_dist*1000.0, t_dist/3600.0);
 
       if(nn_candidates->size() <= k)
         rKnn_count++;
