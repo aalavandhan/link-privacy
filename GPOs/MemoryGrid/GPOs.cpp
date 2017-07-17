@@ -1826,8 +1826,8 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   for(auto c_it = gpos->cooccurrence_groups.begin(); c_it != gpos->cooccurrence_groups.end(); c_it++){
     unordered_set<int>* cooccurrence_group = (*c_it);
 
-    double base_x=0, base_y=0;
-    int base_time_seconds=0, remaining_size=0;
+    double base_x=0, base_y=0, base_time_seconds=0;
+    int remaining_size=0;
     boost::posix_time::ptime base_time;
 
     // Using centroid
@@ -1848,15 +1848,10 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     if(remaining_size == 0) // TopK has other Co-locations
       continue;
 
-    cout << "Total time in seconds : " << base_time_seconds << endl;
     base_x/=remaining_size;
     base_y/=remaining_size;
     base_time_seconds/=remaining_size;
-    cout << "Mean time in seconds : " << base_time_seconds << endl;
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
-    cout << "Final time : " << base_time << endl;
-    cout << "Original Time :" << sample->getTime() << endl;
-    exit(-1);
 
     // Moving points together
     for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
