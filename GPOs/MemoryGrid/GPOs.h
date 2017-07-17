@@ -120,6 +120,8 @@ public:
 
     unordered_map< int, unordered_set<int>* > cooccurrence_index;
     unordered_map< int, unordered_set<int>* > cooccurrence_index_indirect;
+    vector< unordered_set<int>* > cooccurrence_groups;
+
     set<int> unpurtrubed_cooccurrences;
 
     // nextNN without the incremental approach of NN

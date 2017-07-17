@@ -1097,11 +1097,39 @@ void GPOs::countCoOccurrencesOptimistic(){
     cooccurrence_index_indirect.insert(make_pair(order, indirect));
     total_indirect_size+=indirect->size();
   }
+
+  double average_group_size=0;
+  unordered_set<int> cooccurrence_group_checkins;
+  for(auto c_it = cooccurrence_index_indirect.begin(); c_it != cooccurrence_index_indirect.end(); c_it++){
+    int origin_order = c_it->first;
+    unordered_set<int>* cooccurrences = c_it->second;
+    unordered_set<int> unique_checkins;
+    unique_checkins.insert(origin_order);
+    for(auto co_it = cooccurrences->begin(); co_it != cooccurrences->end(); co_it++){
+      int order = (*co_it);
+      unique_checkins.insert(order);
+    }
+    unordered_set<int>* cooccurrence_group = new unordered_set<int>();
+    for(auto g_it = unique_checkins.begin(); g_it != unique_checkins.end(); g_it++){
+      int order = (*g_it);
+      cooccurrence_group_checkins.insert(order);
+      cooccurrence_group->insert(order);
+    }
+    average_group_size+=cooccurrence_group->size();
+
+    if(cooccurrence_group->size() > 0)
+      cooccurrence_groups.push_back(cooccurrence_group);
+    else
+      delete cooccurrence_group;
+  }
+
   cout<<"Completed computing cooccurrences in optimistic manner" << endl;
   cout<<"total_cooccurrences{{"<<cooccurred_checkins.size()<<"}}"<<endl;
   cout<<"cooccurrence_index_size{{"<<cooccurrence_index.size()<<"}}"<<endl;
   cout<<"indirect_cooccurrence_index_size{{"<<cooccurrence_index_indirect.size()<<"}}"<<endl;
   cout<<"average_indirect_cooccurrences{{"<<total_indirect_size / cooccurrence_index_indirect.size()<<"}}"<<endl;
+  cout<<"number_of_groups{{"<<cooccurrence_groups.size()<<"}}"<<endl;
+  cout<<"average_group_size{{"<<average_group_size / cooccurrence_groups.size() <<"}}"<<endl;
 }
 
 void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_deviation_in_hours){
@@ -1783,28 +1811,17 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
   unsigned int lid=LOCATION_NOISE_BOUND, cooccurrences_out_of_bound=0, knn_not_added=0;
   double sd, td;
 
-  unordered_set<int> seenLocations, colocation_groups;
-  for(auto c_it = cooccurrence_index_indirect.begin(); c_it != cooccurrence_index_indirect.end(); c_it++){
-    int origin_order = c_it->first;
-    unordered_set<int>* cooccurrences = c_it->second;
-
-    // Colocaiton group has been processed!
-    if(colocation_groups.find(origin_order) != colocation_groups.end())
-      continue;
-
-    set<int> group;
-    group.insert(origin_order);
-    for(auto co_it = cooccurrences->begin(); co_it != cooccurrences->end(); co_it++){
-      int order = (*co_it);
-      group.insert(order);
-    }
+  unordered_set<int> seenLocations;
+  for(auto c_it = cooccurrence_groups.begin(); c_it != cooccurrence_groups.end(); c_it++){
+    unordered_set<int>* cooccurrence_group = (*c_it);
 
     double base_x=0, base_y=0;
     int base_time_seconds=0, size=0;
     boost::posix_time::ptime base_time;
+    int origin_order;
 
     // Using centroid
-    for(auto g_it = group.begin(); g_it != group.end(); g_it++){
+    for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
       int order = (*g_it);
       Point *p = gpos->checkin_list.find(order)->second;
       if(seenLocations.find(p->getOrder()) == seenLocations.end()){
@@ -1813,7 +1830,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
         base_time_seconds += p->getTimeInSeconds();
         size++;
       }
-      colocation_groups.insert(order);
+      origin_order = p->getOrder();
     }
 
     base_x/=size;
@@ -1822,7 +1839,7 @@ void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
     base_time = Point::START_DATE_TIME + boost::posix_time::seconds( base_time_seconds );
 
     // Moving points together
-    for(auto g_it = group.begin(); g_it != group.end(); g_it++){
+    for(auto g_it = cooccurrence_group->begin(); g_it != cooccurrence_group->end(); g_it++){
       int order = (*g_it);
       Point *p = gpos->checkin_list.find(order)->second;
 
