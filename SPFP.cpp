@@ -162,6 +162,9 @@ void runEBMWithoutGroundTruth(){
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
+  gpos->generateCooccurrenceCache();
+  gpos->countU2UCoOccurrences();
+
   SimpleQueries* query = new SimpleQueries(gpos, spos);
 
   cout << "----- Precomputing matrices --- " << endl;
@@ -1238,6 +1241,10 @@ int main(int argc, char *argv[]){
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->hideCoLocations(fixedGPOs, prob);
       purturbedGPOs->countCoOccurrencesOptimistic();
+
+      runEBM(fixedGPOs, spos);
+      runEBM(purturbedGPOs, spos);
+
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
       if(run_utilties){
         runUtilities(purturbedGPOs, baseGPOs, spos);
