@@ -1231,19 +1231,19 @@ int main(int argc, char *argv[]){
 
       cout << "Hiding with prob" << prob << endl;
 
-      bool preload_LE  = false;
+      bool preload_LE  = true;
       bool preload_OCC = false;
       GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
       SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
 
       GPOs* fixedGPOs = baseGPOs;
+      runEBM(fixedGPOs, spos);
       fixedGPOs->countCoOccurrencesOptimistic();
+
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->hideCoLocations(fixedGPOs, prob);
-      purturbedGPOs->countCoOccurrencesOptimistic();
-
-      runEBM(fixedGPOs, spos);
       runEBM(purturbedGPOs, spos);
+      purturbedGPOs->countCoOccurrencesOptimistic();
 
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
       if(run_utilties){
