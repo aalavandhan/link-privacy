@@ -173,10 +173,10 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  for(double i = 0; i < 50; i = i + 0.25){
-   query->verifySocialStrength(i);
-  }
-  query->computeAccuracyOfSocialStrength(0.60);
+  // for(double i = 0; i < 50; i = i + 0.25){
+  //  query->verifySocialStrength(i);
+  // }
+  query->computeAccuracyOfSocialStrength(0.70);
 }
 
 // void runBasicOnNoised(GPOs *baseGPOs, GPOs *cmpGPOs, SPOs *spos, bool areFriends){
