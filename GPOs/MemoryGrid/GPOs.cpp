@@ -2545,31 +2545,31 @@ void GPOs::countU2UCoOccurrences(){
     }
   }
 
-  cout << "Building co-occurrence index " << endl;
+  // cout << "Building co-occurrence index " << endl;
 
-  for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
-    int o1 = c_it->first;
-    int o2 = c_it->second;
-    unordered_set<int> *lst;
+  // for(auto c_it = cooccurred_checkins.begin(); c_it != cooccurred_checkins.end(); c_it++){
+  //   int o1 = c_it->first;
+  //   int o2 = c_it->second;
+  //   unordered_set<int> *lst;
 
-    auto o1_it = cooccurrence_index.find(o1);
-    if(o1_it == cooccurrence_index.end()){
-      lst = new unordered_set<int>();
-      cooccurrence_index.insert(make_pair(o1, lst));
-    } else {
-      lst = o1_it->second;
-    }
-    lst->insert(o2);
+  //   auto o1_it = cooccurrence_index.find(o1);
+  //   if(o1_it == cooccurrence_index.end()){
+  //     lst = new unordered_set<int>();
+  //     cooccurrence_index.insert(make_pair(o1, lst));
+  //   } else {
+  //     lst = o1_it->second;
+  //   }
+  //   lst->insert(o2);
 
-    auto o2_it = cooccurrence_index.find(o2);
-    if(o2_it == cooccurrence_index.end()){
-      lst = new unordered_set<int>();
-      cooccurrence_index.insert(make_pair(o2, lst));
-    } else {
-      lst = o2_it->second;
-    }
-    lst->insert(o1);
-  }
+  //   auto o2_it = cooccurrence_index.find(o2);
+  //   if(o2_it == cooccurrence_index.end()){
+  //     lst = new unordered_set<int>();
+  //     cooccurrence_index.insert(make_pair(o2, lst));
+  //   } else {
+  //     lst = o2_it->second;
+  //   }
+  //   lst->insert(o1);
+  // }
 
   cout << "users_with_atleast_one_cooccurrence{{" << cooccurrence_matrix.size() << "}}" << endl;
   cout << "cooccurred_user_paris{{" << cooccured_user_pairs.size() << "}}" << endl;
