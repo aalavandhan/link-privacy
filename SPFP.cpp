@@ -162,6 +162,7 @@ void runEBMWithoutGroundTruth(){
 }
 
 void runEBM(GPOs *gpos, SPOs *spos){
+  return 0;
   gpos->generateCooccurrenceCache();
   gpos->countU2UCoOccurrences();
 
