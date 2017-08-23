@@ -87,7 +87,7 @@ GPOs* loadCheckins(char* checkins_file, bool preload_LE, bool preload_OCC){
     gpos->calculateLocationEntropy();
 
   if(preload_OCC){
-    gpos->generateCooccurrenceCache();
+    // gpos->generateCooccurrenceCache();
     gpos->countU2UCoOccurrences();
   }
 
@@ -156,7 +156,7 @@ void runEBMWithoutGroundTruth(){
   query->cacluateSocialStrength();
 
   // Compute stats: Number of Friendships inferred vs Threshold
-  for(double i = 0; i < 10; i = i + 0.1){
+  for(double i = 0; i < 50; i = i + 0.1){
     query->countEBMInferredFriendships(i);
   }
 }
@@ -173,7 +173,7 @@ void runEBM(GPOs *gpos, SPOs *spos){
   cout << "----- Calculating Social Strength --- " << endl;
   query->cacluateSocialStrength();
 
-  // for(double i = 0; i < 50; i = i + 0.25){
+  // for(double i = 0; i < 100; i = i + 0.25){
   //  query->verifySocialStrength(i);
   // }
   query->computeAccuracyOfSocialStrength(0.70);
@@ -982,7 +982,7 @@ int main(int argc, char *argv[]){
       noise_radius            = 0;
       time_deviation          = 0;
       group_radius            = 0;
-      coocc_time_range   = p4;
+      coocc_time_range        = p4;
       printParameters();
       plainEBM();
       break;
