@@ -287,7 +287,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
   cout << "STEP 2: Split co-occurrences per bucket." << endl;
   vector<int> true_positive_vector, gt_vector, positive_vector;
-  for(auto b_it = bucket_hash.end(); b_it != bucket_hash.begin(); b_it--){
+  for(auto b_it = bucket_hash.rbegin(); b_it != bucket_hash.rend(); b_it++){
     int bucket = b_it->first;
     unordered_set<pair<int,int>, PairHasher>* co_occurred_checkins = b_it->second;
     unordered_set<pair<int,int>, PairHasher> p_co_occurred_checkins;
