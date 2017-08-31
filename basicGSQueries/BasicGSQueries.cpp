@@ -287,7 +287,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
   cout << "STEP 2: Split co-occurrences per bucket." << endl;
   vector<int> true_positive_vector, gt_vector, positive_vector;
-  for(auto b_it = bucket_hash.begin(); b_it != bucket_hash.end(); b_it++){
+  for(auto b_it = bucket_hash.end(); b_it != bucket_hash.begin(); b_it--){
     int bucket = b_it->first;
     unordered_set<pair<int,int>, PairHasher>* co_occurred_checkins = b_it->second;
     unordered_set<pair<int,int>, PairHasher> p_co_occurred_checkins;
@@ -299,11 +299,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       int o2 = co_it->second;
       // True Positives
       if(purturbed_cooccurrences_hash.find(make_pair(o1, o2)) != purturbed_cooccurrences_hash.end()){
-
-        if(p_co_occurred_checkins.find(make_pair(o1, o2)) == p_co_occurred_checkins.end()){
+        if(p_co_occurred_checkins.find(make_pair(o1, o2)) == p_co_occurred_checkins.end() &&
+          check_hash.find(make_pair(o1, o2)) == check_hash.end()){
           p_co_occurred_checkins.insert(make_pair(o1, o2));
           check_hash.insert(make_pair(o1, o2));
-
           // False Positives
           auto co_index_it = gpos->cooccurrence_index.find(o1);
           if(co_index_it != gpos->cooccurrence_index.end()){
@@ -368,6 +367,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
 
     cout << "\tSTEP 3: Computed accuracy" << endl;
   }
+
+  std::reverse(true_positive_vector.begin(),true_positive_vector.end());
+  std::reverse(gt_vector.begin(),gt_vector.end());
+  std::reverse(positive_vector.begin(),positive_vector.end());
 
   cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << "true_positive_count{{";
