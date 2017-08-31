@@ -173,7 +173,7 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
   cout << "Base Co-occurrences      :" << base_cooccurrences->size() << endl;
   cout << "Perturbed Co-occurrences :" << purturbed_cooccurrences->size() << endl;
 
-  unordered_set< pair<int,int>, PairHasher > base_cooccurrences_hash, purturbed_cooccurrences_hash;
+  unordered_set< pair<int,int>, PairHasher > base_cooccurrences_hash, purturbed_cooccurrences_hash, check_hash;
 
   for(auto c_it = base_cooccurrences->begin(); c_it != base_cooccurrences->end(); c_it++){
     int o1 = c_it->first;
@@ -299,8 +299,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
       int o2 = co_it->second;
       // True Positives
       if(purturbed_cooccurrences_hash.find(make_pair(o1, o2)) != purturbed_cooccurrences_hash.end()){
+
         if(p_co_occurred_checkins.find(make_pair(o1, o2)) == p_co_occurred_checkins.end()){
           p_co_occurred_checkins.insert(make_pair(o1, o2));
+          check_hash.insert(make_pair(o1, o2));
 
           // False Positives
           auto co_index_it = gpos->cooccurrence_index.find(o1);
@@ -314,9 +316,11 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
                 order = other;
                 other = temp;
               }
-              if(base_cooccurrences_hash.find(make_pair(order, other)) == base_cooccurrences_hash.end() ){
-                if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
+              if( base_cooccurrences_hash.find(make_pair(order, other)) == base_cooccurrences_hash.end() ){
+                if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end() &&
+                  check_hash.find(make_pair(order, other)) == check_hash.end()){
                   p_co_occurred_checkins.insert(make_pair(order, other));
+                  check_hash.insert(make_pair(order, other));
                 }
               }
             }
@@ -334,8 +338,10 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
                 other = temp;
               }
               if(base_cooccurrences_hash.find(make_pair(order, other)) == base_cooccurrences_hash.end() ){
-                if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end()){
+                if(p_co_occurred_checkins.find(make_pair(order, other)) == p_co_occurred_checkins.end() &&
+                  check_hash.find(make_pair(order, other)) == check_hash.end()){
                   p_co_occurred_checkins.insert(make_pair(order, other));
+                  check_hash.insert(make_pair(order, other));
                 }
               }
             }
