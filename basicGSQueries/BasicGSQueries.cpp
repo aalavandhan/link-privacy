@@ -264,7 +264,8 @@ void SimpleQueries::checkUtilityBasic(GPOs *base_gpos){
     else
       continue;
 
-    knn_dist = knn_dist > 1 ? knn_dist : 1;
+    if(knn_dist <= 1)
+      continue;
 
     cooccurrences_queue.push(make_pair(knn_dist, make_pair(o1,o2)));
   }
