@@ -3046,7 +3046,7 @@ void GPOs::persist(int k){
 
   for(auto l_id = locations.begin(); l_id != locations.end(); l_id++){
     Point *p = *l_id;
-    outfile << p->getUID() << " " << p->getY() << p->getX() << p->getID() << p->getTime();
+    outfile << p->getUID() << " " << p->getY() << " " << p->getX() << " " << p->getID() << " " << p->getTime() << endl;
   }
 
   outfile.close();
