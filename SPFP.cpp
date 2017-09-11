@@ -495,6 +495,8 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
     }
+    cmpGPOs->persist(0);
+    cout << "---- PERSISTED " << endl;
     delete cmpGPOs;
   }
 
@@ -506,6 +508,8 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
     }
+    cmpGPOs->persist(0);
+    cout << "---- PERSISTED " << endl;
     delete cmpGPOs;
   }
 
