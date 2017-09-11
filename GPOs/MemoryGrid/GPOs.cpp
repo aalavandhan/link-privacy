@@ -3036,3 +3036,19 @@ double GPOs::distanceBetween(Point *a, Point *b){
 }
 
 
+void GPOs::persist(int k){
+  ofstream outfile;
+  stringstream ss;
+  std::string filePath;
+  ss << "gpos-" << k;
+  filePath = ss.str();
+  outfile.open( filePath.c_str() );
+
+  for(auto l_id = locations.begin(); l_id != locations.end(); l_id++){
+    Point *p = *l_id;
+    outfile << p->getUID() << " " << p->getY() << p->getX() << p->getID() << p->getTime();
+  }
+
+  outfile.close();
+}
+

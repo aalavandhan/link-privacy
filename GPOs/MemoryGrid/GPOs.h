@@ -211,4 +211,5 @@ public:
     void dummyCoLocations(GPOs* gpos, int k);
 
     vector<int>* getCheckinsInRangeByHourBlock(Point *p, double r);
+    void persist(int k);
 };

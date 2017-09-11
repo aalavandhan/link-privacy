@@ -421,6 +421,7 @@ void selectiveGaussianNoise(int isOptimistic){
 
     GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
     purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
+
     if(run_utilties){
       runUtilities(purturbedGPOs, fixedGPOs, spos);
     }
@@ -456,6 +457,9 @@ void selectiveGaussianNoise(int isOptimistic){
       cmpGPOs->coocc_time_range      = tg * 3600;
       cmpGPOs->countCoOccurrencesOptimistic();
     }
+
+    cmpGPOs->persist(0);
+    cout << "---- PERSISTED " << endl;
 
     if(run_utilties){
       runBasicUtility(cmpGPOs, fixedGPOs, spos);
@@ -1179,11 +1183,15 @@ int main(int argc, char *argv[]){
       fixedGPOs->countCoOccurrencesOptimistic();
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->anonymizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide);
+      purturbedGPOs->persist(1);
+      cout << "---- PERSISTED " << endl;
       purturbedGPOs->countCoOccurrencesOptimistic();
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
       if(run_utilties){
         runUtilities(purturbedGPOs, baseGPOs, spos);
       }
+
+
 
       break;
     }
@@ -1211,6 +1219,8 @@ int main(int argc, char *argv[]){
 
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
       purturbedGPOs->loadPurturbedBasedOnSelectiveSTKNNDistance(fixedGPOs, k, false, hide);
+      purturbedGPOs->persist(2);
+      cout << "---- PERSISTED " << endl;
       purturbedGPOs->countCoOccurrencesOptimistic();
 
       runBasicUtility(purturbedGPOs, fixedGPOs, spos);
