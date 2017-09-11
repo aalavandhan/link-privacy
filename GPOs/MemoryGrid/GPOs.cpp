@@ -3046,7 +3046,11 @@ void GPOs::persist(int k){
 
   for(auto l_id = locations.begin(); l_id != locations.end(); l_id++){
     Point *p = *l_id;
-    outfile << p->getUID() << " " << p->getY() << " " << p->getX() << " " << p->getID() << " " << p->getTime() << endl;
+    boost::posix_time::ptime time = p->getTime();
+    outfile << p->getUID() << " " << p->getY() << " " << p->getX()
+      << " " << p->getID() << " "
+      << time.date().year() << "-"  << time.date().month() << "-" << time.date().day() << " "
+      << time.time_of_day().hours() << ":" << time.time_of_day().minutes() << ":" << time.time_of_day().seconds() << endl;
   }
 
   outfile.close();
