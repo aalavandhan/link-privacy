@@ -1568,7 +1568,7 @@ int main(int argc, char *argv[]){
 
       printParameters();
 
-      int noise[10] = {0,50,100,150,200,500,750,1000,2000,5000};
+      int noise[9] = { 50,100,150,200,500,750,1000,2000,5000 };
 
       bool preload_LE  = false;
       bool preload_OCC = false;
@@ -1580,7 +1580,7 @@ int main(int argc, char *argv[]){
       cout << "Counting co-occurrrences :" << endl;
       fixedGPOs->countCoOccurrencesOptimistic();
 
-      for(int i=0; i<10;i++){
+      for(int i=0; i<9;i++){
         int noise_radius = noise[i];
         double time_deviation = 0;
         cout << "Using spatial noise : (m)"  << noise_radius << endl;
