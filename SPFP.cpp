@@ -1577,7 +1577,7 @@ int main(int argc, char *argv[]){
       SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
       GPOs* fixedGPOs = baseGPOs;
 
-      cout << "Counting co-occurrrences" << endl;
+      cout << "Counting co-occurrrences :" << endl;
       fixedGPOs->countCoOccurrencesOptimistic();
 
       for(int i=0; i<10;i++){
@@ -1587,7 +1587,7 @@ int main(int argc, char *argv[]){
         cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
 
         GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-        purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
+        purturbedGPOs->loadPurturbedBasedOnGaussian(fixedGPOs, noise_radius, time_deviation);
         purturbedGPOs->countCoOccurrencesOptimistic();
 
         runBasicUtility(purturbedGPOs, fixedGPOs, spos);
