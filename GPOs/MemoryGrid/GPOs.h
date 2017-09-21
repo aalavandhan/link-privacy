@@ -169,6 +169,7 @@ public:
     // void loadPurturbedLocationsBasedOnCombinationFunctionofCOOCC(GPOs* gpos, map< int, map<int, int>* >* _location_to_user_to_cooccurrences , double radius, bool isGaussainNoise, int function_type);
 
     void loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint time_deviation);
+    void loadPurturbedBasedOnGaussian(GPOs* gpos, double radius, uint time_deviation);
     void loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide);
     void loadPurturbedBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool gaussian, bool hide);
     void loadPurturbedBasedOnSelectiveSkyline(GPOs* gpos, int k);

@@ -971,6 +971,9 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "compute-coocc-checkins") == 0)
     iteration_type = 101;
 
+  else if (strcmp(argv[2], "compute-loc-priv") == 0)
+    iteration_type = 102;
+
   else
     iteration_type = -1;
 
@@ -1556,6 +1559,38 @@ int main(int argc, char *argv[]){
       outfile.close();
 
       break;
+    }
+
+    case 102:{
+      printParameters();
+
+      coocc_spatial_range     = p1;
+      coocc_time_range        = p2;
+      int noise[10] = {0,50,100,150,200,500,750,1000,2000,5000};
+
+      bool preload_LE  = false;
+      bool preload_OCC = false;
+
+      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
+      SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+      GPOs* fixedGPOs = baseGPOs;
+
+      cout << "Counting co-occurrrences" << endl;
+      fixedGPOs->countCoOccurrencesOptimistic();
+
+      for(int i=0; i<10;i++){
+        int noise_radius = noise[i];
+        double time_deviation = 0;
+        cout << "Using spatial noise : (m)"  << noise_radius << endl;
+        cout << "Using time    noise : (mi)" << time_deviation/60 << endl;
+
+        GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
+        purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(fixedGPOs, noise_radius, time_deviation);
+        purturbedGPOs->countCoOccurrencesOptimistic();
+
+        runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+        delete purturbedGPOs;
+      }
     }
 
     default:

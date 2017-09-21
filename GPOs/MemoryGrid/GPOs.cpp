@@ -1729,6 +1729,50 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
 }
 
+void GPOs::loadPurturbedBasedOnGaussian(GPOs* gpos, double radius, uint time_deviation){
+  unsigned int point_count = 0, lid=0;
+  double min_spatial_noise_added=std::numeric_limits<double>::infinity(), min_temporal_noise_added=std::numeric_limits<double>::infinity();
+
+  for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+    int order = c_it->first;
+    Point *p = c_it->second;
+
+    pair<double,double> coordinates_with_noise = util.addGaussianNoise( p->getX(), p->getY(), 2*radius,  0 );
+    boost::posix_time::ptime purtubed_time = util.addTemporalGaussianNoise( p->getTime(), time_deviation, 0 );
+
+    double sd = p->computeMinDistInKiloMeters(coordinates_with_noise.first, coordinates_with_noise.second);
+    double td = (double) abs( (p->getTime() - purtubed_time).total_seconds() ) / 3600.0;
+    total_spatial_displacement += sd;
+    total_time_displacement += td;
+
+    if(sd < min_spatial_noise_added)
+      min_spatial_noise_added  = sd;
+
+    if(td < min_temporal_noise_added)
+      min_temporal_noise_added = td;
+
+    loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
+    lid++;
+    purturbed_count++;
+    spatial_purturbed_count++;
+    temporal_purturbed_count++;
+    point_count++;
+  }
+
+  cout<<"purtubed_checkins{{"<< purturbed_count << "}}" << endl;
+  cout<<"spatially_purtubed_checkins{{"<< spatial_purturbed_count   << "}}" << endl;
+  cout<<"temporally_purtubed_checkins{{"<< temporal_purturbed_count << "}}" << endl;
+  cout<<"min_spatial_noise_added{{"<<  min_spatial_noise_added <<"}} in km"<<endl;
+  cout<<"total_spatial_displacement{{"<<  total_spatial_displacement <<"}} in km"<<endl;
+  cout<<"average_spatial_displacement{{"<< (total_spatial_displacement / point_count) * 1000  <<"}} in meters"<<endl;
+  cout<<"average_spatial_displacement_on_purtubed{{"<< (total_spatial_displacement / spatial_purturbed_count) * 1000 <<"}} in meters"<<endl;
+  cout<<"min_temporal_noise_added{{"<<  min_temporal_noise_added <<"}} hours"<<endl;
+  cout<<"total_temporal_displacement{{"<< total_time_displacement <<"}} hours"<<endl;
+  cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
+  cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
+  cout<<"Locations after perturbation :"<<location_to_user.size()<<endl;
+}
+
 // Only co-occurrences
 void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint time_deviation){
   set<int> checkins_of_interest;
