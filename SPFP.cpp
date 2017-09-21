@@ -1562,10 +1562,12 @@ int main(int argc, char *argv[]){
     }
 
     case 102:{
+      cout << "METRICS: Gaussian spatial noise" << endl;
+      coocc_spatial_range = p1;
+      coocc_time_range    = p2;
+
       printParameters();
 
-      coocc_spatial_range     = p1;
-      coocc_time_range        = p2;
       int noise[10] = {0,50,100,150,200,500,750,1000,2000,5000};
 
       bool preload_LE  = false;
