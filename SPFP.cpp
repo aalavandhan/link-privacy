@@ -495,21 +495,19 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
     if(run_utilties){
       runBasicUtility(cmpGPOs, baseGPOs, spos);
     }
-    cmpGPOs->persist(0);
-    cout << "---- PERSISTED " << endl;
     delete cmpGPOs;
   }
 
-  // {
-  //   GPOs* cmpGPOs;
-  //   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-  //   cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins);
-  //   cmpGPOs->countCoOccurrencesOptimistic();
-  //   if(run_utilties){
-  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
-  //   }
-  //   delete cmpGPOs;
-  // }
+  {
+    GPOs* cmpGPOs;
+    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+    cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins);
+    cmpGPOs->countCoOccurrencesOptimistic();
+    if(run_utilties){
+      runBasicUtility(cmpGPOs, baseGPOs, spos);
+    }
+    delete cmpGPOs;
+  }
 
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
