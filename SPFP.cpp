@@ -466,7 +466,7 @@ void selectiveGaussianNoise(int isOptimistic){
   }
 }
 
-void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double temporal_noise_in_minutes){
+void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double temporal_noise_in_minutes, bool selective){
   bool preload_LE  = true;
   bool preload_OCC = false;
 
@@ -481,7 +481,7 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
   double time_deviation = temporal_noise_in_minutes * 60;
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  purturbedGPOs->loadPurturbedBasedOnSelectiveGaussian(baseGPOs, noise_radius, time_deviation);
+  purturbedGPOs->loadPurturbedBasedOnGaussian(baseGPOs, noise_radius, time_deviation, selective);
 
   {
     GPOs* cmpGPOs;
@@ -1136,9 +1136,14 @@ int main(int argc, char *argv[]){
       k                       = p3;
       noise_radius            = p4;
       time_deviation          = p5;
+      int selective           = p6;
 
       printParameters();
-      selectiveGaussianNoiseDDAdversary(k, noise_radius, time_deviation);
+
+      if(selective == 0)
+        selectiveGaussianNoiseDDAdversary(k, noise_radius, time_deviation, false);
+      else
+        selectiveGaussianNoiseDDAdversary(k, noise_radius, time_deviation, true);
 
       break;
     }
