@@ -211,4 +211,5 @@ public:
     void dummyCoLocations(GPOs* gpos, int k);
 
     vector<int>* getCheckinsInRangeByHourBlock(Point *p, double r);
+    void loadPurturbedBasedOnGaussian(GPOs* gpos, double radius, uint time_deviation, bool selective);
 };

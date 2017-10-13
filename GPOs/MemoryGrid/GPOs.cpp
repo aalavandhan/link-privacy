@@ -1729,12 +1729,18 @@ void GPOs::dummyCoLocations(GPOs* gpos, int k){
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
 }
 
-// Only co-occurrences
-void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint time_deviation){
+void GPOs::loadPurturbedBasedOnGaussian(GPOs* gpos, double radius, uint time_deviation, bool selective){
   set<int> checkins_of_interest;
-  gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
-
-  cout << "Purtubing only " << checkins_of_interest.size() << " checkins" << endl;
+  if(selective){
+    gpos->pickSingleCheckinFromCooccurrences(&checkins_of_interest);
+    cout << "Purtubing only " << checkins_of_interest.size() << " checkins" << endl;
+  } else {
+    for(auto c_it = gpos->checkin_list.begin(); c_it != gpos->checkin_list.end(); c_it++){
+      int order = c_it->first;
+      checkins_of_interest.insert(order);
+    }
+    cout << "Purtubing all " << checkins_of_interest.size() << " checkins" << endl;
+  }
 
   unsigned int point_count = 0, lid=LOCATION_NOISE_BOUND;
   double min_spatial_noise_added=std::numeric_limits<double>::infinity(), min_temporal_noise_added=std::numeric_limits<double>::infinity();
@@ -1782,6 +1788,12 @@ void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint
   cout<<"average_temporal_displacement{{"<< total_time_displacement  * (1/(float)point_count) * 3600 <<"}} seconds"<<endl;
   cout<<"average_temporal_displacement_on_purtubed{{"<< total_time_displacement * (1/(float)temporal_purturbed_count) <<"}} hours"<<endl;
   cout<<"Locations after perturbation :"<<location_to_user.size()<<endl;
+
+}
+
+// Only co-occurrences
+void GPOs::loadPurturbedBasedOnSelectiveGaussian(GPOs* gpos, double radius, uint time_deviation){
+  loadPurturbedBasedOnGaussian(gpos, radius, time_deviation, true);
 }
 
 void GPOs::anonymizeBasedOnSelectiveSTKNNDistance(GPOs* gpos, int k, bool hide){
