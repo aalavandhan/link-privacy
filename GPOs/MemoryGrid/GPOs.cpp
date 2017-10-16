@@ -1153,6 +1153,8 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
   GPOs *_duplicate_gpos = new GPOs(gpos);
 
   cout << "Number of original checkins               : " << _duplicate_gpos->checkin_list.size() << endl;
+  cout << "Grouping by                               : " << radius_in_km             << " KM" << endl;
+  cout << "Grouping by                               : " << time_deviation_in_hours  << " Hours" << endl;
 
   for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
     Point *p = l->second;
