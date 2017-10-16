@@ -488,10 +488,7 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
       cout << "Grouping just spatially" << endl;
       GPOs* cmpGPOs;
       cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-
-
-      cmpGPOs->groupLocationsByST(purturbedGPOs, 0.25 * spatial_noise_in_m / 1000.0, 20*60/3600.0);
-
+      cmpGPOs->groupLocationsByST(purturbedGPOs, 0.01, 5*60/3600.0);
       cmpGPOs->countCoOccurrencesOptimistic();
       if(run_utilties){
         runBasicUtility(cmpGPOs, baseGPOs, spos);

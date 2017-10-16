@@ -1171,7 +1171,6 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     count++;
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
-
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
         loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
