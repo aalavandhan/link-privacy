@@ -1156,6 +1156,8 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
   cout << "Grouping by                               : " << radius_in_km             << " KM" << endl;
   cout << "Grouping by                               : " << time_deviation_in_hours  << " Hours" << endl;
 
+  double average_group_size=0, n_groups;
+
   for(auto l = gpos->checkin_list.begin(); l != gpos->checkin_list.end(); l++){
     Point *p = l->second;
     x        = p->getX();
@@ -1171,6 +1173,8 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
     count++;
 
     vector<res_point*>* checkins = _duplicate_gpos->getRangeAndDelete(p, radius_geo_dist, time_deviation_in_hours);
+    average_group_size += checkins->size();
+    n_groups++;
     for(auto c = checkins->begin(); c != checkins->end(); c++){
       if( seenLocations.find( (*c)->oid ) == seenLocations.end() ){
         loadPoint(x, y, p->getID(), (*c)->uid, time, (*c)->oid);
@@ -1186,6 +1190,7 @@ void GPOs::groupLocationsByST(GPOs* gpos, double radius_in_km, double time_devia
   cout << "Number of checkins after iteration     : " << count << endl;
   cout << "Check-ins inserted                     : " << seenLocations.size() << endl;
   cout << "Number of total checkins               : " << gpos->checkin_list.size() << endl;
+  cout << "Avg. Group Size                        : " << average_group_size/n_groups << endl;
 
   delete _duplicate_gpos;
 
@@ -1768,8 +1773,13 @@ void GPOs::loadPurturbedBasedOnGaussian(GPOs* gpos, double radius, uint time_dev
       loadPoint( coordinates_with_noise.first, coordinates_with_noise.second, lid, p->getUID(), purtubed_time, p->getOrder() );
       lid++;
       purturbed_count++;
-      spatial_purturbed_count++;
-      temporal_purturbed_count++;
+
+      if(sd != 0)
+        spatial_purturbed_count++;
+
+      if(td != 0)
+        temporal_purturbed_count++;
+
     } else {
       loadPoint( p->getX(), p->getY(), p->getID(), p->getUID(), p->getTime(), p->getOrder() );
     }
