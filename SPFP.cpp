@@ -483,27 +483,59 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
   purturbedGPOs->loadPurturbedBasedOnGaussian(baseGPOs, noise_radius, time_deviation, selective);
 
-  {
-    GPOs* cmpGPOs;
-    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
+  if(temporal_noise_in_minutes == 0){
+    {
+      GPOs* cmpGPOs;
+      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, 0.1, time_deviation/3600.0);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
     }
-    delete cmpGPOs;
   }
 
-  {
-    GPOs* cmpGPOs;
-    cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
-    cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins);
-    cmpGPOs->countCoOccurrencesOptimistic();
-    if(run_utilties){
-      runBasicUtility(cmpGPOs, baseGPOs, spos);
+  else if(spatial_noise_in_m == 0){
+
+    {
+      GPOs* cmpGPOs;
+      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs->groupLocationsByST(purturbedGPOs, noise_radius/1000.0, 1.5);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
     }
-    delete cmpGPOs;
+
   }
+
+  else {
+    {
+      GPOs* cmpGPOs;
+      cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+      cmpGPOs->groupLocationsToTopK(purturbedGPOs, &interested_checkins, 1, noise_radius, time_deviation/3600.0);
+      cmpGPOs->countCoOccurrencesOptimistic();
+      if(run_utilties){
+        runBasicUtility(cmpGPOs, baseGPOs, spos);
+      }
+      delete cmpGPOs;
+    }
+  }
+
+
+
+  // {
+  //   GPOs* cmpGPOs;
+  //   cmpGPOs       = new GPOs(coocc_time_range,coocc_spatial_range);
+  //   cmpGPOs->groupLocationsByDD(purturbedGPOs, &interested_checkins);
+  //   cmpGPOs->countCoOccurrencesOptimistic();
+  //   if(run_utilties){
+  //     runBasicUtility(cmpGPOs, baseGPOs, spos);
+  //   }
+  //   delete cmpGPOs;
+  // }
 
   if(run_utilties){
     runUtilities(purturbedGPOs, baseGPOs, spos);
