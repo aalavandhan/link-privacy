@@ -472,18 +472,20 @@ void selectiveGaussianNoiseDDAdversary(int k, double spatial_noise_in_m, double 
 
   GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
   SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
-  baseGPOs->countCoOccurrencesOptimistic();
+  baseGPOs->countCoOccurrencesOptimistic(); // count coorcurence adj list
 
+  //picks one checking from each colocation - spftbounds unknown
   set<int> interested_checkins;
-  baseGPOs->computeLocationsOfInterest(SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND, &interested_checkins);
+  baseGPOs->computeLocationsOfInterest(SPATIAL_SOFT_BOUND, TEMPORAL_SOFT_BOUND, &interested_checkins); 
+
 
   double noise_radius   = spatial_noise_in_m;
   double time_deviation = temporal_noise_in_minutes * 60;
 
   GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-  purturbedGPOs->loadPurturbedBasedOnGaussian(baseGPOs, noise_radius, time_deviation, selective);
+  purturbedGPOs->loadPurturbedBasedOnGaussian(baseGPOs, noise_radius, time_deviation, selective); // 2d gauss perturbation
 
-  if(temporal_noise_in_minutes == 0){
+  if(temporal_noise_in_minutes == 0){ // for aleksandra
     {
       cout << "Grouping just spatially" << endl;
       GPOs* cmpGPOs;
@@ -939,7 +941,7 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "ebm-without-gt") == 0)
     iteration_type = 5;
 
-  else if (strcmp(argv[2], "selective-gaussian") == 0)
+  else if (strcmp(argv[2], "selective-gaussian") == 0) // manually specified grouping radii
     iteration_type = 6;
 
   else if (strcmp(argv[2], "selective-skyline") == 0)
@@ -948,31 +950,31 @@ int main(int argc, char *argv[]){
   else if (strcmp(argv[2], "selective-stknn") == 0)
     iteration_type = 8;
 
-  else if (strcmp(argv[2], "selective-gaussian-dd") == 0)
+  else if (strcmp(argv[2], "selective-gaussian-dd") == 0) // location entropy as stopping point
     iteration_type = 9;
 
-  else if (strcmp(argv[2], "selective-gaussian-ideal-grouping") == 0)
+  else if (strcmp(argv[2], "selective-gaussian-ideal-grouping") == 0) // empirical estimate of stopping distance
     iteration_type = 10;
 
-  else if (strcmp(argv[2], "selective-anon-1") == 0)
+  else if (strcmp(argv[2], "selective-anon-1") == 0) // k-anon
     iteration_type = 11;
 
-  else if (strcmp(argv[2], "selective-anon-2") == 0)
+  else if (strcmp(argv[2], "selective-anon-2") == 0) // adaptive perturb
     iteration_type = 12;
 
-  else if (strcmp(argv[2], "selective-hiding") == 0)
+  else if (strcmp(argv[2], "selective-hiding") == 0) // hiding based on lambda
     iteration_type = 13;
 
-  else if (strcmp(argv[2], "dummy-checkins") == 0)
+  else if (strcmp(argv[2], "dummy-checkins") == 0) // adds random checkins at co-locations
     iteration_type = 14;
 
-  else if (strcmp(argv[2], "occ-hist") == 0)
+  else if (strcmp(argv[2], "occ-hist") == 0) // generates 
     iteration_type = 90;
-  else if (strcmp(argv[2], "compute-katz") == 0)
+  else if (strcmp(argv[2], "compute-katz") == 0) // computes katz score
     iteration_type = 91;
-  else if (strcmp(argv[2], "compute-locality") == 0)
+  else if (strcmp(argv[2], "compute-locality") == 0) // computes node locality - scellato
     iteration_type = 92;
-  else if (strcmp(argv[2], "compute-histograms") == 0)
+  else if (strcmp(argv[2], "compute-histograms") == 0) // knn histograms and entropy historgrams and other stuff
     iteration_type = 93;
   else if (strcmp(argv[2], "query-metrics") == 0)
     iteration_type = 94;
@@ -1205,22 +1207,22 @@ int main(int argc, char *argv[]){
 
       printParameters();
 
-      if(hide)
-        cout << "Hiding sparse co-locations" << endl;
+      if(hide) // removes sparsest 1%
+        cout << "Hiding sparse co-locations" << endl; 
 
       bool preload_LE  = false;
       bool preload_OCC = false;
-      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC);
-      SPOs* spos = loadSocialGraph(graph_file, baseGPOs);
+      GPOs* baseGPOs = loadCheckins(checkins_file, preload_LE, preload_OCC); // location entropy and coccurrences matrix computation
+      SPOs* spos = loadSocialGraph(graph_file, baseGPOs); // 
 
       GPOs* fixedGPOs = baseGPOs;
-      fixedGPOs->countCoOccurrencesOptimistic();
+      fixedGPOs->countCoOccurrencesOptimistic(); // adjacecy list of cooccurrences for each checkin
       GPOs* purturbedGPOs = new GPOs(coocc_time_range, coocc_spatial_range);
-      purturbedGPOs->anonymizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide);
-      purturbedGPOs->countCoOccurrencesOptimistic();
-      runBasicUtility(purturbedGPOs, fixedGPOs, spos);
+      purturbedGPOs->anonymizeBasedOnSelectiveSTKNNDistance(fixedGPOs, k, hide); // get neaerst k and put at checking
+      purturbedGPOs->countCoOccurrencesOptimistic(); // computing all coccrurences again
+      runBasicUtility(purturbedGPOs, fixedGPOs, spos); // f1 and precision recall etc
       if(run_utilties){
-        runUtilities(purturbedGPOs, baseGPOs, spos);
+        runUtilities(purturbedGPOs, baseGPOs, spos); // range utilities
       }
 
       break;

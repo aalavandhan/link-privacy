@@ -3,7 +3,7 @@ CC = g++ -std=c++11
 CPPFLAGS = -g -O0 -Wall -fpermissive
 LDFLAGS = -I/usr/local/include
 LFLAGS = -L/usr/local/lib
-LIBS = -lboost_thread-mt -lboost_filesystem -lboost_program_options -lboost_system -lboost_date_time
+LIBS = -lboost_thread -lboost_filesystem -lboost_program_options -lboost_system -lboost_date_time
 OBJS = Group.o Utilities.o Cell.o Point.o Grid.o Value.o User.o Pair.o SPOs.o GPOs.o BasicGSQueries.o COCqueries.o PurturbQ.o ArrayOperations.o CalculateProbability.o Entropy.o RenyiEntropy.o KatzScore.o WeightedEntropy.o SPFP.o
 
 $(PROG) : $(OBJS)
